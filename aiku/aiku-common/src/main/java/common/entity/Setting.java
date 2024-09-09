@@ -1,0 +1,18 @@
+package common.entity;
+
+import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@Embeddable
+public class Setting {
+    private boolean isServicePolicyAgreed;
+    private boolean isPersonalInformationPolicyAgreed;
+    private boolean isLocationPolicyAgreed;
+    private boolean isMarketingPolicyAgreed;
+}

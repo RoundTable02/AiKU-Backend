@@ -1,11 +1,11 @@
-package common.response;
+package common.response.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum BaseCode {
+public enum BaseCode implements StatusCode {
     OK(2000, "요청 성공했습니다."),
     POST(2001, "등록 성공했습니다."),
     PATCH(2002, "수정 성공했습니다."),

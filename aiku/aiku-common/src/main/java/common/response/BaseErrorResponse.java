@@ -15,8 +15,7 @@ public class BaseErrorResponse {
     private String message;
     private String requestId;
 
-    public ResponseEntity<BaseErrorResponse> getResponseEntity(StatusCode code) {
-        BaseErrorResponse body = new BaseErrorResponse(code.getCode(), code.getMessage(), null);
-        return ResponseEntity.of(Optional.of(body));
+    public static BaseErrorResponse get(StatusCode code) {
+        return new BaseErrorResponse(code.getCode(), code.getMessage(), null);
     }
 }

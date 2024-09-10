@@ -23,7 +23,7 @@ public class Member extends BaseTime{
     private MemberProfile profile;
 
     @Enumerated(value = EnumType.STRING)
-    private String mainTitle;
+    private Title mainTitle;
     private int point;
 
     @Embedded

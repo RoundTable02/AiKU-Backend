@@ -1,5 +1,6 @@
 package common.domain.log;
 
+import common.domain.value_reference.ShopProductValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,5 +17,5 @@ public class ShopPointLog {
     private Long id;
 
     @Embedded
-    private ShopPointLog shopProduct;
+    private ShopProductValue shopProduct;
 }

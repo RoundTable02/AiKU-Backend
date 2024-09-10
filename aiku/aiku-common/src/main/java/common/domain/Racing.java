@@ -15,15 +15,15 @@ public class Racing extends BaseTime{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "firstRacerScheduleMemberId")
+    @AttributeOverride(name = "id", column = @Column(name = "firstRacerScheduleMemberId"))
     @Embedded
     private ScheduleMemberValue firstRacer;
 
-    @Column(name = "secondRacerScheduleMemberId")
+    @AttributeOverride(name = "id", column = @Column(name = "secondRacerScheduleMemberId"))
     @Embedded
     private ScheduleMemberValue secondRacer;
 
-    @Column(name = "winnerScheduleMemberId")
+    @AttributeOverride(name = "id", column = @Column(name = "winnerScheduleMemberId"))
     @Embedded
     private ScheduleMemberValue winner;
 

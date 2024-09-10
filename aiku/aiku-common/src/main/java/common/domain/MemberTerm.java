@@ -16,11 +16,11 @@ public class MemberTerm extends BaseTime{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "memberId")
+    @JoinColumn(name = "memberId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @Column(name = "termId")
+    @JoinColumn(name = "termId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Term term;
 

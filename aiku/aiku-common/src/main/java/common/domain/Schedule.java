@@ -1,5 +1,6 @@
-package common.entity;
+package common.domain;
 
+import common.domain.value_reference.TeamValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,10 +12,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Schedule extends BaseTime{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "scheduleId")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "teamId")
+    @Embedded
+    private TeamValue team;
 
     private String scheduleName;
     private LocalDateTime scheduleTime;

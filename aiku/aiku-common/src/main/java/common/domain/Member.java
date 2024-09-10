@@ -1,4 +1,4 @@
-package common.entity;
+package common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Entity
 public class Member extends BaseTime{
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "memberId")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long kakaoId;
     private String refreshToken;

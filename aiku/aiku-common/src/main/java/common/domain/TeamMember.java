@@ -1,4 +1,4 @@
-package common.entity;
+package common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class TeamMember extends BaseTime{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "teamMemberId")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teamId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private boolean isOwner;

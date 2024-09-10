@@ -1,4 +1,4 @@
-package common.entity;
+package common.domain.value_reference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -9,12 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
-public class Location {
-    private String locationName;
+public class ScheduleMemberValue {
 
-    @Column(name = "locationLatitude")
-    private Double latitude;
-
-    @Column(name = "locationLongitude")
-    private Double longitude;
+    @Column(name = "scheduleMemberId")
+    private Long id;
 }

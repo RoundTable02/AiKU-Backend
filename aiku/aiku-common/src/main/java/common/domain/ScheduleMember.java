@@ -1,4 +1,4 @@
-package common.entity;
+package common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class ScheduleMember extends BaseTime{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "scheduleMemberId")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scheduleId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Schedule schedule;
 
     private boolean isOwner;

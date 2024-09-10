@@ -1,4 +1,4 @@
-package common.entity;
+package common.domain;
 
 import lombok.AllArgsConstructor;
 

@@ -1,5 +1,6 @@
-package common.entity;
+package common.domain.event;
 
+import common.domain.BaseTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,12 +9,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Team extends BaseTime{
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "teamId")
-    private Long id;
-    private String teamName;
+public class EventNotice extends BaseTime {
 
-    @Enumerated(value = EnumType.STRING)
-    private Status status;
+    @Column(name = "eventNoticeId")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String eventImg;
 }

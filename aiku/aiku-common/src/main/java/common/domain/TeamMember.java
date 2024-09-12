@@ -26,4 +26,11 @@ public class TeamMember extends BaseTime{
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    protected TeamMember(Team team, Member member, boolean isOwner) {
+        this.team = team;
+        this.member = member;
+        this.isOwner = isOwner;
+        this.status = Status.ALIVE;
+    }
 }

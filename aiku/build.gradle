@@ -52,6 +52,9 @@ subprojects {
 		testImplementation 'org.springframework.kafka:spring-kafka-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+		//Mokito
+		testImplementation 'org.mockito:mockito-core'
+
 		// QueryDsl
 		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 		annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

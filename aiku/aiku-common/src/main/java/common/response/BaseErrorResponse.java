@@ -4,6 +4,7 @@ import common.response.status.StatusCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
@@ -15,7 +16,8 @@ public class BaseErrorResponse {
     private String message;
     private String requestId;
 
-    public static BaseErrorResponse get(StatusCode code) {
-        return new BaseErrorResponse(code.getCode(), code.getMessage(), null);
+    public static ResponseEntity<BaseErrorResponse> get(StatusCode code) {
+        BaseErrorResponse res = new BaseErrorResponse(code.getCode(), code.getMessage(), null);
+        return new ResponseEntity<>(res, code.getHttpStatus());
     }
 }

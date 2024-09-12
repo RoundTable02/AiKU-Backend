@@ -30,11 +30,6 @@ class ScheduleServiceTest {
     ScheduleService scheduleService;
 
     @Test
-    void create(){
-
-    }
-
-    @Test
     void updateSchedule() {
         //given
         Member member = createSpyMember();

@@ -19,7 +19,7 @@ public class TeamService {
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
-        Team team = Team.create(teamDto.getGroupName());
+        Team team = Team.create(member, teamDto.getGroupName());
         teamRepository.save(team);
 
         return team.getId();

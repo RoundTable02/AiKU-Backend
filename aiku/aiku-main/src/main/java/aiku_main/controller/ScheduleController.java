@@ -21,9 +21,9 @@ public class ScheduleController {
     @PostMapping()
     public BaseResponse<BaseResultDto> addSchedule(@PathVariable Long groupId,
                                                    @RequestBody ScheduleAddDto scheduleDto){
-        Long addId = scheduleService.addSchedule(null, scheduleDto);
+        Long addId = scheduleService.addSchedule(null, groupId, scheduleDto);
 
-        return BaseResponse.getSimpleRes(addId, BaseCode.PATCH);
+        return BaseResponse.getSimpleRes(addId, BaseCode.POST);
     }
 
     @PatchMapping("/{scheduleId}")

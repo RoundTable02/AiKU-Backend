@@ -36,7 +36,7 @@ public class Schedule extends BaseTime{
     private Status status;
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
-    private List<ScheduleMember> scheduleMember = new ArrayList<>();
+    private List<ScheduleMember> scheduleMembers = new ArrayList<>();
 
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
         this.team = team;
@@ -46,13 +46,13 @@ public class Schedule extends BaseTime{
     }
 
     //==CUD 편의 메서드==
-    public static Schedule create(Member member, Long teamId, String scheduleName, LocalDateTime scheduleTime, Location location) {
+    public static Schedule create(Member member, Long teamId, String scheduleName, LocalDateTime scheduleTime, Location location, int pointAmount) {
         //스케줄 생성
         TeamValue team = new TeamValue(teamId);
         Schedule schedule = new Schedule(team, scheduleName, scheduleTime, location);
 
         //생성자를 스케줄 멤버로 추가
-        schedule.addScheduleMember();
+        schedule.addScheduleMember(member, true, pointAmount);
         return schedule;
     }
 
@@ -63,8 +63,8 @@ public class Schedule extends BaseTime{
     }
 
     //==편의 메서드==
-    public void addScheduleMember(){
-        ScheduleMember scheduleMember = new ScheduleMember();
-//        this.scheduleMember.add();
+    public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
+        ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
+        this.scheduleMembers.add(scheduleMember);
     }
 }

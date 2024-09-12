@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ScheduleAddDto {
-    public String scheduleName;
-    public Location location;
-    public LocalDateTime scheduleTime;
-    public int pointAmount;
+    private String scheduleName;
+    private Location location;
+    private LocalDateTime scheduleTime;
+    private int pointAmount;
 }

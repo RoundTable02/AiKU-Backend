@@ -45,7 +45,7 @@ public class Schedule extends BaseTime{
         this.location = location;
     }
 
-    //==생성 편의 메서드==
+    //==CUD 편의 메서드==
     public static Schedule create(Member member, Long teamId, String scheduleName, LocalDateTime scheduleTime, Location location) {
         //스케줄 생성
         TeamValue team = new TeamValue(teamId);
@@ -54,6 +54,12 @@ public class Schedule extends BaseTime{
         //생성자를 스케줄 멤버로 추가
         schedule.addScheduleMember();
         return schedule;
+    }
+
+    public void update(String scheduleName, LocalDateTime scheduleTime, Location location){
+        this.scheduleName = scheduleName;
+        this.scheduleTime = scheduleTime;
+        this.location = location;
     }
 
     //==편의 메서드==

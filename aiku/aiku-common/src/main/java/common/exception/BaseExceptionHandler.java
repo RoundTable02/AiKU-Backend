@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -39,6 +40,13 @@ public class BaseExceptionHandler {
     public ResponseEntity<BaseErrorResponse> handle_RuntimeException(Exception e) {
         log.error("[BaseExceptionHandler: handle_RuntimeException 호출]", e);
         return BaseErrorResponse.get(BaseErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<BaseErrorResponse> handle_NoSuchElementException(NoSuchElementException e) {
+        log.error("[BaseExceptionHandler: handle_NoAuthorityException 호출]", e);
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        return BaseErrorResponse.get(BaseErrorCode.NOT_FOUND);
     }
 
     @ExceptionHandler(NoAuthorityException.class)

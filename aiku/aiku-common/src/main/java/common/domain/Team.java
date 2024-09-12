@@ -17,4 +17,15 @@ public class Team extends BaseTime{
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    private Team(String teamName) {
+        this.teamName = teamName;
+    }
+
+    //==생성 메서드==
+    public static Team create(String teamName){
+        Team team = new Team(teamName);
+        team.status = Status.ALIVE;
+        return team;
+    }
 }

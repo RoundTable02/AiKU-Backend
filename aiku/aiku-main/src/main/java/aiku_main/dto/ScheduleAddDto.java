@@ -12,4 +12,5 @@ public class ScheduleAddDto {
     public String scheduleName;
     public Location location;
     public LocalDateTime scheduleTime;
+    public int pointAmount;
 }

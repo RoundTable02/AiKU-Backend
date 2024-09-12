@@ -23,7 +23,7 @@ public class ScheduleController {
                                                    @RequestBody ScheduleAddDto scheduleDto){
         Long addId = scheduleService.addSchedule(null, scheduleDto);
 
-        return BaseResponse.getSimpleRes(updateId, BaseCode.PATCH);
+        return BaseResponse.getSimpleRes(addId, BaseCode.PATCH);
     }
 
     @PatchMapping("/{scheduleId}")

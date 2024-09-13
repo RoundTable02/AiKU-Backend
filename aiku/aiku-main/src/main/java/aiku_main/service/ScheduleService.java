@@ -6,6 +6,7 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
+import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Member;
 import common.domain.Schedule;
 import common.domain.Status;
@@ -30,8 +31,9 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ScheduleScheduler scheduleScheduler;
 
-    //TODO 알림 추가하는 카프카 로직 추가해야됨
+    //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
     @Transactional
     public Long addSchedule(Member member, Long teamId, ScheduleAddDto scheduleDto){
         //검증 로직
@@ -44,11 +46,12 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
 
         pointChangeEventPublisher.publish(member.getId(), MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
+        scheduleScheduler.reserveSchedule(schedule.getId(), schedule.getScheduleTime());
 
         return schedule.getId();
     }
 
-    //TODO 시간 바꿨을때 알림등 바꾸는 로직 추가해야됨
+    //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
     @Transactional
     public Long updateSchedule(Member member, Long scheduleId, ScheduleUpdateDto scheduleDto){
         //검증 로직
@@ -59,6 +62,8 @@ public class ScheduleService {
 
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location);
+
+        scheduleScheduler.changeSchedule(schedule.getId(), schedule.getScheduleTime());
 
         return schedule.getId();
     }

@@ -51,4 +51,28 @@ public class TeamServiceIntegrationTest {
         assertThat(teamMember.isOwner()).isTrue();
         assertThat(teamMember.getMember().getId()).isEqualTo(member.getId());
     }
+
+    @Test
+    @DisplayName("그룹 입장")
+    void test() {
+        //given
+        Member member = Member.create("member1");
+        Member enterMember = Member.create("enterMember");
+        em.persist(member);
+        em.persist(enterMember);
+
+        Team team = Team.create(member, "team1");
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
+        Long teamId = teamService.enterTeam(enterMember, team.getId());
+
+        //then
+        TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(teamId, enterMember.getId()).orElse(null);
+        assertThat(teamMember).isNotNull();
+        assertThat(teamMember.isOwner()).isFalse();
+    }
 }

@@ -28,9 +28,4 @@ public class SpringMainApplication {
     public void postConstruct(){
         testBean.loadBean();
     }
-
-    @Bean
-    public JPAQueryFactory jpaQueryFactory(EntityManager em) {
-        return new JPAQueryFactory(em);
-    }
 }

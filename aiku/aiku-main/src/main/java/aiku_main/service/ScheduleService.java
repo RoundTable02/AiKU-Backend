@@ -31,6 +31,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
 
+    //TODO 알림 추가하는 카프카 로직 추가해야됨
     @Transactional
     public Long addSchedule(Member member, Long teamId, ScheduleAddDto scheduleDto){
         //검증 로직
@@ -47,6 +48,7 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    //TODO 시간 바꿨을때 알림등 바꾸는 로직 추가해야됨
     @Transactional
     public Long updateSchedule(Member member, Long scheduleId, ScheduleUpdateDto scheduleDto){
         //검증 로직

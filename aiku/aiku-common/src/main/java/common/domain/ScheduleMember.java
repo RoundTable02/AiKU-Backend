@@ -34,4 +34,13 @@ public class ScheduleMember extends BaseTime{
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    protected ScheduleMember(Member member, Schedule schedule, boolean isOwner, int pointAmount) {
+        this.member = member;
+        this.schedule = schedule;
+        this.isOwner = isOwner;
+        this.isPaid = (pointAmount > 0) ? true : false;
+        this.pointAmount = pointAmount;
+        this.status = Status.ALIVE;
+    }
 }

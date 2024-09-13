@@ -1,5 +1,6 @@
 package aiku_main.controller;
 
+import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
@@ -16,6 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
+
+    @PostMapping()
+    public BaseResponse<BaseResultDto> addSchedule(@PathVariable Long groupId,
+                                                   @RequestBody ScheduleAddDto scheduleDto){
+        Long addId = scheduleService.addSchedule(null, groupId, scheduleDto);
+
+        return BaseResponse.getSimpleRes(addId, BaseCode.POST);
+    }
 
     @PatchMapping("/{scheduleId}")
     public BaseResponse<BaseResultDto> updateSchedule(@PathVariable Long groupId,

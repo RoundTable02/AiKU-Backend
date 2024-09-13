@@ -15,6 +15,8 @@ public enum BaseErrorCode implements StatusCode{
     NOT_FOUND(4040, HttpStatus.NOT_FOUND.getReasonPhrase(), HttpStatus.NOT_FOUND),
     METHOD_NOT_ALLOWED(4050, HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase(), HttpStatus.METHOD_NOT_ALLOWED),
 
+    AlreadyInTeam(4003, "이미 팀에 소속되어 있습니다.", HttpStatus.BAD_REQUEST),
+
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(5000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR);
 

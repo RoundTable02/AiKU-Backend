@@ -3,6 +3,7 @@ package aiku_main.service;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.repository.TeamRepository;
 import common.domain.Member;
+import common.domain.Status;
 import common.domain.Team;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -33,8 +36,10 @@ public class TeamService {
         //검증 로직
         checkTeamMember(member.getId(), teamId, false);
 
-        //서비스 로직
         Team team = teamRepository.findById(teamId).orElseThrow();
+        checkIsAlive(team);
+
+        //서비스 로직
         team.addTeamMember(member, false);
 
         //TODO 푸시 알람
@@ -53,6 +58,12 @@ public class TeamService {
             }else {
                 throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
             }
+        }
+    }
+
+    private void checkIsAlive(Team team){
+        if(team.getStatus() == Status.DELETE){
+            throw new NoSuchElementException();
         }
     }
 }

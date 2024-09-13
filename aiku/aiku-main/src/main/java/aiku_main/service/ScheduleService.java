@@ -1,5 +1,8 @@
 package aiku_main.service;
 
+import aiku_main.application_event.event.PointChangeReason;
+import aiku_main.application_event.event.PointChangeType;
+import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
@@ -12,8 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.NoSuchElementException;
+
+import static aiku_main.application_event.event.PointChangeReason.SCHEDULE;
+import static aiku_main.application_event.event.PointChangeType.MINUS;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -22,26 +29,21 @@ import java.util.NoSuchElementException;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final PointChangeEventPublisher pointChangeEventPublisher;
 
-    /**
-     * 스케줄 등록
-     * 참가비
-     * 약속 참가자로 등록
-     * 부족하면 예외
-     */
     @Transactional
     public Long addSchedule(Member member, Long teamId, ScheduleAddDto scheduleDto){
         //검증 로직
         checkEnoughPoint(member, scheduleDto.getPointAmount());
 
         //서비스 로직
-        //TODO 멤버 포인트 지불
-
         Schedule schedule = Schedule.create(member, teamId,
                 scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.getLocation(),
                 scheduleDto.getPointAmount());
         scheduleRepository.save(schedule);
 
+        pointChangeEventPublisher.publish(member.getId(), MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
+        
         return schedule.getId();
     }
 

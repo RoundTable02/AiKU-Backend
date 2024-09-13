@@ -46,6 +46,7 @@ public class ScheduleScheduler {
         reserveSchedule(scheduleId, scheduleTime);
     }
 
+    //TODO Runnable 추가
     private void reserveAlarm(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime);
         checkDurationValid(delayTime);
@@ -54,6 +55,7 @@ public class ScheduleScheduler {
         scheduleAlarmTasks.put(scheduleId, future);
     }
 
+    //TODO Runnable 추가
     private void reserveMapOpen(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).minus(Duration.ofMinutes(30));
         checkDurationValid(delayTime);
@@ -61,6 +63,8 @@ public class ScheduleScheduler {
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(null, delayTime);
         mapOpenTasks.put(scheduleId, future);
     }
+
+    //TODO Runnable 추가
 
     private void reserveMapClose(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).plus(Duration.ofMinutes(30));

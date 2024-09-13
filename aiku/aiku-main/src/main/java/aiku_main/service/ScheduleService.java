@@ -43,7 +43,7 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
 
         pointChangeEventPublisher.publish(member.getId(), MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
-        
+
         return schedule.getId();
     }
 

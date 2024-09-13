@@ -55,7 +55,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
-                new Location("new", 2.0, 2.0), LocalDateTime.now());
+                new Location("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
         scheduleService.updateSchedule(member, schedule.getId(), scheduleDto);
 
         //then

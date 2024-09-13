@@ -51,7 +51,7 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(scheduleTime);
         checkDurationValid(delayTime);
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(null, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         scheduleAlarmTasks.put(scheduleId, future);
     }
 
@@ -60,7 +60,7 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(scheduleTime).minus(Duration.ofMinutes(30));
         checkDurationValid(delayTime);
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(null, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         mapOpenTasks.put(scheduleId, future);
     }
 
@@ -70,22 +70,28 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(scheduleTime).plus(Duration.ofMinutes(30));
         checkDurationValid(delayTime);
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(null, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         mapCloseTasks.put(scheduleId, future);
     }
 
     private void cancleAll(Long scheduleId){
         ScheduledFuture future1 = mapOpenTasks.get(scheduleId);
-        future1.cancel(false);
-        mapOpenTasks.remove(scheduleId);
+        if (future1 != null) {
+            future1.cancel(false);
+            mapOpenTasks.remove(scheduleId);
+        }
 
         ScheduledFuture future2 = mapCloseTasks.get(scheduleId);
-        future2.cancel(false);
-        mapCloseTasks.remove(scheduleId);
+        if (future2 != null) {
+            future2.cancel(false);
+            mapCloseTasks.remove(scheduleId);
+        }
 
         ScheduledFuture future3 = scheduleAlarmTasks.get(scheduleId);
-        future3.cancel(false);
-        scheduleAlarmTasks.remove(scheduleId);
+        if (future3 != null) {
+            future3.cancel(false);
+            scheduleAlarmTasks.remove(scheduleId);
+        }
     }
 
     private Duration getDuration(LocalDateTime time){

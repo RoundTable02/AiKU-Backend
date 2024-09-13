@@ -2,6 +2,7 @@ package aiku_main.service;
 
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
+import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Location;
 import common.domain.Member;
 import common.domain.Schedule;
@@ -25,6 +26,9 @@ class ScheduleServiceTest {
 
     @Mock
     ScheduleRepository scheduleRepository;
+
+    @Mock
+    ScheduleScheduler scheduleScheduler;
 
     @InjectMocks
     ScheduleService scheduleService;

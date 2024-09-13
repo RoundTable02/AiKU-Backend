@@ -9,16 +9,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DiscriminatorValue(value = "Recommend")
 @Entity
-public class RecommendEvent extends BaseTime {
-
-    @Column(name = "recommendEventId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @JoinColumn(name = "memberId")
-    @OneToOne(fetch = FetchType.LAZY)
-    private Member member;
+public class RecommendEvent extends CommonEvent {
 
     @JoinColumn(name = "recommenderId")
     @ManyToOne(fetch = FetchType.LAZY)

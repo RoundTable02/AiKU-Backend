@@ -1,6 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.dto.TeamAddDto;
+import aiku_main.dto.TeamDetailResDto;
 import aiku_main.repository.TeamRepository;
 import common.domain.Member;
 import common.domain.Status;
@@ -47,10 +48,24 @@ public class TeamService {
         return team.getId();
     }
 
+    @Transactional
     public Long exitTeam(Member member, Long teamId) {
         return null;
     }
 
+    //== 조회 서비스 ==
+    public TeamDetailResDto getTeamDetail(Member member, Long teamId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+
+        //서비스 로직
+        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+        TeamDetailResDto resultDto = new TeamDetailResDto(team);
+
+        return resultDto;
+    }
+
+    //== 편의 메서드 ==
     private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
         if(teamRepository.existTeamMember(memberId, teamId) != isMember){
             if(isMember){

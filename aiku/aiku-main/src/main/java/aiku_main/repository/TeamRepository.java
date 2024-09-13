@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends JpaRepository<Team, Long>, TeamReadRepository {
 
     @Query("SELECT CASE WHEN COUNT(tm) > 0 THEN true ELSE false END " +
             "FROM TeamMember tm WHERE tm.member.id = :memberId " +

@@ -14,9 +14,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
@@ -27,9 +28,6 @@ class TeamServiceTest {
     @InjectMocks
     TeamService teamService;
 
-    @Spy
-    Member member;
-
     @Test
     void addTeam() {
         //given
@@ -38,5 +36,18 @@ class TeamServiceTest {
         //when
         TeamAddDto teamDto = new TeamAddDto("team1");
         Long teamId = teamService.addTeam(member, teamDto);
+    }
+
+    @Test
+    void enterTeam() {
+        //given
+        Member member = new Member("member1");
+        Team team = Team.create(member, "team1");
+
+        when(teamRepository.existTeamMember(any(), any())).thenReturn(false);
+        when(teamRepository.findById(any())).thenReturn(Optional.of(team));
+
+        //when
+        Long resultId = teamService.enterTeam(member, null);
     }
 }

@@ -28,6 +28,7 @@ public class TeamService {
         return team.getId();
     }
 
+    @Transactional
     public Long enterTeam(Member member, Long teamId) {
         //검증 로직
         checkTeamMember(member.getId(), teamId, false);

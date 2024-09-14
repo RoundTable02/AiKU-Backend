@@ -1,7 +1,9 @@
 package aiku_main.service;
 
+import aiku_main.dto.DataResDto;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
+import aiku_main.dto.TeamEachListResDto;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -67,9 +70,12 @@ public class TeamService {
         return resultDto;
     }
 
-    public void getTeamList(Member member, int page) {
+    public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
+        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
+        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
+        return resultDto;
     }
 
     //== 편의 메서드 ==

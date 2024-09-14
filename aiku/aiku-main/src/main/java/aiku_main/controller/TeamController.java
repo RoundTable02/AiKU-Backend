@@ -1,12 +1,16 @@
 package aiku_main.controller;
 
+import aiku_main.dto.DataResDto;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
+import aiku_main.dto.TeamEachListResDto;
 import aiku_main.service.TeamService;
 import common.response.BaseResponse;
 import common.response.status.BaseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static common.response.status.BaseCode.*;
 
@@ -46,10 +50,9 @@ public class TeamController {
     }
 
     @GetMapping
-    public BaseResponse getGroupList(@RequestParam int page){
-        teamService.getTeamList(null, page);
+    public BaseResponse getGroupList(@RequestParam(defaultValue = "1") int page){
+        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(null, page);
 
-        return null;
-//        return new BaseResponse(result, GET);
+        return new BaseResponse(result, GET);
     }
 }

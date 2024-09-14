@@ -4,16 +4,12 @@ import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
 import aiku_main.dto.TeamMemberResDto;
 import aiku_main.repository.TeamRepository;
-import common.domain.Member;
+import common.domain.member.Member;
 import common.domain.Team;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;

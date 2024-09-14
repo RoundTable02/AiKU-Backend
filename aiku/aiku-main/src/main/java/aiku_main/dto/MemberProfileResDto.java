@@ -1,6 +1,6 @@
 package aiku_main.dto;
 
-import common.domain.MemberProfile;
+import MemberProfile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.member.Member;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

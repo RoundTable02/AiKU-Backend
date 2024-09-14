@@ -3,7 +3,7 @@ package aiku_main.service;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
 import aiku_main.repository.TeamRepository;
-import common.domain.Member;
+import common.domain.member.Member;
 import common.domain.Status;
 import common.domain.Team;
 import common.exception.BaseExceptionImpl;

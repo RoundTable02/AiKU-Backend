@@ -4,7 +4,7 @@ import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Location;
-import common.domain.Member;
+import common.domain.member.Member;
 import common.domain.Schedule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,5 +1,9 @@
-package common.domain;
+package common.domain.member;
 
+import common.domain.BaseTime;
+import common.domain.Setting;
+import common.domain.Status;
+import common.domain.Title;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Entity
-public class Member extends BaseTime{
+public class Member extends BaseTime {
 
     @Column(name = "memberId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +40,7 @@ public class Member extends BaseTime{
 
     public Member(String nickname) {
         this.nickname = nickname;
-        this.profile = new MemberProfile("1", "1", "1", "1");
+        this.profile = new MemberProfile(MemberProfileType.CHAR, "1", MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
     }
     public static Member create(String nickname){
         return new Member(nickname);

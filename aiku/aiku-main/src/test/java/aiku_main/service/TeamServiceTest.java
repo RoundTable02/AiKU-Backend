@@ -1,6 +1,8 @@
 package aiku_main.service;
 
+import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
@@ -24,9 +26,12 @@ class TeamServiceTest {
 
     @Mock
     TeamRepository teamRepository;
-
     @Mock
     TeamReadRepository teamReadRepository;
+    @Mock
+    ScheduleRepository scheduleRepository;
+    @Mock
+    TeamEventPublisher teamEventPublisher;
 
     @InjectMocks
     TeamService teamService;

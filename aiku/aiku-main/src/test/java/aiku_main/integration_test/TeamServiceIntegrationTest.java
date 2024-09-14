@@ -7,6 +7,7 @@ import common.domain.*;
 import common.domain.member.Member;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
+import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +59,7 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("그룹 입장")
+    @DisplayName("그룹 입장-기본/중복 입장")
     void enterTeam() {
         //given
         Member member = Member.create("member1");
@@ -79,6 +80,38 @@ public class TeamServiceIntegrationTest {
         TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(teamId, enterMember.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
         assertThat(teamMember.isOwner()).isFalse();
+
+        //중복 입장
+        assertThatThrownBy(() -> teamService.enterTeam(enterMember, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+    }
+
+    @Test
+    @DisplayName("그룹 퇴장-권한O/X")
+    void exitTeam() {
+        //given
+        Member member = Member.create("member");
+        Member exitMember = Member.create("exitMember");
+        em.persist(member);
+        em.persist(exitMember);
+
+        Team team = Team.create(member, "team1");
+        team.addTeamMember(member, true);
+        team.addTeamMember(exitMember, false);
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
+        teamService.exitTeam(exitMember, team.getId());
+
+        //then
+        TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(team.getId(), exitMember.getId()).orElse(null);
+        assertThat(teamMember).isNotNull();
+        assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
+
+        //중복 퇴장
+        assertThatThrownBy(() -> teamService.exitTeam(exitMember, team.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test

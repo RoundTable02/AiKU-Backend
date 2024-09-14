@@ -14,7 +14,7 @@ import static common.domain.QTeamMember.teamMember;
 import static common.domain.Status.ALIVE;
 
 @RequiredArgsConstructor
-public class TeamReadRepositoryImpl implements TeamReadRepository{
+public class TeamReadRepositoryImpl implements TeamReadRepositoryCustom{
 
     private final JPAQueryFactory query;
 

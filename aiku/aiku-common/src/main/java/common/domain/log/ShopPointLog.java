@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @DiscriminatorValue(value = "SHOP")
 @Entity
-public class ShopPointLog {
+public class ShopPointLog extends PointLog{
 
     @Embedded
     private ShopProductValue shopProduct;

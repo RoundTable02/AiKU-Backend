@@ -45,4 +45,11 @@ public class TeamController {
         return new BaseResponse(result, GET);
     }
 
+    @GetMapping
+    public BaseResponse getGroupList(@RequestParam int page){
+        teamService.getTeamList(null, page);
+
+        return null;
+//        return new BaseResponse(result, GET);
+    }
 }

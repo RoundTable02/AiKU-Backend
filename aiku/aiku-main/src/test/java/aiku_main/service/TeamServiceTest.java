@@ -3,6 +3,7 @@ package aiku_main.service;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
 import aiku_main.dto.TeamMemberResDto;
+import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
 import common.domain.Team;
@@ -24,6 +25,9 @@ class TeamServiceTest {
 
     @Mock
     TeamRepository teamRepository;
+
+    @Mock
+    TeamReadRepository teamReadRepository;
 
     @InjectMocks
     TeamService teamService;
@@ -60,7 +64,7 @@ class TeamServiceTest {
         team.addTeamMember(member2, false);
 
         when(teamRepository.existTeamMember(any(), any())).thenReturn(true);
-        when(teamRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
+        when(teamReadRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
 
         //when
         TeamDetailResDto result = teamService.getTeamDetail(member1, team.getId());

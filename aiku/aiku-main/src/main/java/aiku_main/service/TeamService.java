@@ -2,6 +2,7 @@ package aiku_main.service;
 
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
+import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
 import common.domain.Status;
@@ -23,6 +24,7 @@ import java.util.NoSuchElementException;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamReadRepository teamReadRepository;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
@@ -59,10 +61,15 @@ public class TeamService {
         checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
-        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+        Team team = teamReadRepository.findTeamWithMember(teamId).orElseThrow();
         TeamDetailResDto resultDto = new TeamDetailResDto(team);
 
         return resultDto;
+    }
+
+    public void getTeamList(Member member, int page) {
+        //서비스 로직
+
     }
 
     //== 편의 메서드 ==

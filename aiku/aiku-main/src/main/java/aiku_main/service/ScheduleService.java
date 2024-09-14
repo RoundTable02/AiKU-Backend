@@ -4,12 +4,15 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
+import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import static aiku_main.application_event.event.PointChangeType.MINUS;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final TeamRepository teamRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
 
@@ -34,6 +38,7 @@ public class ScheduleService {
     @Transactional
     public Long addSchedule(Member member, Long teamId, ScheduleAddDto scheduleDto){
         //검증 로직
+        checkTeamMember(member.getId(), teamId);
         checkEnoughPoint(member, scheduleDto.getPointAmount());
 
         //서비스 로직
@@ -65,6 +70,7 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    //== 편의 메서드 ==
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
             throw new NoSuchElementException();
@@ -80,6 +86,12 @@ public class ScheduleService {
     private void checkEnoughPoint(Member member, int point){
         if(member.getPoint() < point){
             throw new NotEnoughPoint();
+        }
+    }
+
+    private void checkTeamMember(Long memberId, Long teamId){
+        if(!teamRepository.existTeamMember(memberId, teamId)){
+            throw new NoAuthorityException();
         }
     }
 

@@ -1,8 +1,10 @@
 package aiku_main.integration_test;
 
+import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
+import common.domain.ExecStatus;
 import common.domain.Location;
 import common.domain.member.Member;
 import common.domain.Schedule;
@@ -36,6 +38,37 @@ public class ScheduleServiceIntegrationTest {
     ScheduleRepository scheduleRepository;
 
     Random random = new Random();
+
+    @Test
+    @DisplayName("스케줄 등록-권한O/X")
+    void addSchedule() {
+        //given
+        Member member = Member.create("member1");
+        Member noMember = Member.create("noMember");
+        em.persist(member);
+        em.persist(noMember);
+
+        Team team = Team.create(member, "team1");
+        em.persist(team);
+
+        //when
+        ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
+                new Location("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
+        Long scheduleId = scheduleService.addSchedule(member, team.getId(), scheduleDto);
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+        assertThat(schedule).isNotNull();
+        assertThat(schedule.getScheduleStatus()).isEqualTo(ExecStatus.WAIT);
+        assertThat(schedule.getScheduleMembers().size()).isEqualTo(1);
+        assertThat(schedule.getScheduleMembers().get(0).getMember().getId()).isEqualTo(member.getId());
+
+        //권한x
+        assertThatThrownBy(() -> scheduleService.addSchedule(noMember, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+    }
 
     @Test
     @DisplayName("스케줄 수정-권한O/X-")

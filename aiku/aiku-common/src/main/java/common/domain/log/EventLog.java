@@ -13,10 +13,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class EventLog extends PointLog{
 
-    @Column(name = "eventLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private EventValue event;
 }

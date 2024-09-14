@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @DiscriminatorValue(value = "SHOP")
 @Entity
-public class ShopPointLog {
-
-    @Column(name = "shopPointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ShopPointLog extends PointLog{
 
     @Embedded
     private ShopProductValue shopProduct;

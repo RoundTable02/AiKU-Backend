@@ -1,13 +1,11 @@
 package aiku_main.service;
 
-import aiku_main.application_event.event.PointChangeReason;
-import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.scheduler.ScheduleScheduler;
-import common.domain.Member;
+import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
 import common.exception.NoAuthorityException;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.NoSuchElementException;
 

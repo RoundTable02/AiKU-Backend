@@ -1,12 +1,13 @@
 package common.domain;
 
-import org.assertj.core.api.Assertions;
+import common.domain.member.Member;
+import common.domain.team.Team;
+import common.domain.team.TeamMember;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TeamTest {
 

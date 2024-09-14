@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

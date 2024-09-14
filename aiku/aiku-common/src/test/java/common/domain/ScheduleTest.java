@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.member.Member;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

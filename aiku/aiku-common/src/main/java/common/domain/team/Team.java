@@ -1,5 +1,8 @@
-package common.domain;
+package common.domain.team;
 
+import common.domain.BaseTime;
+import common.domain.Status;
+import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +14,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Team extends BaseTime{
+public class Team extends BaseTime {
 
     @Column(name = "teamId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +45,14 @@ public class Team extends BaseTime{
     //==편의 메서드==
     public void addTeamMember(Member member, boolean isOwner){
         this.teamMembers.add(new TeamMember(this, member, isOwner));
+    }
+
+    public void removeTeamMember(Member member){
+        for (int i = 0; i < teamMembers.size(); i++) {
+            TeamMember teamMember = teamMembers.get(i);
+            if(teamMember.getMember().getId() == member.getId()){
+                teamMember.setStatus(Status.DELETE);
+            }
+        }
     }
 }

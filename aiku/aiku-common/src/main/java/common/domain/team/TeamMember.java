@@ -1,5 +1,8 @@
-package common.domain;
+package common.domain.team;
 
+import common.domain.BaseTime;
+import common.domain.Status;
+import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class TeamMember extends BaseTime{
+public class TeamMember extends BaseTime {
 
     @Column(name = "teamMemberId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,5 +35,10 @@ public class TeamMember extends BaseTime{
         this.member = member;
         this.isOwner = isOwner;
         this.status = Status.ALIVE;
+    }
+
+    //==편의 메서드==
+    protected void setStatus(Status status) {
+        this.status = status;
     }
 }

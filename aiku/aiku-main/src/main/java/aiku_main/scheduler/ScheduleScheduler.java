@@ -3,8 +3,6 @@ package aiku_main.scheduler;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.Schedule;
-import common.exception.BaseExceptionImpl;
-import common.response.status.BaseErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
@@ -49,7 +47,7 @@ public class ScheduleScheduler {
     //TODO Runnable 추가
     private void reserveAlarm(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime);
-        checkDurationValid(delayTime);
+        if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         scheduleAlarmTasks.put(scheduleId, future);
@@ -58,7 +56,7 @@ public class ScheduleScheduler {
     //TODO Runnable 추가
     private void reserveMapOpen(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).minus(Duration.ofMinutes(30));
-        checkDurationValid(delayTime);
+        if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         mapOpenTasks.put(scheduleId, future);
@@ -68,7 +66,7 @@ public class ScheduleScheduler {
 
     private void reserveMapClose(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).plus(Duration.ofMinutes(30));
-        checkDurationValid(delayTime);
+        if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
         mapCloseTasks.put(scheduleId, future);
@@ -98,9 +96,8 @@ public class ScheduleScheduler {
         return Duration.between(LocalDateTime.now(), time);
     }
 
-    private void checkDurationValid(Duration duration){
-        if(duration.toMinutes() < 0){
-            throw new BaseExceptionImpl(BaseErrorCode.NO_VALID_SCHEDULE_TIME);
-        }
+    private boolean isValidDuration(Duration duration){
+        if(duration.toMinutes() < 0) return false;
+        else return true;
     }
 }

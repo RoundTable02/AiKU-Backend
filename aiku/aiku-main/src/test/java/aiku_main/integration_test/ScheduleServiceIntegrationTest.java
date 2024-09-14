@@ -4,12 +4,11 @@ import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
 import common.domain.Location;
-import common.domain.Member;
+import common.domain.member.Member;
 import common.domain.Schedule;
-import common.domain.Team;
+import common.domain.team.Team;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class ScheduleServiceIntegrationTest {
     Random random = new Random();
 
     @Test
-    @DisplayName("스케줄 수정(권한O&X)")
+    @DisplayName("스케줄 수정-권한O/X-")
     void updateSchedule() {
         //given
         Member member = Member.create("member1");

@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class SchedulePointLog extends PointLog{
 
-    @Column(name = "schedulePointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private ScheduleValue schedule;
 

@@ -1,9 +1,13 @@
 package common.response;
 
+import common.response.status.BaseCode;
 import common.response.status.StatusCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.lang.Nullable;
+
+import static common.response.status.BaseCode.OK;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
@@ -18,6 +22,12 @@ public class BaseResponse<T> {
     public BaseResponse(T result, StatusCode code) {
         this.code = code.getCode();
         this.message = code.getMessage();
+        this.result = result;
+    }
+
+    public BaseResponse(T result) {
+        this.code = OK.getCode();
+        this.message = OK.getMessage();
         this.result = result;
     }
 

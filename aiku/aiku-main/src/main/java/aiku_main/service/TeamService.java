@@ -1,13 +1,27 @@
 package aiku_main.service;
 
+import aiku_main.application_event.publisher.TeamEventPublisher;
+import aiku_main.dto.DataResDto;
 import aiku_main.dto.TeamAddDto;
+import aiku_main.dto.TeamDetailResDto;
+import aiku_main.dto.TeamEachListResDto;
+import aiku_main.exception.CanNotExitException;
+import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
-import common.domain.Member;
-import common.domain.Team;
+import common.domain.member.Member;
+import common.domain.Status;
+import common.domain.team.Team;
+import common.exception.BaseExceptionImpl;
+import common.exception.NoAuthorityException;
+import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -16,6 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamReadRepository teamReadRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TeamEventPublisher teamEventPublisher;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
@@ -23,5 +40,80 @@ public class TeamService {
         teamRepository.save(team);
 
         return team.getId();
+    }
+
+    @Transactional
+    public Long enterTeam(Member member, Long teamId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, false);
+
+        Team team = teamRepository.findById(teamId).orElseThrow();
+        checkIsAlive(team);
+
+        //서비스 로직
+        team.addTeamMember(member, false);
+
+        //TODO 푸시 알람
+
+        return team.getId();
+    }
+
+    @Transactional
+    public Long exitTeam(Member member, Long teamId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+        checkIsAlive(team);
+        checkHasMemberRunScheduleInTeam(member.getId(), teamId);
+
+        //서비스 로직
+        team.removeTeamMember(member);
+
+        teamEventPublisher.publish(member.getId(), teamId);
+
+        return team.getId();
+    }
+
+    //== 조회 서비스 ==
+    public TeamDetailResDto getTeamDetail(Member member, Long teamId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+
+        //서비스 로직
+        Team team = teamReadRepository.findTeamWithMember(teamId).orElseThrow();
+        TeamDetailResDto resultDto = new TeamDetailResDto(team);
+
+        return resultDto;
+    }
+
+    public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
+        //서비스 로직
+        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
+        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
+
+        return resultDto;
+    }
+
+    //== 편의 메서드 ==
+    private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
+        if(teamRepository.existTeamMember(memberId, teamId) != isMember){
+            if(isMember){
+                throw new NoAuthorityException();
+            }else {
+                throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
+            }
+        }
+    }
+
+    private void checkHasMemberRunScheduleInTeam(Long memberId, Long teamId){
+        if(scheduleRepository.hasMemberRunScheduleInTeam(memberId, teamId)){
+            throw new CanNotExitException();
+        };
+    }
+
+    private void checkIsAlive(Team team){
+        if(team.getStatus() == Status.DELETE){
+            throw new NoSuchElementException();
+        }
     }
 }

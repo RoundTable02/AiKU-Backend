@@ -1,8 +1,6 @@
 package aiku_main.service;
 
-import aiku_main.dto.TeamAddDto;
-import aiku_main.dto.TeamDetailResDto;
-import aiku_main.dto.TeamMemberResDto;
+import aiku_main.dto.*;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
@@ -13,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,5 +73,22 @@ class TeamServiceTest {
 
         List<TeamMemberResDto> teamMembers = result.getMembers();
         assertThat(teamMembers).extracting("nickname").containsExactly(member1.getNickname(), member2.getNickname());
+    }
+
+    @Test
+    void getTeamList() {
+        //given
+        Member member1 = new Member("member1");
+
+        List<TeamEachListResDto> data = new ArrayList<>();
+        when(teamReadRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
+
+        //when
+        int page = 3;
+        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1, 3);
+
+        //then
+        assertThat(result.getPage()).isEqualTo(3);
+        assertThat(result.getData()).isEqualTo(data);
     }
 }

@@ -1,26 +1,24 @@
 package aiku_main.integration_test;
 
-import aiku_main.dto.TeamAddDto;
-import aiku_main.dto.TeamDetailResDto;
-import aiku_main.dto.TeamMemberResDto;
+import aiku_main.dto.*;
 import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
+import common.domain.*;
 import common.domain.member.Member;
-import common.domain.Team;
-import common.domain.TeamMember;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @Transactional
 @SpringBootTest
 public class TeamServiceIntegrationTest {
@@ -60,7 +58,7 @@ public class TeamServiceIntegrationTest {
 
     @Test
     @DisplayName("그룹 입장")
-    void test() {
+    void enterTeam() {
         //given
         Member member = Member.create("member1");
         Member enterMember = Member.create("enterMember");
@@ -84,7 +82,7 @@ public class TeamServiceIntegrationTest {
 
     @Test
     @DisplayName("그룹 상세 조회-권한O/X")
-    void getGroupDetail() {
+    void getTeamDetail() {
         //given
         Member member = Member.create("member1");
         Member member2 = Member.create("member2");
@@ -113,5 +111,69 @@ public class TeamServiceIntegrationTest {
 
         //권한x
         assertThatThrownBy(() -> teamService.getTeamDetail(noMember, team.getId())).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Rollback(value = false)
+    @Test
+    @DisplayName("그룹 목록 조회")
+    void getTeamList() {
+        //given
+        Member member1 = Member.create("member1");
+        Member member2 = Member.create("member2");
+        Member member3 = Member.create("member3");
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+
+        Team teamA = Team.create(member1, "teamA");
+        em.persist(teamA);
+
+        Team teamB = Team.create(member1, "teamB");
+        teamB.addTeamMember(member2, false);
+        em.persist(teamB);
+
+        Team teamC = Team.create(member1, "teamC");
+        teamC.addTeamMember(member2, false);
+        teamC.addTeamMember(member3, false);
+        em.persist(teamC);
+
+        Schedule scheduleA1 = Schedule.create(member1, teamA.getId(), "scheduleA1", LocalDateTime.now().minusDays(1),
+                new Location("loc1", 1.1, 1.1), 0);
+        scheduleA1.setScheduleStatus(ExecStatus.TERM);
+        em.persist(scheduleA1);
+
+        Schedule scheduleB1 = Schedule.create(member2, teamB.getId(), "scheduleB1", LocalDateTime.now().minusDays(2),
+                new Location("loc1", 1.1, 1.1), 0);
+        scheduleB1.setScheduleStatus(ExecStatus.TERM);
+        em.persist(scheduleB1);
+
+        Schedule scheduleB2 = Schedule.create(member2, teamB.getId(), "scheduleB2", LocalDateTime.now().minusDays(3),
+                new Location("loc1", 1.1, 1.1), 0);
+        scheduleB2.setScheduleStatus(ExecStatus.TERM);
+        em.persist(scheduleB2);
+
+        Schedule scheduleB3 = Schedule.create(member2, teamB.getId(), "scheduleB3", LocalDateTime.now().minusDays(4),
+                new Location("loc1", 1.1, 1.1), 0);
+        scheduleB3.setScheduleStatus(ExecStatus.TERM);
+        em.persist(scheduleB3);
+
+
+        Schedule scheduleC1 = Schedule.create(member2, teamC.getId(), "scheduleC1", LocalDateTime.now(),
+                new Location("loc1", 1.1, 1.1), 0);
+        scheduleC1.setScheduleStatus(ExecStatus.WAIT);
+        em.persist(scheduleC1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        int page = 1;
+        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1, page);
+
+        //then
+        List<TeamEachListResDto> data = result.getData();
+        assertThat(data.size()).isEqualTo(3);
+        assertThat(data).extracting("groupId").containsExactly(teamA.getId(), teamB.getId(), teamC.getId());
+        assertThat(data).extracting("memberSize").containsExactly(1, 2, 3);
     }
 }

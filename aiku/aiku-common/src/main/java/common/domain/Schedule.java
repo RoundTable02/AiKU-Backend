@@ -44,6 +44,7 @@ public class Schedule extends BaseTime{
         this.scheduleName = scheduleName;
         this.scheduleTime = scheduleTime;
         this.location = location;
+        this.status = Status.ALIVE;
     }
 
     //==CUD 편의 메서드==
@@ -67,5 +68,9 @@ public class Schedule extends BaseTime{
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
+    }
+
+    public void setScheduleStatus(ExecStatus scheduleStatus) {
+        this.scheduleStatus = scheduleStatus;
     }
 }

@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class RacingPointLog extends PointLog{
 
-    @Column(name = "racingPointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private RacingValue racing;
 }

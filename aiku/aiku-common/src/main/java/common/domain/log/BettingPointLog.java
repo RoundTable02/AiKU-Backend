@@ -13,10 +13,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class BettingPointLog extends PointLog{
 
-    @Column(name = "racingPointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private BettingValue betting;
 }

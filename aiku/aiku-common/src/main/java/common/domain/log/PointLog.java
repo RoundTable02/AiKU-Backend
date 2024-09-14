@@ -14,10 +14,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class PointLog extends BaseTime {
 
-    @Column(name = "pointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @JoinColumn(name = "memberId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;

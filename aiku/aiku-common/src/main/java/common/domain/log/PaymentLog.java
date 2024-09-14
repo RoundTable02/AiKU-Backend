@@ -11,7 +11,4 @@ import lombok.NoArgsConstructor;
 @Entity
 public class PaymentLog extends PointLog{
 
-    @Column(name = "paymentLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 }

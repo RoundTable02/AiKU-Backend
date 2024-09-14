@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class ShopPointLog {
 
-    @Column(name = "shopPointLogId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Embedded
     private ShopProductValue shopProduct;
 }

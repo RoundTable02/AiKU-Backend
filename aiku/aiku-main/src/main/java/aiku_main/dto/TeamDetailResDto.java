@@ -16,6 +16,9 @@ public class TeamDetailResDto {
         this.groupId = team.getId();
         this.groupName = team.getTeamName();
 
-        team.getTeamMembers().forEach(TeamMemberResDto::new);
+        List<TeamMemberResDto> members = team.getTeamMembers().stream()
+                .map(TeamMemberResDto::new)
+                .toList();
+        this.members = members;
     }
 }

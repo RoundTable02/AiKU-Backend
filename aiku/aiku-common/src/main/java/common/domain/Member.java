@@ -36,6 +36,7 @@ public class Member extends BaseTime{
 
     public Member(String nickname) {
         this.nickname = nickname;
+        this.profile = new MemberProfile("1", "1", "1", "1");
     }
     public static Member create(String nickname){
         return new Member(nickname);

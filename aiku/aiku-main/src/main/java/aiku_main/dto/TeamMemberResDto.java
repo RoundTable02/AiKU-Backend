@@ -1,5 +1,6 @@
 package aiku_main.dto;
 
+import common.domain.Member;
 import common.domain.TeamMember;
 import lombok.Getter;
 
@@ -10,8 +11,9 @@ public class TeamMemberResDto {
     private MemberProfileResDto memberProfile;
 
     public TeamMemberResDto(TeamMember teamMember) {
-        this.memberId = teamMember.getId();
-        this.nickname = teamMember.getMember().getNickname();
-        this.memberProfile = new MemberProfileResDto(teamMember.getMember().getProfile());
+        Member member = teamMember.getMember();
+        this.memberId = member.getId();
+        this.nickname = member.getNickname();
+        this.memberProfile = new MemberProfileResDto(member.getProfile());
     }
 }

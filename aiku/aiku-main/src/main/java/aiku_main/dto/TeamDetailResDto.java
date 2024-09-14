@@ -1,6 +1,6 @@
 package aiku_main.dto;
 
-import common.domain.Team;
+import common.domain.team.Team;
 import lombok.Getter;
 
 import java.util.ArrayList;

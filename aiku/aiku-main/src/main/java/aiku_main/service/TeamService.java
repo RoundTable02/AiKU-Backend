@@ -1,14 +1,17 @@
 package aiku_main.service;
 
+import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.TeamAddDto;
 import aiku_main.dto.TeamDetailResDto;
 import aiku_main.dto.TeamEachListResDto;
+import aiku_main.exception.CanNotExitException;
+import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
 import common.domain.Status;
-import common.domain.Team;
+import common.domain.team.Team;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.response.status.BaseErrorCode;
@@ -28,6 +31,8 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamReadRepository teamReadRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TeamEventPublisher teamEventPublisher;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
@@ -55,7 +60,18 @@ public class TeamService {
 
     @Transactional
     public Long exitTeam(Member member, Long teamId) {
-        return null;
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+        checkIsAlive(team);
+        checkHasMemberRunScheduleInTeam(member.getId(), teamId);
+
+        //서비스 로직
+        team.removeTeamMember(member);
+
+        teamEventPublisher.publish(member.getId(), teamId);
+
+        return team.getId();
     }
 
     //== 조회 서비스 ==
@@ -87,6 +103,12 @@ public class TeamService {
                 throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
             }
         }
+    }
+
+    private void checkHasMemberRunScheduleInTeam(Long memberId, Long teamId){
+        if(scheduleRepository.hasMemberRunScheduleInTeam(memberId, teamId)){
+            throw new CanNotExitException();
+        };
     }
 
     private void checkIsAlive(Team team){

@@ -1,5 +1,6 @@
-package common.domain;
+package common.domain.team;
 
+import common.domain.BaseTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class TeamResult extends BaseTime{
+public class TeamResult extends BaseTime {
 
     @Column(name = "teamResultId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

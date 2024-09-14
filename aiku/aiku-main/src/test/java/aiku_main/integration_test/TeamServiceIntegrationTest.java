@@ -5,13 +5,14 @@ import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
 import common.domain.*;
 import common.domain.member.Member;
+import common.domain.team.Team;
+import common.domain.team.TeamMember;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -113,7 +114,6 @@ public class TeamServiceIntegrationTest {
         assertThatThrownBy(() -> teamService.getTeamDetail(noMember, team.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
-    @Rollback(value = false)
     @Test
     @DisplayName("그룹 목록 조회")
     void getTeamList() {

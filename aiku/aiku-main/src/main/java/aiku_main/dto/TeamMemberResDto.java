@@ -1,7 +1,7 @@
 package aiku_main.dto;
 
 import common.domain.member.Member;
-import common.domain.TeamMember;
+import common.domain.team.TeamMember;
 import lombok.Getter;
 
 @Getter

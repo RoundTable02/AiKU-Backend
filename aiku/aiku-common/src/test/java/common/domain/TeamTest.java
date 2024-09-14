@@ -1,6 +1,8 @@
 package common.domain;
 
 import common.domain.member.Member;
+import common.domain.team.Team;
+import common.domain.team.TeamMember;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

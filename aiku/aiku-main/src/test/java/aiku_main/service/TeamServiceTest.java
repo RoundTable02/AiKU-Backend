@@ -4,7 +4,7 @@ import aiku_main.dto.*;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
-import common.domain.Team;
+import common.domain.team.Team;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

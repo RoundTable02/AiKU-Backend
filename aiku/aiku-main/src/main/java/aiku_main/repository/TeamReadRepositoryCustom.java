@@ -1,7 +1,7 @@
 package aiku_main.repository;
 
 import aiku_main.dto.TeamEachListResDto;
-import common.domain.Team;
+import common.domain.team.Team;
 
 import java.util.List;
 import java.util.Optional;

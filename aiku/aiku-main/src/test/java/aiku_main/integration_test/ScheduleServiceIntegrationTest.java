@@ -6,7 +6,7 @@ import aiku_main.service.ScheduleService;
 import common.domain.Location;
 import common.domain.member.Member;
 import common.domain.Schedule;
-import common.domain.Team;
+import common.domain.team.Team;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;

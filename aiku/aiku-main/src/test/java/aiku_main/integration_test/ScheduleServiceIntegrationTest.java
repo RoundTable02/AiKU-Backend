@@ -39,7 +39,7 @@ public class ScheduleServiceIntegrationTest {
     Random random = new Random();
 
     @Test
-    @DisplayName("스케줄 수정(권한O&X)")
+    @DisplayName("스케줄 수정-권한O/X-")
     void updateSchedule() {
         //given
         Member member = Member.create("member1");

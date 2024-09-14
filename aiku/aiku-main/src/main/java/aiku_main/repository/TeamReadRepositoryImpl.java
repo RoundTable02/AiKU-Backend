@@ -21,10 +21,10 @@ public class TeamReadRepositoryImpl implements TeamReadRepository{
     @Override
     public Optional<Team> findTeamWithMember(Long teamId) {
         return query.selectFrom(team)
-                .leftJoin(team.teamMembers, teamMember)
-                .on(teamMember.status.eq(ALIVE)).fetchJoin()
+                .leftJoin(team.teamMembers, teamMember).fetchJoin()
                 .where(team.id.eq(teamId),
-                        team.status.eq(ALIVE))
+                        team.status.eq(ALIVE),
+                        teamMember.status.eq(ALIVE))
                 .stream().findFirst();
     }
 }

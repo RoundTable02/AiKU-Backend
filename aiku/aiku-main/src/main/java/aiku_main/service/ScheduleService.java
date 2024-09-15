@@ -111,7 +111,7 @@ public class ScheduleService {
             pointChangeEventPublisher.publish(member.getId(), PLUS, schedulePoint, SCHEDULE, schedule.getId());
         }
 
-        scheduleEventPublisher.publish(member.getId(), scheduleId);
+        scheduleEventPublisher.publishScheduleExitEvent(member.getId(), scheduleId);
 
         return schedule.getId();
     }

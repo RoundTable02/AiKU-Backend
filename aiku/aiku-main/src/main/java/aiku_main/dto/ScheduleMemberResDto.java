@@ -6,12 +6,12 @@ import lombok.Getter;
 @Getter
 public class ScheduleMemberResDto {
     private Long memberId;
-    private Long nickname;
+    private String nickname;
     private MemberProfileResDto memberProfile;
     private int point;
 
     @QueryProjection
-    public ScheduleMemberResDto(Long memberId, Long nickname, MemberProfileResDto memberProfile, int point) {
+    public ScheduleMemberResDto(Long memberId, String nickname, MemberProfileResDto memberProfile, int point) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;

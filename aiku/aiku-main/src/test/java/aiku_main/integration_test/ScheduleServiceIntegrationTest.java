@@ -1,8 +1,6 @@
 package aiku_main.integration_test;
 
-import aiku_main.dto.ScheduleAddDto;
-import aiku_main.dto.ScheduleEnterDto;
-import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.dto.*;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
 import common.domain.*;
@@ -35,7 +33,6 @@ public class ScheduleServiceIntegrationTest {
     @Autowired
     EntityManager em;
 
-    @InjectMocks
     @Autowired
     ScheduleService scheduleService;
 
@@ -200,6 +197,50 @@ public class ScheduleServiceIntegrationTest {
         assertThatThrownBy(() -> scheduleService.exitSchedule(noMember, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
         //중복 요청
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 상세 조회-권한O/X")
+    void getScheduleDetail() {
+        //given
+        Member member = Member.create("member1");
+        Member member2 = Member.create("member2");
+        Member member3 = Member.create("member3");
+        Member noMember = Member.create("noMember");
+        em.persist(member);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(noMember);
+
+        Team team = Team.create(member, "team1");
+        team.addTeamMember(member2, false);
+        team.addTeamMember(member3, false);
+        team.addTeamMember(noMember, false);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member, team.getId(), 100);
+        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member3, false, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member, team.getId(), schedule.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
+
+        List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
+        assertThat(scheduleMembers.size()).isEqualTo(3);
+        assertThat(scheduleMembers).extracting("memberId").containsExactly(member.getId(), member2.getId(), member3.getId());
+
+        //권한 x-스케줄 멤버가 아닐때
+        assertThatThrownBy(() -> scheduleService.getScheduleDetail(noMember, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     Schedule createSchedule(Member member, Long teamId, int pointAmount){

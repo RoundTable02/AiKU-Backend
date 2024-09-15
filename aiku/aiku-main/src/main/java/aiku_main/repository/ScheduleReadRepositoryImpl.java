@@ -31,7 +31,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
                         member.point))
                 .from(scheduleMember)
-                .innerJoin(scheduleMember.member, member).fetchJoin()
+                .innerJoin(scheduleMember.member, member)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
                 .orderBy(scheduleMember.createdAt.asc())

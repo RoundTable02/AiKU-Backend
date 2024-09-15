@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.*;
 import common.domain.team.Team;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,8 @@ import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
 
 @RequiredArgsConstructor
-public class TeamReadRepositoryImpl implements TeamReadRepositoryCustom{
+@Repository
+public class TeamReadRepositoryImpl implements TeamReadRepository {
 
     private final JPAQueryFactory query;
 

@@ -23,4 +23,8 @@ public class LocationDto {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    public Location toDomain(){
+        return new Location(this.locationName, this.latitude, this.longitude);
+    }
 }

@@ -50,7 +50,7 @@ public class ScheduleService {
 
         //서비스 로직
         Schedule schedule = Schedule.create(member, teamId,
-                scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.getLocation(),
+                scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.getLocation().toDomain(),
                 scheduleDto.getPointAmount());
         scheduleRepository.save(schedule);
 
@@ -70,7 +70,7 @@ public class ScheduleService {
         checkIsAlive(schedule);
 
         //서비스 로직
-        schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location);
+        schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
 
         scheduleScheduler.changeSchedule(schedule.getId(), schedule.getScheduleTime());
 

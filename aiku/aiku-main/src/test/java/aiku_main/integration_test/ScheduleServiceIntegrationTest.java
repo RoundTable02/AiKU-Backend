@@ -75,7 +75,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
-                new Location("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
+                new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
         Long scheduleId = scheduleService.addSchedule(member1, team.getId(), scheduleDto);
 
         em.flush();
@@ -107,7 +107,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
-                new Location("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
+                new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
         scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto);
 
         em.flush();

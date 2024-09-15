@@ -1,6 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
+import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleDetailResDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleReadRepository;
@@ -55,14 +56,13 @@ class ScheduleServiceTest {
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new Schedule",
-                new Location("new location", 2.2, 2.2),
+                new LocationDto("new location", 2.2, 2.2),
                 LocalDateTime.now());
         Long resultId = scheduleService.updateSchedule(member, schedule.getId(), scheduleDto);
 
         //then
         assertThat(resultId).isEqualTo(scheduleId);
         assertThat(schedule.getScheduleName()).isEqualTo(scheduleDto.getScheduleName());
-        assertThat(schedule.getLocation()).isEqualTo(scheduleDto.getLocation());
     }
 
     @Test

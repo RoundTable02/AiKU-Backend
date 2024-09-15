@@ -1,6 +1,7 @@
 package aiku_main.integration_test;
 
 import aiku_main.dto.*;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
 import common.domain.*;
@@ -9,6 +10,8 @@ import common.domain.team.Team;
 import common.exception.BaseException;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,31 +35,48 @@ public class ScheduleServiceIntegrationTest {
 
     @Autowired
     EntityManager em;
-
     @Autowired
     ScheduleService scheduleService;
-
     @Autowired
     ScheduleRepository scheduleRepository;
+    @Autowired
+    MemberRepository memberRepository;
+
+    Member member1;
+    Member member2;
+    Member member3;
+    Member member4;
 
     Random random = new Random();
+
+    @BeforeEach
+    void beforeEach(){
+        member1 = Member.create("member1");
+        member2 = Member.create("member2");
+        member3 = Member.create("member3");
+        member4 = Member.create("member4");
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+    }
+
+    @AfterEach
+    void afterEach(){
+        memberRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("스케줄 등록-권한O/X")
     void addSchedule() {
         //given
-        Member member = Member.create("member1");
-        Member noMember = Member.create("noMember");
-        em.persist(member);
-        em.persist(noMember);
-
-        Team team = Team.create(member, "team1");
+        Team team = Team.create(member1, "team1");
         em.persist(team);
 
         //when
         ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
                 new Location("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        Long scheduleId = scheduleService.addSchedule(member, team.getId(), scheduleDto);
+        Long scheduleId = scheduleService.addSchedule(member1, team.getId(), scheduleDto);
 
         em.flush();
         em.clear();
@@ -66,25 +86,20 @@ public class ScheduleServiceIntegrationTest {
         assertThat(schedule).isNotNull();
         assertThat(schedule.getScheduleStatus()).isEqualTo(ExecStatus.WAIT);
         assertThat(schedule.getScheduleMembers().size()).isEqualTo(1);
-        assertThat(schedule.getScheduleMembers().get(0).getMember().getId()).isEqualTo(member.getId());
+        assertThat(schedule.getScheduleMembers().get(0).getMember().getId()).isEqualTo(member1.getId());
 
         //권한x
-        assertThatThrownBy(() -> scheduleService.addSchedule(noMember, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.addSchedule(member3, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
     @DisplayName("스케줄 수정-권한O/X-")
     void updateSchedule() {
         //given
-        Member member = Member.create("member1");
-        Member member2 = Member.create("member2");
-        em.persist(member);
-        em.persist(member2);
-
-        Team team = Team.create(member, "team1");
+        Team team = Team.create(member1, "team1");
         em.persist(team);
 
-        Schedule schedule = createSchedule(member, team.getId(), 0);
+        Schedule schedule = createSchedule(member1, team.getId(), 0);
         em.persist(schedule);
 
         em.flush();
@@ -93,7 +108,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new Location("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        scheduleService.updateSchedule(member, schedule.getId(), scheduleDto);
+        scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto);
 
         em.flush();
         em.clear();
@@ -111,18 +126,11 @@ public class ScheduleServiceIntegrationTest {
     @DisplayName("스케줄 입장-기본/중복 입장,권한O/X")
     void enterSchedule() {
         //given
-        Member member = Member.create("member1");
-        Member member2 = Member.create("member2");
-        Member noMember = Member.create("noMember");
-        em.persist(member);
-        em.persist(member2);
-        em.persist(noMember);
-
-        Team team = Team.create(member, "team1");
+        Team team = Team.create(member1, "team1");
         team.addTeamMember(member2, false);
         em.persist(team);
 
-        Schedule schedule = createSchedule(member, team.getId(), 100);
+        Schedule schedule = createSchedule(member1, team.getId(), 100);
         em.persist(schedule);
 
         em.flush();
@@ -144,33 +152,24 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleMembers).extracting("isOwner").contains(true, false);
         assertThat(scheduleMembers).extracting("isPaid").contains(true, false);
         assertThat(scheduleMembers).extracting("pointAmount").contains(100, 0);
-        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member.getId(), member2.getId());
+        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
 
         //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.enterSchedule(noMember, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member3, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
         //중복 요청
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member1, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
     }
 
     @Test
     @DisplayName("스케줄 퇴장-기본/중복 퇴장,권한O/X")
     void exitSchedule() {
         //given
-        Member member = Member.create("member1");
-        Member member2 = Member.create("member2");
-        Member member3 = Member.create("member3");
-        Member noMember = Member.create("noMember");
-        em.persist(member);
-        em.persist(member2);
-        em.persist(member3);
-        em.persist(noMember);
-
-        Team team = Team.create(member, "team1");
+        Team team = Team.create(member1, "team1");
         team.addTeamMember(member2, false);
         team.addTeamMember(member3, false);
         em.persist(team);
 
-        Schedule schedule = createSchedule(member, team.getId(), 100);
+        Schedule schedule = createSchedule(member1, team.getId(), 100);
         schedule.addScheduleMember(member2, false, 0);
         schedule.addScheduleMember(member3, false, 100);
         em.persist(schedule);
@@ -191,10 +190,10 @@ public class ScheduleServiceIntegrationTest {
         List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
         assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
-        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member.getId(), member2.getId());
+        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
 
         //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.exitSchedule(noMember, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
         //중복 요청
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
@@ -203,22 +202,13 @@ public class ScheduleServiceIntegrationTest {
     @DisplayName("스케줄 상세 조회-권한O/X")
     void getScheduleDetail() {
         //given
-        Member member = Member.create("member1");
-        Member member2 = Member.create("member2");
-        Member member3 = Member.create("member3");
-        Member noMember = Member.create("noMember");
-        em.persist(member);
-        em.persist(member2);
-        em.persist(member3);
-        em.persist(noMember);
-
-        Team team = Team.create(member, "team1");
+        Team team = Team.create(member1, "team1");
         team.addTeamMember(member2, false);
         team.addTeamMember(member3, false);
-        team.addTeamMember(noMember, false);
+        team.addTeamMember(member4, false);
         em.persist(team);
 
-        Schedule schedule = createSchedule(member, team.getId(), 100);
+        Schedule schedule = createSchedule(member1, team.getId(), 100);
         schedule.addScheduleMember(member2, false, 0);
         schedule.addScheduleMember(member3, false, 100);
         em.persist(schedule);
@@ -227,7 +217,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member, team.getId(), schedule.getId());
+        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member1, team.getId(), schedule.getId());
 
         em.flush();
         em.clear();
@@ -237,10 +227,10 @@ public class ScheduleServiceIntegrationTest {
 
         List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
-        assertThat(scheduleMembers).extracting("memberId").containsExactly(member.getId(), member2.getId(), member3.getId());
+        assertThat(scheduleMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
 
         //권한 x-스케줄 멤버가 아닐때
-        assertThatThrownBy(() -> scheduleService.getScheduleDetail(noMember, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     Schedule createSchedule(Member member, Long teamId, int pointAmount){

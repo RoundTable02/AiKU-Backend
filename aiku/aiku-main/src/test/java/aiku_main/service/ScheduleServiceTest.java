@@ -1,5 +1,6 @@
 package aiku_main.service;
 
+import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
@@ -31,6 +32,8 @@ class ScheduleServiceTest {
     TeamRepository teamRepository;
     @Mock
     ScheduleScheduler scheduleScheduler;
+    @Mock
+    ScheduleEventPublisher scheduleEventPublisher;
 
     @InjectMocks
     ScheduleService scheduleService;

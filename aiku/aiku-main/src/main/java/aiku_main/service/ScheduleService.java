@@ -88,7 +88,7 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
 
         if(enterDto.getPointAmount() > 0) {
-            pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId)
+            pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
         };
 
         return schedule.getId();

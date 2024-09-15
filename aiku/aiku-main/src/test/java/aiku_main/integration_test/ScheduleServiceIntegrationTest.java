@@ -5,11 +5,8 @@ import aiku_main.dto.ScheduleEnterDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
-import common.domain.ExecStatus;
-import common.domain.Location;
-import common.domain.ScheduleMember;
+import common.domain.*;
 import common.domain.member.Member;
-import common.domain.Schedule;
 import common.domain.team.Team;
 import common.exception.BaseException;
 import common.exception.NoAuthorityException;
@@ -26,6 +23,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import static common.domain.Status.ALIVE;
+import static common.domain.Status.DELETE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -154,6 +153,53 @@ public class ScheduleServiceIntegrationTest {
         assertThatThrownBy(() -> scheduleService.enterSchedule(noMember, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
         //중복 요청
         assertThatThrownBy(() -> scheduleService.enterSchedule(member, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 퇴장-기본/중복 퇴장,권한O/X")
+    void exitSchedule() {
+        //given
+        Member member = Member.create("member1");
+        Member member2 = Member.create("member2");
+        Member member3 = Member.create("member3");
+        Member noMember = Member.create("noMember");
+        em.persist(member);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(noMember);
+
+        Team team = Team.create(member, "team1");
+        team.addTeamMember(member2, false);
+        team.addTeamMember(member3, false);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member, team.getId(), 100);
+        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member3, false, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+        assertThat(scheduleMembers.size()).isEqualTo(3);
+        assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
+        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member.getId(), member2.getId());
+
+        //권한x-그룹에 속해 있지 않을 때
+        assertThatThrownBy(() -> scheduleService.exitSchedule(noMember, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        //중복 요청
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     Schedule createSchedule(Member member, Long teamId, int pointAmount){

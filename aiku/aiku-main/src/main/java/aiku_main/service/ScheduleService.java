@@ -87,7 +87,9 @@ public class ScheduleService {
         //서비스 로직
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
 
-        pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
+        if(enterDto.getPointAmount() > 0) {
+            pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId)
+        };
 
         return schedule.getId();
     }

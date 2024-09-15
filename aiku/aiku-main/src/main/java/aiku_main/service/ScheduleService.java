@@ -138,11 +138,12 @@ public class ScheduleService {
         checkIsAlive(team);
 
         //서비스 로직
-        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page);
-        int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN);
-        int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT);
+        Long totalCount = 0L;
+        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page, totalCount);
+        int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
+        int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
-        return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
+        return new TeamScheduleListResDto(team, totalCount, page, runSchedule, waitSchedule, scheduleList);
     }
 
     //== 이벤트 핸들러 실행 메서드 ==

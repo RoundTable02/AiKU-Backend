@@ -1,6 +1,7 @@
 package aiku_main.repository;
 
 import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.TotalCountDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,8 +36,15 @@ public class TeamReadRepositoryImpl implements TeamReadRepository {
     }
 
     @Override
-    public List<TeamEachListResDto> getTeamList(Long memberId, int page) {
+    public List<TeamEachListResDto> getTeamList(Long memberId, int page, TotalCountDto totalCount) {
         QSchedule subSchedule = new QSchedule("subSchedule");
+
+        totalCount.setTotalCount(
+                query.select(teamMember.count())
+                        .from(teamMember)
+                        .where(teamMember.member.id.eq(memberId))
+                        .fetchFirst()
+        );
 
         List<Long> teamIdList = query.select(teamMember.team.id)
                 .from(teamMember)

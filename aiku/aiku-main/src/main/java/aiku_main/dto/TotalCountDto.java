@@ -2,11 +2,9 @@ package aiku_main.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
-@Getter
-@AllArgsConstructor
-public class DataResDto<T> {
+@Getter @Setter
+public class TotalCountDto {
     private Long totalCount;
-    private int page;
-    private T data;
 }

@@ -199,6 +199,7 @@ public class TeamServiceIntegrationTest {
         DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1, page);
 
         //then
+        assertThat(result.getTotalCount()).isEqualTo(3);
         List<TeamEachListResDto> data = result.getData();
         assertThat(data.size()).isEqualTo(3);
         assertThat(data).extracting("groupId").containsExactly(teamA.getId(), teamB.getId(), teamC.getId());

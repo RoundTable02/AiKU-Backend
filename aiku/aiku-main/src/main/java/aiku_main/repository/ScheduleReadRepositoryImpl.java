@@ -5,17 +5,12 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
-import common.domain.QSchedule;
-import common.domain.QScheduleMember;
-import common.domain.Status;
-import common.domain.member.QMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static common.domain.ExecStatus.RUN;
 import static common.domain.QSchedule.schedule;
 import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
@@ -44,7 +39,16 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page) {
+    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page, Long totalCount) {
+        totalCount = query
+                .select(schedule.count())
+                .from(schedule)
+                .where(schedule.team.id.eq(teamId),
+                        schedule.status.eq(ALIVE),
+                        scheduleTimeGoe(dateCond.getStartDate()),
+                        scheduleTimeLoe(dateCond.getEndDate()))
+                .fetchFirst();
+
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(schedule)
@@ -53,6 +57,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .offset(getOffset(page))
+                .limit(10)
                 .fetch();
 
         return query
@@ -71,13 +76,15 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public int countTeamScheduleByScheduleStatus(Long teamId, ExecStatus scheduleStatus) {
+    public int countTeamScheduleByScheduleStatus(Long teamId, ExecStatus scheduleStatus, SearchDateCond dateCond) {
         return query
                 .select(schedule.count())
                 .from(schedule)
                 .where(schedule.team.id.eq(teamId),
                         schedule.scheduleStatus.eq(scheduleStatus),
-                        schedule.status.eq(ALIVE))
+                        schedule.status.eq(ALIVE),
+                        scheduleTimeGoe(dateCond.getStartDate()),
+                        scheduleTimeLoe(dateCond.getEndDate()))
                 .fetchFirst()
                 .intValue();
     }

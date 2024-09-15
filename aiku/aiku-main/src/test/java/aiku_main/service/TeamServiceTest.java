@@ -86,7 +86,7 @@ class TeamServiceTest {
         Member member1 = new Member("member1");
 
         List<TeamEachListResDto> data = new ArrayList<>();
-        when(teamReadRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
+        when(teamReadRepository.getTeamList(nullable(Long.class), nullable(Integer.class), any())).thenReturn(data);
 
         //when
         int page = 3;

@@ -1,7 +1,10 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.Schedule;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import static common.domain.ExecStatus.RUN;
 import static common.domain.QSchedule.schedule;
@@ -9,9 +12,19 @@ import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
 
 @RequiredArgsConstructor
-public class ScheduleCustomRepositoryImpl implements ScheduleCustomRepository {
+public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
     private final JPAQueryFactory query;
+
+    @Override
+    public List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId) {
+        return query.selectFrom(schedule)
+                .innerJoin(schedule.scheduleMembers, scheduleMember).fetchJoin()
+                .where(schedule.team.id.eq(teamId),
+                        scheduleMember.status.eq(ALIVE),
+                        schedule.status.eq(ALIVE))
+                .fetch();
+    }
 
     @Override
     public boolean isScheduleOwner(Long memberId, Long scheduleId) {

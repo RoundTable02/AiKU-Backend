@@ -9,10 +9,8 @@ import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
-import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
-import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,6 +68,12 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    //== 이벤트 핸들러 실행 메서드 ==
+    @Transactional
+    public void exitAllScheduleInTeam(Long memberId, Long teamId) {
+        
+    }
+
     //== 편의 메서드 ==
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
@@ -94,5 +98,4 @@ public class ScheduleService {
             throw new NoAuthorityException();
         }
     }
-
 }

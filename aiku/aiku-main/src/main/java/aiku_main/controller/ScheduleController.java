@@ -53,7 +53,7 @@ public class ScheduleController {
 
     @GetMapping("/{scheduleId}")
     public BaseResponse<ScheduleDetailResDto> getScheduleDetail(@PathVariable Long groupId,
-                                          @PathVariable Long scheduleId){
+                                                                @PathVariable Long scheduleId){
         ScheduleDetailResDto result = scheduleService.getScheduleDetail(null, groupId, scheduleId);
 
         return new BaseResponse<>(result, BaseCode.GET);
@@ -61,11 +61,18 @@ public class ScheduleController {
 
     @GetMapping
     public BaseResponse<TeamScheduleListResDto> getTeamScheduleList(@PathVariable Long groupId,
-                                              @ModelAttribute SearchDateCond dateCond,
-                                              @RequestParam(defaultValue = "1") int page){
+                                                                    @ModelAttribute SearchDateCond dateCond,
+                                                                    @RequestParam(defaultValue = "1") int page){
         TeamScheduleListResDto result = scheduleService.getTeamScheduleList(null, groupId, dateCond, page);
 
         return new BaseResponse<>(result, BaseCode.GET);
     }
 
+    @GetMapping
+    public BaseResponse<MemberScheduleListResDto> getMemberScheduleList(@ModelAttribute SearchDateCond dateCond,
+                                                                    @RequestParam(defaultValue = "1") int page){
+        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(null, dateCond, page);
+
+        return new BaseResponse<>(result, BaseCode.GET);
+    }
 }

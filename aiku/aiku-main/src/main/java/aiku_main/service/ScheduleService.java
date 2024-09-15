@@ -147,6 +147,16 @@ public class ScheduleService {
         return new TeamScheduleListResDto(team, totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
     }
 
+    public MemberScheduleListResDto getMemberScheduleList(Member member, SearchDateCond dateCond, int page) {
+        //서비스 로직
+        TotalCountDto totalCount = new TotalCountDto();
+        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page, totalCount);
+        int runSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.RUN, dateCond);
+        int waitSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.WAIT, dateCond);
+
+        return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
+    }
+
     //== 이벤트 핸들러 실행 메서드 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {

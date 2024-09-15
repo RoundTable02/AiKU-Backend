@@ -1,7 +1,10 @@
 package aiku_main.service;
 
+import aiku_main.application_event.event.PointChangeReason;
+import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
+import aiku_main.dto.ScheduleEnterDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
@@ -9,8 +12,10 @@ import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
+import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,6 +73,24 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    @Transactional
+    public Long enterSchedule(Member member, Long teamId, Long scheduleId, ScheduleEnterDto enterDto) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId);
+        checkEnoughPoint(member, enterDto.getPointAmount());
+        checkScheduleMember(member.getId(), scheduleId, false);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsAlive(schedule);
+
+        //서비스 로직
+        schedule.addScheduleMember(member, false, enterDto.getPointAmount());
+
+        pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
+
+        return schedule.getId();
+    }
+
     //== 이벤트 핸들러 실행 메서드 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
@@ -96,6 +119,16 @@ public class ScheduleService {
     private void checkTeamMember(Long memberId, Long teamId){
         if(!teamRepository.existTeamMember(memberId, teamId)){
             throw new NoAuthorityException();
+        }
+    }
+
+    private void checkScheduleMember(Long memberId, Long scheduleId, boolean isMember){
+        if(scheduleRepository.existScheduleMember(memberId, scheduleId) != isMember){
+            if(isMember){
+                throw new NoAuthorityException();
+            }else{
+                throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
+            }
         }
     }
 }

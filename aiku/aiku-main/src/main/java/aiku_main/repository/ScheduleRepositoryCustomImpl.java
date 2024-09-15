@@ -38,6 +38,17 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
         return count != null && count > 0;
     }
 
+    @Override
+    public boolean existScheduleMember(Long memberId, Long scheduleId) {
+        Long count = query.select(scheduleMember.count())
+                .from(scheduleMember)
+                .where(scheduleMember.member.id.eq(memberId),
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+        return count != null && count > 0;
+    }
+
     public boolean hasMemberRunScheduleInTeam(Long memberId, Long teamId) {
         Long count = query.select(schedule.count())
                 .from(schedule)

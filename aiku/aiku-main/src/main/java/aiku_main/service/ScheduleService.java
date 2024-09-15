@@ -1,8 +1,7 @@
 package aiku_main.service;
 
-import aiku_main.application_event.event.PointChangeReason;
-import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
+import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleEnterDto;
 import aiku_main.dto.ScheduleUpdateDto;
@@ -25,6 +24,7 @@ import java.util.NoSuchElementException;
 
 import static aiku_main.application_event.event.PointChangeReason.SCHEDULE;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
+import static aiku_main.application_event.event.PointChangeType.PLUS;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -35,6 +35,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final TeamRepository teamRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
 
     //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
@@ -87,6 +88,25 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
 
         pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
+
+        return schedule.getId();
+    }
+
+    @Transactional
+    public Long exitSchedule(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        checkScheduleMember(member.getId(), scheduleId, true);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsAlive(schedule);
+
+        //서비스 로직
+        int schedulePoint = schedule.removeScheduleMember(member);
+        if(schedulePoint > 0){
+            pointChangeEventPublisher.publish(member.getId(), PLUS, schedulePoint, SCHEDULE, schedule.getId());
+        }
+
+        scheduleEventPublisher.publish(member.getId(), scheduleId);
 
         return schedule.getId();
     }

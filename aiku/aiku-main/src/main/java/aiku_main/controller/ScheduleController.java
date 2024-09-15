@@ -44,4 +44,12 @@ public class ScheduleController {
 
         return BaseResponse.getSimpleRes(enterId, BaseCode.ENTER);
     }
+
+    @PostMapping("/{scheduleId}/exit")
+    public BaseResponse<BaseResultDto> enderSchedule(@PathVariable Long groupId,
+                                                     @PathVariable Long scheduleId){
+        Long exitId = scheduleService.exitSchedule(null, groupId, scheduleId);
+
+        return BaseResponse.getSimpleRes(exitId, BaseCode.ENTER);
+    }
 }

@@ -52,6 +52,7 @@ public class Team extends BaseTime {
             TeamMember teamMember = teamMembers.get(i);
             if(teamMember.getMember().getId() == member.getId()){
                 teamMember.setStatus(Status.DELETE);
+                return;
             }
         }
     }

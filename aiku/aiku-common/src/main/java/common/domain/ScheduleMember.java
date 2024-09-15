@@ -44,4 +44,8 @@ public class ScheduleMember extends BaseTime{
         this.pointAmount = pointAmount;
         this.status = Status.ALIVE;
     }
+
+    protected void setStatus(Status status) {
+        this.status = status;
+    }
 }

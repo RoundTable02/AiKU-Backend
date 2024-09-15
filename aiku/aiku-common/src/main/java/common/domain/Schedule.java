@@ -71,6 +71,17 @@ public class Schedule extends BaseTime{
         this.scheduleMembers.add(scheduleMember);
     }
 
+    public int removeScheduleMember(Member member) {
+        for (int i = 0; i < scheduleMembers.size(); i++) {
+            ScheduleMember scheduleMember = scheduleMembers.get(i);
+            if(scheduleMember.getMember().getId() == member.getId()){
+                scheduleMember.setStatus(Status.DELETE);
+                return scheduleMember.getPointAmount();
+            }
+        }
+        return 0;
+    }
+
     public void setScheduleStatus(ExecStatus scheduleStatus) {
         this.scheduleStatus = scheduleStatus;
     }

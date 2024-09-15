@@ -1,7 +1,9 @@
 package aiku_main.service;
 
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
+import aiku_main.dto.ScheduleDetailResDto;
 import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
@@ -28,6 +30,8 @@ class ScheduleServiceTest {
 
     @Mock
     ScheduleRepository scheduleRepository;
+    @Mock
+    ScheduleReadRepository scheduleReadRepository;
     @Mock
     TeamRepository teamRepository;
     @Mock
@@ -59,6 +63,28 @@ class ScheduleServiceTest {
         assertThat(resultId).isEqualTo(scheduleId);
         assertThat(schedule.getScheduleName()).isEqualTo(scheduleDto.getScheduleName());
         assertThat(schedule.getLocation()).isEqualTo(scheduleDto.getLocation());
+    }
+
+    @Test
+    void getScheduleDetail(){
+        //given
+        Member member1 = createSpyMember();
+        Member member2 = createSpyMember();
+
+        Schedule schedule = createSpySchedule(member1, null, 0);
+        schedule.addScheduleMember(member2, false, 0);
+
+
+        when(scheduleRepository.existScheduleMember(any(), any())).thenReturn(true);
+        when(scheduleRepository.findById(nullable(Long.class))).thenReturn(Optional.of(schedule));
+        when(scheduleReadRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
+
+        //when
+        ScheduleDetailResDto result = scheduleService.getScheduleDetail(member1, null, null);
+
+        //then
+        assertThat(result.getScheduleName()).isEqualTo(schedule.getScheduleName());
+        assertThat(result.getLocation().getLocationName()).isEqualTo(schedule.getLocation().getLocationName());
     }
 
     Member createSpyMember(){

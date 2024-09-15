@@ -2,9 +2,8 @@ package aiku_main.service;
 
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
-import aiku_main.dto.ScheduleAddDto;
-import aiku_main.dto.ScheduleEnterDto;
-import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.dto.*;
+import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
@@ -20,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static aiku_main.application_event.event.PointChangeReason.SCHEDULE;
@@ -33,6 +33,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final ScheduleReadRepository scheduleReadRepository;
     private final TeamRepository teamRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
@@ -111,6 +112,20 @@ public class ScheduleService {
         scheduleEventPublisher.publish(member.getId(), scheduleId);
 
         return schedule.getId();
+    }
+
+    //== 조회 서비스 ==
+    public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
+        //검증 메서드
+        checkScheduleMember(member.getId(), teamId, true);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsAlive(schedule);
+
+        //서비스 로직
+        List<ScheduleMemberResDto> membersDtoList = scheduleReadRepository.getScheduleMembersWithMember(scheduleId);
+
+        return new ScheduleDetailResDto(schedule, membersDtoList);
     }
 
     //== 이벤트 핸들러 실행 메서드 ==

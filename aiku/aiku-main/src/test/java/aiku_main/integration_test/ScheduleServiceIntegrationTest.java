@@ -233,6 +233,93 @@ public class ScheduleServiceIntegrationTest {
         assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
+    @Test
+    @DisplayName("그룹의 스케줄 목록 조회-필터링x,권한O/X")
+    void getTeamScheduleList() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team.getId(), 100);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 100);
+        schedule1.setScheduleStatus(ExecStatus.RUN);
+        em.persist(schedule1);
+
+        Schedule schedule2 = createSchedule(member2, team.getId(), 100);
+        schedule2.addScheduleMember(member3, false, 100);
+        schedule2.setScheduleStatus(ExecStatus.WAIT);
+        em.persist(schedule2);
+
+        Schedule schedule3 = createSchedule(member3, team.getId(), 100);
+        schedule3.setScheduleStatus(ExecStatus.WAIT);
+        em.persist(schedule3);
+
+        em.flush();
+        em.clear();
+
+        //when
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(), 1);
+
+        em.flush();
+        em.clear();
+
+        //then
+        assertThat(result.getTotalCount()).isEqualTo(3);
+        assertThat(result.getRunSchedule()).isEqualTo(1);
+        assertThat(result.getWaitSchedule()).isEqualTo(2);
+
+        List<TeamScheduleListEachResDto> schedules = result.getData();
+        assertThat(schedules).extracting("scheduleId").containsExactly(schedule3.getId(), schedule2.getId(), schedule1.getId());
+        assertThat(schedules).extracting("memberSize").containsExactly(1, 2, 3);
+        assertThat(schedules).extracting("accept").containsExactly(false, false, true);
+
+        //권한 x
+        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4, team.getId(), new SearchDateCond(), 1)).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    @DisplayName("그룹의 스케줄 목록 조회-필터링o")
+    void getTeamScheduleListWithFilter() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team.getId(), 100);
+        schedule1.setScheduleStatus(ExecStatus.RUN);
+        em.persist(schedule1);
+
+        LocalDateTime startDate = LocalDateTime.now();
+
+        Schedule schedule2 = createSchedule(member2, team.getId(), 100);
+        schedule2.setScheduleStatus(ExecStatus.WAIT);
+        em.persist(schedule2);
+
+        LocalDateTime endDate = LocalDateTime.now();
+
+        Schedule schedule3 = createSchedule(member3, team.getId(), 100);
+        schedule3.setScheduleStatus(ExecStatus.WAIT);
+        em.persist(schedule3);
+
+        em.flush();
+        em.clear();
+
+        //when
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(startDate, endDate), 1);
+
+        em.flush();
+        em.clear();
+
+        //then
+        assertThat(result.getTotalCount()).isEqualTo(1);
+        assertThat(result.getRunSchedule()).isEqualTo(0);
+        assertThat(result.getWaitSchedule()).isEqualTo(1);
+
+        List<TeamScheduleListEachResDto> schedules = result.getData();
+        assertThat(schedules).extracting("scheduleId").containsExactly(schedule2.getId());
+        assertThat(schedules).extracting("accept").containsExactly(false);
+    }
+
     Schedule createSchedule(Member member, Long teamId, int pointAmount){
         return Schedule.create(member, teamId, UUID.randomUUID().toString(), LocalDateTime.now(),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()), pointAmount);

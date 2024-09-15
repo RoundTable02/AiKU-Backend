@@ -3,6 +3,7 @@ package aiku_main.repository;
 import aiku_main.dto.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
 import lombok.RequiredArgsConstructor;
@@ -39,15 +40,16 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page, Long totalCount) {
-        totalCount = query
+    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page, TotalCountDto totalCount) {
+        totalCount.setTotalCount(
+                query
                 .select(schedule.count())
                 .from(schedule)
                 .where(schedule.team.id.eq(teamId),
                         schedule.status.eq(ALIVE),
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
-                .fetchFirst();
+                .fetchFirst());
 
         List<Long> scheduleIdList = query
                 .select(schedule.id)
@@ -65,12 +67,14 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         schedule.id, schedule.scheduleName,
                         Projections.constructor(LocationDto.class,
                                 schedule.location.locationName, schedule.location.latitude, schedule.location.longitude),
-                        schedule.scheduleTime, schedule.scheduleStatus, scheduleMember.id))
+                        schedule.scheduleTime, schedule.scheduleStatus,
+                        Expressions.stringTemplate("STRING_AGG({0}, ',')", scheduleMember.member.id)))
                 .from(schedule)
                 .leftJoin(scheduleMember).on(
                         scheduleMember.schedule.id.eq(schedule.id),
                         scheduleMember.status.eq(ALIVE))
                 .where(schedule.id.in(scheduleIdList))
+                .groupBy(schedule.id, schedule.scheduleName, schedule.location, schedule.scheduleTime, schedule.scheduleStatus)
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }

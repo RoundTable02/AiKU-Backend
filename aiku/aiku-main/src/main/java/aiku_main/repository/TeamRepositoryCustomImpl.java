@@ -35,7 +35,7 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom{
                 .where(teamMember.member.id.eq(memberId),
                         teamMember.team.id.eq(teamId),
                         teamMember.status.eq(ALIVE))
-                .fetchOne();
+                .fetchFirst();
 
         return count != null && count > 0;
     }

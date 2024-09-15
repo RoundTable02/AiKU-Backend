@@ -1,10 +1,13 @@
 package aiku_main.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.QueryProjection;
 import common.domain.ExecStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 public class TeamScheduleListEachResDto {
@@ -13,15 +16,34 @@ public class TeamScheduleListEachResDto {
     private LocationDto location;
     private LocalDateTime scheduleTime;
     private ExecStatus scheduleStatus;
+    private int memberSize;
     private boolean accept;
 
+    @JsonIgnore
+    List<Long> membersIdList;
+
     @QueryProjection
-    public TeamScheduleListEachResDto(Long scheduleId, String scheduleName, LocationDto location, LocalDateTime scheduleTime, ExecStatus scheduleStatus, Long memberId) {
+    public TeamScheduleListEachResDto(Long scheduleId, String scheduleName, LocationDto location, LocalDateTime scheduleTime,
+                                      ExecStatus scheduleStatus, String membersIdStringList) {
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.location = location;
         this.scheduleTime = scheduleTime;
         this.scheduleStatus = scheduleStatus;
-        this.accept = (memberId == null) ? false : true;
+
+        membersIdList = Arrays.stream(membersIdStringList.split(","))
+                .map(Long::parseLong)
+                .toList();
+        this.memberSize = membersIdList.size();
+    }
+
+    public void setAccept(Long memberId){
+        for (int i = 0; i < membersIdList.size(); i++) {
+            if(membersIdList.get(i) == memberId){
+                accept = true;
+                return;
+            }
+        }
+        accept = false;
     }
 }

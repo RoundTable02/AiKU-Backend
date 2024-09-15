@@ -1,9 +1,6 @@
 package aiku_main.controller;
 
-import aiku_main.dto.ScheduleAddDto;
-import aiku_main.dto.ScheduleDetailResDto;
-import aiku_main.dto.ScheduleEnterDto;
-import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.dto.*;
 import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
@@ -55,9 +52,18 @@ public class ScheduleController {
     }
 
     @GetMapping("/{scheduleId}")
-    public BaseResponse getScheduleDetail(@PathVariable Long groupId,
+    public BaseResponse<ScheduleDetailResDto> getScheduleDetail(@PathVariable Long groupId,
                                           @PathVariable Long scheduleId){
         ScheduleDetailResDto result = scheduleService.getScheduleDetail(null, groupId, scheduleId);
+
+        return new BaseResponse<>(result, BaseCode.GET);
+    }
+
+    @GetMapping
+    public BaseResponse<TeamScheduleListResDto> getTeamScheduleList(@PathVariable Long groupId,
+                                              @ModelAttribute SearchDateCond dateCond,
+                                              @RequestParam(defaultValue = "1") int page){
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(null, groupId, dateCond, page);
 
         return new BaseResponse<>(result, BaseCode.GET);
     }

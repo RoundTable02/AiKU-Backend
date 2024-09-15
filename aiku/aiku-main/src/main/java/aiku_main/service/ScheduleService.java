@@ -7,9 +7,11 @@ import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
+import common.domain.ExecStatus;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
+import common.domain.team.Team;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
@@ -128,6 +130,21 @@ public class ScheduleService {
         return new ScheduleDetailResDto(schedule, membersDtoList);
     }
 
+    public TeamScheduleListResDto getTeamScheduleList(Member member, Long teamId, SearchDateCond dateCond, int page) {
+        //검증 메서드
+        checkTeamMember(member.getId(), teamId);
+
+        Team team = teamRepository.findById(teamId).orElseThrow();
+        checkIsAlive(team);
+
+        //서비스 로직
+        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page);
+        int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN);
+        int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT);
+
+        return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
+    }
+
     //== 이벤트 핸들러 실행 메서드 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
@@ -137,6 +154,12 @@ public class ScheduleService {
     //== 편의 메서드 ==
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
+            throw new NoSuchElementException();
+        }
+    }
+
+    private void checkIsAlive(Team team){
+        if(team.getStatus() == Status.DELETE){
             throw new NoSuchElementException();
         }
     }

@@ -11,6 +11,7 @@ import common.domain.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.team.Team;
+import common.exception.BaseException;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -111,13 +112,15 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 입장")
+    @DisplayName("스케줄 입장-기본/중복 입장,권한O/X")
     void enterSchedule() {
         //given
         Member member = Member.create("member1");
         Member member2 = Member.create("member2");
+        Member noMember = Member.create("noMember");
         em.persist(member);
         em.persist(member2);
+        em.persist(noMember);
 
         Team team = Team.create(member, "team1");
         team.addTeamMember(member2, false);
@@ -147,6 +150,10 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleMembers).extracting("pointAmount").contains(100, 0);
         assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member.getId(), member2.getId());
 
+        //권한x-그룹에 속해 있지 않을 때
+        assertThatThrownBy(() -> scheduleService.enterSchedule(noMember, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
+        //중복 요청
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
     }
 
     Schedule createSchedule(Member member, Long teamId, int pointAmount){

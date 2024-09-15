@@ -1,11 +1,13 @@
 package aiku_main.integration_test;
 
 import aiku_main.dto.ScheduleAddDto;
+import aiku_main.dto.ScheduleEnterDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
 import common.domain.ExecStatus;
 import common.domain.Location;
+import common.domain.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.team.Team;
@@ -13,11 +15,13 @@ import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -31,6 +35,7 @@ public class ScheduleServiceIntegrationTest {
     @Autowired
     EntityManager em;
 
+    @InjectMocks
     @Autowired
     ScheduleService scheduleService;
 
@@ -85,10 +90,16 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member, team.getId(), 0);
         em.persist(schedule);
 
+        em.flush();
+        em.clear();
+
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new Location("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
         scheduleService.updateSchedule(member, schedule.getId(), scheduleDto);
+
+        em.flush();
+        em.clear();
 
         //then
         Schedule findSchedule = scheduleRepository.findById(schedule.getId()).get();
@@ -97,6 +108,45 @@ public class ScheduleServiceIntegrationTest {
 
         //권한 x
         assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 입장")
+    void enterSchedule() {
+        //given
+        Member member = Member.create("member1");
+        Member member2 = Member.create("member2");
+        em.persist(member);
+        em.persist(member2);
+
+        Team team = Team.create(member, "team1");
+        team.addTeamMember(member2, false);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member, team.getId(), 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
+        Long scheduleId = scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto);
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(scheduleId).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+        assertThat(scheduleMembers.size()).isEqualTo(2);
+        assertThat(scheduleMembers).extracting("isOwner").contains(true, false);
+        assertThat(scheduleMembers).extracting("isPaid").contains(true, false);
+        assertThat(scheduleMembers).extracting("pointAmount").contains(100, 0);
+        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member.getId(), member2.getId());
+
     }
 
     Schedule createSchedule(Member member, Long teamId, int pointAmount){

@@ -44,6 +44,7 @@ public class Schedule extends BaseTime{
         this.scheduleName = scheduleName;
         this.scheduleTime = scheduleTime;
         this.location = location;
+        this.scheduleStatus = ExecStatus.WAIT;
         this.status = Status.ALIVE;
     }
 
@@ -52,7 +53,6 @@ public class Schedule extends BaseTime{
         //스케줄 생성
         TeamValue team = new TeamValue(teamId);
         Schedule schedule = new Schedule(team, scheduleName, scheduleTime, location);
-        schedule.setScheduleStatus(ExecStatus.WAIT);
 
         //생성자를 스케줄 멤버로 추가
         schedule.addScheduleMember(member, true, pointAmount);

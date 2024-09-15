@@ -141,7 +141,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     @Override
     public int countMemberScheduleByScheduleStatus(Long memberId, ExecStatus scheduleStatus, SearchDateCond dateCond) {
         return query
-                .select(schedule.count())
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .innerJoin(schedule).on(
                         schedule.id.eq(scheduleMember.schedule.id))

@@ -119,7 +119,7 @@ public class ScheduleService {
     //== 조회 서비스 ==
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
         //검증 메서드
-        checkScheduleMember(member.getId(), teamId, true);
+        checkScheduleMember(member.getId(), scheduleId, true);
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);

@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@RequestMapping({"/groups/{groupId}/schedules", "/schedules"})
+@RequestMapping({"/groups/{groupId}/schedules", "/member"})
 @RequiredArgsConstructor
 @RestController
 public class ScheduleController {
@@ -68,7 +68,7 @@ public class ScheduleController {
         return new BaseResponse<>(result, BaseCode.GET);
     }
 
-    @GetMapping
+    @GetMapping("/schedules")
     public BaseResponse<MemberScheduleListResDto> getMemberScheduleList(@ModelAttribute SearchDateCond dateCond,
                                                                     @RequestParam(defaultValue = "1") int page){
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(null, dateCond, page);

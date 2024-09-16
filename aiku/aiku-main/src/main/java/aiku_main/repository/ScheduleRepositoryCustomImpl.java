@@ -2,9 +2,11 @@ package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.Schedule;
+import common.domain.ScheduleMember;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 import static common.domain.ExecStatus.RUN;
 import static common.domain.QSchedule.schedule;
@@ -47,6 +49,17 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
                         scheduleMember.status.eq(ALIVE))
                 .fetchOne();
         return count != null && count > 0;
+    }
+
+    @Override
+    public Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId) {
+        ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
+                .where(scheduleMember.member.id.eq(memberId),
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+
+        return Optional.ofNullable(findScheduleMember);
     }
 
     public boolean hasMemberRunScheduleInTeam(Long memberId, Long teamId) {

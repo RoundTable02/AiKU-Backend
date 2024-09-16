@@ -6,6 +6,7 @@ import aiku_main.repository.BettingRepository;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.Betting;
 import common.domain.ExecStatus;
+import common.domain.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.exception.NoAuthorityException;
@@ -33,7 +34,7 @@ public class BettingService {
         checkScheduleMember(member.getId(), scheduleId);
         checkScheduleUsable(scheduleId);
         checkEnoughPoint(member, bettingDto.getPointAmount());
-
+        
         //서비스 로직
         Betting betting = Betting.create(member.getId(), bettingDto.getBeteeMemberId(), bettingDto.getPointAmount());
         bettingRepository.save(betting);
@@ -43,6 +44,18 @@ public class BettingService {
         return betting.getId();
     }
 
+    @Transactional
+    public Long cancelBetting(Member member, Long scheduleId, Long bettingId){
+        //검증 로직
+
+    }
+
+    //==엔티티 조회 메서드==
+    private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
+        return scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+    }
+
+    //==편의 메서드==
     private void checkScheduleUsable(Long scheduleId) {
         if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
@@ -51,6 +64,12 @@ public class BettingService {
 
     private void checkScheduleMember(Long memberId, Long scheduleId){
         if(!scheduleRepository.existScheduleMember(memberId, scheduleId)){
+            throw new NoAuthorityException();
+        }
+    }
+
+    private void checkBettingMember(Long scheduleMemberId, Long scheduleId){
+        if(!bettingRepository.ex(memberId, scheduleId)){
             throw new NoAuthorityException();
         }
     }

@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,8 +28,22 @@ public class Betting extends BaseTime{
     @Embedded
     private ScheduleMemberValue winner;
 
+    @Enumerated(value = EnumType.STRING)
+    private ExecStatus bettingStatus = ExecStatus.WAIT;
+
     private int pointAmount;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
+
+
+    //==CUD 편의 메서드==
+    public static Betting create(Long memberId, Long beteeId, int pointAmount){
+        Betting betting = new Betting();
+        betting.bettor = new ScheduleMemberValue(memberId);
+        betting.betee = new ScheduleMemberValue(beteeId);
+        betting.pointAmount = pointAmount;
+        return betting;
+    }
+
 }

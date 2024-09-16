@@ -8,6 +8,7 @@ import aiku_main.service.BettingService;
 import common.domain.Betting;
 import common.domain.Location;
 import common.domain.Schedule;
+import common.domain.ScheduleMember;
 import common.domain.member.Member;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
@@ -84,9 +85,12 @@ class BettingServiceIntegrationTest {
 
         //then
         Betting betting = bettingRepository.findById(bettingId).orElse(null);
+        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
+        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElse(null);
+
         assertThat(betting).isNotNull();
-        assertThat(betting.getBettor().getId()).isEqualTo(member1.getId());
-        assertThat(betting.getBetee().getId()).isEqualTo(member2.getId());
+        assertThat(betting.getBettor().getId()).isEqualTo(bettor.getId());
+        assertThat(betting.getBetee().getId()).isEqualTo(betee.getId());
 
         //스케줄에 속하지 않을 때
         assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);

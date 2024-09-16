@@ -9,6 +9,7 @@ import common.domain.ExecStatus;
 import common.domain.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
+import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,12 @@ public class BettingService {
         checkScheduleMember(member.getId(), scheduleId);
         checkScheduleUsable(scheduleId);
         checkEnoughPoint(member, bettingDto.getPointAmount());
-        
+
+        ScheduleMemberValue bettor = new ScheduleMemberValue(findScheduleMember(member.getId(), scheduleId));
+        ScheduleMemberValue bettee = new ScheduleMemberValue(findScheduleMember(bettingDto.getBeteeMemberId(), scheduleId));
+
         //서비스 로직
-        Betting betting = Betting.create(member.getId(), bettingDto.getBeteeMemberId(), bettingDto.getPointAmount());
+        Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
         bettingRepository.save(betting);
 
         pointChangeEventPublisher.publish(member.getId(), MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());

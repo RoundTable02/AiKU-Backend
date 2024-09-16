@@ -1,6 +1,5 @@
 package common.domain;
 
-import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,10 +37,10 @@ public class Betting extends BaseTime{
 
 
     //==CUD 편의 메서드==
-    public static Betting create(Long memberId, Long beteeId, int pointAmount){
+    public static Betting create(ScheduleMemberValue bettor, ScheduleMemberValue betee, int pointAmount){
         Betting betting = new Betting();
-        betting.bettor = new ScheduleMemberValue(memberId);
-        betting.betee = new ScheduleMemberValue(beteeId);
+        betting.bettor = bettor;
+        betting.betee = betee;
         betting.pointAmount = pointAmount;
         return betting;
     }

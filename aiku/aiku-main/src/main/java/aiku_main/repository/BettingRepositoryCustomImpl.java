@@ -10,11 +10,4 @@ import static common.domain.QBetting.betting;
 public class BettingRepositoryCustomImpl implements BettingRepositoryCustom{
 
     private final JPAQueryFactory query;
-
-    @Override
-    public boolean existBettorMember(Long scheduleMemberId, Long bettingId) {
-        query.select()
-                .from(betting)
-                .where(betting.bettor.id.eq())
-    }
 }

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static aiku_main.application_event.event.PointChangeReason.BETTING;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
+import static aiku_main.application_event.event.PointChangeType.PLUS;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -51,7 +52,16 @@ public class BettingService {
     @Transactional
     public Long cancelBetting(Member member, Long scheduleId, Long bettingId){
         //검증 로직
+        ScheduleMember bettor = findScheduleMember(member.getId(), scheduleId);
+        Betting betting = bettingRepository.findById(bettingId).orElseThrow();
+        checkBettingMember(betting, bettor);
 
+        //서비스 로직
+        betting.setStatus(Status.DELETE);
+
+        pointChangeEventPublisher.publish(member.getId(), PLUS, betting.getPointAmount(), BETTING, bettingId);
+
+        return betting.getId();
     }
 
     //==엔티티 조회 메서드==
@@ -72,8 +82,8 @@ public class BettingService {
         }
     }
 
-    private void checkBettingMember(Long scheduleMemberId, Long scheduleId){
-        if(!bettingRepository.ex(memberId, scheduleId)){
+    private void checkBettingMember(Betting betting, ScheduleMember bettor){
+        if(betting.getBettor().getId() != bettor.getId()){
             throw new NoAuthorityException();
         }
     }

@@ -45,4 +45,10 @@ public class Betting extends BaseTime{
         return betting;
     }
 
+    //==편의 메서드==
+
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

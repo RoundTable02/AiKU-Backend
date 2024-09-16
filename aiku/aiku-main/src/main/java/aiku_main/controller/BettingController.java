@@ -8,7 +8,7 @@ import common.response.status.BaseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import static common.response.status.BaseCode.OK;
+import static common.response.status.BaseCode.*;
 
 @RequestMapping("/schedules/{scheduleId}/bettings")
 @RequiredArgsConstructor
@@ -21,6 +21,15 @@ public class BettingController {
     public BaseResponse<BaseResultDto> addBetting(@PathVariable Long scheduleId,
                                                   @RequestBody BettingAddDto bettingDto){
         Long resultId = bettingService.addBetting(null, scheduleId, bettingDto);
+
+        return BaseResponse.getSimpleRes(resultId, POST);
+    }
+
+    @PostMapping("/{bettingId}")
+    public BaseResponse<BaseResultDto> cancelBetting(@PathVariable Long scheduleId,
+                                                  @PathVariable Long bettingId,
+                                                  @RequestBody BettingAddDto bettingDto){
+        Long resultId = bettingService.cancelBetting(null, scheduleId, bettingId);
 
         return BaseResponse.getSimpleRes(resultId, OK);
     }

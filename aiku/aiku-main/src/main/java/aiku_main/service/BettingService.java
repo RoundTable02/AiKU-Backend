@@ -10,8 +10,10 @@ import common.domain.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
+import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,7 @@ public class BettingService {
         ScheduleMember bettor = findScheduleMember(member.getId(), scheduleId);
         Betting betting = bettingRepository.findById(bettingId).orElseThrow();
         checkBettingMember(betting, bettor);
+        checkBettingAlive(betting);
 
         //서비스 로직
         betting.setStatus(Status.DELETE);
@@ -73,6 +76,12 @@ public class BettingService {
     private void checkScheduleUsable(Long scheduleId) {
         if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
+        }
+    }
+
+    private void checkBettingAlive(Betting betting) {
+        if (betting.getStatus() == Status.DELETE){
+            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN, "취소된 베팅입니다.");
         }
     }
 

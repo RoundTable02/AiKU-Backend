@@ -5,11 +5,10 @@ import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.BettingService;
-import common.domain.Betting;
-import common.domain.Location;
-import common.domain.Schedule;
-import common.domain.ScheduleMember;
+import common.domain.*;
 import common.domain.member.Member;
+import common.domain.value_reference.ScheduleMemberValue;
+import common.exception.BaseException;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
 import jakarta.persistence.EntityManager;
@@ -23,7 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
+import static common.domain.ExecStatus.WAIT;
+import static common.domain.Status.DELETE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -104,5 +106,53 @@ class BettingServiceIntegrationTest {
 
         //then
         assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(NotEnoughPoint.class);
+    }
+
+    @Test
+    @DisplayName("베팅 취소-권한O/X,기본/중복요청")
+    void cancelBetting() {
+        //given
+        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Betting findBetting = bettingRepository.findById(betting.getId()).orElseThrow();
+        assertThat(findBetting.getBettingStatus()).isEqualTo(WAIT);
+        assertThat(findBetting.getStatus()).isEqualTo(DELETE);
+
+        //중복 요청
+        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    @DisplayName("베팅 취소-권한X")
+    void cancelBettingNoAuthority() {
+        //given
+        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        //스케줄 멤버 아님
+        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(NoSuchElementException.class);
+        //베터가 아님
+        assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(NoAuthorityException.class);
     }
 }

@@ -1,7 +1,5 @@
 package aiku_main.service;
 
-import aiku_main.application_event.event.PointChangeReason;
-import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
 import aiku_main.repository.BettingRepository;
@@ -46,7 +44,7 @@ public class BettingService {
     }
 
     private void checkScheduleUsable(Long scheduleId) {
-        if(!scheduleRepository.existsByScheduleIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
+        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
         }
     }

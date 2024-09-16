@@ -10,5 +10,5 @@ import java.util.List;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
 
     List<Schedule> findByScheduleStatus(ExecStatus scheduleStatus);
-    boolean existsByScheduleIdAndScheduleStatusAndStatus(Long scheduleId, ExecStatus scheduleStatus, Status status);
+    boolean existsByIdAndScheduleStatusAndStatus(Long scheduleId, ExecStatus scheduleStatus, Status status);
 }

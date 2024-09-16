@@ -1,10 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.application_event.publisher.TeamEventPublisher;
-import aiku_main.dto.DataResDto;
-import aiku_main.dto.TeamAddDto;
-import aiku_main.dto.TeamDetailResDto;
-import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.*;
 import aiku_main.exception.CanNotExitException;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamReadRepository;
@@ -88,8 +85,10 @@ public class TeamService {
 
     public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
-        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
-        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
+        TotalCountDto totalCount = new TotalCountDto();
+        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page, totalCount);
+        System.out.println("totalCount = " + totalCount);
+        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(totalCount.getTotalCount(), page, data);
 
         return resultDto;
     }

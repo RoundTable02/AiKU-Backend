@@ -1,12 +1,14 @@
 package aiku_main.repository;
 
 import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.TotalCountDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.*;
 import common.domain.team.Team;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +20,8 @@ import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
 
 @RequiredArgsConstructor
-public class TeamReadRepositoryImpl implements TeamReadRepositoryCustom{
+@Repository
+public class TeamReadRepositoryImpl implements TeamReadRepository {
 
     private final JPAQueryFactory query;
 
@@ -33,8 +36,15 @@ public class TeamReadRepositoryImpl implements TeamReadRepositoryCustom{
     }
 
     @Override
-    public List<TeamEachListResDto> getTeamList(Long memberId, int page) {
+    public List<TeamEachListResDto> getTeamList(Long memberId, int page, TotalCountDto totalCount) {
         QSchedule subSchedule = new QSchedule("subSchedule");
+
+        totalCount.setTotalCount(
+                query.select(teamMember.count())
+                        .from(teamMember)
+                        .where(teamMember.member.id.eq(memberId))
+                        .fetchFirst()
+        );
 
         List<Long> teamIdList = query.select(teamMember.team.id)
                 .from(teamMember)

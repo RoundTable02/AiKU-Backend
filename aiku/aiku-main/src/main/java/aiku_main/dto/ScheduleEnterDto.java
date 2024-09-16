@@ -5,8 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DataResDto<T> {
-    private Long totalCount;
-    private int page;
-    private T data;
+public class ScheduleEnterDto {
+    private int pointAmount;
 }

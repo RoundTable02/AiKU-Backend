@@ -1,5 +1,6 @@
 package aiku_main.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
@@ -8,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class MemberProfileResDto{
     private MemberProfileType profileType;
     private String profileImg;
@@ -20,5 +20,13 @@ public class MemberProfileResDto{
         this.profileImg = profile.getProfileImg();
         this.profileCharacter = profile.getProfileCharacter();
         this.profileBackground = profile.getProfileBackground();
+    }
+
+    @QueryProjection
+    public MemberProfileResDto(MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter, MemberProfileBackground profileBackground) {
+        this.profileType = profileType;
+        this.profileImg = profileImg;
+        this.profileCharacter = profileCharacter;
+        this.profileBackground = profileBackground;
     }
 }

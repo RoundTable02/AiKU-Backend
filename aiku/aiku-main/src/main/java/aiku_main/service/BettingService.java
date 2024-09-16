@@ -2,6 +2,7 @@ package aiku_main.service;
 
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
+import aiku_main.exception.CanNotBettingException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.Betting;
@@ -37,10 +38,12 @@ public class BettingService {
         //검증 로직
         checkScheduleMember(member.getId(), scheduleId);
         checkScheduleUsable(scheduleId);
-        checkEnoughPoint(member, bettingDto.getPointAmount());
 
         ScheduleMemberValue bettor = new ScheduleMemberValue(findScheduleMember(member.getId(), scheduleId));
         ScheduleMemberValue bettee = new ScheduleMemberValue(findScheduleMember(bettingDto.getBeteeMemberId(), scheduleId));
+
+        checkAlreadyHasBetting(bettor, scheduleId);
+        checkEnoughPoint(member, bettingDto.getPointAmount());
 
         //서비스 로직
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
@@ -82,6 +85,12 @@ public class BettingService {
     private void checkBettingAlive(Betting betting) {
         if (betting.getStatus() == Status.DELETE){
             throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN, "취소된 베팅입니다.");
+        }
+    }
+
+    private void checkAlreadyHasBetting(ScheduleMemberValue bettor, Long scheduleId) {
+        if(bettingRepository.existBettorInSchedule(bettor, scheduleId)){
+            throw new CanNotBettingException();
         }
     }
 

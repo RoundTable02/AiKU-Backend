@@ -1,6 +1,7 @@
 package aiku_main.integration_test;
 
 import aiku_main.dto.BettingAddDto;
+import aiku_main.exception.CanNotBettingException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
@@ -76,7 +77,7 @@ class BettingServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("베팅 등록-권한O/X")
+    @DisplayName("베팅 등록-권한O/X,기본/중복요청")
     void addBetting() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
@@ -96,6 +97,8 @@ class BettingServiceIntegrationTest {
 
         //스케줄에 속하지 않을 때
         assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);
+        //중복 요청
+        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(CanNotBettingException.class);
     }
 
     @Test

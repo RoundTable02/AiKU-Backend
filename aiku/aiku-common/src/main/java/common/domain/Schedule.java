@@ -49,9 +49,8 @@ public class Schedule extends BaseTime{
     }
 
     //==CUD 편의 메서드==
-    public static Schedule create(Member member, Long teamId, String scheduleName, LocalDateTime scheduleTime, Location location, int pointAmount) {
+    public static Schedule create(Member member, TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location, int pointAmount) {
         //스케줄 생성
-        TeamValue team = new TeamValue(teamId);
         Schedule schedule = new Schedule(team, scheduleName, scheduleTime, location);
 
         //생성자를 스케줄 멤버로 추가

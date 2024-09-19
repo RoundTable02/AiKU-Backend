@@ -12,6 +12,7 @@ import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
 import common.domain.team.Team;
+import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
@@ -48,13 +49,16 @@ public class ScheduleService {
         checkTeamMember(member.getId(), teamId);
         checkEnoughPoint(member, scheduleDto.getPointAmount());
 
+        Team team = teamRepository.findById(teamId).orElseThrow();
+        checkIsAlive(team);
+
         //서비스 로직
-        Schedule schedule = Schedule.create(member, teamId,
+        Schedule schedule = Schedule.create(member, new TeamValue(team),
                 scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.getLocation().toDomain(),
                 scheduleDto.getPointAmount());
         scheduleRepository.save(schedule);
 
-        pointChangeEventPublisher.publish(member.getId(), MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
+        pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
         scheduleScheduler.reserveSchedule(schedule.getId(), schedule.getScheduleTime());
 
         return schedule.getId();
@@ -91,7 +95,7 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
 
         if(enterDto.getPointAmount() > 0) {
-            pointChangeEventPublisher.publish(member.getId(), MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
+            pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE, scheduleId);
         };
 
         return schedule.getId();
@@ -108,10 +112,10 @@ public class ScheduleService {
         //서비스 로직
         int schedulePoint = schedule.removeScheduleMember(member);
         if(schedulePoint > 0){
-            pointChangeEventPublisher.publish(member.getId(), PLUS, schedulePoint, SCHEDULE, schedule.getId());
+            pointChangeEventPublisher.publish(member, PLUS, schedulePoint, SCHEDULE, schedule.getId());
         }
 
-        scheduleEventPublisher.publishScheduleExitEvent(member.getId(), scheduleId);
+        scheduleEventPublisher.publishScheduleExitEvent(member, schedule);
 
         return schedule.getId();
     }

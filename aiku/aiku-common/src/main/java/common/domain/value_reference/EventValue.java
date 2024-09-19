@@ -1,5 +1,6 @@
 package common.domain.value_reference;
 
+import common.domain.event.CommonEvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -13,4 +14,8 @@ public class EventValue {
 
     @Column(name = "eventId")
     private Long id;
+
+    public EventValue(CommonEvent event) {
+        this.id = event.getId();
+    }
 }

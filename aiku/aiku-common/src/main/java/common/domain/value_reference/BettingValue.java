@@ -1,5 +1,6 @@
 package common.domain.value_reference;
 
+import common.domain.Betting;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -13,4 +14,8 @@ public class BettingValue {
 
     @Column(name = "bettingId")
     private Long id;
+
+    public BettingValue(Betting betting) {
+        this.id = betting.getId();
+    }
 }

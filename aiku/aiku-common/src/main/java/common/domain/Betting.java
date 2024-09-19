@@ -27,8 +27,28 @@ public class Betting extends BaseTime{
     @Embedded
     private ScheduleMemberValue winner;
 
+    @Enumerated(value = EnumType.STRING)
+    private ExecStatus bettingStatus = ExecStatus.WAIT;
+
     private int pointAmount;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
+
+
+    //==CUD 편의 메서드==
+    public static Betting create(ScheduleMemberValue bettor, ScheduleMemberValue betee, int pointAmount){
+        Betting betting = new Betting();
+        betting.bettor = bettor;
+        betting.betee = betee;
+        betting.pointAmount = pointAmount;
+        return betting;
+    }
+
+    //==편의 메서드==
+
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

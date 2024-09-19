@@ -66,7 +66,7 @@ public class TeamService {
         //서비스 로직
         team.removeTeamMember(member);
 
-        teamEventPublisher.publish(member.getId(), teamId);
+        teamEventPublisher.publish(member, team);
 
         return team.getId();
     }

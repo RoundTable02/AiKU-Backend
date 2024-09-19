@@ -1,6 +1,8 @@
 package aiku_main.application_event.publisher;
 
 import aiku_main.application_event.event.TeamExitEvent;
+import common.domain.member.Member;
+import common.domain.team.Team;
 import common.domain.value_reference.MemberValue;
 import common.domain.value_reference.TeamValue;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +15,8 @@ public class TeamEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    public void publish(Long memberId, Long teamId){
-        TeamExitEvent event = new TeamExitEvent(new MemberValue(memberId), new TeamValue(teamId));
+    public void publish(Member member, Team team){
+        TeamExitEvent event = new TeamExitEvent(member, team);
         publisher.publishEvent(event);
     }
 

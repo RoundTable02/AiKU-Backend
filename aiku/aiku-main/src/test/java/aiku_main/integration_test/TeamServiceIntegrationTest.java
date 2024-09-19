@@ -8,6 +8,7 @@ import common.domain.*;
 import common.domain.member.Member;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
+import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
@@ -165,28 +166,28 @@ public class TeamServiceIntegrationTest {
         teamC.addTeamMember(member3, false);
         em.persist(teamC);
 
-        Schedule scheduleA1 = Schedule.create(member1, teamA.getId(), "scheduleA1", LocalDateTime.now().minusDays(1),
+        Schedule scheduleA1 = Schedule.create(member1, new TeamValue(teamA), "scheduleA1", LocalDateTime.now().minusDays(1),
                 new Location("loc1", 1.1, 1.1), 0);
         scheduleA1.setScheduleStatus(ExecStatus.TERM);
         em.persist(scheduleA1);
 
-        Schedule scheduleB1 = Schedule.create(member2, teamB.getId(), "scheduleB1", LocalDateTime.now().minusDays(2),
+        Schedule scheduleB1 = Schedule.create(member2, new TeamValue(teamB), "scheduleB1", LocalDateTime.now().minusDays(2),
                 new Location("loc1", 1.1, 1.1), 0);
         scheduleB1.setScheduleStatus(ExecStatus.TERM);
         em.persist(scheduleB1);
 
-        Schedule scheduleB2 = Schedule.create(member2, teamB.getId(), "scheduleB2", LocalDateTime.now().minusDays(3),
+        Schedule scheduleB2 = Schedule.create(member2, new TeamValue(teamB), "scheduleB2", LocalDateTime.now().minusDays(3),
                 new Location("loc1", 1.1, 1.1), 0);
         scheduleB2.setScheduleStatus(ExecStatus.TERM);
         em.persist(scheduleB2);
 
-        Schedule scheduleB3 = Schedule.create(member2, teamB.getId(), "scheduleB3", LocalDateTime.now().minusDays(4),
+        Schedule scheduleB3 = Schedule.create(member2, new TeamValue(teamB), "scheduleB3", LocalDateTime.now().minusDays(4),
                 new Location("loc1", 1.1, 1.1), 0);
         scheduleB3.setScheduleStatus(ExecStatus.TERM);
         em.persist(scheduleB3);
 
 
-        Schedule scheduleC1 = Schedule.create(member2, teamC.getId(), "scheduleC1", LocalDateTime.now(),
+        Schedule scheduleC1 = Schedule.create(member2, new TeamValue(teamC), "scheduleC1", LocalDateTime.now(),
                 new Location("loc1", 1.1, 1.1), 0);
         scheduleC1.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleC1);

@@ -49,7 +49,7 @@ public class BettingService {
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
         bettingRepository.save(betting);
 
-        pointChangeEventPublisher.publish(member.getId(), MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());
+        pointChangeEventPublisher.publish(member, MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());
 
         return betting.getId();
     }
@@ -65,7 +65,7 @@ public class BettingService {
         //서비스 로직
         betting.setStatus(Status.DELETE);
 
-        pointChangeEventPublisher.publish(member.getId(), PLUS, betting.getPointAmount(), BETTING, bettingId);
+        pointChangeEventPublisher.publish(member, PLUS, betting.getPointAmount(), BETTING, bettingId);
 
         return betting.getId();
     }

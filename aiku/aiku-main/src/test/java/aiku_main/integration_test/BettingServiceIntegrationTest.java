@@ -63,7 +63,7 @@ class BettingServiceIntegrationTest {
         em.persist(member3);
         em.persist(noScheduleMember);
 
-        schedule1 = Schedule.create(member1, 0L, "schedule1", LocalDateTime.now(),
+        schedule1 = Schedule.create(member1, null, "schedule1", LocalDateTime.now(),
                 new Location("loc1", 1.0, 1.0), 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);

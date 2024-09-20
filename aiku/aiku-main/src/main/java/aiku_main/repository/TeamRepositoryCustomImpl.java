@@ -60,4 +60,14 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom{
 
         return Optional.ofNullable(result);
     }
+
+    @Override
+    public Optional<TeamMember> findTeamMember(Long teamId, Long memberId) {
+        TeamMember result = query.selectFrom(teamMember)
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.member.id.eq(memberId))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
 }

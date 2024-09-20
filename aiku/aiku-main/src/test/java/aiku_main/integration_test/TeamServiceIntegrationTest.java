@@ -112,14 +112,41 @@ public class TeamServiceIntegrationTest {
 
         //when
         teamService.exitTeam(member2, team.getId());
+        em.flush();
+        em.clear();
 
         //then
-        TeamMember teamMember = teamRepository.findAliveTeamMember(team.getId(), member2.getId()).orElse(null);
+        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+        assertThat(findTeam.getStatus()).isEqualTo(Status.ALIVE);
+
+        TeamMember teamMember = teamRepository.findTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
         assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
 
         //중복 퇴장
         assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    @DisplayName("그룹 퇴장-그룹 멤버가 안남아 자동 그룹 삭제")
+    void exitTeamWithNoMember() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
+        teamService.exitTeam(member1, team.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+        assertThat(findTeam.getStatus()).isEqualTo(Status.DELETE);
     }
 
     @Test

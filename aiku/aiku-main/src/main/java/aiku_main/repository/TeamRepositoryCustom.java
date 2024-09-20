@@ -13,4 +13,5 @@ public interface TeamRepositoryCustom {
     boolean existTeamMember(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
     Long countOfAliveTeamMember(Long teamId);
     Optional<TeamMember> findAliveTeamMember(Long teamId, Long memberId);
+    Optional<TeamMember> findTeamMember(Long teamId, Long memberId);
 }

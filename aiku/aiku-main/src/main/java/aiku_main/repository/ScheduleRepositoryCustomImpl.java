@@ -3,6 +3,7 @@ package aiku_main.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.Schedule;
 import common.domain.ScheduleMember;
+import common.domain.member.QMember;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import static common.domain.ExecStatus.RUN;
 import static common.domain.QSchedule.schedule;
 import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
+import static common.domain.member.QMember.member;
 
 @RequiredArgsConstructor
 public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
@@ -66,6 +68,16 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+
+        return Optional.ofNullable(findScheduleMember);
+    }
+
+    @Override
+    public Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId) {
+        ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
+                .innerJoin(scheduleMember.member, member).fetchJoin()
+                .where(scheduleMember.id.eq(scheduleMemberId))
                 .fetchOne();
 
         return Optional.ofNullable(findScheduleMember);

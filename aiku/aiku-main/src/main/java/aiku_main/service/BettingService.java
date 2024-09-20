@@ -4,6 +4,7 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
 import aiku_main.exception.CanNotBettingException;
 import aiku_main.repository.BettingRepository;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.Betting;
 import common.domain.ExecStatus;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static aiku_main.application_event.event.PointChangeReason.BETTING;
+import static aiku_main.application_event.event.PointChangeReason.BETTING_CANCLE;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 
@@ -28,6 +30,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 @Service
 public class BettingService {
 
+    private final MemberRepository memberRepository;
     private final BettingRepository bettingRepository;
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
@@ -68,6 +71,30 @@ public class BettingService {
         pointChangeEventPublisher.publish(member, PLUS, betting.getPointAmount(), BETTING, bettingId);
 
         return betting.getId();
+    }
+
+    //==이벤트 핸들러==
+    @Transactional
+    public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
+        Betting bettingForBettor = bettingRepository.findByBettorScheduleMemberIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        bettingForBettor.setStatus(Status.DELETE);
+
+        int pointAmount = bettingForBettor.getPointAmount();
+        Member member = memberRepository.findById(memberId).orElseThrow();
+        pointChangeEventPublisher.publish(member, PLUS, pointAmount, BETTING_CANCLE, bettingForBettor.getId());
+    }
+
+    @Transactional
+    public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
+        Betting bettingForBetee = bettingRepository.findByBeteeScheduleMemberIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        bettingForBetee.setStatus(Status.DELETE);
+
+        int pointAmount = bettingForBetee.getPointAmount();
+        Member bettor = scheduleRepository.findScheduleMemberWithMemberById(bettingForBetee.getBettor().getId()).orElseThrow()
+                .getMember();
+        pointChangeEventPublisher.publish(bettor, PLUS, pointAmount, BETTING_CANCLE, bettingForBetee.getId());
+
+        //TODO 베터한테 푸쉬 알림 줘야함. 강제 베팅 취소기 때문에..
     }
 
     //==엔티티 조회 메서드==

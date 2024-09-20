@@ -120,7 +120,9 @@ public class ScheduleService {
             schedule.changeScheduleOwner(nextScheduleOwner);
         }
 
-        int schedulePoint = schedule.removeScheduleMember(scheduleMember);
+        schedule.removeScheduleMember(scheduleMember);
+
+        int schedulePoint = scheduleMember.getPointAmount();
         if(schedulePoint > 0){
             pointChangeEventPublisher.publish(member, PLUS, schedulePoint, SCHEDULE, schedule.getId());
         }

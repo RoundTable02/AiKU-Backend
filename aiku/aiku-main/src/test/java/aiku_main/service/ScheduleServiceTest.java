@@ -93,7 +93,7 @@ class ScheduleServiceTest {
 
     Schedule createSpySchedule(Member member, Long teamId, int pointAmount){
         return spy(Schedule.create(member, null,
-                randomUUID().toString(), LocalDateTime.now(),
+                randomUUID().toString(), LocalDateTime.now().plusHours(3),
                 new Location(randomUUID().toString(), random(), random()), pointAmount));
     }
 

@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -69,10 +71,12 @@ public class ScheduleService {
     @Transactional
     public Long updateSchedule(Member member, Long scheduleId, ScheduleUpdateDto scheduleDto){
         //검증 로직
-        checkIsOwner(member.getId(), scheduleId);
-
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+
+        checkScheduleUpdateTime(schedule);
+
+        checkIsOwner(member.getId(), scheduleId);
 
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
@@ -224,6 +228,13 @@ public class ScheduleService {
             }else{
                 throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
             }
+        }
+    }
+
+    private void checkScheduleUpdateTime(Schedule schedule){
+        long minutesDiff = Duration.between(LocalDateTime.now(), schedule.getScheduleTime()).toMinutes();
+        if(minutesDiff < 60){
+            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_TIME);
         }
     }
 }

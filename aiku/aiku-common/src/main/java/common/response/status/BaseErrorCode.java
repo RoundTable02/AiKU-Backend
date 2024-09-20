@@ -19,6 +19,7 @@ public enum BaseErrorCode implements StatusCode{
     CAN_NOT_EXIT(4004, "실행중인 스케줄이 있습니다.", HttpStatus.BAD_REQUEST),
     NOT_AVAILABLE_SCHEDULE(4005, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),
     ALREADY_HAS_BETTING(4006, "이미 베팅이 존재합니다.", HttpStatus.BAD_REQUEST),
+    FORBIDDEN_SCHEDULE_UPDATE_TIME(4007, "스케줄 변경이 불가한 시간입니다.", HttpStatus.BAD_REQUEST),
 
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(5000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR);

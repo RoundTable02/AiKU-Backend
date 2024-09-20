@@ -9,6 +9,7 @@ import common.domain.member.Member;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import common.exception.BaseException;
+import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -94,7 +95,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 수정-권한O/X-")
+    @DisplayName("스케줄 수정-권한O/X")
     void updateSchedule() {
         //given
         Team team = Team.create(member1, "team1");
@@ -121,6 +122,26 @@ public class ScheduleServiceIntegrationTest {
 
         //권한 x
         assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 수정-1시간 이내의 스케줄 수정 금지")
+    void updateScheduleWithTimeLimit() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = Schedule.create(member1, null, "sche1", LocalDateTime.now().plusMinutes(30),
+                new Location("loc1", 1.0, 1.0), 0);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
+                new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
+        assertThatThrownBy(() -> scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto)).isInstanceOf(BaseExceptionImpl.class);
     }
 
     @Test
@@ -356,13 +377,13 @@ public class ScheduleServiceIntegrationTest {
         schedule1.setScheduleStatus(ExecStatus.RUN);
         em.persist(schedule1);
 
-        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule2 = createSchedule(member2, team, 100);
         schedule2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule2);
 
-        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime endDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule3 = createSchedule(member3, team, 100);
         schedule3.setScheduleStatus(ExecStatus.WAIT);
@@ -452,7 +473,7 @@ public class ScheduleServiceIntegrationTest {
         scheduleA2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleA2);
 
-        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
         scheduleB1.setScheduleStatus(ExecStatus.RUN);
@@ -480,7 +501,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){
-        return Schedule.create(member, new TeamValue(team), UUID.randomUUID().toString(), LocalDateTime.now(),
+        return Schedule.create(member, new TeamValue(team), UUID.randomUUID().toString(), LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()), pointAmount);
     }
 }

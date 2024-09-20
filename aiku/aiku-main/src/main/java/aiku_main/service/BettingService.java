@@ -72,7 +72,7 @@ public class BettingService {
 
     //==엔티티 조회 메서드==
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        return scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+        return scheduleRepository.findAliveScheduleMember(memberId, scheduleId).orElseThrow();
     }
 
     //==편의 메서드==

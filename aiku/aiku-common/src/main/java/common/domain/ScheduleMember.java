@@ -45,6 +45,10 @@ public class ScheduleMember extends BaseTime{
         this.status = Status.ALIVE;
     }
 
+    protected void setOwner() {
+        this.isOwner = true;
+    }
+
     protected void setStatus(Status status) {
         this.status = status;
     }

@@ -8,6 +8,7 @@ import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.ExecStatus;
+import common.domain.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.Schedule;
 import common.domain.Status;
@@ -101,16 +102,27 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    //팀원이 남았다면 방장 위임, 안남았다면 스케줄 삭제
     @Transactional
     public Long exitSchedule(Member member, Long teamId, Long scheduleId) {
         //검증 로직
-        checkScheduleMember(member.getId(), scheduleId, true);
+        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(member.getId(), scheduleId).orElseThrow();
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
 
         //서비스 로직
-        int schedulePoint = schedule.removeScheduleMember(member);
+        Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
+        if(scheduleMemberCount == 1){
+            schedule.delete();
+        }
+
+        if (scheduleMember.isOwner()){
+            ScheduleMember nextScheduleOwner = findNextScheduleOwner(scheduleId, scheduleMember.getId());
+            schedule.changeScheduleOwner(nextScheduleOwner);
+        }
+
+        int schedulePoint = schedule.removeScheduleMember(scheduleMember);
         if(schedulePoint > 0){
             pointChangeEventPublisher.publish(member, PLUS, schedulePoint, SCHEDULE, schedule.getId());
         }
@@ -168,6 +180,13 @@ public class ScheduleService {
     }
 
     //== 편의 메서드 ==
+    private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
+        ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);
+        if (nextOwner == null) {
+            throw new BaseExceptionImpl(BaseErrorCode.INTERNAL_SERVER_ERROR, "스케줄의 다음 방장을 찾을 수 없습니다.");
+        }
+        return nextOwner;
+    }
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
             throw new NoSuchElementException();

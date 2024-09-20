@@ -13,7 +13,6 @@ import common.exception.BaseException;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,8 +87,8 @@ class BettingServiceIntegrationTest {
 
         //then
         Betting betting = bettingRepository.findById(bettingId).orElse(null);
-        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
-        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElse(null);
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElse(null);
 
         assertThat(betting).isNotNull();
         assertThat(betting.getBettor().getId()).isEqualTo(bettor.getId());
@@ -115,8 +114,8 @@ class BettingServiceIntegrationTest {
     @DisplayName("베팅 취소-권한O/X,기본/중복요청")
     void cancelBetting() {
         //given
-        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
 
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
@@ -143,8 +142,8 @@ class BettingServiceIntegrationTest {
     @DisplayName("베팅 취소-권한X")
     void cancelBettingNoAuthority() {
         //given
-        ScheduleMember bettor = scheduleRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
 
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);

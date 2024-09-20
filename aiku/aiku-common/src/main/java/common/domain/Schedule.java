@@ -64,21 +64,29 @@ public class Schedule extends BaseTime{
         this.location = location;
     }
 
+    public void delete(){
+        this.status = Status.DELETE;
+    }
+
     //==편의 메서드==
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
     }
 
-    public int removeScheduleMember(Member member) {
+    public int removeScheduleMember(ScheduleMember scheduleMember) {
         for (int i = 0; i < scheduleMembers.size(); i++) {
-            ScheduleMember scheduleMember = scheduleMembers.get(i);
-            if(scheduleMember.getMember().getId() == member.getId()){
-                scheduleMember.setStatus(Status.DELETE);
-                return scheduleMember.getPointAmount();
+            ScheduleMember getScheMember = scheduleMembers.get(i);
+            if(getScheMember.getMember().getId() == scheduleMember.getId()){
+                getScheMember.setStatus(Status.DELETE);
+                return getScheMember.getPointAmount();
             }
         }
         return 0;
+    }
+
+    public void changeScheduleOwner(ScheduleMember nextOwner){
+        nextOwner.setOwner();
     }
 
     public void setScheduleStatus(ExecStatus scheduleStatus) {

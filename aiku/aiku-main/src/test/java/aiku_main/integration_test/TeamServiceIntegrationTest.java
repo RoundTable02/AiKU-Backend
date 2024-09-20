@@ -91,7 +91,7 @@ public class TeamServiceIntegrationTest {
         Long teamId = teamService.enterTeam(member2, team.getId());
 
         //then
-        TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(teamId, member2.getId()).orElse(null);
+        TeamMember teamMember = teamRepository.findAliveTeamMember(teamId, member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
 
         //중복 입장
@@ -114,7 +114,7 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member2, team.getId());
 
         //then
-        TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(team.getId(), member2.getId()).orElse(null);
+        TeamMember teamMember = teamRepository.findAliveTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
         assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
 

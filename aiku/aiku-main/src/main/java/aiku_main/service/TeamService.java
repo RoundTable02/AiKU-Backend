@@ -2,13 +2,13 @@ package aiku_main.service;
 
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
-import aiku_main.exception.CanNotExitException;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
 import common.domain.member.Member;
 import common.domain.Status;
 import common.domain.team.Team;
+import common.domain.team.TeamMember;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.response.status.BaseErrorCode;
@@ -59,14 +59,20 @@ public class TeamService {
     public Long exitTeam(Member member, Long teamId) {
         //검증 로직
         checkTeamMember(member.getId(), teamId, true);
-        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+
+        Team team = teamRepository.findById(teamId).orElseThrow();
         checkIsAlive(team);
-        checkHasMemberRunScheduleInTeam(member.getId(), teamId);
 
         //서비스 로직
-        team.removeTeamMember(member);
+        Long teamMemberCount = teamRepository.countOfAliveTeamMember(teamId);
+        if (teamMemberCount <= 1){
+            team.delete();
+        }
 
-        teamEventPublisher.publish(member, team);
+        TeamMember teamMember = teamRepository.findAliveTeamMember(teamId, member.getId()).orElseThrow();
+        team.removeTeamMember(teamMember);
+
+        teamEventPublisher.publishTeamExitEvent(member, team);
 
         return team.getId();
     }
@@ -102,12 +108,6 @@ public class TeamService {
                 throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
             }
         }
-    }
-
-    private void checkHasMemberRunScheduleInTeam(Long memberId, Long teamId){
-        if(scheduleRepository.hasMemberRunScheduleInTeam(memberId, teamId)){
-            throw new CanNotExitException();
-        };
     }
 
     private void checkIsAlive(Team team){

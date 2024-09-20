@@ -81,20 +81,4 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
         return Optional.ofNullable(findScheduleMember);
     }
-
-    public boolean hasMemberRunScheduleInTeam(Long memberId, Long teamId) {
-        Long count = query.select(schedule.count())
-                .from(schedule)
-                .innerJoin(scheduleMember).on(
-                        scheduleMember.member.id.eq(memberId),
-                        scheduleMember.schedule.id.eq(schedule.id),
-                        scheduleMember.status.eq(ALIVE))
-                .where(schedule.team.id.eq(teamId),
-                        schedule.scheduleStatus.eq(RUN),
-                        schedule.status.eq(ALIVE))
-                .fetchOne();
-        return count != null && count > 0;
-    }
-
-
 }

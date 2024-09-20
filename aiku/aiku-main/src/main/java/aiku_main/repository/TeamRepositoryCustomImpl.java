@@ -41,10 +41,21 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom{
     }
 
     @Override
-    public Optional<TeamMember> findTeamMemberByTeamIdAndMemberId(Long teamId, Long memberId) {
+    public Long countOfAliveTeamMember(Long teamId) {
+        return query
+                .select(teamMember.count())
+                .from(teamMember)
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.status.eq(ALIVE))
+                .fetchOne();
+    }
+
+    @Override
+    public Optional<TeamMember> findAliveTeamMember(Long teamId, Long memberId) {
         TeamMember result = query.selectFrom(teamMember)
-                .where(teamMember.team.id.eq(teamId)
-                        .and(teamMember.member.id.eq(memberId)))
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.member.id.eq(memberId),
+                        teamMember.status.eq(ALIVE))
                 .fetchOne();
 
         return Optional.ofNullable(result);

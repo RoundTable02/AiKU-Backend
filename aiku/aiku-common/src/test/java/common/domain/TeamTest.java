@@ -28,7 +28,6 @@ class TeamTest {
         TeamMember teamMember = team.getTeamMembers().get(0);
         assertThat(teamMember.getTeam()).isEqualTo(team);
         assertThat(teamMember.getMember()).isEqualTo(member);
-        assertThat(teamMember.isOwner()).isTrue();
         assertThat(teamMember.getStatus()).isEqualTo(Status.ALIVE);
     }
 
@@ -42,7 +41,7 @@ class TeamTest {
         Team team = Team.create(member1, teamName);
 
         //when
-        team.addTeamMember(member2, false);
+        team.addTeamMember(member2);
 
         //then
         assertThat(team.getTeamName()).isEqualTo(teamName);
@@ -52,7 +51,6 @@ class TeamTest {
         List<TeamMember> teamMembers = team.getTeamMembers();
         assertThat(teamMembers).extracting("member").containsExactly(member1, member2);
         assertThat(teamMembers).extracting("team").containsExactly(team, team);
-        assertThat(teamMembers).extracting("isOwner").containsExactly(true, false);
         assertThat(teamMembers).extracting("status").containsExactly(Status.ALIVE, Status.ALIVE);
     }
 }

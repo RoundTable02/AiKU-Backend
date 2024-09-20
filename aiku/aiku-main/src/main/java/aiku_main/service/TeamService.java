@@ -48,7 +48,7 @@ public class TeamService {
         checkIsAlive(team);
 
         //서비스 로직
-        team.addTeamMember(member, false);
+        team.addTeamMember(member);
 
         //TODO 푸시 알람
 

@@ -127,7 +127,7 @@ public class ScheduleServiceIntegrationTest {
     void enterSchedule() {
         //given
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2, false);
+        team.addTeamMember(member2);
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 100);
@@ -165,8 +165,8 @@ public class ScheduleServiceIntegrationTest {
     void exitSchedule() {
         //given
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2, false);
-        team.addTeamMember(member3, false);
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 100);
@@ -203,9 +203,9 @@ public class ScheduleServiceIntegrationTest {
     void getScheduleDetail() {
         //given
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2, false);
-        team.addTeamMember(member3, false);
-        team.addTeamMember(member4, false);
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        team.addTeamMember(member4);
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 100);
@@ -325,12 +325,12 @@ public class ScheduleServiceIntegrationTest {
     void getMemberScheduleList() {
         //given
         Team teamA = Team.create(member1, "teamA");
-        teamA.addTeamMember(member2, false);
-        teamA.addTeamMember(member3, false);
+        teamA.addTeamMember(member2);
+        teamA.addTeamMember(member3);
         em.persist(teamA);
 
         Team teamB = Team.create(member1, "teamB");
-        teamB.addTeamMember(member2, false);
+        teamB.addTeamMember(member2);
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);
@@ -368,12 +368,12 @@ public class ScheduleServiceIntegrationTest {
     void getMemberScheduleListWithFilter() {
         //given
         Team teamA = Team.create(member1, "teamA");
-        teamA.addTeamMember(member2, false);
-        teamA.addTeamMember(member3, false);
+        teamA.addTeamMember(member2);
+        teamA.addTeamMember(member3);
         em.persist(teamA);
 
         Team teamB = Team.create(member1, "teamB");
-        teamB.addTeamMember(member2, false);
+        teamB.addTeamMember(member2);
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);

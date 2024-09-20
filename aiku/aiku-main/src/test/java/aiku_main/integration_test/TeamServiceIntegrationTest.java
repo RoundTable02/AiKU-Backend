@@ -74,7 +74,6 @@ public class TeamServiceIntegrationTest {
         assertThat(team.getTeamMembers().size()).isEqualTo(1);
 
         TeamMember teamMember = team.getTeamMembers().get(0);
-        assertThat(teamMember.isOwner()).isTrue();
         assertThat(teamMember.getMember().getId()).isEqualTo(member1.getId());
     }
 
@@ -94,7 +93,6 @@ public class TeamServiceIntegrationTest {
         //then
         TeamMember teamMember = teamRepository.findTeamMemberByTeamIdAndMemberId(teamId, member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
-        assertThat(teamMember.isOwner()).isFalse();
 
         //중복 입장
         assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
@@ -105,8 +103,8 @@ public class TeamServiceIntegrationTest {
     void exitTeam() {
         //given
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member1, true);
-        team.addTeamMember(member2, false);
+        team.addTeamMember(member1);
+        team.addTeamMember(member2);
         em.persist(team);
 
         em.flush();
@@ -129,7 +127,7 @@ public class TeamServiceIntegrationTest {
     void getTeamDetail() {
         //given
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2, false);
+        team.addTeamMember(member2);
         em.persist(team);
 
         em.flush();
@@ -158,12 +156,12 @@ public class TeamServiceIntegrationTest {
         em.persist(teamA);
 
         Team teamB = Team.create(member1, "teamB");
-        teamB.addTeamMember(member2, false);
+        teamB.addTeamMember(member2);
         em.persist(teamB);
 
         Team teamC = Team.create(member1, "teamC");
-        teamC.addTeamMember(member2, false);
-        teamC.addTeamMember(member3, false);
+        teamC.addTeamMember(member2);
+        teamC.addTeamMember(member3);
         em.persist(teamC);
 
         Schedule scheduleA1 = Schedule.create(member1, new TeamValue(teamA), "scheduleA1", LocalDateTime.now().minusDays(1),

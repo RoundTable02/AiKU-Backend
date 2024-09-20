@@ -38,13 +38,13 @@ public class Team extends BaseTime {
         team.status = Status.ALIVE;
 
         //생성한 멤버를 팀 멤버로 추가
-        team.addTeamMember(member, true);
+        team.addTeamMember(member);
         return team;
     }
 
     //==편의 메서드==
-    public void addTeamMember(Member member, boolean isOwner){
-        this.teamMembers.add(new TeamMember(this, member, isOwner));
+    public void addTeamMember(Member member){
+        this.teamMembers.add(new TeamMember(this, member));
     }
 
     public void removeTeamMember(Member member){

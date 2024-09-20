@@ -113,11 +113,9 @@ public class ScheduleService {
 
         //서비스 로직
         Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
-        if(scheduleMemberCount == 1){
+        if(scheduleMemberCount <= 1){
             schedule.delete();
-        }
-
-        if (scheduleMember.isOwner()){
+        }else if(scheduleMember.isOwner()){
             ScheduleMember nextScheduleOwner = findNextScheduleOwner(scheduleId, scheduleMember.getId());
             schedule.changeScheduleOwner(nextScheduleOwner);
         }

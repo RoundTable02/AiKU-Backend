@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.UUID;
 
@@ -186,16 +187,82 @@ public class ScheduleServiceIntegrationTest {
         //then
         Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
 
         List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
         assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
         assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
 
+        ScheduleMember owner = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule.getId()).orElse(null);
+        assertThat(owner).isNotNull();
+        assertThat(owner.isOwner()).isTrue();
+
         //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(NoSuchElementException.class);
         //중복 요청
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 퇴장-스케줄 멤버가 없어 자동 삭제")
+    void exitScheduleWithNoMember() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getStatus()).isEqualTo(DELETE);
+
+        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+        assertThat(scheduleMembers).extracting("status").contains(DELETE);
+    }
+
+    @Test
+    @DisplayName("스케줄 퇴장-방장 변경")
+    void exitScheduleWithChangeOwner() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 0);
+        schedule.addScheduleMember(member2, false, 0);
+
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
+
+        ScheduleMember nextOwner = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule.getId()).orElse(null);
+        assertThat(nextOwner).isNotNull();
+        assertThat(nextOwner.isOwner()).isTrue();
+
     }
 
     @Test

@@ -73,6 +73,7 @@ public class ScheduleService {
         //검증 로직
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
 
         checkScheduleUpdateTime(schedule);
 
@@ -95,6 +96,7 @@ public class ScheduleService {
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
 
         //서비스 로직
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
@@ -114,6 +116,7 @@ public class ScheduleService {
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
 
         //서비스 로직
         Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
@@ -194,6 +197,12 @@ public class ScheduleService {
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
             throw new NoSuchElementException();
+        }
+    }
+
+    private void checkIsWait(Schedule schedule){
+        if(schedule.getScheduleStatus() != ExecStatus.WAIT){
+            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_STATUS);
         }
     }
 

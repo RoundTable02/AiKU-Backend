@@ -183,6 +183,26 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("스케줄 입장-실행, 종료된 스케줄일때")
+    void enterScheduleNotWait() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        schedule.setScheduleStatus(ExecStatus.RUN);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+    }
+
+    @Test
     @DisplayName("스케줄 퇴장-기본/중복 퇴장,권한O/X")
     void exitSchedule() {
         //given
@@ -284,6 +304,26 @@ public class ScheduleServiceIntegrationTest {
         assertThat(nextOwner).isNotNull();
         assertThat(nextOwner.isOwner()).isTrue();
 
+    }
+
+    @DisplayName("스케줄 퇴장-실행, 종료된 스케줄일때")
+    void exitScheduleNotWait() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 0);
+        schedule.setScheduleStatus(ExecStatus.TERM);
+        schedule.addScheduleMember(member2, false, 0);
+
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member1, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
     }
 
     @Test

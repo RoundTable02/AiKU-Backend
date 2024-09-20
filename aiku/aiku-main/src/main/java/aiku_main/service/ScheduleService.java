@@ -112,13 +112,15 @@ public class ScheduleService {
     @Transactional
     public Long exitSchedule(Member member, Long teamId, Long scheduleId) {
         //검증 로직
-        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(member.getId(), scheduleId).orElseThrow();
+        checkScheduleMember(member.getId(), scheduleId, true);
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
         checkIsWait(schedule);
 
         //서비스 로직
+        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(member.getId(), scheduleId).orElseThrow();
+
         Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
         if(scheduleMemberCount <= 1){
             schedule.delete();

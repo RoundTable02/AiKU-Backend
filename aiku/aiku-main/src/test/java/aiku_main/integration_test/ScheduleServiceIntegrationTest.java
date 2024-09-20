@@ -240,9 +240,9 @@ public class ScheduleServiceIntegrationTest {
         assertThat(owner.isOwner()).isTrue();
 
         //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
         //중복 요청
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
     }
 
     @Test

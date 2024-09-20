@@ -157,4 +157,52 @@ class BettingServiceIntegrationTest {
         //베터가 아님
         assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(NoAuthorityException.class);
     }
+
+    @Test
+    @DisplayName("스케줄 퇴장 이벤트 핸들러 - 퇴장 유저가 베터인 베팅 제거")
+    void exitSchedule_deleteBettingForBettor(){
+        //given
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Betting findBetting = bettingRepository.findById(betting.getId()).orElse(null);
+        assertThat(findBetting).isNotNull();
+        assertThat(findBetting.getStatus()).isEqualTo(DELETE);
+    }
+
+    @Test
+    @DisplayName("스케줄 퇴장 이벤트 핸들러 - 퇴장 유저가 베티인 베팅 제거")
+    void exitSchedule_deleteBettingForBetee(){
+        //given
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.exitSchedule_deleteBettingForBettor(member2.getId(), bettor.getId(), schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Betting findBetting = bettingRepository.findById(betting.getId()).orElse(null);
+        assertThat(findBetting).isNotNull();
+        assertThat(findBetting.getStatus()).isEqualTo(DELETE);
+    }
 }

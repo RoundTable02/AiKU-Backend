@@ -76,7 +76,7 @@ public class BettingService {
     //==이벤트 핸들러==
     @Transactional
     public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBettor = bettingRepository.findByBettorScheduleMemberIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        Betting bettingForBettor = bettingRepository.findByBettorIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
         bettingForBettor.setStatus(Status.DELETE);
 
         int pointAmount = bettingForBettor.getPointAmount();
@@ -86,7 +86,7 @@ public class BettingService {
 
     @Transactional
     public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBetee = bettingRepository.findByBeteeScheduleMemberIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        Betting bettingForBetee = bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
         bettingForBetee.setStatus(Status.DELETE);
 
         int pointAmount = bettingForBetee.getPointAmount();

@@ -87,6 +87,10 @@ public class Schedule extends BaseTime{
         this.scheduleStatus = scheduleStatus;
     }
 
+    public void arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
+        scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
+    }
+
     public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
         notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
         this.scheduleStatus = ExecStatus.TERM;

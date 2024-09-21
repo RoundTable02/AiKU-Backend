@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -681,6 +682,77 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule2.getId())).isFalse();
         assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule3.getId())).isTrue();
         assertThat(scheduleRepository.existScheduleMember(member1.getId(), scheduleB1.getId())).isTrue();
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_자동종료() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.scheduleAutoClose(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
+
+        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+        assertThat(scheduleMembers).extracting("arrivalTimeDiff")
+                .contains(-30, -30, (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes());
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_자동종료_이미종료된스케줄() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 0);
+        schedule1.addScheduleMember(member2, false, 0);
+
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
+        schedule1.setScheduleStatus(ExecStatus.TERM);
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.scheduleAutoClose(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+
+        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+
+        int timeDiff = (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes();
+        assertThat(scheduleMembers).extracting("arrivalTimeDiff").contains(timeDiff, timeDiff);
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){

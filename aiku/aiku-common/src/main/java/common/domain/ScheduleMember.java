@@ -49,6 +49,11 @@ public class ScheduleMember extends BaseTime{
         this.isOwner = true;
     }
 
+    protected void arrive(LocalDateTime arrivalTime, int arrivalTimeDiff){
+        this.arrivalTime = arrivalTime;
+        this.arrivalTimeDiff = arrivalTimeDiff;
+    }
+
     protected void setStatus(Status status) {
         this.status = status;
     }

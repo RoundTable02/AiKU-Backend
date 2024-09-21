@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
-import static common.domain.ExecStatus.WAIT;
+import static common.domain.ExecStatus.*;
 import static common.domain.Status.DELETE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -92,6 +92,16 @@ class BettingServiceIntegrationTest {
         assertThat(betting).isNotNull();
         assertThat(betting.getBettor().getId()).isEqualTo(bettor.getId());
         assertThat(betting.getBetee().getId()).isEqualTo(betee.getId());
+    }
+
+    @Test
+    void 베팅_등록_대기스케줄x() {
+        //given
+        schedule1.setScheduleStatus(TERM);
+
+        //when
+        BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
+        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test

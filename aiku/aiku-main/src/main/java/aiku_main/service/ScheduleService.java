@@ -197,6 +197,28 @@ public class ScheduleService {
         });
     }
 
+    @Transactional
+    public void scheduleOpen(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        schedule.setScheduleStatus(ExecStatus.RUN);
+
+        //TODO 카프카, 알림
+    }
+
+    @Transactional
+    public void scheduleAutoClose(Long scheduleId) {
+        if (scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.TERM, Status.ALIVE)){
+            return;
+        }
+
+        Schedule schedule = scheduleRepository.findScheduleWithNotArriveScheduleMember(scheduleId).orElseThrow();
+
+        LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
+        schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
+
+        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
+    }
+
     //== 편의 메서드 ==
     private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
         ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);

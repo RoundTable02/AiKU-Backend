@@ -22,6 +22,18 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     private final JPAQueryFactory query;
 
     @Override
+    public Optional<Schedule> findScheduleWithNotArriveScheduleMember(Long scheduleId) {
+        Schedule findSchedule = query.selectFrom(schedule)
+                .join(schedule.scheduleMembers, scheduleMember).fetchJoin()
+                .where(schedule.id.eq(scheduleId),
+                        scheduleMember.arrivalTime.isNull(),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+
+        return Optional.ofNullable(findSchedule);
+    }
+
+    @Override
     public List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId) {
         return query.selectFrom(schedule)
                 .innerJoin(schedule.scheduleMembers, scheduleMember).fetchJoin()

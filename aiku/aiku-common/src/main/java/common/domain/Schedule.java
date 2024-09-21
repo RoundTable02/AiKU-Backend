@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,5 +85,10 @@ public class Schedule extends BaseTime{
 
     public void setScheduleStatus(ExecStatus scheduleStatus) {
         this.scheduleStatus = scheduleStatus;
+    }
+
+    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
+        notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
+        this.scheduleStatus = ExecStatus.TERM;
     }
 }

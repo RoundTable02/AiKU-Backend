@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ScheduleRepositoryCustom {
 
+    Optional<Schedule> findScheduleWithNotArriveScheduleMember(Long scheduleId);
+
     List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId);
 
     boolean isScheduleOwner(Long memberId, Long scheduleId);

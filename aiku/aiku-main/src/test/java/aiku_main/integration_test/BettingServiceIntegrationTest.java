@@ -76,8 +76,7 @@ class BettingServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("베팅 등록-권한O/X,기본/중복요청")
-    void addBetting() {
+    void 베팅_등록() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
         Long bettingId = bettingService.addBetting(member1, schedule1.getId(), bettingDto);
@@ -93,16 +92,34 @@ class BettingServiceIntegrationTest {
         assertThat(betting).isNotNull();
         assertThat(betting.getBettor().getId()).isEqualTo(bettor.getId());
         assertThat(betting.getBetee().getId()).isEqualTo(betee.getId());
+    }
 
-        //스케줄에 속하지 않을 때
+    @Test
+    void 베팅_등록_스케줄멤버x() {
+        //when
+        BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
         assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);
-        //중복 요청
+    }
+
+    @Test
+    void 베팅_등록_중복() {
+        //given
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElse(null);
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 0);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
         assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(CanNotBettingException.class);
     }
 
     @Test
-    @DisplayName("베팅 등록-포인트 부족")
-    void addBettingWithNotEnoughPoint() {
+    void 베팅_등록_포인트부족() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 1000);
 
@@ -111,8 +128,7 @@ class BettingServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("베팅 취소-권한O/X,기본/중복요청")
-    void cancelBetting() {
+    void 베팅_취소() {
         //given
         ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
         ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
@@ -133,14 +149,10 @@ class BettingServiceIntegrationTest {
         Betting findBetting = bettingRepository.findById(betting.getId()).orElseThrow();
         assertThat(findBetting.getBettingStatus()).isEqualTo(WAIT);
         assertThat(findBetting.getStatus()).isEqualTo(DELETE);
-
-        //중복 요청
-        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BaseException.class);
     }
 
     @Test
-    @DisplayName("베팅 취소-권한X")
-    void cancelBettingNoAuthority() {
+    void 베팅_취소_중복() {
         //given
         ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
         ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
@@ -152,15 +164,44 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //when
-        //스케줄 멤버 아님
-        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(NoSuchElementException.class);
-        //베터가 아님
+        bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
+        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    void 베팅_취소_베터x() {
+        //given
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
         assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("스케줄 퇴장 이벤트 핸들러 - 퇴장 유저가 베터인 베팅 제거")
-    void exitSchedule_deleteBettingForBettor(){
+    void 베팅_취소_스케줄멤버x() {
+        //given
+        ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        em.persist(betting);
+
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄퇴장_퇴장멤버가_베터인_베팅제거(){
         //given
         ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
         ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
@@ -183,8 +224,7 @@ class BettingServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 퇴장 이벤트 핸들러 - 퇴장 유저가 베티인 베팅 제거")
-    void exitSchedule_deleteBettingForBetee(){
+    void 이벤트핸들러_스케줄퇴장_퇴장멤버가_베티인_베팅제거(){
         //given
         ScheduleMember bettor = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
         ScheduleMember betee = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();

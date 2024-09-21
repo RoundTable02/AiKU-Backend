@@ -14,7 +14,6 @@ import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,8 +57,7 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("그룹 등록")
-    void addTeam() {
+    void 그룹_등록() {
         //given
         //when
         TeamAddDto teamDto = new TeamAddDto("group1");
@@ -78,8 +76,7 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("그룹 입장-기본/중복 입장")
-    void enterTeam() {
+    void 그룹_입장() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -99,8 +96,21 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("그룹 퇴장-권한O/X")
-    void exitTeam() {
+    void 그룹_입장_중복() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+    }
+
+    @Test
+    void 그룹_퇴장() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member1);
@@ -123,14 +133,39 @@ public class TeamServiceIntegrationTest {
         TeamMember teamMember = teamRepository.findTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
         assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
+    }
 
-        //중복 퇴장
+    @Test
+    void 그룹_퇴장_그룹멤버x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
         assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("그룹 퇴장-그룹 멤버가 안남아 자동 그룹 삭제")
-    void exitTeamWithNoMember() {
+    void 그룹_퇴장_중복() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        teamService.exitTeam(member2, team.getId());
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    void 그룹_퇴장_남은멤버x_그룹삭제() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -150,8 +185,7 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("그룹 상세 조회-권한O/X")
-    void getTeamDetail() {
+    void 그룹_상세_조회() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -170,14 +204,23 @@ public class TeamServiceIntegrationTest {
         List<TeamMemberResDto> teamMemberDtos = result.getMembers();
         assertThat(teamMemberDtos.size()).isEqualTo(2);
         assertThat(teamMemberDtos).extracting("memberId").containsExactly(member1.getId(), member2.getId());
-
-        //권한x
-        assertThatThrownBy(() -> teamService.getTeamDetail(member3, team.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("그룹 목록 조회")
-    void getTeamList() {
+    void 그룹_상세_조회_그룹멤버x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    void 그룹_목록_조회() {
         //given
         Team teamA = Team.create(member1, "teamA");
         em.persist(teamA);

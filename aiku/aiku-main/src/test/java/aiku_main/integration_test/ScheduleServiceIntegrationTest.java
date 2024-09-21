@@ -69,8 +69,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 등록-권한O/X")
-    void addSchedule() {
+    void 스케줄_등록() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -95,8 +94,19 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 수정-권한O/X")
-    void updateSchedule() {
+    void 스케줄_등록_팀멤버x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        //when
+        ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
+                new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
+        assertThatThrownBy(() -> scheduleService.addSchedule(member2, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    void 스케줄_수정() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -119,14 +129,30 @@ public class ScheduleServiceIntegrationTest {
         Schedule findSchedule = scheduleRepository.findById(schedule.getId()).get();
         assertThat(findSchedule.getScheduleName()).isEqualTo(scheduleDto.getScheduleName());
         assertThat(findSchedule.getLocation().getLocationName()).isEqualTo(scheduleDto.getLocation().getLocationName());
+    }
 
-        //권한 x
+    @Test
+    void 스케줄_수정_방장x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 0);
+        schedule.addScheduleMember(member2, false, 0);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
+                new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
         assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("스케줄 수정-1시간 이내의 스케줄 수정 금지")
-    void updateScheduleWithTimeLimit() {
+    void 스케줄_수정_스케줄시간1시간이내() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -145,8 +171,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 입장-기본/중복 입장,권한O/X")
-    void enterSchedule() {
+    void 스케줄_입장() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -175,16 +200,46 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleMembers).extracting("isPaid").contains(true, false);
         assertThat(scheduleMembers).extracting("pointAmount").contains(100, 0);
         assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
-
-        //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member3, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
-        //중복 요청
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member1, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
     }
 
     @Test
-    @DisplayName("스케줄 입장-실행, 종료된 스케줄일때")
-    void enterScheduleNotWait() {
+    void 스케줄_입장_중복() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        schedule.addScheduleMember(member2, false, 0);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    void 스케줄_입장_팀멤버X() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
+    }
+
+    @Test
+    void 스케줄_입장_대기스케줄x() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -203,8 +258,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 퇴장-기본/중복 퇴장,권한O/X")
-    void exitSchedule() {
+    void 스케줄_퇴장() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -238,16 +292,48 @@ public class ScheduleServiceIntegrationTest {
         ScheduleMember owner = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule.getId()).orElse(null);
         assertThat(owner).isNotNull();
         assertThat(owner.isOwner()).isTrue();
-
-        //권한x-그룹에 속해 있지 않을 때
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member4, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
         //중복 요청
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
     }
 
     @Test
-    @DisplayName("스케줄 퇴장-스케줄 멤버가 없어 자동 삭제")
-    void exitScheduleWithNoMember() {
+    void 스케줄_퇴장_스케줄멤버X() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    void 스케줄_퇴장_중복() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        schedule.addScheduleMember(member2, false, 0);
+        em.persist(schedule);
+
+        scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
+        em.flush();
+        em.clear();
+
+        //when
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    void 스케줄_퇴장_남은멤버x_자동삭제() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -274,8 +360,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 퇴장-방장 변경")
-    void exitScheduleWithChangeOwner() {
+    void 스케줄_퇴장_방장퇴장_방장변경() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -303,11 +388,10 @@ public class ScheduleServiceIntegrationTest {
         ScheduleMember nextOwner = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule.getId()).orElse(null);
         assertThat(nextOwner).isNotNull();
         assertThat(nextOwner.isOwner()).isTrue();
-
     }
 
-    @DisplayName("스케줄 퇴장-실행, 종료된 스케줄일때")
-    void exitScheduleNotWait() {
+    @Test
+    void 스케줄_퇴장_대기스케줄x() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -327,8 +411,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("스케줄 상세 조회-권한O/X")
-    void getScheduleDetail() {
+    void 스케줄_상세_조회() {
         //given
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
@@ -356,14 +439,31 @@ public class ScheduleServiceIntegrationTest {
         List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
         assertThat(scheduleMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+    }
 
-        //권한 x-스케줄 멤버가 아닐때
+    @Test
+    void 스케줄_상세_조회_스케줄멤버x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        team.addTeamMember(member4);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member3, false, 100);
+        em.persist(schedule);
+
+        em.flush();
+        em.clear();
+
+        //when
         assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("그룹의 스케줄 목록 조회-필터링x,권한O/X")
-    void getTeamScheduleList() {
+    void 그룹_스케줄_목록_조회() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -401,14 +501,20 @@ public class ScheduleServiceIntegrationTest {
         assertThat(schedules).extracting("scheduleId").containsExactly(schedule3.getId(), schedule2.getId(), schedule1.getId());
         assertThat(schedules).extracting("memberSize").containsExactly(1, 2, 3);
         assertThat(schedules).extracting("accept").containsExactly(false, false, true);
+    }
 
-        //권한 x
+    @Test
+    void 그룹_스케줄_목록_조회_스케줄멤버x() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        //when
         assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4, team.getId(), new SearchDateCond(), 1)).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
-    @DisplayName("그룹의 스케줄 목록 조회-필터링o")
-    void getTeamScheduleListWithFilter() {
+    void 그룹_스케줄_목록_조회_필터링() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
@@ -449,8 +555,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("멤버의 스케줄 목록 조회-필터링x")
-    void getMemberScheduleList() {
+    void 멤버_스케줄_목록_조회() {
         //given
         Team teamA = Team.create(member1, "teamA");
         teamA.addTeamMember(member2);
@@ -492,8 +597,7 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("멤버의 스케줄 목록 조회-필터링o")
-    void getMemberScheduleListWithFilter() {
+    void 멤버_스케줄_목록_조회_필터링() {
         //given
         Team teamA = Team.create(member1, "teamA");
         teamA.addTeamMember(member2);

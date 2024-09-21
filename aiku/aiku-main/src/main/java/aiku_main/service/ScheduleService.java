@@ -3,6 +3,7 @@ package aiku_main.service;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
@@ -38,6 +39,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 @Service
 public class ScheduleService {
 
+    private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleReadRepository scheduleReadRepository;
     private final TeamRepository teamRepository;
@@ -182,10 +184,14 @@ public class ScheduleService {
         return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
     }
 
-    //== 이벤트 핸들러 실행 메서드 ==
+    //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
-        
+        Member member = memberRepository.findById(memberId).orElseThrow();
+
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findWaitScheduleMemberWithScheduleInTeam(memberId, teamId);
+        scheduleMembers.forEach((scheduleMember) ->
+                        scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, scheduleMember.getSchedule()));
     }
 
     //== 편의 메서드 ==

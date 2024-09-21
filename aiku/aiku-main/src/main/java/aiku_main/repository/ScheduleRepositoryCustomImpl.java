@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static common.domain.ExecStatus.RUN;
+import static common.domain.ExecStatus.WAIT;
 import static common.domain.QSchedule.schedule;
 import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
@@ -81,6 +82,18 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
                 .fetchOne();
 
         return Optional.ofNullable(findScheduleMember);
+    }
+
+    @Override
+    public List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId) {
+        return query.selectFrom(scheduleMember)
+                .innerJoin(scheduleMember.schedule, schedule).fetchJoin()
+                .where(scheduleMember.member.id.eq(memberId),
+                        scheduleMember.status.eq(ALIVE),
+                        schedule.team.id.eq(teamId),
+                        schedule.scheduleStatus.eq(WAIT),
+                        schedule.status.eq(ALIVE))
+                .fetch();
     }
 
     @Override

@@ -644,6 +644,45 @@ public class ScheduleServiceIntegrationTest {
         assertThat(schedules).extracting("memberSize").containsExactly(1, 1);
     }
 
+    @Test
+    void 이벤트핸들러_팀퇴장_참여중인_대기스케줄_퇴장() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        em.persist(schedule1);
+
+        Schedule schedule2 = createSchedule(member1, team, 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        em.persist(schedule2);
+
+        Schedule schedule3 = createSchedule(member1, team, 0);
+        schedule3.addScheduleMember(member2, false, 0);
+        schedule3.setScheduleStatus(ExecStatus.TERM);
+        em.persist(schedule3);
+
+        Team teamB = Team.create(member1, "teamB");
+        em.persist(teamB);
+
+        Schedule scheduleB1 = createSchedule(member1, teamB, 100);
+        em.persist(scheduleB1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.exitAllScheduleInTeam(member1.getId(), team.getId());
+
+        //then
+        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule1.getId())).isFalse();
+        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule2.getId())).isFalse();
+        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule3.getId())).isTrue();
+        assertThat(scheduleRepository.existScheduleMember(member1.getId(), scheduleB1.getId())).isTrue();
+    }
+
     Schedule createSchedule(Member member, Team team, int pointAmount){
         return Schedule.create(member, new TeamValue(team), UUID.randomUUID().toString(), LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()), pointAmount);

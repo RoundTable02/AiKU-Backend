@@ -190,8 +190,11 @@ public class ScheduleService {
         Member member = memberRepository.findById(memberId).orElseThrow();
 
         List<ScheduleMember> scheduleMembers = scheduleRepository.findWaitScheduleMemberWithScheduleInTeam(memberId, teamId);
-        scheduleMembers.forEach((scheduleMember) ->
-                        scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, scheduleMember.getSchedule()));
+        scheduleMembers.forEach((scheduleMember) ->{
+            Schedule schedule = scheduleMember.getSchedule();
+            schedule.removeScheduleMember(scheduleMember);
+            scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
+        });
     }
 
     //== 편의 메서드 ==

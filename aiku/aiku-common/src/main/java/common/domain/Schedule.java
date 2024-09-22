@@ -95,4 +95,8 @@ public class Schedule extends BaseTime{
         notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
         this.scheduleStatus = ExecStatus.TERM;
     }
+
+    public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
+        scheduleMember.setRewardPointAmount(rewardPointAmount);
+    }
 }

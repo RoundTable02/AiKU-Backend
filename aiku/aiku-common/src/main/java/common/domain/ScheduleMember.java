@@ -29,6 +29,7 @@ public class ScheduleMember extends BaseTime{
 
     private boolean isPaid;
     private int pointAmount;
+    private int rewardPointAmount;
 
     private LocalDateTime arrivalTime;
     private int arrivalTimeDiff;
@@ -52,6 +53,10 @@ public class ScheduleMember extends BaseTime{
     protected void arrive(LocalDateTime arrivalTime, int arrivalTimeDiff){
         this.arrivalTime = arrivalTime;
         this.arrivalTimeDiff = arrivalTimeDiff;
+    }
+
+    protected void setRewardPointAmount(int rewardPointAmount) {
+        this.rewardPointAmount = rewardPointAmount;
     }
 
     protected void setStatus(Status status) {

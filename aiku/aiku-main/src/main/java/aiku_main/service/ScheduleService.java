@@ -217,6 +217,32 @@ public class ScheduleService {
         schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
     }
 
+    @Transactional
+    public void processScheduleResultPoint(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+
+        List<ScheduleMember> earlyMembers = scheduleRepository.findPaidEarlyScheduleMemberWithMember(scheduleId);
+
+        if(earlyMembers.size() == 0) {
+            scheduleRepository.findPaidLateScheduleMemberWithMember(scheduleId)
+                    .forEach((lateMember) -> {
+                        int rewardPointAmount = lateMember.getPointAmount();
+                        pointChangeEventPublisher.publish(lateMember.getMember(), PLUS, rewardPointAmount, SCHEDULE, scheduleId);
+                        schedule.rewardMember(lateMember, rewardPointAmount);
+                    });
+            return;
+        }
+
+        int pointAmountOfLateMembers = scheduleRepository.findPointAmountOfLatePaidScheduleMember(scheduleId);
+        int rewardOfEarlyMember = pointAmountOfLateMembers / earlyMembers.size();
+
+        earlyMembers.forEach((earlyScheduleMember) -> {
+            int rewardPointAmount = earlyScheduleMember.getPointAmount() + rewardOfEarlyMember;
+            pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE, scheduleId);
+            schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
+        });
+    }
+
     //== 편의 메서드 ==
     private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
         ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);

@@ -110,6 +110,39 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
+    public int findPointAmountOfLatePaidScheduleMember(Long scheduleId) {
+        return query.select(scheduleMember.pointAmount.sum().coalesce(0))
+                .from(scheduleMember)
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.isPaid.isTrue(),
+                        scheduleMember.arrivalTimeDiff.lt(0),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+    }
+
+    @Override
+    public List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId) {
+        return query.selectFrom(scheduleMember)
+                .join(scheduleMember.member, member)
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.isPaid.isTrue(),
+                        scheduleMember.arrivalTimeDiff.goe(0),
+                        scheduleMember.status.eq(ALIVE))
+                .fetch();
+    }
+
+    @Override
+    public List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId) {
+        return query.selectFrom(scheduleMember)
+                .join(scheduleMember.member, member)
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.isPaid.isTrue(),
+                        scheduleMember.arrivalTimeDiff.lt(0),
+                        scheduleMember.status.eq(ALIVE))
+                .fetch();
+    }
+
+    @Override
     public List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId) {
         return query.selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.schedule, schedule).fetchJoin()

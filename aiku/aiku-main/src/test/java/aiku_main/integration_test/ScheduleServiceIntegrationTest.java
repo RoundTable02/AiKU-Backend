@@ -14,7 +14,6 @@ import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.UUID;
 
@@ -753,6 +751,114 @@ public class ScheduleServiceIntegrationTest {
 
         int timeDiff = (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes();
         assertThat(scheduleMembers).extracting("arrivalTimeDiff").contains(timeDiff, timeDiff);
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_결과_정산_지각자x(){
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 100);
+        schedule1.addScheduleMember(member2, false, 200);
+        schedule1.addScheduleMember(member3, false, 300);
+
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
+        schedule1.setScheduleStatus(ExecStatus.TERM);
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.processScheduleResultPoint(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_결과_정산_모두지각자(){
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 100);
+        schedule1.addScheduleMember(member2, false, 200);
+        schedule1.addScheduleMember(member3, false, 300);
+
+        LocalDateTime arrivalTime = LocalDateTime.now().plusHours(4);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
+        schedule1.setScheduleStatus(ExecStatus.TERM);
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.processScheduleResultPoint(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_결과_정산(){
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 100);
+        schedule1.addScheduleMember(member2, false, 200);
+        schedule1.addScheduleMember(member3, false, 300);
+
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(5));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
+        schedule1.setScheduleStatus(ExecStatus.TERM);
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.processScheduleResultPoint(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(0, 250, 350);
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){

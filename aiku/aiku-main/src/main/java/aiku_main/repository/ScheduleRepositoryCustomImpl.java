@@ -67,6 +67,19 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
+    public boolean existPaidScheduleMember(Long memberId, Long scheduleId) {
+        Long count = query.select(scheduleMember.count())
+                .from(scheduleMember)
+                .where(scheduleMember.member.id.eq(memberId),
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.pointAmount.isNotNull(),
+//                        scheduleMember.pointAmount.gt(0),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+        return count != null && count > 0;
+    }
+
+    @Override
     public Long countOfAliveScheduleMember(Long scheduleId) {
         return query.select(scheduleMember.count())
                 .from(scheduleMember)

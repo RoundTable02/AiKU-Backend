@@ -12,6 +12,7 @@ import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.BaseException;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.exception.PaidMemberLimitException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +49,7 @@ class BettingServiceIntegrationTest {
     Member member2;
     Member member3;
     Member noScheduleMember;
+    Member freeMember;
 
     Schedule schedule1;
 
@@ -56,16 +58,19 @@ class BettingServiceIntegrationTest {
         member1 = Member.create("member1");
         member2 = Member.create("member2");
         member3 = Member.create("member3");
+        freeMember = Member.create("freeMember");
         noScheduleMember = Member.create("noScheduleMember");
         em.persist(member1);
         em.persist(member2);
         em.persist(member3);
+        em.persist(freeMember);
         em.persist(noScheduleMember);
 
         schedule1 = Schedule.create(member1, null, "schedule1", LocalDateTime.now(),
-                new Location("loc1", 1.0, 1.0), 0);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 0);
+                new Location("loc1", 1.0, 1.0), 1000);
+        schedule1.addScheduleMember(member2, false, 1000);
+        schedule1.addScheduleMember(member3, false, 1000);
+        schedule1.addScheduleMember(freeMember, false, 0);
         em.persist(schedule1);
     }
 
@@ -108,7 +113,14 @@ class BettingServiceIntegrationTest {
     void 베팅_등록_스케줄멤버x() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(BaseException.class);
+    }
+
+    @Test
+    void 베팅_등록_깍두기멤버() {
+        //when
+        BettingAddDto bettingDto = new BettingAddDto(freeMember.getId(), 0);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(PaidMemberLimitException.class);
     }
 
     @Test

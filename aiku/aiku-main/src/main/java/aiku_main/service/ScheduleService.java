@@ -215,8 +215,6 @@ public class ScheduleService {
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
-
-        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
     }
 
     //== 편의 메서드 ==
@@ -268,7 +266,7 @@ public class ScheduleService {
             if(isMember){
                 throw new NoAuthorityException();
             }else{
-                throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
+                throw new BaseExceptionImpl(BaseErrorCode.ALREADY_IN_TEAM);
             }
         }
     }

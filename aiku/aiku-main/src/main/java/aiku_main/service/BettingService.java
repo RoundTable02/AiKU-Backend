@@ -15,6 +15,7 @@ import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.exception.PaidMemberLimitException;
 import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,9 @@ public class BettingService {
     @Transactional
     public Long addBetting(Member member, Long scheduleId, BettingAddDto bettingDto){
         //검증 로직
-        checkScheduleMember(member.getId(), scheduleId);
-        checkScheduleUsable(scheduleId);
+        checkPaidScheduleMember(member.getId(), scheduleId);
+        checkPaidScheduleMember(bettingDto.getBeteeMemberId(), scheduleId);
+        checkScheduleWait(scheduleId);
 
         ScheduleMemberValue bettor = new ScheduleMemberValue(findScheduleMember(member.getId(), scheduleId));
         ScheduleMemberValue bettee = new ScheduleMemberValue(findScheduleMember(bettingDto.getBeteeMemberId(), scheduleId));
@@ -103,7 +105,7 @@ public class BettingService {
     }
 
     //==편의 메서드==
-    private void checkScheduleUsable(Long scheduleId) {
+    private void checkScheduleWait(Long scheduleId) {
         if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
         }
@@ -121,9 +123,9 @@ public class BettingService {
         }
     }
 
-    private void checkScheduleMember(Long memberId, Long scheduleId){
-        if(!scheduleRepository.existScheduleMember(memberId, scheduleId)){
-            throw new NoAuthorityException();
+    private void checkPaidScheduleMember(Long memberId, Long scheduleId){
+        if(!scheduleRepository.existPaidScheduleMember(memberId, scheduleId)){
+            throw new PaidMemberLimitException();
         }
     }
 

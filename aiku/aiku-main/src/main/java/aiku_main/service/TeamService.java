@@ -105,7 +105,7 @@ public class TeamService {
             if(isMember){
                 throw new NoAuthorityException();
             }else {
-                throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
+                throw new BaseExceptionImpl(BaseErrorCode.ALREADY_IN_TEAM);
             }
         }
     }

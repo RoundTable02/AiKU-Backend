@@ -14,6 +14,7 @@ public interface ScheduleRepositoryCustom {
 
     boolean isScheduleOwner(Long memberId, Long scheduleId);
     boolean existScheduleMember(Long memberId, Long scheduleId);
+    boolean existPaidScheduleMember(Long memberId, Long scheduleId);
     Long countOfAliveScheduleMember(Long scheduleId);
     Optional<ScheduleMember> findAliveScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);

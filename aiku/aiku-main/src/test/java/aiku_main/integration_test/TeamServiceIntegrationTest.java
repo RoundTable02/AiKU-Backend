@@ -6,6 +6,7 @@ import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
 import common.domain.*;
 import common.domain.member.Member;
+import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import common.domain.value_reference.TeamValue;

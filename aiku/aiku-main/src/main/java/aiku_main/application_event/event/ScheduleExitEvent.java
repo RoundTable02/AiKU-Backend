@@ -1,7 +1,7 @@
 package aiku_main.application_event.event;
 
-import common.domain.Schedule;
-import common.domain.ScheduleMember;
+import common.domain.schedule.Schedule;
+import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.value_reference.MemberValue;
 import common.domain.value_reference.ScheduleMemberValue;

@@ -1,5 +1,6 @@
-package common.domain;
+package common.domain.schedule;
 
+import common.domain.BaseTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class ScheduleResult extends BaseTime{
+public class ScheduleResult extends BaseTime {
 
     @Column(name = "scheduleResultId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
-package common.domain;
+package common.domain.schedule;
 
+import common.domain.*;
 import common.domain.member.Member;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Schedule extends BaseTime{
+public class Schedule extends BaseTime {
 
     @Column(name = "scheduleId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +36,7 @@ public class Schedule extends BaseTime{
     private ExecStatus scheduleStatus;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
@@ -46,7 +47,6 @@ public class Schedule extends BaseTime{
         this.scheduleTime = scheduleTime;
         this.location = location;
         this.scheduleStatus = ExecStatus.WAIT;
-        this.status = Status.ALIVE;
     }
 
     //==CUD 편의 메서드==

@@ -8,7 +8,7 @@ import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.Betting;
 import common.domain.ExecStatus;
-import common.domain.ScheduleMember;
+import common.domain.schedule.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;

@@ -1,5 +1,7 @@
-package common.domain;
+package common.domain.schedule;
 
+import common.domain.BaseTime;
+import common.domain.Status;
 import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class ScheduleMember extends BaseTime{
+public class ScheduleMember extends BaseTime {
 
     @Column(name = "scheduleMemberId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +37,7 @@ public class ScheduleMember extends BaseTime{
     private int arrivalTimeDiff;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
 
     protected ScheduleMember(Member member, Schedule schedule, boolean isOwner, int pointAmount) {
         this.member = member;
@@ -43,7 +45,6 @@ public class ScheduleMember extends BaseTime{
         this.isOwner = isOwner;
         this.isPaid = (pointAmount > 0) ? true : false;
         this.pointAmount = pointAmount;
-        this.status = Status.ALIVE;
     }
 
     protected void setOwner() {

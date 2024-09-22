@@ -3,7 +3,7 @@ package aiku_main.scheduler;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.ExecStatus;
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;

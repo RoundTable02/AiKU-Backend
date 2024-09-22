@@ -1,7 +1,7 @@
 package aiku_main.repository;
 
-import common.domain.Schedule;
-import common.domain.ScheduleMember;
+import common.domain.schedule.Schedule;
+import common.domain.schedule.ScheduleMember;
 
 import java.util.List;
 import java.util.Optional;

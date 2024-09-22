@@ -1,15 +1,13 @@
 package common.domain;
 
 import common.domain.member.Member;
+import common.domain.schedule.Schedule;
+import common.domain.schedule.ScheduleMember;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
-import static common.domain.Status.ALIVE;
-import static common.domain.Status.DELETE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;

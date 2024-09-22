@@ -1,20 +1,18 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Schedule;
-import common.domain.ScheduleMember;
-import common.domain.member.QMember;
+import common.domain.schedule.Schedule;
+import common.domain.schedule.ScheduleMember;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
-import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
-import static common.domain.QSchedule.schedule;
-import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
+import static common.domain.schedule.QSchedule.schedule;
+import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
 public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {

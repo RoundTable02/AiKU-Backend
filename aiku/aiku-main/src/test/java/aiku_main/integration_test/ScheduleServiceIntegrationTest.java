@@ -6,6 +6,8 @@ import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
 import common.domain.*;
 import common.domain.member.Member;
+import common.domain.schedule.Schedule;
+import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import common.exception.BaseException;

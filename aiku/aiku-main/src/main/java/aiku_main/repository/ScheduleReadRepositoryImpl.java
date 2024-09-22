@@ -72,11 +72,13 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         schedule.scheduleTime, schedule.scheduleStatus,
                         Expressions.stringTemplate("STRING_AGG({0}, ',')", scheduleMember.member.id)))
                 .from(schedule)
-                .leftJoin(scheduleMember).on(
+                .innerJoin(scheduleMember).on(
                         scheduleMember.schedule.id.eq(schedule.id),
                         scheduleMember.status.eq(ALIVE))
                 .where(schedule.id.in(scheduleIdList))
-                .groupBy(schedule.id, schedule.scheduleName, schedule.location, schedule.scheduleTime, schedule.scheduleStatus)
+                .groupBy(schedule.id, schedule.scheduleName, schedule.location.locationName,
+                        schedule.location.latitude, schedule.location.longitude,
+                        schedule.scheduleTime, schedule.scheduleStatus)
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }

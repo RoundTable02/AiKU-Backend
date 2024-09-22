@@ -17,7 +17,7 @@ public class TeamScheduleListEachResDto {
     private LocalDateTime scheduleTime;
     private ExecStatus scheduleStatus;
     private int memberSize;
-    private boolean accept;
+    private boolean accept = false;
 
     @JsonIgnore
     List<Long> membersIdList;
@@ -38,12 +38,10 @@ public class TeamScheduleListEachResDto {
     }
 
     public void setAccept(Long memberId){
-        for (int i = 0; i < membersIdList.size(); i++) {
-            if(membersIdList.get(i) == memberId){
-                accept = true;
-                return;
+        for (Long acceptId : membersIdList) {
+            if(memberId.equals(acceptId)){
+                this.accept = true;
             }
         }
-        accept = false;
     }
 }

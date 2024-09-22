@@ -465,6 +465,8 @@ public class ScheduleServiceIntegrationTest {
     void 그룹_스케줄_목록_조회() {
         //given
         Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
         em.persist(team);
 
         Schedule schedule1 = createSchedule(member1, team, 100);

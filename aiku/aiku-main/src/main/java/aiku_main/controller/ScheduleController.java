@@ -29,7 +29,7 @@ public class ScheduleController {
     @PatchMapping("/{scheduleId}")
     public BaseResponse<BaseResultDto> updateSchedule(@PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
-                                                      @RequestBody ScheduleUpdateDto scheduleDto){
+                                                      @RequestBody @Valid ScheduleUpdateDto scheduleDto){
         Long updateId = scheduleService.updateSchedule(null, scheduleId, scheduleDto);
 
         return BaseResponse.getSimpleRes(updateId, BaseCode.PATCH);

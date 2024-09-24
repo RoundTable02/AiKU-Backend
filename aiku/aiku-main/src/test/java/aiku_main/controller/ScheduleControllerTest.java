@@ -4,10 +4,8 @@ import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleAddDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.service.ScheduleService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +44,7 @@ class ScheduleControllerTest {
     @Test
     void addSchedule() throws Exception {
         ScheduleAddDto scheduleAddDto = new ScheduleAddDto("sche1",
-                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now(), 0);
+                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1), 10);
         mockMvc.perform(post("/groups/1/schedules")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleAddDto)))
@@ -60,7 +58,7 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto(" ",
                                         new LocationDto("loc1", 1.1, 1.1),
-                                        LocalDateTime.now(), 0)
+                                        LocalDateTime.now().plusHours(1), 10)
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -69,7 +67,7 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("schedule name is too long",
                                         new LocationDto("loc1", 1.1, 1.1),
-                                        LocalDateTime.now(), 0)
+                                        LocalDateTime.now().plusHours(1), 10)
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -78,7 +76,7 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
                                         new LocationDto(" ", 1.1, 1.1),
-                                        LocalDateTime.now(), 0)
+                                        LocalDateTime.now().plusHours(1), 10)
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -87,7 +85,7 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
                                         new LocationDto("lo1", 1.1, 1.1),
-                                        null, 0)
+                                        null, 10)
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -96,7 +94,34 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
                                         new LocationDto("lo1", null, 1.1),
-                                        null, 0)
+                                        LocalDateTime.now().plusHours(1), 10)
+                        )))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/groups/1/schedules")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ScheduleAddDto("name1",
+                                        new LocationDto("lo1", null, 1.1),
+                                        LocalDateTime.now().plusHours(1), 101)
+                        )))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/groups/1/schedules")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ScheduleAddDto("name1",
+                                        new LocationDto("lo1", null, 1.1),
+                                        LocalDateTime.now().plusHours(1), 0)
+                        )))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/groups/1/schedules")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new ScheduleAddDto("name1",
+                                        new LocationDto("lo1", null, 1.1),
+                                        LocalDateTime.now(), 100)
                         )))
                 .andExpect(status().isBadRequest());
     }

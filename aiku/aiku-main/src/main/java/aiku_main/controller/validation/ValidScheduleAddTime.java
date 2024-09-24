@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = ValidPointAmountValidator.class)
+@Constraint(validatedBy = ValidScheduleAddTimeValidator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidPointAmount {
-    String message() default "Invalid point amount";
+public @interface ValidScheduleAddTime {
+    String message() default "Invalid schedule time";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

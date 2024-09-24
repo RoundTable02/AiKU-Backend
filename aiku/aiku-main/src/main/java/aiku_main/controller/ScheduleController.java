@@ -35,7 +35,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/{scheduleId}/enter")
-    public BaseResponse<BaseResultDto> enderSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> enterSchedule(@PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
                                                       @RequestBody ScheduleEnterDto enterDto){
         Long enterId = scheduleService.enterSchedule(null, groupId, scheduleId, enterDto);
@@ -44,7 +44,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/{scheduleId}/exit")
-    public BaseResponse<BaseResultDto> enderSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> exitSchedule(@PathVariable Long groupId,
                                                      @PathVariable Long scheduleId){
         Long exitId = scheduleService.exitSchedule(null, groupId, scheduleId);
 

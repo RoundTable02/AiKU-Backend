@@ -1,5 +1,7 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -8,6 +10,8 @@ import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
@@ -46,6 +50,7 @@ public class ScheduleService {
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
+    private final ObjectMapper objectMapper;
 
     //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
     @Transactional
@@ -241,6 +246,19 @@ public class ScheduleService {
             pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE, scheduleId);
             schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
         });
+    }
+
+    @Transactional
+    public void analyzeScheduleArrivalResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+
+        List<ScheduleArrivalMember> arrivalMembers = scheduleReadRepository.getScheduleArrivalResults(scheduleId);
+        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(arrivalMembers);
+        try {
+            schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Can't Parse ScheduleArrivalResult");
+        } ;
     }
 
     //== 편의 메서드 ==

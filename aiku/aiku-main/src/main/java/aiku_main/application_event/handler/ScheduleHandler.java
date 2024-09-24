@@ -32,5 +32,6 @@ public class ScheduleHandler {
     public void handleScheduleAutoCloseEvent(ScheduleAutoCloseEvent event){
         scheduleService.scheduleAutoClose(event.getScheduleId());
         scheduleService.processScheduleResultPoint(event.getScheduleId());
+        scheduleService.analyzeScheduleArrivalResult(event.getScheduleId());
     }
 }

@@ -1,10 +1,9 @@
 package aiku_main.dto;
 
 import aiku_main.controller.validation.ValidPointAmount;
-import aiku_main.controller.validation.ValidScheduleAddTime;
+import aiku_main.controller.validation.ValidScheduleTime;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class ScheduleAddDto {
     private String scheduleName;
     @Valid
     private LocationDto location;
-    @ValidScheduleAddTime
+    @ValidScheduleTime
     private LocalDateTime scheduleTime;
     @ValidPointAmount
     private int pointAmount;

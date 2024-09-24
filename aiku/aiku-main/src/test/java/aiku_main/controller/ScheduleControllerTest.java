@@ -97,7 +97,10 @@ class ScheduleControllerTest {
                                         LocalDateTime.now().plusHours(1), 10)
                         )))
                 .andExpect(status().isBadRequest());
+    }
 
+    @Test
+    void addScheduleWithFaultPoint() throws Exception {
         mockMvc.perform(post("/groups/1/schedules")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
@@ -115,7 +118,10 @@ class ScheduleControllerTest {
                                         LocalDateTime.now().plusHours(1), 0)
                         )))
                 .andExpect(status().isBadRequest());
+    }
 
+    @Test
+    void addScheduleWithFaultScheduleTime() throws Exception {
         mockMvc.perform(post("/groups/1/schedules")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
@@ -129,7 +135,7 @@ class ScheduleControllerTest {
     @Test
     void updateSchedule() throws Exception {
         ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto("sche1",
-                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now());
+                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1));
         mockMvc.perform(patch("/groups/1/schedules/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
@@ -139,12 +145,20 @@ class ScheduleControllerTest {
     @Test
     void updateScheduleWithFaultDto() throws Exception {
         ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto(" ",
-                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now());
+                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1));
         mockMvc.perform(patch("/groups/1/schedules/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
                 .andExpect(status().isBadRequest());
+    }
 
-
+    @Test
+    void updateScheduleWithFaultScheduleTime() throws Exception {
+        ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto(" ",
+                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusMinutes(30));
+        mockMvc.perform(patch("/groups/1/schedules/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
+                .andExpect(status().isBadRequest());
     }
 }

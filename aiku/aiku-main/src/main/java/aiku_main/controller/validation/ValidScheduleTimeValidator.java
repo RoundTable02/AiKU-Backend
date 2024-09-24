@@ -6,9 +6,9 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class ValidScheduleAddTimeValidator implements ConstraintValidator<ValidScheduleAddTime, LocalDateTime> {
+public class ValidScheduleTimeValidator implements ConstraintValidator<ValidScheduleTime, LocalDateTime> {
     @Override
-    public void initialize(ValidScheduleAddTime constraintAnnotation) {
+    public void initialize(ValidScheduleTime constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 

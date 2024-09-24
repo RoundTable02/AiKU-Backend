@@ -2,7 +2,6 @@ package aiku_main.controller;
 
 import aiku_main.dto.BettingAddDto;
 import aiku_main.service.BettingService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,14 +51,17 @@ class BettingControllerTest {
         mockMvc.perform(post("/schedules/1/bettings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new BettingAddDto(1L, 0)
+                                new BettingAddDto(null, 100)
                         )))
                 .andExpect(status().isBadRequest());
+    }
 
+    @Test
+    void addBettingWithFaultPoint() throws Exception {
         mockMvc.perform(post("/schedules/1/bettings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new BettingAddDto(null, 100)
+                                new BettingAddDto(1L, 0)
                         )))
                 .andExpect(status().isBadRequest());
 

@@ -7,6 +7,7 @@ import aiku_main.dto.TeamEachListResDto;
 import aiku_main.service.TeamService;
 import common.response.BaseResponse;
 import common.response.status.BaseCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class TeamController {
     private final TeamService teamService;
 
     @PostMapping
-    public BaseResponse addTeam(@RequestBody TeamAddDto teamDto){
+    public BaseResponse addTeam(@RequestBody @Valid TeamAddDto teamDto){
         Long teamId = teamService.addTeam(null, teamDto);
 
         return BaseResponse.getSimpleRes(teamId, POST);

@@ -41,11 +41,11 @@ class TeamControllerTest {
         TeamAddDto teamAddDto = new TeamAddDto("group name");
         mockMvc.perform(post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(teamAddDto)));
+                .content(objectMapper.writeValueAsString(teamAddDto)))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("그룹 등록-입력 조건에 맞지 않는 body")
     void addTeamWithFaultDto() throws Exception {
         mockMvc.perform(post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)

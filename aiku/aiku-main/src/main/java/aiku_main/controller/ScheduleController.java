@@ -5,6 +5,7 @@ import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import common.response.status.BaseCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ScheduleController {
 
     @PostMapping()
     public BaseResponse<BaseResultDto> addSchedule(@PathVariable Long groupId,
-                                                   @RequestBody ScheduleAddDto scheduleDto){
+                                                   @RequestBody @Valid ScheduleAddDto scheduleDto){
         Long addId = scheduleService.addSchedule(null, groupId, scheduleDto);
 
         return BaseResponse.getSimpleRes(addId, BaseCode.POST);

@@ -1,6 +1,6 @@
 package aiku_main.dto;
 
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import lombok.Getter;
 
 import java.util.List;

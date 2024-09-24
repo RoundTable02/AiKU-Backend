@@ -15,10 +15,15 @@ public enum BaseErrorCode implements StatusCode{
     NOT_FOUND(4040, HttpStatus.NOT_FOUND.getReasonPhrase(), HttpStatus.NOT_FOUND),
     METHOD_NOT_ALLOWED(4050, HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase(), HttpStatus.METHOD_NOT_ALLOWED),
 
-    AlreadyInTeam(4003, "이미 팀에 소속되어 있습니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_IN_TEAM(4003, "이미 팀에 소속되어 있습니다.", HttpStatus.BAD_REQUEST),
     CAN_NOT_EXIT(4004, "실행중인 스케줄이 있습니다.", HttpStatus.BAD_REQUEST),
-    NOT_AVAILABLE_SCHEDULE(4005, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),
     ALREADY_HAS_BETTING(4006, "이미 베팅이 존재합니다.", HttpStatus.BAD_REQUEST),
+
+    NOT_AVAILABLE_SCHEDULE(4031, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),
+    FORBIDDEN_SCHEDULE_UPDATE_TIME(4032, "스케줄 변경이 불가한 시간입니다.", HttpStatus.FORBIDDEN),
+    FORBIDDEN_SCHEDULE_UPDATE_STATUS(4033, "변경이 불가능한 스케줄 상태입니다.", HttpStatus.FORBIDDEN),
+    FREE_MEMBER_LIMIT(4034, "깍두기 제한 기능입니다.", HttpStatus.FORBIDDEN),
+
 
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(5000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR);

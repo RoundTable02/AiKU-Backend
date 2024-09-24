@@ -1,6 +1,6 @@
 package common.domain.value_reference;
 
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;

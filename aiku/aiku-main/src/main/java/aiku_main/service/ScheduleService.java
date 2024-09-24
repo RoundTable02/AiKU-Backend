@@ -3,13 +3,15 @@ package aiku_main.service;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.ExecStatus;
+import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import common.domain.Status;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
@@ -22,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -35,6 +39,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 @Service
 public class ScheduleService {
 
+    private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleReadRepository scheduleReadRepository;
     private final TeamRepository teamRepository;
@@ -68,10 +73,13 @@ public class ScheduleService {
     @Transactional
     public Long updateSchedule(Member member, Long scheduleId, ScheduleUpdateDto scheduleDto){
         //검증 로직
-        checkIsOwner(member.getId(), scheduleId);
-
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
+
+        checkScheduleUpdateTime(schedule);
+
+        checkIsOwner(member.getId(), scheduleId);
 
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
@@ -90,6 +98,7 @@ public class ScheduleService {
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
 
         //서비스 로직
         schedule.addScheduleMember(member, false, enterDto.getPointAmount());
@@ -101,6 +110,7 @@ public class ScheduleService {
         return schedule.getId();
     }
 
+    //팀원이 남았다면 방장 위임, 안남았다면 스케줄 삭제
     @Transactional
     public Long exitSchedule(Member member, Long teamId, Long scheduleId) {
         //검증 로직
@@ -108,14 +118,27 @@ public class ScheduleService {
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsAlive(schedule);
+        checkIsWait(schedule);
 
         //서비스 로직
-        int schedulePoint = schedule.removeScheduleMember(member);
+        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(member.getId(), scheduleId).orElseThrow();
+
+        Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
+        if(scheduleMemberCount <= 1){
+            schedule.delete();
+        }else if(scheduleMember.isOwner()){
+            ScheduleMember nextScheduleOwner = findNextScheduleOwner(scheduleId, scheduleMember.getId());
+            schedule.changeScheduleOwner(nextScheduleOwner);
+        }
+
+        schedule.removeScheduleMember(scheduleMember);
+
+        int schedulePoint = scheduleMember.getPointAmount();
         if(schedulePoint > 0){
             pointChangeEventPublisher.publish(member, PLUS, schedulePoint, SCHEDULE, schedule.getId());
         }
 
-        scheduleEventPublisher.publishScheduleExitEvent(member, schedule);
+        scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
         return schedule.getId();
     }
@@ -161,16 +184,82 @@ public class ScheduleService {
         return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
     }
 
-    //== 이벤트 핸들러 실행 메서드 ==
+    //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
-        
+        Member member = memberRepository.findById(memberId).orElseThrow();
+
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findWaitScheduleMemberWithScheduleInTeam(memberId, teamId);
+        scheduleMembers.forEach((scheduleMember) ->{
+            Schedule schedule = scheduleMember.getSchedule();
+            schedule.removeScheduleMember(scheduleMember);
+            scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
+        });
+    }
+
+    @Transactional
+    public void scheduleOpen(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        schedule.setScheduleStatus(ExecStatus.RUN);
+
+        //TODO 카프카, 알림
+    }
+
+    @Transactional
+    public void scheduleAutoClose(Long scheduleId) {
+        if (scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.TERM, Status.ALIVE)){
+            return;
+        }
+
+        Schedule schedule = scheduleRepository.findScheduleWithNotArriveScheduleMember(scheduleId).orElseThrow();
+
+        LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
+        schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
+    }
+
+    @Transactional
+    public void processScheduleResultPoint(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+
+        List<ScheduleMember> earlyMembers = scheduleRepository.findPaidEarlyScheduleMemberWithMember(scheduleId);
+
+        if(earlyMembers.size() == 0) {
+            scheduleRepository.findPaidLateScheduleMemberWithMember(scheduleId)
+                    .forEach((lateMember) -> {
+                        int rewardPointAmount = lateMember.getPointAmount();
+                        pointChangeEventPublisher.publish(lateMember.getMember(), PLUS, rewardPointAmount, SCHEDULE, scheduleId);
+                        schedule.rewardMember(lateMember, rewardPointAmount);
+                    });
+            return;
+        }
+
+        int pointAmountOfLateMembers = scheduleRepository.findPointAmountOfLatePaidScheduleMember(scheduleId);
+        int rewardOfEarlyMember = pointAmountOfLateMembers / earlyMembers.size();
+
+        earlyMembers.forEach((earlyScheduleMember) -> {
+            int rewardPointAmount = earlyScheduleMember.getPointAmount() + rewardOfEarlyMember;
+            pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE, scheduleId);
+            schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
+        });
     }
 
     //== 편의 메서드 ==
+    private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
+        ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);
+        if (nextOwner == null) {
+            throw new BaseExceptionImpl(BaseErrorCode.INTERNAL_SERVER_ERROR, "스케줄의 다음 방장을 찾을 수 없습니다.");
+        }
+        return nextOwner;
+    }
     private void checkIsAlive(Schedule schedule){
         if(schedule.getStatus() == Status.DELETE){
             throw new NoSuchElementException();
+        }
+    }
+
+    private void checkIsWait(Schedule schedule){
+        if(schedule.getScheduleStatus() != ExecStatus.WAIT){
+            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_STATUS);
         }
     }
 
@@ -203,8 +292,15 @@ public class ScheduleService {
             if(isMember){
                 throw new NoAuthorityException();
             }else{
-                throw new BaseExceptionImpl(BaseErrorCode.AlreadyInTeam);
+                throw new BaseExceptionImpl(BaseErrorCode.ALREADY_IN_TEAM);
             }
+        }
+    }
+
+    private void checkScheduleUpdateTime(Schedule schedule){
+        long minutesDiff = Duration.between(LocalDateTime.now(), schedule.getScheduleTime()).toMinutes();
+        if(minutesDiff < 60){
+            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_TIME);
         }
     }
 }

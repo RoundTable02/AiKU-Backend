@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.schedule.ScheduleMember;
 import common.domain.value_reference.ScheduleMemberValue;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

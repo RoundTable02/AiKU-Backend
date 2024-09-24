@@ -1,15 +1,12 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.QBetting;
-import common.domain.QScheduleMember;
-import common.domain.Status;
 import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
 
 import static common.domain.QBetting.betting;
-import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
+import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
 public class BettingRepositoryCustomImpl implements BettingRepositoryCustom{

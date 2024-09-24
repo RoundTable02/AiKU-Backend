@@ -1,8 +1,9 @@
 package aiku_main.scheduler;
 
+import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.ExecStatus;
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
@@ -21,9 +22,10 @@ public class ScheduleScheduler {
 
     private final TaskScheduler scheduler;
     private final ScheduleRepository scheduleRepository;
+    private final ScheduleEventPublisher scheduleEventPublisher;
 
-    private final ConcurrentHashMap<Long, ScheduledFuture> mapOpenTasks = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, ScheduledFuture> mapCloseTasks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAutoCloseTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAlarmTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
@@ -34,13 +36,13 @@ public class ScheduleScheduler {
     }
 
     public void reserveSchedule(Long scheduleId, LocalDateTime scheduleTime){
-        reserveMapOpen(scheduleId, scheduleTime);
-        reserveMapClose(scheduleId, scheduleTime);
+        reserveScheduleOpen(scheduleId, scheduleTime);
+        reserveScheduleAutoClose(scheduleId, scheduleTime);
         reserveAlarm(scheduleId, scheduleTime);
     }
 
     public void changeSchedule(Long scheduleId, LocalDateTime scheduleTime){
-        cancleAll(scheduleId);
+        cancelAll(scheduleId);
         reserveSchedule(scheduleId, scheduleTime);
     }
 
@@ -53,36 +55,37 @@ public class ScheduleScheduler {
         scheduleAlarmTasks.put(scheduleId, future);
     }
 
-    //TODO Runnable 추가
-    private void reserveMapOpen(Long scheduleId, LocalDateTime scheduleTime){
+    private void reserveScheduleOpen(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).minus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
-        mapOpenTasks.put(scheduleId, future);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()-> {
+            scheduleEventPublisher.publishScheduleOpenEvent(scheduleId);
+            }, delayTime);
+        scheduleOpenTasks.put(scheduleId, future);
     }
 
-    //TODO Runnable 추가
-
-    private void reserveMapClose(Long scheduleId, LocalDateTime scheduleTime){
+    private void reserveScheduleAutoClose(Long scheduleId, LocalDateTime scheduleTime){
         Duration delayTime = getDuration(scheduleTime).plus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
-        mapCloseTasks.put(scheduleId, future);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{
+            scheduleEventPublisher.publishScheduleAutoCloseEvent(scheduleId);
+        }, delayTime);
+        scheduleAutoCloseTasks.put(scheduleId, future);
     }
 
-    private void cancleAll(Long scheduleId){
-        ScheduledFuture future1 = mapOpenTasks.get(scheduleId);
+    private void cancelAll(Long scheduleId){
+        ScheduledFuture future1 = scheduleOpenTasks.get(scheduleId);
         if (future1 != null) {
             future1.cancel(false);
-            mapOpenTasks.remove(scheduleId);
+            scheduleOpenTasks.remove(scheduleId);
         }
 
-        ScheduledFuture future2 = mapCloseTasks.get(scheduleId);
+        ScheduledFuture future2 = scheduleAutoCloseTasks.get(scheduleId);
         if (future2 != null) {
             future2.cancel(false);
-            mapCloseTasks.remove(scheduleId);
+            scheduleAutoCloseTasks.remove(scheduleId);
         }
 
         ScheduledFuture future3 = scheduleAlarmTasks.get(scheduleId);

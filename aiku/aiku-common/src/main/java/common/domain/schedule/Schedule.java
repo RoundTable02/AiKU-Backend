@@ -1,5 +1,6 @@
-package common.domain;
+package common.domain.schedule;
 
+import common.domain.*;
 import common.domain.member.Member;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Schedule extends BaseTime{
+public class Schedule extends BaseTime {
 
     @Column(name = "scheduleId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +36,7 @@ public class Schedule extends BaseTime{
     private ExecStatus scheduleStatus;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
@@ -45,7 +47,6 @@ public class Schedule extends BaseTime{
         this.scheduleTime = scheduleTime;
         this.location = location;
         this.scheduleStatus = ExecStatus.WAIT;
-        this.status = Status.ALIVE;
     }
 
     //==CUD 편의 메서드==
@@ -64,24 +65,38 @@ public class Schedule extends BaseTime{
         this.location = location;
     }
 
+    public void delete(){
+        this.status = Status.DELETE;
+    }
+
     //==편의 메서드==
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
     }
 
-    public int removeScheduleMember(Member member) {
-        for (int i = 0; i < scheduleMembers.size(); i++) {
-            ScheduleMember scheduleMember = scheduleMembers.get(i);
-            if(scheduleMember.getMember().getId() == member.getId()){
-                scheduleMember.setStatus(Status.DELETE);
-                return scheduleMember.getPointAmount();
-            }
-        }
-        return 0;
+    public void removeScheduleMember(ScheduleMember scheduleMember) {
+        scheduleMember.setStatus(Status.DELETE);
+    }
+
+    public void changeScheduleOwner(ScheduleMember nextOwner){
+        nextOwner.setOwner();
     }
 
     public void setScheduleStatus(ExecStatus scheduleStatus) {
         this.scheduleStatus = scheduleStatus;
+    }
+
+    public void arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
+        scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
+    }
+
+    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
+        notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
+        this.scheduleStatus = ExecStatus.TERM;
+    }
+
+    public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
+        scheduleMember.setRewardPointAmount(rewardPointAmount);
     }
 }

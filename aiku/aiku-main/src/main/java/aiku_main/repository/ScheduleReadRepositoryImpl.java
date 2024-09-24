@@ -6,17 +6,16 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
-import common.domain.team.QTeam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static common.domain.QSchedule.schedule;
-import static common.domain.QScheduleMember.scheduleMember;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
+import static common.domain.schedule.QSchedule.schedule;
+import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.team.QTeam.team;
 
 @RequiredArgsConstructor
@@ -72,11 +71,13 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         schedule.scheduleTime, schedule.scheduleStatus,
                         Expressions.stringTemplate("STRING_AGG({0}, ',')", scheduleMember.member.id)))
                 .from(schedule)
-                .leftJoin(scheduleMember).on(
+                .innerJoin(scheduleMember).on(
                         scheduleMember.schedule.id.eq(schedule.id),
                         scheduleMember.status.eq(ALIVE))
                 .where(schedule.id.in(scheduleIdList))
-                .groupBy(schedule.id, schedule.scheduleName, schedule.location, schedule.scheduleTime, schedule.scheduleStatus)
+                .groupBy(schedule.id, schedule.scheduleName, schedule.location.locationName,
+                        schedule.location.latitude, schedule.location.longitude,
+                        schedule.scheduleTime, schedule.scheduleStatus)
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }

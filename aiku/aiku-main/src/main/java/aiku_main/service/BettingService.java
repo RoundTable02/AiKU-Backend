@@ -4,22 +4,25 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
 import aiku_main.exception.CanNotBettingException;
 import aiku_main.repository.BettingRepository;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import common.domain.Betting;
 import common.domain.ExecStatus;
-import common.domain.ScheduleMember;
+import common.domain.schedule.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
+import common.exception.PaidMemberLimitException;
 import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static aiku_main.application_event.event.PointChangeReason.BETTING;
+import static aiku_main.application_event.event.PointChangeReason.BETTING_CANCLE;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 
@@ -28,6 +31,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 @Service
 public class BettingService {
 
+    private final MemberRepository memberRepository;
     private final BettingRepository bettingRepository;
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
@@ -36,8 +40,9 @@ public class BettingService {
     @Transactional
     public Long addBetting(Member member, Long scheduleId, BettingAddDto bettingDto){
         //검증 로직
-        checkScheduleMember(member.getId(), scheduleId);
-        checkScheduleUsable(scheduleId);
+        checkPaidScheduleMember(member.getId(), scheduleId);
+        checkPaidScheduleMember(bettingDto.getBeteeMemberId(), scheduleId);
+        checkScheduleWait(scheduleId);
 
         ScheduleMemberValue bettor = new ScheduleMemberValue(findScheduleMember(member.getId(), scheduleId));
         ScheduleMemberValue bettee = new ScheduleMemberValue(findScheduleMember(bettingDto.getBeteeMemberId(), scheduleId));
@@ -70,13 +75,37 @@ public class BettingService {
         return betting.getId();
     }
 
+    //==이벤트 핸들러==
+    @Transactional
+    public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
+        Betting bettingForBettor = bettingRepository.findByBettorIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        bettingForBettor.setStatus(Status.DELETE);
+
+        int pointAmount = bettingForBettor.getPointAmount();
+        Member member = memberRepository.findById(memberId).orElseThrow();
+        pointChangeEventPublisher.publish(member, PLUS, pointAmount, BETTING_CANCLE, bettingForBettor.getId());
+    }
+
+    @Transactional
+    public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
+        Betting bettingForBetee = bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
+        bettingForBetee.setStatus(Status.DELETE);
+
+        int pointAmount = bettingForBetee.getPointAmount();
+        Member bettor = scheduleRepository.findScheduleMemberWithMemberById(bettingForBetee.getBettor().getId()).orElseThrow()
+                .getMember();
+        pointChangeEventPublisher.publish(bettor, PLUS, pointAmount, BETTING_CANCLE, bettingForBetee.getId());
+
+        //TODO 베터한테 푸쉬 알림 줘야함. 강제 베팅 취소기 때문에..
+    }
+
     //==엔티티 조회 메서드==
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        return scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+        return scheduleRepository.findAliveScheduleMember(memberId, scheduleId).orElseThrow();
     }
 
     //==편의 메서드==
-    private void checkScheduleUsable(Long scheduleId) {
+    private void checkScheduleWait(Long scheduleId) {
         if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
         }
@@ -94,9 +123,9 @@ public class BettingService {
         }
     }
 
-    private void checkScheduleMember(Long memberId, Long scheduleId){
-        if(!scheduleRepository.existScheduleMember(memberId, scheduleId)){
-            throw new NoAuthorityException();
+    private void checkPaidScheduleMember(Long memberId, Long scheduleId){
+        if(!scheduleRepository.existPaidScheduleMember(memberId, scheduleId)){
+            throw new PaidMemberLimitException();
         }
     }
 

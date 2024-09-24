@@ -10,7 +10,7 @@ import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Location;
 import common.domain.member.Member;
-import common.domain.Schedule;
+import common.domain.schedule.Schedule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -93,7 +93,7 @@ class ScheduleServiceTest {
 
     Schedule createSpySchedule(Member member, Long teamId, int pointAmount){
         return spy(Schedule.create(member, null,
-                randomUUID().toString(), LocalDateTime.now(),
+                randomUUID().toString(), LocalDateTime.now().plusHours(3),
                 new Location(randomUUID().toString(), random(), random()), pointAmount));
     }
 

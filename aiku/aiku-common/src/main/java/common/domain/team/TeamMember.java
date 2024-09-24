@@ -25,16 +25,12 @@ public class TeamMember extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private boolean isOwner;
-
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
 
-    protected TeamMember(Team team, Member member, boolean isOwner) {
+    protected TeamMember(Team team, Member member) {
         this.team = team;
         this.member = member;
-        this.isOwner = isOwner;
-        this.status = Status.ALIVE;
     }
 
     //==편의 메서드==

@@ -65,7 +65,7 @@ class TeamServiceTest {
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
         Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2, false);
+        team.addTeamMember(member2);
 
         when(teamRepository.existTeamMember(any(), any())).thenReturn(true);
         when(teamReadRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));

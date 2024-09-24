@@ -189,6 +189,15 @@ public class ScheduleService {
         return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
     }
 
+    public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleArrivalResult();
+    }
+
     //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
@@ -253,7 +262,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
 
         List<ScheduleArrivalMember> arrivalMembers = scheduleReadRepository.getScheduleArrivalResults(scheduleId);
-        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(arrivalMembers);
+        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
         try {
             schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
         } catch (JsonProcessingException e) {
@@ -278,6 +287,12 @@ public class ScheduleService {
     private void checkIsWait(Schedule schedule){
         if(schedule.getScheduleStatus() != ExecStatus.WAIT){
             throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_STATUS);
+        }
+    }
+
+    private void checkIsTerm(Schedule schedule){
+        if(schedule.getScheduleStatus() != ExecStatus.TERM){
+            throw new BaseExceptionImpl(BaseErrorCode.SCHEDULE_NOT_TERM);
         }
     }
 

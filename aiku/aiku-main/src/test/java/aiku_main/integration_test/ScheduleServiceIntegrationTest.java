@@ -904,7 +904,7 @@ public class ScheduleServiceIntegrationTest {
         assertThat(findSchedule).isNotNull();
 
         String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();
-        List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getData();
+        List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getMembers();
         assertThat(data).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 

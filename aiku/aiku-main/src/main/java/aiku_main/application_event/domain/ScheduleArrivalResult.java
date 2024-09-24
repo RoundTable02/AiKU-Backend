@@ -8,9 +8,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ScheduleArrivalResult {
-    private List<ScheduleArrivalMember> data;
+    private Long scheduleId;
+    private List<ScheduleArrivalMember> members;
 
-    public ScheduleArrivalResult(List<ScheduleArrivalMember> data) {
-        this.data = data;
+    public ScheduleArrivalResult(Long scheduleId, List<ScheduleArrivalMember> members) {
+        this.scheduleId = scheduleId;
+        this.members = members;
     }
 }

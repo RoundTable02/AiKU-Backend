@@ -70,8 +70,16 @@ public class ScheduleController {
 
     @GetMapping("/schedules")
     public BaseResponse<MemberScheduleListResDto> getMemberScheduleList(@ModelAttribute SearchDateCond dateCond,
-                                                                    @RequestParam(defaultValue = "1") int page){
+                                                                        @RequestParam(defaultValue = "1") int page){
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(null, dateCond, page);
+
+        return new BaseResponse<>(result, BaseCode.GET);
+    }
+
+    @GetMapping("/{scheduleId}/arrival/result")
+    public BaseResponse<String> getScheduleArrivalResult(@PathVariable Long groupId,
+                                                   @PathVariable Long scheduleId){
+        String result = scheduleService.getScheduleArrivalResult(null, groupId, scheduleId);
 
         return new BaseResponse<>(result, BaseCode.GET);
     }

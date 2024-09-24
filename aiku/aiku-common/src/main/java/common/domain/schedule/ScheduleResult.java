@@ -19,11 +19,11 @@ public class ScheduleResult extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Schedule schedule;
 
-    @Column(length = 1024)
+    @Column(length = 8192)
     private String scheduleArrivalResult;
-    @Column(length = 1024)
+    @Column(length = 8192)
     private String scheduleBettingResult;
-    @Column(length = 1024)
+    @Column(length = 8192)
     private String scheduleRacingResult;
 
     //==편의 메서드==

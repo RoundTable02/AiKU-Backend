@@ -906,7 +906,6 @@ public class ScheduleServiceIntegrationTest {
         String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();
         List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getData();
         assertThat(data).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
-        System.out.println("scheduleArrivalResultStr.toString() = " + scheduleArrivalResultStr.toString());
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){

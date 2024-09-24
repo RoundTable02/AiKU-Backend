@@ -13,15 +13,13 @@ public class ScheduleArrivalMember{
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;
-    private LocalDateTime arrivalTime;
     private int arrivalTimeDiff;
 
     @QueryProjection
-    public ScheduleArrivalMember(Long memberId, String nickname, MemberProfileResDto memberProfile, LocalDateTime arrivalTime, int arrivalTimeDiff) {
+    public ScheduleArrivalMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int arrivalTimeDiff) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;
-        this.arrivalTime = arrivalTime;
         this.arrivalTimeDiff = arrivalTimeDiff;
     }
 }

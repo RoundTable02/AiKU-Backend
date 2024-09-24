@@ -165,7 +165,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        scheduleMember.arrivalTime, scheduleMember.arrivalTimeDiff))
+                        scheduleMember.arrivalTimeDiff))
                 .from(scheduleMember)
                 .join(member).on(member.id.eq(scheduleMember.member.id))
                 .where(scheduleMember.schedule.id.eq(scheduleId),

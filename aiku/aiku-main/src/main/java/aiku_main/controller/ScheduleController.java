@@ -38,7 +38,7 @@ public class ScheduleController {
     @PostMapping("/{scheduleId}/enter")
     public BaseResponse<BaseResultDto> enterSchedule(@PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
-                                                      @RequestBody ScheduleEnterDto enterDto){
+                                                      @RequestBody @Valid ScheduleEnterDto enterDto){
         Long enterId = scheduleService.enterSchedule(null, groupId, scheduleId, enterDto);
 
         return BaseResponse.getSimpleRes(enterId, BaseCode.ENTER);

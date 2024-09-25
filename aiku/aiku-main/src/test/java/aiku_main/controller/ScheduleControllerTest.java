@@ -2,6 +2,7 @@ package aiku_main.controller;
 
 import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleAddDto;
+import aiku_main.dto.ScheduleEnterDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.service.ScheduleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,7 +116,7 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
                                         new LocationDto("lo1", null, 1.1),
-                                        LocalDateTime.now().plusHours(1), 0)
+                                        LocalDateTime.now().plusHours(1), -10)
                         )))
                 .andExpect(status().isBadRequest());
     }
@@ -159,6 +160,22 @@ class ScheduleControllerTest {
         mockMvc.perform(patch("/groups/1/schedules/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void enterSchedule() throws Exception {
+        mockMvc.perform(post("/groups/1/schedules/1/enter")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ScheduleEnterDto(0))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void enterScheduleWithFaultPoint() throws Exception {
+        mockMvc.perform(post("/groups/1/schedules/1/enter")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ScheduleEnterDto(3))))
                 .andExpect(status().isBadRequest());
     }
 }

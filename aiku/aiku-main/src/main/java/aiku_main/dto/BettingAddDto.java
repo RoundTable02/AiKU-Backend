@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class BettingAddDto {
     @NotNull
     private Long beteeMemberId;
+    @Min(10)
     @ValidPointAmount
     private Integer pointAmount;
 }

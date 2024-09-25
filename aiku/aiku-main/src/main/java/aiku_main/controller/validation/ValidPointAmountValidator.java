@@ -14,7 +14,7 @@ public class ValidPointAmountValidator implements ConstraintValidator<ValidPoint
 
     @Override
     public boolean isValid(Integer integer, ConstraintValidatorContext constraintValidatorContext) {
-        if(integer % 10 != 0 || integer < 10){
+        if(integer % 10 != 0 || integer < 0){
             return false;
         }
         return true;

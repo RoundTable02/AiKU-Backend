@@ -7,6 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class LocationDto {
+
     private String locationName;
     private Double latitude;
     private Double longitude;

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MemberScheduleListEachResDto {
+
     private Long groupId;
     private String groupName;
     private Long scheduleId;

@@ -6,5 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ScheduleOpenEvent {
+
     private Long scheduleId;
 }

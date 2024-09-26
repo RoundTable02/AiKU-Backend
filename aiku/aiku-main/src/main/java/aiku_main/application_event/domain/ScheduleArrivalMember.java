@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class ScheduleArrivalMember{
+
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;

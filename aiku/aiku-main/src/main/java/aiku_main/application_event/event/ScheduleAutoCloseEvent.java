@@ -6,5 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ScheduleAutoCloseEvent {
+
     private Long scheduleId;
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScheduleBettingMember {
+
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;

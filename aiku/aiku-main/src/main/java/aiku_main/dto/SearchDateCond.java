@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchDateCond {
+
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 }

@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScheduleBettingResult {
+
     private Long scheduleId;
     private List<ScheduleBetting> data;
 }

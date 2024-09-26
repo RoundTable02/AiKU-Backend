@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScheduleBetting {
+
     private ScheduleBettingMember bettor;
     private ScheduleBettingMember betee;
     private int pointAmount;

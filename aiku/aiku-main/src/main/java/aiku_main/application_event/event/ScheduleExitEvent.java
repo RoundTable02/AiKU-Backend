@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ScheduleExitEvent {
+
     private MemberValue member;
     private ScheduleMemberValue scheduleMember;
     private ScheduleValue schedule;

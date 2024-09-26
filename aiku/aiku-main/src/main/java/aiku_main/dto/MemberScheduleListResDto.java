@@ -6,6 +6,7 @@ import java.util.List;
 
 @Getter
 public class MemberScheduleListResDto {
+
     private Long totalCount;
     private int page;
     private int runSchedule;

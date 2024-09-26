@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ScheduleAddDto {
+
     private String scheduleName;
     private LocationDto location;
     private LocalDateTime scheduleTime;

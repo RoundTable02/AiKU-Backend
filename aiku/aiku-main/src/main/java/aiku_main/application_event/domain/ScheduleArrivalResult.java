@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ScheduleArrivalResult {
+
     private Long scheduleId;
     private List<ScheduleArrivalMember> members;
 

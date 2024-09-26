@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 public class ScheduleDetailResDto {
+
     private Long scheduleId;
     private String scheduleName;
     private LocationDto location;

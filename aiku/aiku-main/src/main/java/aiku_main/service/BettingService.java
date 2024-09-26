@@ -21,6 +21,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static aiku_main.application_event.event.PointChangeReason.BETTING;
 import static aiku_main.application_event.event.PointChangeReason.BETTING_CANCLE;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
@@ -97,6 +101,74 @@ public class BettingService {
         pointChangeEventPublisher.publish(bettor, PLUS, pointAmount, BETTING_CANCLE, bettingForBetee.getId());
 
         //TODO 베터한테 푸쉬 알림 줘야함. 강제 베팅 취소기 때문에..
+    }
+
+    @Transactional
+    public void processBettingResult(Long scheduleId) {
+        Map<Long, ScheduleMember> scheduleMembers =
+                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
+                .collect(Collectors.toMap(
+                        sm -> sm.getId(),
+                        sm -> sm
+                ));
+
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId);
+
+        LocalDateTime latestTime = getLatestTimeOfLateMember(scheduleMembers.values());
+        long winBettingCount = countWinBetting(scheduleMembers, bettings, latestTime);
+
+        if(winBettingCount == 0) {
+            for (Betting betting : bettings) {
+                betting.setDraw();
+                pointChangeEventPublisher.publish(scheduleMembers.get(betting.getBettor().getId()).getMember(),
+                        PLUS, betting.getPointAmount(), BETTING, betting.getId());
+            }
+            return;
+        }
+
+        int bettingPointAmount = getBettingPointAmount(bettings);
+        int winnerPointAmount = getWinnersPointAmount(scheduleMembers, bettings, latestTime);
+
+        for (Betting betting : bettings) {
+            if(scheduleMembers.get(betting.getBetee().getId()).getArrivalTime().equals(latestTime)){
+                int rewardPoint = getBettingRewardPoint(betting.getPointAmount(), winnerPointAmount, bettingPointAmount);
+                betting.setWin(rewardPoint);
+                pointChangeEventPublisher.publish(scheduleMembers.get(betting.getBettor().getId()).getMember(),
+                        PLUS, rewardPoint, BETTING, betting.getId());
+            }else {
+                betting.setLose();
+            }
+        }
+    }
+
+    private LocalDateTime getLatestTimeOfLateMember(Collection<ScheduleMember> scheduleMembers){
+        return scheduleMembers.stream()
+                .filter(scheduleMember -> scheduleMember.getArrivalTimeDiff() < 0)
+                .max(Comparator.comparing(ScheduleMember::getArrivalTime))
+                .map(ScheduleMember::getArrivalTime)
+                .orElse(null);
+    }
+
+    private long countWinBetting(Map<Long, ScheduleMember> scheduleMembers, List<Betting> bettings, LocalDateTime latestTime){
+        if (latestTime == null) return 0L;
+        return bettings.stream()
+                .filter(betting -> scheduleMembers.get(betting.getBetee().getId()).getArrivalTime().equals(latestTime))
+                .count();
+    }
+
+    private int getBettingPointAmount(List<Betting> bettings){
+        return bettings.stream().mapToInt(Betting::getPointAmount).sum();
+    }
+
+    private int getWinnersPointAmount(Map<Long, ScheduleMember> scheduleMembers, List<Betting> bettings, LocalDateTime latestTime){
+        return bettings.stream()
+                .filter(betting -> scheduleMembers.get(betting.getBetee().getId()).getArrivalTime().equals(latestTime))
+                .mapToInt(Betting::getPointAmount)
+                .sum();
+    }
+
+    private int getBettingRewardPoint(int bettingPoint, int winnerPointAmount, int bettingPointAmount) {
+        return (int) ((double) bettingPoint / winnerPointAmount * bettingPointAmount);
     }
 
     //==엔티티 조회 메서드==

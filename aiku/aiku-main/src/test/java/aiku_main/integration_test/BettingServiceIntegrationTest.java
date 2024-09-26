@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static common.domain.ExecStatus.*;
@@ -267,5 +268,103 @@ class BettingServiceIntegrationTest {
         Betting findBetting = bettingRepository.findById(betting.getId()).orElse(null);
         assertThat(findBetting).isNotNull();
         assertThat(findBetting.getStatus()).isEqualTo(DELETE);
+    }
+
+    @Test
+    void 이벤트핸들러_베팅_결과_계산_지각자x_전원환급(){
+        //given
+        ScheduleMember scheduleMember1 = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember2 = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember3 = scheduleRepository.findAliveScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember3), 200);
+        em.persist(betting1);
+        em.persist(betting2);
+
+        List<ScheduleMember> scheduleMembers = schedule1.getScheduleMembers();
+        schedule1.arriveScheduleMember(scheduleMembers.get(0), LocalDateTime.now());
+        schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
+        schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now());
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.processBettingResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        assertThat(bettings).extracting("rewardPointAmount").contains(100, 200);
+        assertThat(bettings).extracting("isWinner").contains(false, false);
+    }
+
+    @Test
+    void 이벤트핸들러_베팅_결과_계산(){
+        //given
+        ScheduleMember scheduleMember1 = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember2 = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember3 = scheduleRepository.findAliveScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember3), 200);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMember3), new ScheduleMemberValue(scheduleMember1), 300);
+        em.persist(betting1);
+        em.persist(betting2);
+        em.persist(betting3);
+
+        List<ScheduleMember> scheduleMembers = schedule1.getScheduleMembers();
+        schedule1.arriveScheduleMember(scheduleMembers.get(0), LocalDateTime.now());
+        schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
+        schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now().plusMinutes(30));
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.processBettingResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        assertThat(bettings.size()).isEqualTo(3);
+        assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
+        assertThat(bettings).extracting("isWinner").containsExactly(true, true, false);
+    }
+
+    @Test
+    void 이벤트핸들러_베팅_결과_계산_꼴찌_여러명(){
+        //given
+        ScheduleMember scheduleMember1 = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember2 = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        ScheduleMember scheduleMember3 = scheduleRepository.findAliveScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember2), 300);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMember3), new ScheduleMemberValue(scheduleMember1), 200);
+        em.persist(betting1);
+        em.persist(betting2);
+        em.persist(betting3);
+
+        List<ScheduleMember> scheduleMembers = schedule1.getScheduleMembers();
+        schedule1.arriveScheduleMember(scheduleMembers.get(0), schedule1.getScheduleTime().plusMinutes(30));
+        schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
+        schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));
+
+        em.flush();
+        em.clear();
+
+        //when
+        bettingService.processBettingResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
+        assertThat(bettings).extracting("isWinner").containsExactly(true, false, true);
     }
 }

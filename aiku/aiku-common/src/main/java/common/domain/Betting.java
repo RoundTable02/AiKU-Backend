@@ -23,14 +23,13 @@ public class Betting extends BaseTime{
     @Embedded
     private ScheduleMemberValue betee;
 
-    @AttributeOverride(name = "id", column = @Column(name = "winnerScheduleMemberId"))
-    @Embedded
-    private ScheduleMemberValue winner;
+    private boolean isWinner = false;
 
     @Enumerated(value = EnumType.STRING)
     private ExecStatus bettingStatus = ExecStatus.WAIT;
 
     private int pointAmount;
+    private int rewardPointAmount;
 
     @Enumerated(value = EnumType.STRING)
     private Status status = Status.ALIVE;
@@ -47,6 +46,21 @@ public class Betting extends BaseTime{
 
     //==편의 메서드==
 
+
+    public void setWin(int rewardPointAmount) {
+        this.isWinner = true;
+        this.rewardPointAmount = rewardPointAmount;
+    }
+
+    public void setDraw(){
+        isWinner = false;
+        rewardPointAmount = pointAmount;
+    }
+
+    public void setLose(){
+        isWinner = false;
+        rewardPointAmount = 0;
+    }
 
     public void setStatus(Status status) {
         this.status = status;

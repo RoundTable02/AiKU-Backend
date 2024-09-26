@@ -6,6 +6,7 @@ import aiku_main.application_event.event.TeamExitEvent;
 import aiku_main.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -28,6 +29,7 @@ public class ScheduleHandler {
     }
 
     @Async
+    @Order(1)
     @EventListener
     public void handleScheduleAutoCloseEvent(ScheduleAutoCloseEvent event){
         scheduleService.scheduleAutoClose(event.getScheduleId());

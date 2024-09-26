@@ -1,13 +1,19 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.ScheduleBetting;
+import aiku_main.application_event.domain.ScheduleBettingMember;
+import aiku_main.application_event.domain.ScheduleBettingResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
 import aiku_main.exception.CanNotBettingException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
 import common.domain.ExecStatus;
+import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
@@ -39,6 +45,7 @@ public class BettingService {
     private final BettingRepository bettingRepository;
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ObjectMapper objectMapper;
 
     //TODO 전체적으로 알림 전송을 위한 카프카 연결 해야됨
     @Transactional
@@ -169,6 +176,33 @@ public class BettingService {
 
     private int getBettingRewardPoint(int bettingPoint, int winnerPointAmount, int bettingPointAmount) {
         return (int) ((double) bettingPoint / winnerPointAmount * bettingPointAmount);
+    }
+
+    @Transactional
+    public void analyzeScheduleBettingResult(Long scheduleId) {
+        Map<Long, ScheduleMember> scheduleMembers =
+                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
+                        .collect(Collectors.toMap(
+                                sm -> sm.getId(),
+                                sm -> sm
+                        ));
+
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId);
+        List<ScheduleBetting> bettingDtoList = bettings.stream()
+                .map(betting -> {
+                    ScheduleBettingMember bettor = new ScheduleBettingMember(scheduleMembers.get(betting.getBettor().getId()).getMember());
+                    ScheduleBettingMember betee = new ScheduleBettingMember(scheduleMembers.get(betting.getBetee().getId()).getMember());
+                    return new ScheduleBetting(bettor, betee, betting.getPointAmount());
+                }).toList();
+
+        ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        try {
+            schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Can't Parse ScheduleBettingResult");
+        }
     }
 
     //==엔티티 조회 메서드==

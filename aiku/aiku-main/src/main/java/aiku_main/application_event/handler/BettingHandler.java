@@ -24,5 +24,6 @@ public class BettingHandler {
     @EventListener
     public void handleScheduleAutoCloseEvent(ScheduleAutoCloseEvent event){
         bettingService.processBettingResult(event.getScheduleId());
+        bettingService.analyzeScheduleBettingResult(event.getScheduleId());
     }
 }

@@ -1,18 +1,21 @@
-package aiku_main.dto;
+package aiku_main.application_event.domain;
 
+import aiku_main.dto.MemberProfileResDto;
 import common.domain.member.Member;
-import common.domain.team.TeamMember;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class TeamMemberResDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ScheduleBettingMember {
 
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;
 
-    public TeamMemberResDto(TeamMember teamMember) {
-        Member member = teamMember.getMember();
+    public ScheduleBettingMember(Member member) {
         this.memberId = member.getId();
         this.nickname = member.getNickname();
         this.memberProfile = new MemberProfileResDto(member.getProfile());

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class TeamEachListResDto {
+
     private Long groupId;
     private String groupName;
     private int memberSize;

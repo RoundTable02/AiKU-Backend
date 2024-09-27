@@ -1,8 +1,11 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.Betting;
 import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import static common.domain.QBetting.betting;
 import static common.domain.Status.ALIVE;
@@ -25,5 +28,15 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom{
                 .fetchOne();
 
         return count != null && count > 0;
+    }
+
+    @Override
+    public List<Betting> findBettingsInSchedule(Long scheduleId) {
+        return query.selectFrom(betting)
+                .join(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE),
+                        betting.status.eq(ALIVE))
+                .fetch();
     }
 }

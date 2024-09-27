@@ -9,6 +9,7 @@ import lombok.Getter;
 
 @Getter
 public class LocationDto {
+
     @NotBlank
     private String locationName;
     @NotNull

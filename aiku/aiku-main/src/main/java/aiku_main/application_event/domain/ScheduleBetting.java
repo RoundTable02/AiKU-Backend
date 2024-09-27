@@ -1,6 +1,5 @@
-package aiku_main.dto;
+package aiku_main.application_event.domain;
 
-import aiku_main.controller.validation.ValidPointAmount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScheduleEnterDto {
+public class ScheduleBetting {
 
-    @ValidPointAmount
+    private ScheduleBettingMember bettor;
+    private ScheduleBettingMember betee;
     private int pointAmount;
 }

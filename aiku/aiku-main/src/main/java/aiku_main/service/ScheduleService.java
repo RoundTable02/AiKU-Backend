@@ -1,5 +1,7 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -8,6 +10,8 @@ import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
@@ -46,6 +50,7 @@ public class ScheduleService {
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
+    private final ObjectMapper objectMapper;
 
     //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
     @Transactional
@@ -184,6 +189,15 @@ public class ScheduleService {
         return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
     }
 
+    public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleArrivalResult();
+    }
+
     //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
@@ -243,6 +257,19 @@ public class ScheduleService {
         });
     }
 
+    @Transactional
+    public void analyzeScheduleArrivalResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+
+        List<ScheduleArrivalMember> arrivalMembers = scheduleReadRepository.getScheduleArrivalResults(scheduleId);
+        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
+        try {
+            schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Can't Parse ScheduleArrivalResult");
+        } ;
+    }
+
     //== 편의 메서드 ==
     private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
         ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);
@@ -260,6 +287,12 @@ public class ScheduleService {
     private void checkIsWait(Schedule schedule){
         if(schedule.getScheduleStatus() != ExecStatus.WAIT){
             throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_STATUS);
+        }
+    }
+
+    private void checkIsTerm(Schedule schedule){
+        if(schedule.getScheduleStatus() != ExecStatus.TERM){
+            throw new BaseExceptionImpl(BaseErrorCode.SCHEDULE_NOT_TERM);
         }
     }
 

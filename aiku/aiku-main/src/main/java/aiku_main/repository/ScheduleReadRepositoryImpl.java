@@ -1,11 +1,13 @@
 package aiku_main.repository;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -154,6 +156,22 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .fetchFirst()
                 .intValue();
+    }
+
+    @Override
+    public List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId) {
+        return query
+                .select(Projections.constructor(ScheduleArrivalMember.class,
+                        member.id, member.nickname,
+                        Projections.constructor(MemberProfileResDto.class,
+                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
+                        scheduleMember.arrivalTimeDiff))
+                .from(scheduleMember)
+                .join(member).on(member.id.eq(scheduleMember.member.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .orderBy(scheduleMember.arrivalTime.asc(), scheduleMember.id.asc())
+                .fetch();
     }
 
     private BooleanExpression scheduleTimeGoe(LocalDateTime startDate){

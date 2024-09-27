@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class ScheduleMemberResDto {
+
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;

@@ -9,6 +9,7 @@ import lombok.Getter;
 
 @Getter
 public class TeamExitEvent{
+
     private MemberValue member;
     private TeamValue team;
 

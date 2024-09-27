@@ -10,6 +10,7 @@ import lombok.Getter;
 
 @Getter
 public class MemberProfileResDto{
+
     private MemberProfileType profileType;
     private String profileImg;
     private MemberProfileCharacter profileCharacter;

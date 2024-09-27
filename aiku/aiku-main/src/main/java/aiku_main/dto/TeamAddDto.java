@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamAddDto {
+
     @NotBlank @Size(max = 15)
     private String groupName;
 }

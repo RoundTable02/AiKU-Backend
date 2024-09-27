@@ -11,6 +11,7 @@ import java.util.List;
 
 @Getter
 public class TeamScheduleListEachResDto {
+
     private Long scheduleId;
     private String scheduleName;
     private LocationDto location;

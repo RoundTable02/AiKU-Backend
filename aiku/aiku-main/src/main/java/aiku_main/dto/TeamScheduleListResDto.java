@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 public class TeamScheduleListResDto {
+
     private Long totalCount;
     private int page;
     private Long groupId;

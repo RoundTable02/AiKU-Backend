@@ -19,7 +19,27 @@ public class ScheduleResult extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Schedule schedule;
 
+    @Lob
     private String scheduleArrivalResult;
+    @Lob
     private String scheduleBettingResult;
+    @Lob
     private String scheduleRacingResult;
+
+    //==편의 메서드==
+    protected void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+
+    protected void setScheduleArrivalResult(String scheduleArrivalResult) {
+        this.scheduleArrivalResult = scheduleArrivalResult;
+    }
+
+    protected void setScheduleBettingResult(String scheduleBettingResult) {
+        this.scheduleBettingResult = scheduleBettingResult;
+    }
+
+    protected void setScheduleRacingResult(String scheduleRacingResult) {
+        this.scheduleRacingResult = scheduleRacingResult;
+    }
 }

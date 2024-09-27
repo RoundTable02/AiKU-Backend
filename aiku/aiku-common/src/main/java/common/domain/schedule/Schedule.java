@@ -41,6 +41,9 @@ public class Schedule extends BaseTime {
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    ScheduleResult scheduleResult = new ScheduleResult();
+
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
         this.team = team;
         this.scheduleName = scheduleName;
@@ -53,6 +56,7 @@ public class Schedule extends BaseTime {
     public static Schedule create(Member member, TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location, int pointAmount) {
         //스케줄 생성
         Schedule schedule = new Schedule(team, scheduleName, scheduleTime, location);
+        schedule.scheduleResult.setSchedule(schedule);
 
         //생성자를 스케줄 멤버로 추가
         schedule.addScheduleMember(member, true, pointAmount);
@@ -98,5 +102,17 @@ public class Schedule extends BaseTime {
 
     public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
         scheduleMember.setRewardPointAmount(rewardPointAmount);
+    }
+
+    public void setScheduleArrivalResult(String scheduleArrivalResult) {
+        this.scheduleResult.setScheduleArrivalResult(scheduleArrivalResult);
+    }
+
+    public void setScheduleBettingResult(String scheduleBettingResult) {
+        this.scheduleResult.setScheduleBettingResult(scheduleBettingResult);
+    }
+
+    public void setScheduleRacingResult(String scheduleRacingResult) {
+        this.scheduleResult.setScheduleRacingResult(scheduleRacingResult);
     }
 }

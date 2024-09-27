@@ -5,6 +5,7 @@ import aiku_main.service.BettingService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import common.response.status.BaseCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class BettingController {
 
     @PostMapping
     public BaseResponse<BaseResultDto> addBetting(@PathVariable Long scheduleId,
-                                                  @RequestBody BettingAddDto bettingDto){
+                                                  @RequestBody @Valid BettingAddDto bettingDto){
         Long resultId = bettingService.addBetting(null, scheduleId, bettingDto);
 
         return BaseResponse.getSimpleRes(resultId, POST);

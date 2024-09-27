@@ -5,6 +5,7 @@ import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import common.response.status.BaseCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ScheduleController {
 
     @PostMapping()
     public BaseResponse<BaseResultDto> addSchedule(@PathVariable Long groupId,
-                                                   @RequestBody ScheduleAddDto scheduleDto){
+                                                   @RequestBody @Valid ScheduleAddDto scheduleDto){
         Long addId = scheduleService.addSchedule(null, groupId, scheduleDto);
 
         return BaseResponse.getSimpleRes(addId, BaseCode.POST);
@@ -28,23 +29,23 @@ public class ScheduleController {
     @PatchMapping("/{scheduleId}")
     public BaseResponse<BaseResultDto> updateSchedule(@PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
-                                                      @RequestBody ScheduleUpdateDto scheduleDto){
+                                                      @RequestBody @Valid ScheduleUpdateDto scheduleDto){
         Long updateId = scheduleService.updateSchedule(null, scheduleId, scheduleDto);
 
         return BaseResponse.getSimpleRes(updateId, BaseCode.PATCH);
     }
 
     @PostMapping("/{scheduleId}/enter")
-    public BaseResponse<BaseResultDto> enderSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> enterSchedule(@PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
-                                                      @RequestBody ScheduleEnterDto enterDto){
+                                                      @RequestBody @Valid ScheduleEnterDto enterDto){
         Long enterId = scheduleService.enterSchedule(null, groupId, scheduleId, enterDto);
 
         return BaseResponse.getSimpleRes(enterId, BaseCode.ENTER);
     }
 
     @PostMapping("/{scheduleId}/exit")
-    public BaseResponse<BaseResultDto> enderSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> exitSchedule(@PathVariable Long groupId,
                                                      @PathVariable Long scheduleId){
         Long exitId = scheduleService.exitSchedule(null, groupId, scheduleId);
 

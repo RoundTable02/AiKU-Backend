@@ -8,6 +8,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -21,7 +26,12 @@ public class Member extends BaseTime {
     private String refreshToken;
 
     private String nickname;
-    private String phoneNumber;
+    private String email;
+
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role; //MANAGER, MEMBER
 
     @Embedded
     private MemberProfile profile;
@@ -35,6 +45,10 @@ public class Member extends BaseTime {
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.
 

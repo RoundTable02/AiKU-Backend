@@ -43,21 +43,14 @@ public class TeamReadRepositoryImpl implements TeamReadRepository {
     }
 
     @Override
-    public List<TeamEachListResDto> getTeamList(Long memberId, int page, TotalCountDto totalCount) {
+    public List<TeamEachListResDto> getTeamList(Long memberId, int page) {
         QSchedule subSchedule = new QSchedule("subSchedule");
-
-        totalCount.setTotalCount(
-                query.select(teamMember.count())
-                        .from(teamMember)
-                        .where(teamMember.member.id.eq(memberId))
-                        .fetchFirst()
-        );
 
         List<Long> teamIdList = query.select(teamMember.team.id)
                 .from(teamMember)
                 .where(teamMember.member.id.eq(memberId))
                 .offset(getOffset(page))
-                .limit(10)
+                .limit(11)
                 .fetch();
 
             return query.select(Projections.constructor(TeamEachListResDto.class,

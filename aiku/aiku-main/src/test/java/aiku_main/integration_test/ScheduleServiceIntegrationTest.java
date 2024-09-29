@@ -500,7 +500,6 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(3);
         assertThat(result.getRunSchedule()).isEqualTo(1);
         assertThat(result.getWaitSchedule()).isEqualTo(2);
 
@@ -550,7 +549,6 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(1);
         assertThat(result.getRunSchedule()).isEqualTo(0);
         assertThat(result.getWaitSchedule()).isEqualTo(1);
 
@@ -590,7 +588,6 @@ public class ScheduleServiceIntegrationTest {
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(), 1);
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(2);
         assertThat(result.getWaitSchedule()).isEqualTo(0);
         assertThat(result.getRunSchedule()).isEqualTo(2);
 
@@ -636,7 +633,6 @@ public class ScheduleServiceIntegrationTest {
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(startDate, null), 1);
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(2);
         assertThat(result.getWaitSchedule()).isEqualTo(1);
         assertThat(result.getRunSchedule()).isEqualTo(1);
 

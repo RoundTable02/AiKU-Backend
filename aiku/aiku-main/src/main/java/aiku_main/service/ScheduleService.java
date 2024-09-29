@@ -189,11 +189,24 @@ public class ScheduleService {
 
     public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
         //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsTerm(schedule);
 
         //서비스 로직
         return schedule.getScheduleResult().getScheduleArrivalResult();
+    }
+
+    public String getScheduleBettingResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleBettingResult();
     }
 
     //== 이벤트 핸들러 ==

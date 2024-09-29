@@ -1,5 +1,6 @@
 package aiku_main.repository;
 
+import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.TeamEachListResDto;
 import aiku_main.dto.TotalCountDto;
 import common.domain.team.Team;
@@ -11,4 +12,6 @@ public interface TeamReadRepository {
 
     Optional<Team> findTeamWithMember(Long teamId);
     List<TeamEachListResDto> getTeamList(Long memberId, int page, TotalCountDto totalCount);
+
+    List<TeamResultMember> getTeamLateTimeResult(Long teamId);
 }

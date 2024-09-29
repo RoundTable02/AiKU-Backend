@@ -110,7 +110,7 @@ class BettingServiceIntegrationTest {
     @Test
     void 베팅_등록_대기스케줄x() {
         //given
-        schedule1.setScheduleStatus(TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);

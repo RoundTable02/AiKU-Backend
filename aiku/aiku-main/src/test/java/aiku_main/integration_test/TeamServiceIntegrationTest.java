@@ -1,9 +1,13 @@
 package aiku_main.integration_test;
 
+import aiku_main.application_event.domain.TeamLateTimeResult;
+import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.*;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
@@ -37,6 +41,8 @@ public class TeamServiceIntegrationTest {
     TeamRepository teamRepository;
     @Autowired
     MemberRepository memberRepository;
+    @Autowired
+    ObjectMapper objectMapper;
 
     Member member1;
     Member member2;
@@ -237,28 +243,28 @@ public class TeamServiceIntegrationTest {
 
         Schedule scheduleA1 = Schedule.create(member1, new TeamValue(teamA), "scheduleA1", LocalDateTime.now().minusDays(1),
                 new Location("loc1", 1.1, 1.1), 0);
-        scheduleA1.setScheduleStatus(ExecStatus.TERM);
+        scheduleA1.setTerm(LocalDateTime.now());
         em.persist(scheduleA1);
 
         Schedule scheduleB1 = Schedule.create(member2, new TeamValue(teamB), "scheduleB1", LocalDateTime.now().minusDays(2),
                 new Location("loc1", 1.1, 1.1), 0);
-        scheduleB1.setScheduleStatus(ExecStatus.TERM);
+        scheduleB1.setTerm(LocalDateTime.now());
         em.persist(scheduleB1);
 
         Schedule scheduleB2 = Schedule.create(member2, new TeamValue(teamB), "scheduleB2", LocalDateTime.now().minusDays(3),
                 new Location("loc1", 1.1, 1.1), 0);
-        scheduleB2.setScheduleStatus(ExecStatus.TERM);
+        scheduleB2.setTerm(LocalDateTime.now());
         em.persist(scheduleB2);
 
         Schedule scheduleB3 = Schedule.create(member2, new TeamValue(teamB), "scheduleB3", LocalDateTime.now().minusDays(4),
                 new Location("loc1", 1.1, 1.1), 0);
-        scheduleB3.setScheduleStatus(ExecStatus.TERM);
+        scheduleB3.setTerm(LocalDateTime.now());
         em.persist(scheduleB3);
 
 
         Schedule scheduleC1 = Schedule.create(member2, new TeamValue(teamC), "scheduleC1", LocalDateTime.now(),
                 new Location("loc1", 1.1, 1.1), 0);
-        scheduleC1.setScheduleStatus(ExecStatus.WAIT);
+        scheduleC1.setTerm(LocalDateTime.now());
         em.persist(scheduleC1);
 
         em.flush();
@@ -272,7 +278,53 @@ public class TeamServiceIntegrationTest {
         assertThat(result.getTotalCount()).isEqualTo(3);
         List<TeamEachListResDto> data = result.getData();
         assertThat(data.size()).isEqualTo(3);
-        assertThat(data).extracting("groupId").containsExactly(teamA.getId(), teamB.getId(), teamC.getId());
-        assertThat(data).extracting("memberSize").containsExactly(1, 2, 3);
+        assertThat(data).extracting("groupId").containsExactly(teamC.getId(), teamA.getId(), teamB.getId());
+        assertThat(data).extracting("memberSize").containsExactly(3, 1, 2);
+    }
+
+    @Test
+    void 이벤트핸들러_그룹_지각_분석() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(15));
+        schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member3, false, 0);
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).minusMinutes(30));
+        schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
+        em.persist(schedule2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        teamService.analyzeLateTimeResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+
+        TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
+        List<TeamResultMember> lateMemberRanking = result.getMembers();
+        assertThat(lateMemberRanking).extracting("memberId").containsExactly(member1.getId(), member3.getId());
+        assertThat(lateMemberRanking).extracting("analysis").containsExactly(-30, -15);
     }
 }

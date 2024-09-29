@@ -26,11 +26,11 @@ public class ScheduleResult extends BaseTime {
     @Lob
     private String scheduleRacingResult;
 
-    //==편의 메서드==
-    protected void setSchedule(Schedule schedule) {
+    protected ScheduleResult(Schedule schedule) {
         this.schedule = schedule;
     }
 
+    //==편의 메서드==
     protected void setScheduleArrivalResult(String scheduleArrivalResult) {
         this.scheduleArrivalResult = scheduleArrivalResult;
     }

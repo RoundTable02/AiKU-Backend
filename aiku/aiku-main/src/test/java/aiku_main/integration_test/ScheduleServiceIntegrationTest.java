@@ -253,7 +253,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 100);
-        schedule.setScheduleStatus(ExecStatus.RUN);
+        schedule.setRun();
         em.persist(schedule);
 
         em.flush();
@@ -405,7 +405,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 0);
-        schedule.setScheduleStatus(ExecStatus.TERM);
+        schedule.setTerm(LocalDateTime.now());
         schedule.addScheduleMember(member2, false, 0);
 
         em.persist(schedule);
@@ -480,16 +480,14 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 100);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 100);
-        schedule1.setScheduleStatus(ExecStatus.RUN);
+        schedule1.setRun();
         em.persist(schedule1);
 
         Schedule schedule2 = createSchedule(member2, team, 100);
         schedule2.addScheduleMember(member3, false, 100);
-        schedule2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule2);
 
         Schedule schedule3 = createSchedule(member3, team, 100);
-        schedule3.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule3);
 
         em.flush();
@@ -529,19 +527,17 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule1 = createSchedule(member1, team, 100);
-        schedule1.setScheduleStatus(ExecStatus.RUN);
+        schedule1.setRun();
         em.persist(schedule1);
 
         LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule2 = createSchedule(member2, team, 100);
-        schedule2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule2);
 
         LocalDateTime endDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule3 = createSchedule(member3, team, 100);
-        schedule3.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule3);
 
         em.flush();
@@ -576,16 +572,15 @@ public class ScheduleServiceIntegrationTest {
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);
-        scheduleA1.setScheduleStatus(ExecStatus.RUN);
+        scheduleA1.setRun();
         scheduleA1.addScheduleMember(member2, false, 0);
         em.persist(scheduleA1);
 
         Schedule scheduleA2 = createSchedule(member2, teamA, 100);
-        scheduleA2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleA2);
 
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
-        scheduleB1.setScheduleStatus(ExecStatus.RUN);
+        scheduleB1.setRun();
         em.persist(scheduleB1);
 
         em.flush();
@@ -618,22 +613,20 @@ public class ScheduleServiceIntegrationTest {
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);
-        scheduleA1.setScheduleStatus(ExecStatus.RUN);
+        scheduleA1.setRun();
         scheduleA1.addScheduleMember(member2, false, 0);
         em.persist(scheduleA1);
 
         Schedule scheduleA2 = createSchedule(member2, teamA, 100);
-        scheduleA2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleA2);
 
         LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
-        scheduleB1.setScheduleStatus(ExecStatus.RUN);
+        scheduleB1.setRun();
         em.persist(scheduleB1);
 
         Schedule scheduleB2 = createSchedule(member1, teamB, 0);
-        scheduleB2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleB2);
 
         em.flush();
@@ -670,7 +663,7 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule schedule3 = createSchedule(member1, team, 0);
         schedule3.addScheduleMember(member2, false, 0);
-        schedule3.setScheduleStatus(ExecStatus.TERM);
+        schedule3.setTerm(LocalDateTime.now());
         em.persist(schedule3);
 
         Team teamB = Team.create(member1, "teamB");
@@ -741,7 +734,7 @@ public class ScheduleServiceIntegrationTest {
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -779,7 +772,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -815,7 +808,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -851,7 +844,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(5));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -887,7 +880,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(4));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime.plusHours(3).plusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime.plusHours(3));
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 

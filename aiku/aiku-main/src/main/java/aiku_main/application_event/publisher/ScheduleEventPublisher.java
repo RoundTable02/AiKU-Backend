@@ -7,6 +7,7 @@ import aiku_main.application_event.event.ScheduleOpenEvent;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
+import common.domain.team.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -22,13 +23,13 @@ public class ScheduleEventPublisher {
         publisher.publishEvent(event);
     }
 
-    public void publishScheduleOpenEvent(Long scheduleId){
-        ScheduleOpenEvent event = new ScheduleOpenEvent(scheduleId);
+    public void publishScheduleOpenEvent(Schedule schedule){
+        ScheduleOpenEvent event = new ScheduleOpenEvent(schedule);
         publisher.publishEvent(event);
     }
 
-    public void publishScheduleAutoCloseEvent(Long scheduleId){
-        ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(scheduleId);
+    public void publishScheduleAutoCloseEvent(Schedule schedule){
+        ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(schedule);
         publisher.publishEvent(event);
     }
 

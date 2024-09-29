@@ -89,6 +89,6 @@ public class ScheduleController {
                                                          @PathVariable Long scheduleId){
         String result = scheduleService.getScheduleBettingResult(null, groupId, scheduleId);
 
-        return new BaseResponse<>(result, BaseCode.GET);
+        return new BaseResponse<>(result);
     }
 }

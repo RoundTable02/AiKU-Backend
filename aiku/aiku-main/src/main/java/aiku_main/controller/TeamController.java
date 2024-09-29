@@ -58,6 +58,6 @@ public class TeamController {
     public BaseResponse getGroupLateTimeResult(@PathVariable Long groupId){
         String  result = teamService.getTeamLateTimeResult(null, groupId);
 
-        return new BaseResponse(result, GET);
+        return new BaseResponse(result);
     }
 }

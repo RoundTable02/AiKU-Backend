@@ -69,7 +69,7 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
 
         pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
-        scheduleScheduler.reserveSchedule(schedule.getId(), schedule.getScheduleTime());
+        scheduleScheduler.reserveSchedule(schedule);
 
         return schedule.getId();
     }
@@ -89,7 +89,7 @@ public class ScheduleService {
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
 
-        scheduleScheduler.changeSchedule(schedule.getId(), schedule.getScheduleTime());
+        scheduleScheduler.changeSchedule(schedule);
 
         return schedule.getId();
     }
@@ -214,7 +214,7 @@ public class ScheduleService {
     @Transactional
     public void scheduleOpen(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        schedule.setScheduleStatus(ExecStatus.RUN);
+        schedule.setRun();
 
         //TODO 카프카, 알림
     }

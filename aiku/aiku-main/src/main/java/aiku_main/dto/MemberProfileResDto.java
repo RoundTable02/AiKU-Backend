@@ -7,7 +7,9 @@ import common.domain.member.MemberProfileCharacter;
 import common.domain.member.MemberProfileType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Getter
 public class MemberProfileResDto{
 

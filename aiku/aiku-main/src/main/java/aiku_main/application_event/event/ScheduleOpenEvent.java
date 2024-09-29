@@ -1,11 +1,16 @@
 package aiku_main.application_event.event;
 
+import common.domain.schedule.Schedule;
+import common.domain.value_reference.ScheduleValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public class ScheduleOpenEvent {
 
-    private Long scheduleId;
+    private ScheduleValue schedule;
+
+    public ScheduleOpenEvent(Schedule schedule) {
+        this.schedule = new ScheduleValue(schedule);
+    }
 }

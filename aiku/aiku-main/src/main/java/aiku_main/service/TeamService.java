@@ -1,12 +1,17 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.TeamLateTimeResult;
+import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamReadRepository;
 import aiku_main.repository.TeamRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.member.Member;
 import common.domain.Status;
+import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import common.exception.BaseExceptionImpl;
@@ -17,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -30,6 +37,7 @@ public class TeamService {
     private final TeamReadRepository teamReadRepository;
     private final ScheduleRepository scheduleRepository;
     private final TeamEventPublisher teamEventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
@@ -97,6 +105,41 @@ public class TeamService {
         DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(totalCount.getTotalCount(), page, data);
 
         return resultDto;
+    }
+
+    public String getTeamLateTimeResult(Member member, Long teamId){
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findById(teamId).orElseThrow();
+
+        //서비스 로직
+        return team.getTeamResult().getLateTimeResult();
+    }
+
+    //==이벤트 핸들러==
+    @Transactional
+    public void analyzeLateTimeResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        if (checkAlreadyAnalyzeResult(schedule, team.getTeamResultLastModifiedAt())){
+            return;
+        }
+
+        List<TeamResultMember> lateTeamMemberRanking = teamReadRepository.getTeamLateTimeResult(team.getId());
+        TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
+
+        try {
+            team.setTeamLateResult(objectMapper.writeValueAsString(teamLateTimeResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Can't parse TeamLateTimeResult.");
+        }
+    }
+
+    private boolean checkAlreadyAnalyzeResult(Schedule schedule, LocalDateTime teamResultLastModifiedAt){
+        if(teamResultLastModifiedAt == null || Duration.between(schedule.getScheduleTermTime(), teamResultLastModifiedAt).toMinutes() <= 0){
+            return false;
+        }
+        return true;
     }
 
     //== 편의 메서드 ==

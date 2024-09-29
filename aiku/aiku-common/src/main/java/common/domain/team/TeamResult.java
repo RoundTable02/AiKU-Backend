@@ -19,7 +19,29 @@ public class TeamResult extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Team team;
 
+    @Lob
     private String lateTimeResult;
+
+    @Lob
     private String teamBettingResult;
+
+    @Lob
     private String teamRacingResult;
+
+    protected TeamResult(Team team) {
+        this.team = team;
+    }
+
+    //==편의 메서드==
+    protected void setLateTimeResult(String lateTimeResult) {
+        this.lateTimeResult = lateTimeResult;
+    }
+
+    protected void setTeamBettingResult(String teamBettingResult) {
+        this.teamBettingResult = teamBettingResult;
+    }
+
+    protected void setTeamRacingResult(String teamRacingResult) {
+        this.teamRacingResult = teamRacingResult;
+    }
 }

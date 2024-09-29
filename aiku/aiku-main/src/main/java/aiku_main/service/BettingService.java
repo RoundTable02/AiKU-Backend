@@ -236,7 +236,7 @@ public class BettingService {
     }
 
     private void checkBettingMember(Betting betting, ScheduleMember bettor){
-        if(betting.getBettor().getId() != bettor.getId()){
+        if(!betting.getBettor().getId().equals(bettor.getId())){
             throw new NoAuthorityException();
         }
     }

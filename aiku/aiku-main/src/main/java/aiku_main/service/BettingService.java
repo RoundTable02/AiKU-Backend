@@ -35,6 +35,8 @@ import static aiku_main.application_event.event.PointChangeReason.BETTING;
 import static aiku_main.application_event.event.PointChangeReason.BETTING_CANCLE;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
+import static common.domain.ExecStatus.TERM;
+import static common.domain.ExecStatus.WAIT;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -112,14 +114,17 @@ public class BettingService {
 
     @Transactional
     public void processBettingResult(Long scheduleId) {
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
+        if(bettings.size() == 0){
+            return;
+        }
+
         Map<Long, ScheduleMember> scheduleMembers =
                 scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
                 .collect(Collectors.toMap(
                         sm -> sm.getId(),
                         sm -> sm
                 ));
-
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId);
 
         LocalDateTime latestTime = getLatestTimeOfLateMember(scheduleMembers.values());
         long winBettingCount = countWinBetting(scheduleMembers, bettings, latestTime);
@@ -180,6 +185,16 @@ public class BettingService {
 
     @Transactional
     public void analyzeScheduleBettingResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        if (isAlreadyAnalyzeScheduleBettingResult(schedule)) {
+            return;
+        }
+
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
+        if(bettings.size() == 0){
+            return;
+        }
+
         Map<Long, ScheduleMember> scheduleMembers =
                 scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
                         .collect(Collectors.toMap(
@@ -187,7 +202,6 @@ public class BettingService {
                                 sm -> sm
                         ));
 
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId);
         List<ScheduleBetting> bettingDtoList = bettings.stream()
                 .map(betting -> {
                     ScheduleBettingMember bettor = new ScheduleBettingMember(scheduleMembers.get(betting.getBettor().getId()).getMember());
@@ -197,12 +211,15 @@ public class BettingService {
 
         ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
 
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         try {
             schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Can't Parse ScheduleBettingResult");
         }
+    }
+
+    private boolean isAlreadyAnalyzeScheduleBettingResult(Schedule schedule){
+        return schedule.getScheduleResult() != null && schedule.getScheduleResult().getScheduleBettingResult() != null;
     }
 
     //==엔티티 조회 메서드==
@@ -212,7 +229,7 @@ public class BettingService {
 
     //==편의 메서드==
     private void checkScheduleWait(Long scheduleId) {
-        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.WAIT, Status.ALIVE)){
+        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, Status.ALIVE)){
             throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
         }
     }

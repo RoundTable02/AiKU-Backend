@@ -170,23 +170,21 @@ public class ScheduleService {
         checkIsAlive(team);
 
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
-        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page, totalCount);
+        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(member.getId()));
         int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
-        return new TeamScheduleListResDto(team, totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
+        return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
     }
 
     public MemberScheduleListResDto getMemberScheduleList(Member member, SearchDateCond dateCond, int page) {
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
-        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page, totalCount);
+        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page);
         int runSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.WAIT, dateCond);
 
-        return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
+        return new MemberScheduleListResDto(page, runSchedule, waitSchedule, scheduleList);
     }
 
     public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {

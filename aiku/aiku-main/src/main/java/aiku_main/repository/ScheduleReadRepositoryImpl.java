@@ -43,17 +43,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page, TotalCountDto totalCount) {
-        totalCount.setTotalCount(
-                query
-                .select(schedule.count())
-                .from(schedule)
-                .where(schedule.team.id.eq(teamId),
-                        schedule.status.eq(ALIVE),
-                        scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
-                .fetchFirst());
-
+    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(schedule)
@@ -62,7 +52,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .offset(getOffset(page))
-                .limit(10)
+                .limit(11)
                 .fetch();
 
         return query
@@ -85,18 +75,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page, TotalCountDto totalCount) {
-        totalCount.setTotalCount(
-                query.select(schedule.count())
-                        .from(scheduleMember)
-                        .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
-                        .where(scheduleMember.member.id.eq(memberId),
-                                scheduleMember.status.eq(ALIVE),
-                                schedule.status.eq(ALIVE),
-                                scheduleTimeGoe(dateCond.getStartDate()),
-                                scheduleTimeLoe(dateCond.getEndDate()))
-                        .fetchFirst());
-
+    public List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(scheduleMember)
@@ -107,7 +86,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .offset(getOffset(page))
-                .limit(10)
+                .limit(11)
                 .fetch();
 
         return query

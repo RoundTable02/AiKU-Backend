@@ -7,7 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DataResDto<T> {
 
-    private Long totalCount;
     private int page;
     private T data;
 }

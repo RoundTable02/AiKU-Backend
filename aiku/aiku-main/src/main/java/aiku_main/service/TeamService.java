@@ -100,9 +100,8 @@ public class TeamService {
     public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
         TotalCountDto totalCount = new TotalCountDto();
-        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page, totalCount);
-        System.out.println("totalCount = " + totalCount);
-        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(totalCount.getTotalCount(), page, data);
+        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
+        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
         return resultDto;
     }

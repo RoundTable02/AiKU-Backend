@@ -26,14 +26,14 @@ public class BettingHandler {
 
     @Order(3)
     @EventListener
-    public void processAutoClosedBettingResult(ScheduleAutoCloseEvent event){
+    public void processBettingResult(ScheduleAutoCloseEvent event){
         if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())) {
             bettingService.processBettingResult(event.getSchedule().getId());
         }
     }
 
     @EventListener
-    public void analyzeAutoClosedScheduleBettingResult(ScheduleAutoCloseEvent event){
+    public void analyzeScheduleBettingResult(ScheduleAutoCloseEvent event){
         if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())){
             bettingService.analyzeScheduleBettingResult(event.getSchedule().getId());
         }

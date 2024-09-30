@@ -16,7 +16,7 @@ public class TeamHandler {
     private final TeamService teamService;
 
     @EventListener
-    public void handleScheduleAutoCloseEvent(ScheduleAutoCloseEvent event){
+    public void analyzeLateTimeResult(ScheduleAutoCloseEvent event){
         teamService.analyzeLateTimeResult(event.getSchedule().getId());
     }
 

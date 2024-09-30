@@ -119,9 +119,6 @@ public class TeamService {
     public void analyzeLateTimeResult(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
-        if (checkAlreadyAnalyzeResult(schedule, team.getTeamResultLastModifiedAt())){
-            return;
-        }
 
         List<TeamResultMember> lateTeamMemberRanking = teamReadRepository.getTeamLateTimeResult(team.getId());
         TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
@@ -152,13 +149,6 @@ public class TeamService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private boolean checkAlreadyAnalyzeResult(Schedule schedule, LocalDateTime teamResultLastModifiedAt){
-        if(teamResultLastModifiedAt == null || Duration.between(schedule.getScheduleTermTime(), teamResultLastModifiedAt).toMinutes() <= 0){
-            return false;
-        }
-        return true;
     }
 
     //== 편의 메서드 ==

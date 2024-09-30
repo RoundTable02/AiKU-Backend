@@ -99,7 +99,6 @@ public class TeamService {
 
     public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
         List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
         DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
@@ -130,7 +129,28 @@ public class TeamService {
         try {
             team.setTeamLateResult(objectMapper.writeValueAsString(teamLateTimeResult));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Can't parse TeamLateTimeResult.");
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void updateLateTimeResultOfExitMember(Long memberId, Long teamId) {
+        Team team = teamRepository.findById(teamId).orElseThrow();
+        if (team.getTeamResult() == null || team.getTeamResult().getLateTimeResult() == null) {
+            return;
+        }
+
+        try {
+            TeamLateTimeResult result = objectMapper.readValue(team.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
+            result.getMembers().forEach(resultMember -> {
+                if (resultMember.getMemberId().equals(memberId)) {
+                    resultMember.setTeamMember(false);
+                }
+            });
+
+            team.setTeamLateResult(objectMapper.writeValueAsString(result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

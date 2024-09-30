@@ -377,7 +377,6 @@ public class TeamServiceIntegrationTest {
         //then
         Team findTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
-        System.out.println("findTeam.getTeamResult().getTeamBettingResult() = " + findTeam.getTeamResult().getTeamBettingResult());
         List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
                 .getMembers();
         assertThat(teamResultMembers.size()).isEqualTo(3);

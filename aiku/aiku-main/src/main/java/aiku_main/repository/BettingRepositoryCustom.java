@@ -5,6 +5,7 @@ import common.domain.ExecStatus;
 import common.domain.value_reference.ScheduleMemberValue;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BettingRepositoryCustom {
 

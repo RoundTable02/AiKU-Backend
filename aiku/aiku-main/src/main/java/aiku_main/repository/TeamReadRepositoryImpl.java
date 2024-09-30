@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static common.domain.ExecStatus.TERM;
+import static common.domain.QBetting.betting;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;

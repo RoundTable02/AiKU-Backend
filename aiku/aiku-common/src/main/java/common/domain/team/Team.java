@@ -63,6 +63,11 @@ public class Team extends BaseTime {
         teamResult.setLateTimeResult(teamLateResult);
     }
 
+    public void setTeamBettingResult(String teamBettingResult){
+        checkTeamResultExist();
+        teamResult.setTeamBettingResult(teamBettingResult);
+    }
+
     public LocalDateTime getTeamResultLastModifiedAt(){
         if (teamResult == null) {
             return null;

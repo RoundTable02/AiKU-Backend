@@ -1,12 +1,12 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.TeamBettingResult;
 import aiku_main.application_event.domain.TeamLateTimeResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
-import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamReadRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.*;
+import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.member.Member;
@@ -22,10 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -36,6 +33,8 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamReadRepository teamReadRepository;
     private final ScheduleRepository scheduleRepository;
+    private final BettingRepository bettingRepository;
+    private final BettingReadRepository bettingReadRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
 
@@ -125,6 +124,32 @@ public class TeamService {
 
         try {
             team.setTeamLateResult(objectMapper.writeValueAsString(teamLateTimeResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void analyzeBettingResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingReadRepository.findMemberTermBettingsInTeam(team.getId());
+
+        List<TeamResultMember> teamResultMembers = new ArrayList<>();
+        memberBettingsMap.forEach((memberId, memberBettingList) -> {
+            long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
+            int analysis = (int) (count/memberBettingList.size());
+
+            TeamBettingResultMemberDto data = memberBettingList.get(0);
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.isTeamMember()));
+        });
+
+        teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+
+        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamResultMembers);
+        try {
+            team.setTeamBettingResult(objectMapper.writeValueAsString(teamBettingResult));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

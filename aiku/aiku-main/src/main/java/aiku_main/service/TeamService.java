@@ -113,6 +113,15 @@ public class TeamService {
         return team.getTeamResult().getLateTimeResult();
     }
 
+    public String getTeamBettingResult(Member member, Long teamId){
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findById(teamId).orElseThrow();
+
+        //서비스 로직
+        return team.getTeamResult().getTeamBettingResult();
+    }
+
     //==이벤트 핸들러==
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {

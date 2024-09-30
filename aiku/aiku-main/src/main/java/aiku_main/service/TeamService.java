@@ -139,10 +139,10 @@ public class TeamService {
         List<TeamResultMember> teamResultMembers = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
             long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
-            int analysis = (int) (count/memberBettingList.size());
+            int analysis = (int) ((double)count/memberBettingList.size() * 100);
 
             TeamBettingResultMemberDto data = memberBettingList.get(0);
-            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.isTeamMember()));
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.getIsTeamMember()));
         });
 
         teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());

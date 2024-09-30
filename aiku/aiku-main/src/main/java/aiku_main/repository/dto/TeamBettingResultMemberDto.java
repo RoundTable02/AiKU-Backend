@@ -13,7 +13,7 @@ public class TeamBettingResultMemberDto {
     private String nickName;
     private MemberProfileResDto memberProfile;
     private boolean isWinner;
-    private boolean isTeamMember;
+    private Status isTeamMember;
 
     @QueryProjection
 
@@ -22,6 +22,6 @@ public class TeamBettingResultMemberDto {
         this.nickName = nickName;
         this.memberProfile = memberProfile;
         this.isWinner = isWinner;
-        this.isTeamMember = teamMemberStatus == ALIVE ? true : false;
+        this.isTeamMember = teamMemberStatus;
     }
 }

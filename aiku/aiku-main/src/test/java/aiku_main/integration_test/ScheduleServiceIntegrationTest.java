@@ -702,7 +702,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        scheduleService.scheduleAutoClose(schedule1.getId());
+        scheduleService.closeScheduleAuto(schedule1.getId());
 
         em.flush();
         em.clear();
@@ -738,7 +738,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        scheduleService.scheduleAutoClose(schedule1.getId());
+        scheduleService.closeScheduleAuto(schedule1.getId());
 
         em.flush();
         em.clear();

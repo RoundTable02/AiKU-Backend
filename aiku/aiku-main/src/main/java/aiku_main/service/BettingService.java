@@ -185,11 +185,6 @@ public class BettingService {
 
     @Transactional
     public void analyzeScheduleBettingResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        if (isAlreadyAnalyzeScheduleBettingResult(schedule)) {
-            return;
-        }
-
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
         if(bettings.size() == 0){
             return;
@@ -211,15 +206,12 @@ public class BettingService {
 
         ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
 
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         try {
             schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Can't Parse ScheduleBettingResult");
         }
-    }
-
-    private boolean isAlreadyAnalyzeScheduleBettingResult(Schedule schedule){
-        return schedule.getScheduleResult() != null && schedule.getScheduleResult().getScheduleBettingResult() != null;
     }
 
     //==엔티티 조회 메서드==

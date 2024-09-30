@@ -37,6 +37,7 @@ public class Schedule extends BaseTime {
     private Location location;
 
     private LocalDateTime scheduleTermTime;
+    private boolean isAutoClose = false;
 
     @Enumerated(value = EnumType.STRING)
     private ExecStatus scheduleStatus = WAIT;
@@ -103,6 +104,7 @@ public class Schedule extends BaseTime {
         notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
         this.scheduleTermTime = closeTime;
         this.scheduleStatus = TERM;
+        this.isAutoClose = true;
     }
 
     public void setTerm(LocalDateTime scheduleTermTime){

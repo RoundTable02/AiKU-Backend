@@ -1,6 +1,6 @@
 package login.oauth;
 
-import login.dto.OIDCDecodePayload;
+import login.oauth.dto.OIDCDecodePayload;
 import login.exception.InvalidIdTokenException;
 import login.oauth.dto.OIDCPublicKeyDto;
 import login.oauth.dto.OIDCPublicKeysResponse;

@@ -17,9 +17,11 @@ public class OauthInfo {
     private String provider = "KAKAO";
 
     private String oid;
+    private String email;
 
     @Builder
-    public OauthInfo(String oid) {
+    public OauthInfo(String oid, String email) {
         this.oid = oid;
+        this.email = email;
     }
 }

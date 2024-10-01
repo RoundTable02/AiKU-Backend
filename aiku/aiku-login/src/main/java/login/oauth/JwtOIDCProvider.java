@@ -1,7 +1,7 @@
 package login.oauth;
 
 import io.jsonwebtoken.*;
-import login.dto.OIDCDecodePayload;
+import login.oauth.dto.OIDCDecodePayload;
 import login.exception.InvalidIdTokenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

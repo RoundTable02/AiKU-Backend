@@ -1,14 +1,11 @@
 package login.oauth;
 
-import login.dto.OIDCDecodePayload;
-import login.oauth.dto.OIDCPublicKeyDto;
+import login.oauth.dto.OIDCDecodePayload;
 import login.oauth.dto.OIDCPublicKeysResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @Slf4j
@@ -42,6 +39,7 @@ public class KakaoOauthHelper {
         OIDCDecodePayload oidcDecodePayload = getOIDCDecodePayload(idToken);
         return OauthInfo.builder()
                 .oid(oidcDecodePayload.getSub())
+                .email(oidcDecodePayload.getEmail())
                 .build();
     }
 }

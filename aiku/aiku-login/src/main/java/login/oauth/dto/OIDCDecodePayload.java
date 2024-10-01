@@ -1,4 +1,4 @@
-package login.dto;
+package login.oauth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

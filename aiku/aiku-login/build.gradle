@@ -12,6 +12,12 @@ repositories {
 dependencies {
     implementation project(':aiku-common')
 
+    // Feign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

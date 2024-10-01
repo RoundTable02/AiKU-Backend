@@ -53,4 +53,18 @@ public class TeamController {
 
         return new BaseResponse(result);
     }
+
+    @GetMapping("/{groupId}/analytics/late")
+    public BaseResponse getGroupLateTimeResult(@PathVariable Long groupId){
+        String result = teamService.getTeamLateTimeResult(null, groupId);
+
+        return new BaseResponse(result);
+    }
+
+    @GetMapping("/{groupId}/analytics/betting")
+    public BaseResponse getGroupBettingResult(@PathVariable Long groupId){
+        String result = teamService.getTeamBettingResult(null, groupId);
+
+        return new BaseResponse(result);
+    }
 }

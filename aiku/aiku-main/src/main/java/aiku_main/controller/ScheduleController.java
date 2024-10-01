@@ -83,4 +83,12 @@ public class ScheduleController {
 
         return new BaseResponse<>(result);
     }
+
+    @GetMapping("/{scheduleId}/betting/result")
+    public BaseResponse<String> getScheduleBettingResult(@PathVariable Long groupId,
+                                                         @PathVariable Long scheduleId){
+        String result = scheduleService.getScheduleBettingResult(null, groupId, scheduleId);
+
+        return new BaseResponse<>(result);
+    }
 }

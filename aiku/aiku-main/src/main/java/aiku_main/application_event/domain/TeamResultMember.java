@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import static common.domain.Status.ALIVE;
+
 @Getter @Setter
 @NoArgsConstructor
 public class TeamResultMember {
@@ -17,11 +19,12 @@ public class TeamResultMember {
     private boolean isTeamMember;
 
     @QueryProjection
-    public TeamResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, Status teamMemberStatus) {
+
+    public TeamResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, Status isTeamMember) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;
         this.analysis = analysis;
-        this.isTeamMember = teamMemberStatus == Status.ALIVE ? true : false;
+        this.isTeamMember = isTeamMember == ALIVE ? true : false;
     }
 }

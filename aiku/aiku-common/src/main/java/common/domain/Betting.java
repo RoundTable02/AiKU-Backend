@@ -6,6 +6,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static common.domain.ExecStatus.TERM;
+import static common.domain.ExecStatus.WAIT;
+import static common.domain.Status.ALIVE;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -26,13 +30,13 @@ public class Betting extends BaseTime{
     private boolean isWinner = false;
 
     @Enumerated(value = EnumType.STRING)
-    private ExecStatus bettingStatus = ExecStatus.WAIT;
+    private ExecStatus bettingStatus = WAIT;
 
     private int pointAmount;
     private int rewardPointAmount;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status = Status.ALIVE;
+    private Status status = ALIVE;
 
 
     //==CUD 편의 메서드==
@@ -45,21 +49,22 @@ public class Betting extends BaseTime{
     }
 
     //==편의 메서드==
-
-
     public void setWin(int rewardPointAmount) {
         this.isWinner = true;
         this.rewardPointAmount = rewardPointAmount;
+        this.bettingStatus = TERM;
     }
 
     public void setDraw(){
         isWinner = false;
         rewardPointAmount = pointAmount;
+        this.bettingStatus = TERM;
     }
 
     public void setLose(){
         isWinner = false;
         rewardPointAmount = 0;
+        this.bettingStatus = TERM;
     }
 
     public void setStatus(Status status) {

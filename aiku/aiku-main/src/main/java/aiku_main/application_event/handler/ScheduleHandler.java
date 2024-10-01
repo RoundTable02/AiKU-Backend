@@ -25,15 +25,31 @@ public class ScheduleHandler {
 
     @EventListener
     public void handleScheduleOpenEvent(ScheduleOpenEvent event){
-        scheduleService.scheduleOpen(event.getSchedule().getId());
+        scheduleService.openSchedule(event.getSchedule().getId());
+    }
+
+    @Order(1)
+    @Async
+    @EventListener
+    public void closeSchedule(ScheduleAutoCloseEvent event){
+        scheduleService.closeScheduleAuto(event.getSchedule().getId());
+    }
+
+    @Order(2)
+    @Async
+    @EventListener
+    public void processSchedulePoint(ScheduleAutoCloseEvent event){
+        if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())) {
+            scheduleService.processScheduleResultPoint(event.getSchedule().getId());
+        }
     }
 
     @Async
-    @Order(1)
     @EventListener
-    public void handleScheduleAutoCloseEvent(ScheduleAutoCloseEvent event){
-        scheduleService.scheduleAutoClose(event.getSchedule().getId());
-        scheduleService.processScheduleResultPoint(event.getSchedule().getId());
-        scheduleService.analyzeScheduleArrivalResult(event.getSchedule().getId());
+    public void analyzeScheduleArrivalResult(ScheduleAutoCloseEvent event){
+        if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())) {
+            scheduleService.analyzeScheduleArrivalResult(event.getSchedule().getId());
+        }
     }
+
 }

@@ -302,7 +302,7 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //then
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);
         assertThat(bettings).extracting("rewardPointAmount").contains(100, 200);
         assertThat(bettings).extracting("isWinner").contains(false, false);
     }
@@ -335,7 +335,7 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //then
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);
         assertThat(bettings.size()).isEqualTo(3);
         assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
         assertThat(bettings).extracting("isWinner").containsExactly(true, true, false);
@@ -369,7 +369,7 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //then
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId());
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);
         assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
         assertThat(bettings).extracting("isWinner").containsExactly(true, false, true);
     }

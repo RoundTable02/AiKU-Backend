@@ -189,11 +189,24 @@ public class ScheduleService {
 
     public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
         //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         checkIsTerm(schedule);
 
         //서비스 로직
         return schedule.getScheduleResult().getScheduleArrivalResult();
+    }
+
+    public String getScheduleBettingResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleBettingResult();
     }
 
     //== 이벤트 핸들러 ==
@@ -210,7 +223,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void scheduleOpen(Long scheduleId) {
+    public void openSchedule(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         schedule.setRun();
 
@@ -218,7 +231,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void scheduleAutoClose(Long scheduleId) {
+    public void closeScheduleAuto(Long scheduleId) {
         if (scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.TERM, Status.ALIVE)){
             return;
         }
@@ -266,6 +279,11 @@ public class ScheduleService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Can't Parse ScheduleArrivalResult");
         } ;
+    }
+
+    public boolean isScheduleAutoClosed(Long scheduleId){
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        return schedule.isAutoClose();
     }
 
     //== 편의 메서드 ==

@@ -12,6 +12,5 @@ public interface TeamReadRepository {
 
     Optional<Team> findTeamWithMember(Long teamId);
     List<TeamEachListResDto> getTeamList(Long memberId, int page);
-
     List<TeamResultMember> getTeamLateTimeResult(Long teamId);
 }

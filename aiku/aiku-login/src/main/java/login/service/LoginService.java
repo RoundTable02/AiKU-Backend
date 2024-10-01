@@ -4,6 +4,7 @@ import common.domain.member.Member;
 import login.dto.RefreshTokenResDto;
 import login.dto.SignInTokenResDto;
 import login.exception.JwtAccessDeniedException;
+import login.exception.MemberNotFoundException;
 import login.oauth.KakaoOauthHelper;
 import login.oauth.OauthInfo;
 import login.repository.MemberRepository;
@@ -53,10 +54,22 @@ public class LoginService {
      *
      * idToken 검증 후 DB 상 멤버 존재 여부 확인
      */
+    @Transactional
     public SignInTokenResDto signIn(String idToken) {
-        String oauthInfoByIdToken = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
-        log.info("oauthInfoByIdToken={}", oauthInfoByIdToken);
-        return null;
+        OauthInfo info = kakaoOauthHelper.getOauthInfoByIdToken(idToken);
+        String email = info.getEmail();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException());
+
+        UsernamePasswordAuthenticationToken authenticationFilter
+                = new UsernamePasswordAuthenticationToken(member.getEmail(), userPassword);
+
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
+
+        // JWT Token 발급
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        return SignInTokenResDto.toDto(jwtToken);
     }
 
     /**

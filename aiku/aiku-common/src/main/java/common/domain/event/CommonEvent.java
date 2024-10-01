@@ -4,6 +4,7 @@ import common.domain.BaseTime;
 import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +22,7 @@ public abstract class CommonEvent extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @JoinColumn(name = "eventNoticeId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private EventNotice eventNotice;
+    public CommonEvent(Member member) {
+        this.member = member;
+    }
 }

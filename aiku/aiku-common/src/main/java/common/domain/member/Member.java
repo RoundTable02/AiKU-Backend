@@ -1,7 +1,7 @@
 package common.domain.member;
 
 import common.domain.BaseTime;
-import common.domain.Setting;
+import common.domain.ServiceAgreement;
 import common.domain.Status;
 import common.domain.Title;
 import jakarta.persistence.*;
@@ -41,7 +41,7 @@ public class Member extends BaseTime {
     private int point;
 
     @Embedded
-    private Setting setting;
+    private ServiceAgreement serviceAgreement;
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
@@ -54,6 +54,38 @@ public class Member extends BaseTime {
         this.refreshToken = refreshToken;
     }
 
+    protected Member(
+            String email, String nickname, String password, MemberRole memberRole,
+            MemberProfile memberProfile, ServiceAgreement serviceAgreement) {
+        this.email = email;
+        this.nickname = nickname;
+        this.password = password;
+        this.role = memberRole;
+        this.profile = memberProfile;
+        this.serviceAgreement = serviceAgreement;
+        this.point = 0;
+        this.status = Status.ALIVE;
+    }
+    public static Member register(
+            String email, String nickname, String password,
+            MemberProfileType memberProfileType, String profileImg,
+            MemberProfileCharacter memberProfileCharacter,
+            MemberProfileBackground memberProfileBackground,
+            boolean isServicePolicyAgreed,
+            boolean isPersonalInformationPolicyAgreed,
+            boolean isLocationPolicyAgreed,
+            boolean isMarketingPolicyAgreed) {
+        MemberProfile memberProfile = new MemberProfile(
+                memberProfileType, profileImg,
+                memberProfileCharacter, memberProfileBackground);
+        ServiceAgreement serviceAgreement = new ServiceAgreement(
+                isServicePolicyAgreed,
+                isPersonalInformationPolicyAgreed,
+                isLocationPolicyAgreed,
+                isMarketingPolicyAgreed);
+
+        return new Member(email, nickname, password, MemberRole.MEMBER, memberProfile, serviceAgreement);
+    }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.
 

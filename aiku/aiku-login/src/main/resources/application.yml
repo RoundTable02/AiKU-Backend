@@ -21,14 +21,25 @@ spring:
 
 # TODO : 테스트용, 추후 환경변수로 변경 예정
 jwt:
-  secret: b7e29d7bc4c8704077549d755d01139de165e4bde39bbb16275c773250823125
+  secret: ${JWT_SECRET}
 
-custom.password: randomExamplePwd
+custom:
+  password: ${CUSTOM_PASSWORD}
 
 kakao:
   base_url: https://kauth.kakao.com
-  app_id: a9e9a269edb3f5aead5264bb3a505ac1
+  app_id: ${KAKAO_APP_ID}
 
 logging:
   level:
     root: INFO
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_BUCKET}
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: ${AWS_ACCESS}
+      secretKey: ${AWS_SECRET}

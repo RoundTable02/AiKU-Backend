@@ -55,10 +55,11 @@ public class Member extends BaseTime {
     }
 
     protected Member(
-            String email, String nickname, String password, MemberRole memberRole,
+            String email, String nickname, String kakaoId, String password, MemberRole memberRole,
             MemberProfile memberProfile, ServiceAgreement serviceAgreement) {
         this.email = email;
         this.nickname = nickname;
+        this.kakaoId = Long.valueOf(kakaoId);
         this.password = password;
         this.role = memberRole;
         this.profile = memberProfile;
@@ -67,7 +68,8 @@ public class Member extends BaseTime {
         this.status = Status.ALIVE;
     }
     public static Member register(
-            String email, String nickname, String password,
+            String email, String nickname,
+            String kakaoId, String password,
             MemberProfileType memberProfileType, String profileImg,
             MemberProfileCharacter memberProfileCharacter,
             MemberProfileBackground memberProfileBackground,
@@ -84,7 +86,7 @@ public class Member extends BaseTime {
                 isLocationPolicyAgreed,
                 isMarketingPolicyAgreed);
 
-        return new Member(email, nickname, password, MemberRole.MEMBER, memberProfile, serviceAgreement);
+        return new Member(email, nickname, kakaoId, password, MemberRole.MEMBER, memberProfile, serviceAgreement);
     }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.

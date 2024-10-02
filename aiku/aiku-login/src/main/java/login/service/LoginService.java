@@ -29,8 +29,6 @@ public class LoginService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final KakaoOauthHelper kakaoOauthHelper;
     private final MemberRepository memberRepository;
-    @Value("${custom.password}")
-    private String userPassword;
 
     /**
      * Payload를 통한 인증
@@ -57,12 +55,12 @@ public class LoginService {
     @Transactional
     public SignInTokenResDto signIn(String idToken) {
         OauthInfo info = kakaoOauthHelper.getOauthInfoByIdToken(idToken);
-        String email = info.getEmail();
-        Member member = memberRepository.findByEmail(email)
+        String kakaoId = info.getOid();
+        Member member = memberRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new MemberNotFoundException());
 
         UsernamePasswordAuthenticationToken authenticationFilter
-                = new UsernamePasswordAuthenticationToken(member.getEmail(), userPassword);
+                = new UsernamePasswordAuthenticationToken(member.getKakaoId(), kakaoId);
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
@@ -80,8 +78,9 @@ public class LoginService {
     @Transactional
     public RefreshTokenResDto refreshToken(Member member, String refreshToken) {
         if (member.getRefreshToken().equals(refreshToken)) {
+            Long kakaoId = member.getKakaoId();
             UsernamePasswordAuthenticationToken authenticationFilter
-                    = new UsernamePasswordAuthenticationToken(member.getEmail(), userPassword);
+                    = new UsernamePasswordAuthenticationToken(kakaoId, kakaoId);
 
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 

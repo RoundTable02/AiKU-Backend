@@ -9,12 +9,14 @@ import login.application_event.publisher.PointChangeEventPublisher;
 import login.dto.MemberProfileDto;
 import login.dto.MemberRegisterDto;
 import login.exception.MemberNotFoundException;
+import login.oauth.KakaoOauthHelper;
 import login.repository.EventRepository;
 import login.repository.MemberRepository;
 import login.s3.S3ImageProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,17 +27,22 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MemberRegisterService {
     private final MemberRepository memberRepository;
+    private final KakaoOauthHelper kakaoOauthHelper;
+    private final PasswordEncoder passwordEncoder;
     private final S3ImageProvider imageProvider;
 
     private final EventRepository eventRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
 
-    @Value("${custom.password}")
-    private String password;
-
     @Transactional
     public Long register(MemberRegisterDto memberRegisterDto) {
         MemberProfileDto memberProfile = memberRegisterDto.getMemberProfile();
+
+        String idToken = memberRegisterDto.getIdToken();
+
+        String kakaoId = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
+
+        String password = passwordEncoder.encode(kakaoId.toString());
 
         String imgUrl = ""; // S3 이미지 URL
         if (memberProfile.getProfileType().equals(MemberProfileType.IMG)) {
@@ -44,7 +51,8 @@ public class MemberRegisterService {
             imgUrl = imageProvider.upload(profileImg);
         }
 
-        Member member = Member.register(memberRegisterDto.getEmail(), memberRegisterDto.getNickname(), password,
+        Member member = Member.register(memberRegisterDto.getEmail(), memberRegisterDto.getNickname(),
+                kakaoId, password,
                 memberProfile.getProfileType(), imgUrl, memberProfile.getProfileCharacter(),
                 memberProfile.getProfileBackground(),
                 memberRegisterDto.getIsServicePolicyAgreed(), memberRegisterDto.getIsPersonalInformationPolicyAgreed(),
@@ -53,7 +61,9 @@ public class MemberRegisterService {
 
         memberRepository.save(member);
 
-        addRecommender(member, memberRegisterDto.getRecommenderNickname());
+        if (!memberRegisterDto.getRecommenderNickname().isEmpty()) {
+            addRecommender(member, memberRegisterDto.getRecommenderNickname());
+        }
 
         return member.getId();
     }

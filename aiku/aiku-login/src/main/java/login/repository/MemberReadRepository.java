@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface MemberReadRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findMemberByEmail(String email);
+    Optional<Member> findMemberByKakaoId(Long kakaoId);
 }

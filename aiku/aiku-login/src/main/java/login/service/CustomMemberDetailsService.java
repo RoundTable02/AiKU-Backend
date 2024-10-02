@@ -19,8 +19,8 @@ public class CustomMemberDetailsService implements UserDetailsService {
     private final MemberReadRepository memberReadRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberReadRepository.findMemberByEmail(email)
+    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
+        Member member = memberReadRepository.findMemberByKakaoId(Long.parseLong(kakaoId))
                 .orElseThrow(() -> new MemberNotFoundException());
 
         return new MemberAdaptor(member);

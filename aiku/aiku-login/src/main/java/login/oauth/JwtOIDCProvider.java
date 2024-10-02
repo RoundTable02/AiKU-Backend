@@ -66,8 +66,7 @@ public class JwtOIDCProvider {
         return new OIDCDecodePayload(
                 body.getIssuer(),
                 body.getAudience(),
-                body.getSubject(),
-                body.get("email", String.class));
+                body.getSubject());
     }
 
     private Key getRSAPublicKey(String modulus, String exponent)

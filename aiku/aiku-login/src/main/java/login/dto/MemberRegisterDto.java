@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class MemberRegisterDto {
     private String nickname;
     private String email;
+    private String idToken;
     private MemberProfileDto memberProfile;
     private Boolean isServicePolicyAgreed;
     private Boolean isPersonalInformationPolicyAgreed;

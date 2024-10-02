@@ -37,9 +37,6 @@ public class KakaoOauthHelper {
 
     public OauthInfo getOauthInfoByIdToken(String idToken) {
         OIDCDecodePayload oidcDecodePayload = getOIDCDecodePayload(idToken);
-        return OauthInfo.builder()
-                .oid(oidcDecodePayload.getSub())
-                .email(oidcDecodePayload.getEmail())
-                .build();
+        return new OauthInfo(oidcDecodePayload.getSub());
     }
 }

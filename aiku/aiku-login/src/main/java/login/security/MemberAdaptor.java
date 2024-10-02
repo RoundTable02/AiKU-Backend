@@ -11,7 +11,7 @@ public class MemberAdaptor extends User {
     private Member member;
 
     public MemberAdaptor(Member member) {
-        super(member.getEmail(), member.getPassword(), member.getAuthorities());
+        super(String.valueOf(member.getKakaoId()), member.getPassword(), member.getAuthorities());
         this.member = member;
     }
 }

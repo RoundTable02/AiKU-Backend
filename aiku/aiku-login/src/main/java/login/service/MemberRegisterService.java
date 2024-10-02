@@ -8,9 +8,12 @@ import login.application_event.event.PointChangeType;
 import login.application_event.publisher.PointChangeEventPublisher;
 import login.dto.MemberProfileDto;
 import login.dto.MemberRegisterDto;
+import login.dto.NicknameExistDto;
+import login.dto.NicknameExistResDto;
 import login.exception.MemberNotFoundException;
 import login.oauth.KakaoOauthHelper;
 import login.repository.EventRepository;
+import login.repository.MemberReadRepository;
 import login.repository.MemberRepository;
 import login.s3.S3ImageProvider;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MemberRegisterService {
     private final MemberRepository memberRepository;
+    private final MemberReadRepository memberReadRepository;
     private final KakaoOauthHelper kakaoOauthHelper;
     private final PasswordEncoder passwordEncoder;
     private final S3ImageProvider imageProvider;
@@ -81,4 +85,8 @@ public class MemberRegisterService {
     }
 
 
+    public NicknameExistResDto checkNickname(NicknameExistDto nicknameExistDto) {
+        boolean exist = memberReadRepository.existsByNickname(nicknameExistDto.getNickname());
+        return new NicknameExistResDto(exist);
+    }
 }

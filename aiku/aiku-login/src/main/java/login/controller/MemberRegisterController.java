@@ -3,15 +3,10 @@ package login.controller;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import common.response.status.BaseCode;
-import login.dto.MemberRegisterDto;
-import login.dto.SignInDto;
-import login.dto.SignInTokenResDto;
+import login.dto.*;
 import login.service.MemberRegisterService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static common.response.status.BaseCode.POST;
 
@@ -25,5 +20,12 @@ public class MemberRegisterController {
         Long addId = memberRegisterService.register(memberRegisterDto);
 
         return BaseResponse.getSimpleRes(addId, POST);
+    }
+
+    @GetMapping("/nickname")
+    public BaseResponse<NicknameExistResDto> checkNickname(@RequestBody NicknameExistDto nicknameExistDto) {
+        NicknameExistResDto checkNickname = memberRegisterService.checkNickname(nicknameExistDto);
+
+        return new BaseResponse<>(checkNickname);
     }
 }

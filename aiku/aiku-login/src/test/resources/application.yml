@@ -20,14 +20,14 @@ spring:
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: 64edba70789f212fd7e289c6b95f1251af01f3b4ac04c01071793cee94e4aec1 # Test용
 
 custom:
-  password: ${CUSTOM_PASSWORD}
+  password: test_custom_pwd
 
 kakao:
   base_url: https://kauth.kakao.com
-  app_id: ${KAKAO_APP_ID}
+  app_id: test_kakao_app_id
 
 logging:
   level:
@@ -36,9 +36,9 @@ logging:
 cloud:
   aws:
     s3:
-      bucket: ${AWS_BUCKET}
+      bucket: test_aws_bucket
     stack.auto: false
     region.static: ap-northeast-2
     credentials:
-      accessKey: ${AWS_ACCESS}
-      secretKey: ${AWS_SECRET}
+      accessKey: test_aws_access
+      secretKey: test_aws_secret

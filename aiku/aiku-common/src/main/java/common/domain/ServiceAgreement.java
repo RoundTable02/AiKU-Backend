@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
-public class Setting {
+public class ServiceAgreement {
     //알람 관련 세팅
     private boolean isServicePolicyAgreed;
     private boolean isPersonalInformationPolicyAgreed;

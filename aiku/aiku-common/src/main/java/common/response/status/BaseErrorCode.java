@@ -25,6 +25,8 @@ public enum BaseErrorCode implements StatusCode{
     FORBIDDEN_SCHEDULE_UPDATE_STATUS(4033, "변경이 불가능한 스케줄 상태입니다.", HttpStatus.FORBIDDEN),
     FREE_MEMBER_LIMIT(4034, "깍두기 제한 기능입니다.", HttpStatus.FORBIDDEN),
 
+    MEMBER_NOT_FOUND(4041, "멤버가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+
 
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(5000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR);

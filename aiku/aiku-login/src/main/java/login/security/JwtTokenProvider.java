@@ -53,9 +53,12 @@ public class JwtTokenProvider {
     public String generateAccessToken(Authentication authentication, String authorities) {
         Calendar accessTokenCal = Calendar.getInstance();
         accessTokenCal.setTime(new Date());
-        accessTokenCal.add(Calendar.DATE, 1);
+//        accessTokenCal.add(Calendar.DATE, 1);
         // AccessToken : 1일 후 만료
+        accessTokenCal.add(Calendar.MONTH, 1);
+        // 테스트용 AccessToken : 1달 후 만료
         Date accessTokenExpiresIn = accessTokenCal.getTime();
+        
         return Jwts.builder()
                 .setSubject(authentication.getName()) // email
                 .claim("auth", authorities)

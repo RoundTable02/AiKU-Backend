@@ -3,6 +3,7 @@ package login.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
@@ -32,13 +33,12 @@ public class SecurityConfig {
                 // 권한 설정 시작
                 .authorizeHttpRequests(authorize ->
                         authorize
-//                                .requestMatchers("/members/signin").permitAll() // 모든 사용자 허용
-//                                .requestMatchers("/members/signup").permitAll() // 모든 사용자 허용
-//                                .requestMatchers("/members/check-nickname").permitAll() // 모든 사용자 허용
-//                                .requestMatchers("/members/check-username").permitAll() // 모든 사용자 허용
-//                                .requestMatchers("/members/hobby-test").permitAll() // 모든 사용자 허용
-//                                .anyRequest().authenticated() // 이외 모든 요청 인증 필요
-                                .anyRequest().permitAll() // 이외 모든 요청 허용
+                                .requestMatchers("/login/sign-in").permitAll() // 모든 사용자 허용
+                                .requestMatchers("/login/refresh").permitAll() // 모든 사용자 허용
+                                .requestMatchers(HttpMethod.POST, "/users").permitAll() // 모든 사용자 허용
+                                .requestMatchers("/users/nickname").permitAll() // 모든 사용자 허용
+                                .anyRequest().authenticated() // 이외 모든 요청 인증 필요
+//                                .anyRequest().permitAll() // 이외 모든 요청 허용
                         )
                 // 구현한 필터 적용
                 .addFilterBefore(

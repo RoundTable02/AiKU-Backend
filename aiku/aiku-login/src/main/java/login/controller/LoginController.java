@@ -1,6 +1,7 @@
 package login.controller;
 
 import common.response.BaseResponse;
+import jakarta.validation.Valid;
 import login.dto.RefreshTokenResDto;
 import login.dto.SignInDto;
 import login.dto.SignInTokenResDto;
@@ -18,7 +19,7 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping("/sign-in")
-    public BaseResponse<SignInTokenResDto> signIn(@RequestBody SignInDto signInDto){
+    public BaseResponse<SignInTokenResDto> signIn(@RequestBody @Valid SignInDto signInDto){
         SignInTokenResDto signInTokenResDto = loginService.signIn(signInDto.getIdToken());
 
         return new BaseResponse<>(signInTokenResDto);

@@ -44,7 +44,6 @@ public class MemberRegisterService {
 
         String idToken = memberRegisterDto.getIdToken();
         String kakaoId = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
-//        String kakaoId = "123";
 
         String password = passwordEncoder.encode(kakaoId.toString());
 

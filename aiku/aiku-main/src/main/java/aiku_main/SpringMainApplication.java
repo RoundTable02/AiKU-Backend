@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EntityScan(basePackages = {"common"})
 @SpringBootApplication(scanBasePackages = {"aiku_main", "common"})
 public class SpringMainApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(SpringMainApplication.class);
     }

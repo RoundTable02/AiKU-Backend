@@ -1,12 +1,17 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.TeamBettingResult;
+import aiku_main.application_event.domain.TeamLateTimeResult;
+import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
-import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamReadRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.*;
+import aiku_main.repository.dto.TeamBettingResultMemberDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.member.Member;
 import common.domain.Status;
+import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import common.exception.BaseExceptionImpl;
@@ -17,8 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -29,7 +33,10 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamReadRepository teamReadRepository;
     private final ScheduleRepository scheduleRepository;
+    private final BettingRepository bettingRepository;
+    private final BettingReadRepository bettingReadRepository;
     private final TeamEventPublisher teamEventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
@@ -91,12 +98,91 @@ public class TeamService {
 
     public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
-        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page, totalCount);
-        System.out.println("totalCount = " + totalCount);
-        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(totalCount.getTotalCount(), page, data);
+        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
+        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
         return resultDto;
+    }
+
+    public String getTeamLateTimeResult(Member member, Long teamId){
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findById(teamId).orElseThrow();
+
+        //서비스 로직
+        return team.getTeamResult().getLateTimeResult();
+    }
+
+    public String getTeamBettingResult(Member member, Long teamId){
+        //검증 로직
+        checkTeamMember(member.getId(), teamId, true);
+        Team team = teamRepository.findById(teamId).orElseThrow();
+
+        //서비스 로직
+        return team.getTeamResult().getTeamBettingResult();
+    }
+
+    //==이벤트 핸들러==
+    @Transactional
+    public void analyzeLateTimeResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+
+        List<TeamResultMember> lateTeamMemberRanking = teamReadRepository.getTeamLateTimeResult(team.getId());
+        TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
+
+        try {
+            team.setTeamLateResult(objectMapper.writeValueAsString(teamLateTimeResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void analyzeBettingResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingReadRepository.findMemberTermBettingsInTeam(team.getId());
+
+        List<TeamResultMember> teamResultMembers = new ArrayList<>();
+        memberBettingsMap.forEach((memberId, memberBettingList) -> {
+            long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
+            int analysis = (int) ((double)count/memberBettingList.size() * 100);
+
+            TeamBettingResultMemberDto data = memberBettingList.get(0);
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.getIsTeamMember()));
+        });
+
+        teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+
+        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamResultMembers);
+        try {
+            team.setTeamBettingResult(objectMapper.writeValueAsString(teamBettingResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void updateLateTimeResultOfExitMember(Long memberId, Long teamId) {
+        Team team = teamRepository.findById(teamId).orElseThrow();
+        if (team.getTeamResult() == null || team.getTeamResult().getLateTimeResult() == null) {
+            return;
+        }
+
+        try {
+            TeamLateTimeResult result = objectMapper.readValue(team.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
+            result.getMembers().forEach(resultMember -> {
+                if (resultMember.getMemberId().equals(memberId)) {
+                    resultMember.setTeamMember(false);
+                }
+            });
+
+            team.setTeamLateResult(objectMapper.writeValueAsString(result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //== 편의 메서드 ==

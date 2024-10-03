@@ -1,5 +1,7 @@
 package aiku_main.service;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -8,6 +10,8 @@ import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
@@ -46,6 +50,7 @@ public class ScheduleService {
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
+    private final ObjectMapper objectMapper;
 
     //TODO 카프카를 통한 푸시 알림 로직 추가해야됨
     @Transactional
@@ -64,7 +69,7 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
 
         pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE, schedule.getId());
-        scheduleScheduler.reserveSchedule(schedule.getId(), schedule.getScheduleTime());
+        scheduleScheduler.reserveSchedule(schedule);
 
         return schedule.getId();
     }
@@ -84,7 +89,7 @@ public class ScheduleService {
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
 
-        scheduleScheduler.changeSchedule(schedule.getId(), schedule.getScheduleTime());
+        scheduleScheduler.changeSchedule(schedule);
 
         return schedule.getId();
     }
@@ -165,23 +170,43 @@ public class ScheduleService {
         checkIsAlive(team);
 
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
-        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page, totalCount);
+        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(member.getId()));
         int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
-        return new TeamScheduleListResDto(team, totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
+        return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
     }
 
     public MemberScheduleListResDto getMemberScheduleList(Member member, SearchDateCond dateCond, int page) {
         //서비스 로직
-        TotalCountDto totalCount = new TotalCountDto();
-        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page, totalCount);
+        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page);
         int runSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.WAIT, dateCond);
 
-        return new MemberScheduleListResDto(totalCount.getTotalCount(), page, runSchedule, waitSchedule, scheduleList);
+        return new MemberScheduleListResDto(page, runSchedule, waitSchedule, scheduleList);
+    }
+
+    public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleArrivalResult();
+    }
+
+    public String getScheduleBettingResult(Member member, Long teamId, Long scheduleId) {
+        //검증 로직
+        checkTeamMember(member.getId(), teamId);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        checkIsTerm(schedule);
+
+        //서비스 로직
+        return schedule.getScheduleResult().getScheduleBettingResult();
     }
 
     //== 이벤트 핸들러 ==
@@ -198,15 +223,15 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void scheduleOpen(Long scheduleId) {
+    public void openSchedule(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        schedule.setScheduleStatus(ExecStatus.RUN);
+        schedule.setRun();
 
         //TODO 카프카, 알림
     }
 
     @Transactional
-    public void scheduleAutoClose(Long scheduleId) {
+    public void closeScheduleAuto(Long scheduleId) {
         if (scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.TERM, Status.ALIVE)){
             return;
         }
@@ -243,6 +268,24 @@ public class ScheduleService {
         });
     }
 
+    @Transactional
+    public void analyzeScheduleArrivalResult(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+
+        List<ScheduleArrivalMember> arrivalMembers = scheduleReadRepository.getScheduleArrivalResults(scheduleId);
+        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
+        try {
+            schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Can't Parse ScheduleArrivalResult");
+        } ;
+    }
+
+    public boolean isScheduleAutoClosed(Long scheduleId){
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        return schedule.isAutoClose();
+    }
+
     //== 편의 메서드 ==
     private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
         ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);
@@ -260,6 +303,12 @@ public class ScheduleService {
     private void checkIsWait(Schedule schedule){
         if(schedule.getScheduleStatus() != ExecStatus.WAIT){
             throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN_SCHEDULE_UPDATE_STATUS);
+        }
+    }
+
+    private void checkIsTerm(Schedule schedule){
+        if(schedule.getScheduleStatus() != ExecStatus.TERM){
+            throw new BaseExceptionImpl(BaseErrorCode.SCHEDULE_NOT_TERM);
         }
     }
 

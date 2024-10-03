@@ -17,6 +17,7 @@ public enum BaseErrorCode implements StatusCode{
 
     ALREADY_IN_TEAM(4003, "이미 팀에 소속되어 있습니다.", HttpStatus.BAD_REQUEST),
     CAN_NOT_EXIT(4004, "실행중인 스케줄이 있습니다.", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_TERM(4005, "스케줄이 아직 종료되지 않았습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_HAS_BETTING(4006, "이미 베팅이 존재합니다.", HttpStatus.BAD_REQUEST),
 
     NOT_AVAILABLE_SCHEDULE(4031, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),

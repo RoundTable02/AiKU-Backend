@@ -22,5 +22,6 @@ public interface ScheduleRepositoryCustom {
     List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId);
+    List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId);
     Optional<ScheduleMember> findNextScheduleOwner(Long scheduleId, Long prevOwnerScheduleMemberId);
 }

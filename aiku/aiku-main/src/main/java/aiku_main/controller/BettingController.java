@@ -4,11 +4,9 @@ import aiku_main.dto.BettingAddDto;
 import aiku_main.service.BettingService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
-import common.response.status.BaseCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import static common.response.status.BaseCode.*;
 
 @RequestMapping("/schedules/{scheduleId}/bettings")
 @RequiredArgsConstructor
@@ -19,10 +17,10 @@ public class BettingController {
 
     @PostMapping
     public BaseResponse<BaseResultDto> addBetting(@PathVariable Long scheduleId,
-                                                  @RequestBody BettingAddDto bettingDto){
+                                                  @RequestBody @Valid BettingAddDto bettingDto){
         Long resultId = bettingService.addBetting(null, scheduleId, bettingDto);
 
-        return BaseResponse.getSimpleRes(resultId, POST);
+        return BaseResponse.getSimpleRes(resultId);
     }
 
     @PostMapping("/{bettingId}")
@@ -31,6 +29,6 @@ public class BettingController {
                                                   @RequestBody BettingAddDto bettingDto){
         Long resultId = bettingService.cancelBetting(null, scheduleId, bettingId);
 
-        return BaseResponse.getSimpleRes(resultId, OK);
+        return BaseResponse.getSimpleRes(resultId);
     }
 }

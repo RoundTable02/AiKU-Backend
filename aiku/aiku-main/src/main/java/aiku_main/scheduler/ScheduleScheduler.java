@@ -31,48 +31,47 @@ public class ScheduleScheduler {
     @PostConstruct
     public void initScheduler(){
         List<Schedule> schedules = scheduleRepository.findByScheduleStatus(ExecStatus.WAIT);
-        schedules.forEach(
-                schedule -> reserveSchedule(schedule.getId(), schedule.getScheduleTime()));
+        schedules.forEach(schedule -> reserveSchedule(schedule));
     }
 
-    public void reserveSchedule(Long scheduleId, LocalDateTime scheduleTime){
-        reserveScheduleOpen(scheduleId, scheduleTime);
-        reserveScheduleAutoClose(scheduleId, scheduleTime);
-        reserveAlarm(scheduleId, scheduleTime);
+    public void reserveSchedule(Schedule schedule){
+        reserveScheduleOpen(schedule);
+        reserveScheduleAutoClose(schedule);
+        reserveAlarm(schedule);
     }
 
-    public void changeSchedule(Long scheduleId, LocalDateTime scheduleTime){
-        cancelAll(scheduleId);
-        reserveSchedule(scheduleId, scheduleTime);
+    public void changeSchedule(Schedule schedule){
+        cancelAll(schedule.getId());
+        reserveSchedule(schedule);
     }
 
     //TODO Runnable 추가
-    private void reserveAlarm(Long scheduleId, LocalDateTime scheduleTime){
-        Duration delayTime = getDuration(scheduleTime);
+    private void reserveAlarm(Schedule schedule){
+        Duration delayTime = getDuration(schedule.getScheduleTime());
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{}, delayTime);
-        scheduleAlarmTasks.put(scheduleId, future);
+        scheduleAlarmTasks.put(schedule.getId(), future);
     }
 
-    private void reserveScheduleOpen(Long scheduleId, LocalDateTime scheduleTime){
-        Duration delayTime = getDuration(scheduleTime).minus(Duration.ofMinutes(30));
+    private void reserveScheduleOpen(Schedule schedule){
+        Duration delayTime = getDuration(schedule.getScheduleTime()).minus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()-> {
-            scheduleEventPublisher.publishScheduleOpenEvent(scheduleId);
+            scheduleEventPublisher.publishScheduleOpenEvent(schedule);
             }, delayTime);
-        scheduleOpenTasks.put(scheduleId, future);
+        scheduleOpenTasks.put(schedule.getId(), future);
     }
 
-    private void reserveScheduleAutoClose(Long scheduleId, LocalDateTime scheduleTime){
-        Duration delayTime = getDuration(scheduleTime).plus(Duration.ofMinutes(30));
+    private void reserveScheduleAutoClose(Schedule schedule){
+        Duration delayTime = getDuration(schedule.getScheduleTime()).plus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{
-            scheduleEventPublisher.publishScheduleAutoCloseEvent(scheduleId);
+            scheduleEventPublisher.publishScheduleAutoCloseEvent(schedule);
         }, delayTime);
-        scheduleAutoCloseTasks.put(scheduleId, future);
+        scheduleAutoCloseTasks.put(schedule.getId(), future);
     }
 
     private void cancelAll(Long scheduleId){

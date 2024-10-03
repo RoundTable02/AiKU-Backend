@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class PointChangeEvent {
+
     private MemberValue member;
     private PointChangeType sign;
     private int pointAmount;

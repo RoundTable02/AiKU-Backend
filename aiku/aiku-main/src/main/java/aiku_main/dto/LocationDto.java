@@ -2,13 +2,19 @@ package aiku_main.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import common.domain.Location;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 public class LocationDto {
+
+    @NotBlank
     private String locationName;
+    @NotNull
     private Double latitude;
+    @NotNull
     private Double longitude;
 
     public LocationDto(Location location) {

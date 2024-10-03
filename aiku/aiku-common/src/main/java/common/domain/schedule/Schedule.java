@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static common.domain.ExecStatus.*;
+import static common.domain.Status.ALIVE;
+import static common.domain.Status.DELETE;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -32,21 +36,26 @@ public class Schedule extends BaseTime {
     @Embedded
     private Location location;
 
-    @Enumerated(value = EnumType.STRING)
-    private ExecStatus scheduleStatus;
+    private LocalDateTime scheduleTermTime;
+    private boolean isAutoClose = false;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status = Status.ALIVE;
+    private ExecStatus scheduleStatus = WAIT;
+
+    @Enumerated(value = EnumType.STRING)
+    private Status status = ALIVE;
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    ScheduleResult scheduleResult;
 
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
         this.team = team;
         this.scheduleName = scheduleName;
         this.scheduleTime = scheduleTime;
         this.location = location;
-        this.scheduleStatus = ExecStatus.WAIT;
     }
 
     //==CUD 편의 메서드==
@@ -66,7 +75,7 @@ public class Schedule extends BaseTime {
     }
 
     public void delete(){
-        this.status = Status.DELETE;
+        this.status = DELETE;
     }
 
     //==편의 메서드==
@@ -76,27 +85,55 @@ public class Schedule extends BaseTime {
     }
 
     public void removeScheduleMember(ScheduleMember scheduleMember) {
-        scheduleMember.setStatus(Status.DELETE);
+        scheduleMember.setStatus(DELETE);
     }
 
     public void changeScheduleOwner(ScheduleMember nextOwner){
         nextOwner.setOwner();
     }
 
-    public void setScheduleStatus(ExecStatus scheduleStatus) {
-        this.scheduleStatus = scheduleStatus;
-    }
-
     public void arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
         scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
     }
 
-    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
-        notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
-        this.scheduleStatus = ExecStatus.TERM;
-    }
-
     public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
         scheduleMember.setRewardPointAmount(rewardPointAmount);
+    }
+
+    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
+        notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
+        this.scheduleTermTime = closeTime;
+        this.scheduleStatus = TERM;
+        this.isAutoClose = true;
+    }
+
+    public void setTerm(LocalDateTime scheduleTermTime){
+        this.scheduleTermTime = scheduleTermTime;
+        this.scheduleStatus = TERM;
+    }
+
+    public void setRun(){
+        scheduleStatus = RUN;
+    }
+
+    public void setScheduleArrivalResult(String scheduleArrivalResult) {
+        checkScheduleResultExist();
+        scheduleResult.setScheduleArrivalResult(scheduleArrivalResult);
+    }
+
+    public void setScheduleBettingResult(String scheduleBettingResult) {
+        checkScheduleResultExist();
+        scheduleResult.setScheduleBettingResult(scheduleBettingResult);
+    }
+
+    public void setScheduleRacingResult(String scheduleRacingResult) {
+        checkScheduleResultExist();
+        scheduleResult.setScheduleRacingResult(scheduleRacingResult);
+    }
+
+    private void checkScheduleResultExist(){
+        if(scheduleResult == null){
+            scheduleResult = new ScheduleResult(this);
+        }
     }
 }

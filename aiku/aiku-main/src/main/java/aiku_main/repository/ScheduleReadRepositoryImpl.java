@@ -1,11 +1,13 @@
 package aiku_main.repository;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -41,17 +43,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page, TotalCountDto totalCount) {
-        totalCount.setTotalCount(
-                query
-                .select(schedule.count())
-                .from(schedule)
-                .where(schedule.team.id.eq(teamId),
-                        schedule.status.eq(ALIVE),
-                        scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
-                .fetchFirst());
-
+    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(schedule)
@@ -60,7 +52,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .offset(getOffset(page))
-                .limit(10)
+                .limit(11)
                 .fetch();
 
         return query
@@ -83,18 +75,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page, TotalCountDto totalCount) {
-        totalCount.setTotalCount(
-                query.select(schedule.count())
-                        .from(scheduleMember)
-                        .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
-                        .where(scheduleMember.member.id.eq(memberId),
-                                scheduleMember.status.eq(ALIVE),
-                                schedule.status.eq(ALIVE),
-                                scheduleTimeGoe(dateCond.getStartDate()),
-                                scheduleTimeLoe(dateCond.getEndDate()))
-                        .fetchFirst());
-
+    public List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(scheduleMember)
@@ -105,7 +86,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeGoe(dateCond.getStartDate()),
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .offset(getOffset(page))
-                .limit(10)
+                .limit(11)
                 .fetch();
 
         return query
@@ -154,6 +135,22 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .fetchFirst()
                 .intValue();
+    }
+
+    @Override
+    public List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId) {
+        return query
+                .select(Projections.constructor(ScheduleArrivalMember.class,
+                        member.id, member.nickname,
+                        Projections.constructor(MemberProfileResDto.class,
+                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
+                        scheduleMember.arrivalTimeDiff))
+                .from(scheduleMember)
+                .join(member).on(member.id.eq(scheduleMember.member.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .orderBy(scheduleMember.arrivalTime.asc(), scheduleMember.id.asc())
+                .fetch();
     }
 
     private BooleanExpression scheduleTimeGoe(LocalDateTime startDate){

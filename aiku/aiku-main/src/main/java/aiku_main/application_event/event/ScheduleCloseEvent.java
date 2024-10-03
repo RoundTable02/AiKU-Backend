@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class ScheduleCloseEvent {
+
     private ScheduleValue schedule;
 
     public ScheduleCloseEvent(Schedule schedule) {

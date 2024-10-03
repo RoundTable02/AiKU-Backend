@@ -1,5 +1,7 @@
 package aiku_main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
@@ -23,5 +25,12 @@ public class MainConfiguration {
         scheduler.setWaitForTasksToCompleteOnShutdown(true); // 애플리케이션 종료 시 남아 있는 작업 완료 대기 여부
         scheduler.setAwaitTerminationSeconds(30); // 종료 시 대기 시간(초)
         return scheduler;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 }

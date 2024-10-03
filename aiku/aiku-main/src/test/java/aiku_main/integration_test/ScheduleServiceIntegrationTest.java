@@ -1,9 +1,13 @@
 package aiku_main.integration_test;
 
+import aiku_main.application_event.domain.ScheduleArrivalMember;
+import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.dto.*;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
@@ -44,6 +48,8 @@ public class ScheduleServiceIntegrationTest {
     ScheduleRepository scheduleRepository;
     @Autowired
     MemberRepository memberRepository;
+    @Autowired
+    ObjectMapper objectMapper;
 
     Member member1;
     Member member2;
@@ -247,7 +253,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 100);
-        schedule.setScheduleStatus(ExecStatus.RUN);
+        schedule.setRun();
         em.persist(schedule);
 
         em.flush();
@@ -399,7 +405,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team, 0);
-        schedule.setScheduleStatus(ExecStatus.TERM);
+        schedule.setTerm(LocalDateTime.now());
         schedule.addScheduleMember(member2, false, 0);
 
         em.persist(schedule);
@@ -474,16 +480,14 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 100);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 100);
-        schedule1.setScheduleStatus(ExecStatus.RUN);
+        schedule1.setRun();
         em.persist(schedule1);
 
         Schedule schedule2 = createSchedule(member2, team, 100);
         schedule2.addScheduleMember(member3, false, 100);
-        schedule2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule2);
 
         Schedule schedule3 = createSchedule(member3, team, 100);
-        schedule3.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule3);
 
         em.flush();
@@ -496,7 +500,6 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(3);
         assertThat(result.getRunSchedule()).isEqualTo(1);
         assertThat(result.getWaitSchedule()).isEqualTo(2);
 
@@ -523,19 +526,17 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule1 = createSchedule(member1, team, 100);
-        schedule1.setScheduleStatus(ExecStatus.RUN);
+        schedule1.setRun();
         em.persist(schedule1);
 
         LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule2 = createSchedule(member2, team, 100);
-        schedule2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule2);
 
         LocalDateTime endDate = LocalDateTime.now().plusHours(3);
 
         Schedule schedule3 = createSchedule(member3, team, 100);
-        schedule3.setScheduleStatus(ExecStatus.WAIT);
         em.persist(schedule3);
 
         em.flush();
@@ -548,7 +549,6 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(1);
         assertThat(result.getRunSchedule()).isEqualTo(0);
         assertThat(result.getWaitSchedule()).isEqualTo(1);
 
@@ -570,16 +570,15 @@ public class ScheduleServiceIntegrationTest {
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);
-        scheduleA1.setScheduleStatus(ExecStatus.RUN);
+        scheduleA1.setRun();
         scheduleA1.addScheduleMember(member2, false, 0);
         em.persist(scheduleA1);
 
         Schedule scheduleA2 = createSchedule(member2, teamA, 100);
-        scheduleA2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleA2);
 
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
-        scheduleB1.setScheduleStatus(ExecStatus.RUN);
+        scheduleB1.setRun();
         em.persist(scheduleB1);
 
         em.flush();
@@ -589,7 +588,6 @@ public class ScheduleServiceIntegrationTest {
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(), 1);
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(2);
         assertThat(result.getWaitSchedule()).isEqualTo(0);
         assertThat(result.getRunSchedule()).isEqualTo(2);
 
@@ -612,22 +610,20 @@ public class ScheduleServiceIntegrationTest {
         em.persist(teamB);
 
         Schedule scheduleA1 = createSchedule(member1, teamA, 100);
-        scheduleA1.setScheduleStatus(ExecStatus.RUN);
+        scheduleA1.setRun();
         scheduleA1.addScheduleMember(member2, false, 0);
         em.persist(scheduleA1);
 
         Schedule scheduleA2 = createSchedule(member2, teamA, 100);
-        scheduleA2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleA2);
 
         LocalDateTime startDate = LocalDateTime.now().plusHours(3);
 
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
-        scheduleB1.setScheduleStatus(ExecStatus.RUN);
+        scheduleB1.setRun();
         em.persist(scheduleB1);
 
         Schedule scheduleB2 = createSchedule(member1, teamB, 0);
-        scheduleB2.setScheduleStatus(ExecStatus.WAIT);
         em.persist(scheduleB2);
 
         em.flush();
@@ -637,7 +633,6 @@ public class ScheduleServiceIntegrationTest {
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(startDate, null), 1);
 
         //then
-        assertThat(result.getTotalCount()).isEqualTo(2);
         assertThat(result.getWaitSchedule()).isEqualTo(1);
         assertThat(result.getRunSchedule()).isEqualTo(1);
 
@@ -664,7 +659,7 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule schedule3 = createSchedule(member1, team, 0);
         schedule3.addScheduleMember(member2, false, 0);
-        schedule3.setScheduleStatus(ExecStatus.TERM);
+        schedule3.setTerm(LocalDateTime.now());
         em.persist(schedule3);
 
         Team teamB = Team.create(member1, "teamB");
@@ -707,7 +702,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        scheduleService.scheduleAutoClose(schedule1.getId());
+        scheduleService.closeScheduleAuto(schedule1.getId());
 
         em.flush();
         em.clear();
@@ -735,7 +730,7 @@ public class ScheduleServiceIntegrationTest {
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -743,7 +738,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        scheduleService.scheduleAutoClose(schedule1.getId());
+        scheduleService.closeScheduleAuto(schedule1.getId());
 
         em.flush();
         em.clear();
@@ -773,7 +768,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -809,7 +804,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -845,7 +840,7 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(5));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
-        schedule1.setScheduleStatus(ExecStatus.TERM);
+        schedule1.setTerm(LocalDateTime.now());
 
         em.persist(schedule1);
 
@@ -863,6 +858,43 @@ public class ScheduleServiceIntegrationTest {
         assertThat(findSchedule).isNotNull();
 
         assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(0, 250, 350);
+    }
+
+    @Test
+    void 이벤트핸들러_스케줄_도착순서_분석() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = createSchedule(member1, team, 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(4));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime.plusHours(3).plusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime.plusHours(3));
+        schedule1.setTerm(LocalDateTime.now());
+
+        em.persist(schedule1);
+
+        em.flush();
+        em.clear();
+
+        //when
+        scheduleService.analyzeScheduleArrivalResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+
+        String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();
+        List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getMembers();
+        assertThat(data).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){

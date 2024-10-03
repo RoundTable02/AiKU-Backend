@@ -153,6 +153,15 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
+    public List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId) {
+        return query.selectFrom(scheduleMember)
+                .join(scheduleMember.member, member).fetchJoin()
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .fetch();
+    }
+
+    @Override
     public Optional<ScheduleMember> findNextScheduleOwner(Long scheduleId, Long prevOwnerScheduleMemberId) {
         ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),

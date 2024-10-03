@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 public class TeamDetailResDto {
+
     private Long groupId;
     private String groupName;
     private List<TeamMemberResDto> members = new ArrayList<>();

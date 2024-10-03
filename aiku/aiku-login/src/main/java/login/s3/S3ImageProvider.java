@@ -85,6 +85,7 @@ public class S3ImageProvider {
                             .withCannedAcl(CannedAccessControlList.PublicRead);
             amazonS3.putObject(putObjectRequest); // put image to S3
         }catch (Exception e){
+            e.printStackTrace();
             throw new S3Exception();
         }finally {
             byteArrayInputStream.close();

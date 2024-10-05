@@ -1,8 +1,8 @@
 package aiku_main.oauth.error;
 
+import aiku_main.exception.InvalidIdTokenException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import login.exception.InvalidIdTokenException;
 
 public class KauthErrorDecoder implements ErrorDecoder {
     @Override

@@ -4,7 +4,10 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
   jpa:
     hibernate:
       ddl-auto: create
@@ -16,7 +19,26 @@ spring:
         show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
 
+jwt:
+  secret: ${JWT_SECRET}
+
+custom:
+  password: ${CUSTOM_PASSWORD}
+
+kakao:
+  base_url: https://kauth.kakao.com
+  app_id: ${KAKAO_APP_ID}
 
 logging:
   level:
     root: INFO
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_BUCKET}
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: ${AWS_ACCESS}
+      secretKey: ${AWS_SECRET}

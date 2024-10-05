@@ -1,10 +1,10 @@
 package aiku_main.oauth.error;
 
+import aiku_main.exception.InvalidIdTokenException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import feign.Response;
-import login.exception.InvalidIdTokenException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

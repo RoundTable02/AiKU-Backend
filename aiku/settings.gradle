@@ -1,5 +1,5 @@
 rootProject.name = 'aiku'
-include 'aiku-login'
+include 'aiku-gateway'
 include 'aiku-main'
 include 'aiku-map'
 include 'aiku-payment'

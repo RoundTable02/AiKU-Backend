@@ -1,7 +1,9 @@
 package common.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public enum Title {
     C01("타이틀 제목", "타이틀 설명", "타이틀 이미지"),

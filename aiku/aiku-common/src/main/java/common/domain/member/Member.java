@@ -89,6 +89,12 @@ public class Member extends BaseTime {
         return new Member(email, nickname, kakaoId, password, MemberRole.MEMBER, memberProfile, serviceAgreement);
     }
 
+    public void updateMember(String nickname, MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter, MemberProfileBackground profileBackground) {
+        MemberProfile memberProfile = new MemberProfile(profileType, profileImg, profileCharacter, profileBackground);
+        this.nickname = nickname;
+        this.profile = memberProfile;
+    }
+
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.
 
     public Member(String nickname) {

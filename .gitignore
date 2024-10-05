@@ -14,3 +14,4 @@
 .idea/uiDesigner.xml
 .idea/modules/aiku-login/aiku.aiku-login.main.iml
 .idea/modules/aiku-login/aiku.aiku-login.test.iml
+*.iml

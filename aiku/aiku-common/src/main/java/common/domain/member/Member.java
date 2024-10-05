@@ -3,7 +3,10 @@ package common.domain.member;
 import common.domain.BaseTime;
 import common.domain.ServiceAgreement;
 import common.domain.Status;
-import common.domain.Title;
+import common.domain.title.Title;
+import common.domain.title.TitleMember;
+import common.domain.value_reference.ScheduleMemberValue;
+import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,8 +39,10 @@ public class Member extends BaseTime {
     @Embedded
     private MemberProfile profile;
 
-    @Enumerated(value = EnumType.STRING)
-    private Title mainTitle;
+    @AttributeOverride(name = "id", column = @Column(name = "mainTitleId"))
+    @Embedded
+    private TitleMemberValue mainTitle;
+
     private int point;
 
     @Embedded

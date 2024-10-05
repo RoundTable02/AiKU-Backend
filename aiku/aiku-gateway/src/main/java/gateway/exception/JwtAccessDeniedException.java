@@ -1,4 +1,4 @@
-package login.exception;
+package gateway.exception;
 
 import common.exception.BaseException;
 import common.response.status.StatusCode;

@@ -1,10 +1,10 @@
-package login.security;
+package gateway.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import login.exception.JwtAccessDeniedException;
+import gateway.exception.JwtAccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

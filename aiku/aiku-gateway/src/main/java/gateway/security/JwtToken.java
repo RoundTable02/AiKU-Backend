@@ -1,4 +1,4 @@
-package login.security;
+package gateway.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

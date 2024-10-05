@@ -1,4 +1,4 @@
-package login.security;
+package gateway.security;
 
 import common.domain.member.Member;
 import lombok.Getter;

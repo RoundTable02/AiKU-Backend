@@ -1,4 +1,4 @@
-package login;
+package gateway;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.TestBean;
@@ -8,16 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
-@EnableFeignClients
-@EnableCaching
 @EntityScan(basePackages = {"common"})
-@SpringBootApplication(scanBasePackages = {"login", "common"})
+@SpringBootApplication(scanBasePackages = {"gateway", "common"})
 public class SpringLoginApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringLoginApplication.class);

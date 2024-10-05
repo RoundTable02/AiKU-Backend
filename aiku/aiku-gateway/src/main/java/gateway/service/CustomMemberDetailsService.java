@@ -1,9 +1,9 @@
-package login.service;
+package gateway.service;
 
 import common.domain.member.Member;
-import login.exception.MemberNotFoundException;
-import login.repository.MemberReadRepository;
-import login.security.MemberAdaptor;
+import gateway.exception.MemberNotFoundException;
+import gateway.repository.MemberReadRepository;
+import gateway.security.MemberAdaptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

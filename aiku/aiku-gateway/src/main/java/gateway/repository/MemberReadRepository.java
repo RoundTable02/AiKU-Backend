@@ -1,4 +1,4 @@
-package login.repository;
+package gateway.repository;
 
 import common.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;

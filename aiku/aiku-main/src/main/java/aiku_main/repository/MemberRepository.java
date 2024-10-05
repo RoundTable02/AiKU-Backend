@@ -9,4 +9,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByNickname(String recommenderNickname);
 
     Optional<Member> findByKakaoId(Long aLong);
+
+    boolean existsByNickname(String nickname);
 }

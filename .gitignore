@@ -15,3 +15,8 @@
 .idea/modules/aiku-login/aiku.aiku-login.main.iml
 .idea/modules/aiku-login/aiku.aiku-login.test.iml
 *.iml
+.idea/modules/aiku-map/aiku.aiku-map.main.iml
+.idea/modules/aiku-map/aiku.aiku-map.main.iml
+/.idea
+*.iml
+.idea/modules/aiku-map/aiku.aiku-map.main.iml

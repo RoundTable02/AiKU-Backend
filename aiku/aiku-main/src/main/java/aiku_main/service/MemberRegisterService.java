@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MemberRegisterService {
     private final MemberRepository memberRepository;
-    private final MemberReadRepository memberReadRepository;
     private final KakaoOauthHelper kakaoOauthHelper;
     private final PasswordEncoder passwordEncoder;
     private final S3ImageProvider imageProvider;
@@ -84,7 +83,7 @@ public class MemberRegisterService {
 
 
     public NicknameExistResDto checkNickname(NicknameExistDto nicknameExistDto) {
-        boolean exist = memberReadRepository.existsByNickname(nicknameExistDto.getNickname());
+        boolean exist = memberRepository.existsByNickname(nicknameExistDto.getNickname());
         return new NicknameExistResDto(exist);
     }
 }

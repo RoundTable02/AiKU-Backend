@@ -4,6 +4,7 @@ import aiku_main.application_event.domain.TeamBettingResult;
 import aiku_main.application_event.domain.TeamLateTimeResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.*;
+import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
@@ -101,7 +102,7 @@ public class TeamServiceIntegrationTest {
         assertThat(teamMember).isNotNull();
 
         //중복 입장
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -115,7 +116,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -154,7 +155,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -170,7 +171,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -225,7 +226,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test

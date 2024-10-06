@@ -35,7 +35,6 @@ public class Team extends BaseTime {
         this.teamName = teamName;
     }
 
-    //==CUD 메서드==
     public static Team create(Member member, String teamName){
         //팀 생성
         Team team = new Team(teamName);
@@ -49,13 +48,17 @@ public class Team extends BaseTime {
         this.status = Status.DELETE;
     }
 
-    //==편의 메서드==
     public void addTeamMember(Member member){
         this.teamMembers.add(new TeamMember(this, member));
     }
 
-    public void removeTeamMember(TeamMember teamMember){
-        teamMember.setStatus(Status.DELETE);
+    public boolean removeTeamMember(TeamMember teamMember){
+        if (teamMember.getTeam().getId().equals(id)) {
+            teamMember.setStatus(Status.DELETE);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void setTeamLateResult(String teamLateResult){
@@ -66,13 +69,6 @@ public class Team extends BaseTime {
     public void setTeamBettingResult(String teamBettingResult){
         checkTeamResultExist();
         teamResult.setTeamBettingResult(teamBettingResult);
-    }
-
-    public LocalDateTime getTeamResultLastModifiedAt(){
-        if (teamResult == null) {
-            return null;
-        }
-        return teamResult.getModifiedAt();
     }
 
     private void checkTeamResultExist(){

@@ -19,13 +19,12 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom{
 
     @Override
     public Optional<Team> findTeamWithMember(Long teamId) {
-        Team findTeam = query.selectFrom(team)
-                .innerJoin(team.teamMembers, teamMember).fetchJoin()
+        return query.selectFrom(team)
+                .leftJoin(team.teamMembers, teamMember).fetchJoin()
                 .where(team.id.eq(teamId),
                         team.status.eq(ALIVE),
                         teamMember.status.eq(ALIVE))
-                .fetchOne();
-        return Optional.ofNullable(findTeam);
+                .stream().findFirst();
     }
 
     @Override

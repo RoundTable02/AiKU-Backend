@@ -5,6 +5,7 @@ import aiku_main.application_event.domain.TeamLateTimeResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,15 +15,14 @@ import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
-import common.exception.BaseExceptionImpl;
-import common.exception.NoAuthorityException;
-import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -33,7 +33,6 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamReadRepository teamReadRepository;
     private final ScheduleRepository scheduleRepository;
-    private final BettingRepository bettingRepository;
     private final BettingReadRepository bettingReadRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
@@ -49,10 +48,9 @@ public class TeamService {
     @Transactional
     public Long enterTeam(Member member, Long teamId) {
         //검증 로직
-        checkTeamMember(member.getId(), teamId, false);
-
-        Team team = teamRepository.findById(teamId).orElseThrow();
+        Team team = findTeamById(teamId);
         checkIsAlive(team);
+        checkTeamMember(member.getId(), teamId, false);
 
         //서비스 로직
         team.addTeamMember(member);
@@ -65,10 +63,9 @@ public class TeamService {
     @Transactional
     public Long exitTeam(Member member, Long teamId) {
         //검증 로직
-        checkTeamMember(member.getId(), teamId, true);
-
-        Team team = teamRepository.findById(teamId).orElseThrow();
+        Team team = findTeamById(teamId);
         checkIsAlive(team);
+        checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
         Long teamMemberCount = teamRepository.countOfAliveTeamMember(teamId);
@@ -87,10 +84,11 @@ public class TeamService {
     //== 조회 서비스 ==
     public TeamDetailResDto getTeamDetail(Member member, Long teamId) {
         //검증 로직
+        checkExistTeam(teamId);
         checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
-        Team team = teamReadRepository.findTeamWithMember(teamId).orElseThrow();
+        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
         TeamDetailResDto resultDto = new TeamDetailResDto(team);
 
         return resultDto;
@@ -106,8 +104,8 @@ public class TeamService {
 
     public String getTeamLateTimeResult(Member member, Long teamId){
         //검증 로직
+        Team team = findTeamById(teamId);
         checkTeamMember(member.getId(), teamId, true);
-        Team team = teamRepository.findById(teamId).orElseThrow();
 
         //서비스 로직
         return team.getTeamResult().getLateTimeResult();
@@ -115,8 +113,8 @@ public class TeamService {
 
     public String getTeamBettingResult(Member member, Long teamId){
         //검증 로직
+        Team team = findTeamById(teamId);
         checkTeamMember(member.getId(), teamId, true);
-        Team team = teamRepository.findById(teamId).orElseThrow();
 
         //서비스 로직
         return team.getTeamResult().getTeamBettingResult();
@@ -185,20 +183,34 @@ public class TeamService {
         }
     }
 
-    //== 편의 메서드 ==
+    //== 검증 메서드 ==
+    private Team findTeamById(Long teamId){
+        Team team = teamRepository.findById(teamId).orElse(null);
+        if (team == null) {
+            throw new TeamException(NO_SUCH_TEAM);
+        }
+        return team;
+    }
+
+    private void checkExistTeam(Long teamId){
+        if(!teamRepository.existsById(teamId)){
+            throw new TeamException(NO_SUCH_TEAM);
+        }
+    }
+
     private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
         if(teamRepository.existTeamMember(memberId, teamId) != isMember){
             if(isMember){
-                throw new NoAuthorityException();
+                throw new TeamException(NOT_IN_TEAM);
             }else {
-                throw new BaseExceptionImpl(BaseErrorCode.ALREADY_IN_TEAM);
+                throw new TeamException(ALREADY_IN_TEAM);
             }
         }
     }
 
     private void checkIsAlive(Team team){
         if(team.getStatus() == Status.DELETE){
-            throw new NoSuchElementException();
+            throw new TeamException(DELETED_DATA);
         }
     }
 }

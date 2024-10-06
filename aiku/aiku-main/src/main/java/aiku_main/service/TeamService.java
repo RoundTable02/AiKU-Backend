@@ -182,7 +182,6 @@ public class TeamService {
         }
     }
 
-    //== 검증 메서드 ==
     private Team findTeamById(Long teamId){
         Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {

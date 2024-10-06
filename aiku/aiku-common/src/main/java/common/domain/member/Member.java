@@ -95,9 +95,28 @@ public class Member extends BaseTime {
     }
 
     public void updateMember(String nickname, MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter, MemberProfileBackground profileBackground) {
-        MemberProfile memberProfile = new MemberProfile(profileType, profileImg, profileCharacter, profileBackground);
+        MemberProfile memberProfile = MemberProfile.makeMemberProfile(profileType, profileImg, profileCharacter, profileBackground);
         this.nickname = nickname;
         this.profile = memberProfile;
+    }
+
+
+    public void updateMemberTitleByTitleMemberId(TitleMemberValue titleMemberValue) {
+        this.mainTitle = titleMemberValue;
+    }
+
+    public void logout() {
+        this.refreshToken = null;
+    }
+
+    public void updateAuth(
+            boolean isServicePolicyAgreed, boolean isPersonalInformationPolicyAgreed,
+            boolean isLocationPolicyAgreed, boolean isMarketingPolicyAgreed) {
+        ServiceAgreement serviceAgreement = ServiceAgreement.makeServiceAgreement(
+                isServicePolicyAgreed, isPersonalInformationPolicyAgreed,
+                isLocationPolicyAgreed, isMarketingPolicyAgreed);
+
+        this.serviceAgreement = serviceAgreement;
     }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.

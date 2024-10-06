@@ -3,19 +3,11 @@ package common.domain.member;
 import common.domain.BaseTime;
 import common.domain.ServiceAgreement;
 import common.domain.Status;
-import common.domain.title.Title;
-import common.domain.title.TitleMember;
-import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -51,10 +43,6 @@ public class Member extends BaseTime {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
     public void reissueRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
@@ -85,7 +73,7 @@ public class Member extends BaseTime {
         MemberProfile memberProfile = new MemberProfile(
                 memberProfileType, profileImg,
                 memberProfileCharacter, memberProfileBackground);
-        ServiceAgreement serviceAgreement = new ServiceAgreement(
+        ServiceAgreement serviceAgreement = ServiceAgreement.makeServiceAgreement(
                 isServicePolicyAgreed,
                 isPersonalInformationPolicyAgreed,
                 isLocationPolicyAgreed,

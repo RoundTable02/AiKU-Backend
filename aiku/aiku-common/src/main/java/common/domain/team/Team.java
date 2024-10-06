@@ -38,10 +38,7 @@ public class Team extends BaseTime {
     }
 
     public static Team create(Member member, String teamName){
-        //팀 생성
         Team team = new Team(teamName);
-
-        //생성한 멤버를 팀 멤버로 추가
         team.addTeamMember(member);
         return team;
     }

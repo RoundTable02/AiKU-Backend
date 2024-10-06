@@ -80,7 +80,7 @@ public class TeamService {
         return team.getId();
     }
 
-    //== 조회 서비스 ==
+    //==* 조회 서비스 *==
     public TeamDetailResDto getTeamDetail(Member member, Long teamId) {
         //검증 로직
         checkExistTeam(teamId);
@@ -119,7 +119,7 @@ public class TeamService {
         return team.getTeamResult().getTeamBettingResult();
     }
 
-    //==이벤트 핸들러==
+    //==* 이벤트 핸들러 호출 메서드*==
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
@@ -182,6 +182,7 @@ public class TeamService {
         }
     }
 
+    //==* 기타 메서드 *==
     private Team findTeamById(Long teamId){
         Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {

@@ -5,24 +5,21 @@ import aiku_main.application_event.domain.ScheduleBettingMember;
 import aiku_main.application_event.domain.ScheduleBettingResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
-import aiku_main.exception.CanNotBettingException;
+import aiku_main.exception.BettingException;
+import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
-import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
-import common.exception.BaseExceptionImpl;
-import common.exception.NoAuthorityException;
 import common.exception.NotEnoughPoint;
 import common.exception.PaidMemberLimitException;
-import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +34,9 @@ import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.ExecStatus.TERM;
 import static common.domain.ExecStatus.WAIT;
+import static common.domain.Status.ALIVE;
+import static common.domain.Status.DELETE;
+import static common.response.status.BaseErrorCode.*;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,13 +49,13 @@ public class BettingService {
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ObjectMapper objectMapper;
 
-    //TODO 전체적으로 알림 전송을 위한 카프카 연결 해야됨
     @Transactional
     public Long addBetting(Member member, Long scheduleId, BettingAddDto bettingDto){
         //검증 로직
+        checkExistSchedule(scheduleId);
+        checkScheduleWait(scheduleId);
         checkPaidScheduleMember(member.getId(), scheduleId);
         checkPaidScheduleMember(bettingDto.getBeteeMemberId(), scheduleId);
-        checkScheduleWait(scheduleId);
 
         ScheduleMemberValue bettor = new ScheduleMemberValue(findScheduleMember(member.getId(), scheduleId));
         ScheduleMemberValue bettee = new ScheduleMemberValue(findScheduleMember(bettingDto.getBeteeMemberId(), scheduleId));
@@ -76,12 +76,11 @@ public class BettingService {
     public Long cancelBetting(Member member, Long scheduleId, Long bettingId){
         //검증 로직
         ScheduleMember bettor = findScheduleMember(member.getId(), scheduleId);
-        Betting betting = bettingRepository.findById(bettingId).orElseThrow();
+        Betting betting = findBettingById(bettingId);
         checkBettingMember(betting, bettor);
-        checkBettingAlive(betting);
 
         //서비스 로직
-        betting.setStatus(Status.DELETE);
+        betting.setStatus(DELETE);
 
         pointChangeEventPublisher.publish(member, PLUS, betting.getPointAmount(), BETTING, bettingId);
 
@@ -91,8 +90,8 @@ public class BettingService {
     //==이벤트 핸들러==
     @Transactional
     public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBettor = bettingRepository.findByBettorIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
-        bettingForBettor.setStatus(Status.DELETE);
+        Betting bettingForBettor = bettingRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
+        bettingForBettor.setStatus(DELETE);
 
         int pointAmount = bettingForBettor.getPointAmount();
         Member member = memberRepository.findById(memberId).orElseThrow();
@@ -101,8 +100,8 @@ public class BettingService {
 
     @Transactional
     public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBetee = bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, Status.ALIVE).orElse(null);
-        bettingForBetee.setStatus(Status.DELETE);
+        Betting bettingForBetee = bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
+        bettingForBetee.setStatus(DELETE);
 
         int pointAmount = bettingForBetee.getPointAmount();
         Member bettor = scheduleRepository.findScheduleMemberWithMemberById(bettingForBetee.getBettor().getId()).orElseThrow()
@@ -115,7 +114,7 @@ public class BettingService {
     @Transactional
     public void processBettingResult(Long scheduleId) {
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
-        if(bettings.size() == 0){
+        if(bettings.isEmpty()){
             return;
         }
 
@@ -186,7 +185,7 @@ public class BettingService {
     @Transactional
     public void analyzeScheduleBettingResult(Long scheduleId) {
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
-        if(bettings.size() == 0){
+        if(bettings.isEmpty()){
             return;
         }
 
@@ -210,31 +209,42 @@ public class BettingService {
         try {
             schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Can't Parse ScheduleBettingResult");
+            throw new BettingException(INTERNAL_SERVER_ERROR, "Can't Parse ScheduleBettingResult");
         }
     }
 
-    //==엔티티 조회 메서드==
+    //==* 기타 메서드 *==
+    private Betting findBettingById(Long bettingId){
+        Betting betting = bettingRepository.findByIdAndStatus(bettingId, ALIVE).orElse(null);
+        if (betting == null) {
+            throw new BettingException(NO_SUCH_BETTING);
+        }
+        return betting;
+    }
+
+    private void checkExistSchedule(Long scheduleId){
+        if (!scheduleRepository.existsByIdAndStatus(scheduleId, ALIVE)) {
+            throw new ScheduleException(NO_SUCH_SCHEDULE);
+        }
+    }
+
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        return scheduleRepository.findAliveScheduleMember(memberId, scheduleId).orElseThrow();
-    }
-
-    //==편의 메서드==
-    private void checkScheduleWait(Long scheduleId) {
-        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, Status.ALIVE)){
-            throw new NoAuthorityException("유효하지 않은 스케줄입니다.");
+        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(memberId, scheduleId).orElse(null);
+        if (scheduleMember == null) {
+            throw new ScheduleException(NOT_IN_SCHEDULE);
         }
+        return scheduleMember;
     }
 
-    private void checkBettingAlive(Betting betting) {
-        if (betting.getStatus() == Status.DELETE){
-            throw new BaseExceptionImpl(BaseErrorCode.FORBIDDEN, "취소된 베팅입니다.");
+    private void checkScheduleWait(Long scheduleId) {
+        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, ALIVE)){
+            throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }
 
     private void checkAlreadyHasBetting(ScheduleMemberValue bettor, Long scheduleId) {
         if(bettingRepository.existBettorInSchedule(bettor, scheduleId)){
-            throw new CanNotBettingException();
+            throw new BettingException(ALREADY_IN_BETTING);
         }
     }
 
@@ -246,7 +256,7 @@ public class BettingService {
 
     private void checkBettingMember(Betting betting, ScheduleMember bettor){
         if(!betting.getBettor().getId().equals(bettor.getId())){
-            throw new NoAuthorityException();
+            throw new BettingException(NOT_IN_BETTING);
         }
     }
 

@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
 
     Optional<Schedule> findByIdAndStatus(Long scheduleId, Status status);
+    boolean existsByIdAndStatus(Long scheduleId, Status status);
     List<Schedule> findByScheduleStatus(ExecStatus scheduleStatus);
     boolean existsByIdAndScheduleStatusAndStatus(Long scheduleId, ExecStatus scheduleStatus, Status status);
 }

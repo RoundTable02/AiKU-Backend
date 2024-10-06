@@ -3,7 +3,6 @@ package aiku_main.repository;
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
 import common.domain.ExecStatus;
-import aiku_main.application_event.domain.ScheduleArrivalResult;
 
 import java.util.List;
 

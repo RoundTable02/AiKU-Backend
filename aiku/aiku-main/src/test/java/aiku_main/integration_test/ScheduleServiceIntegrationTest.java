@@ -3,6 +3,8 @@ package aiku_main.integration_test;
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.dto.*;
+import aiku_main.exception.ScheduleException;
+import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
 import aiku_main.service.ScheduleService;
@@ -95,9 +97,6 @@ public class ScheduleServiceIntegrationTest {
         assertThat(schedule.getScheduleStatus()).isEqualTo(ExecStatus.WAIT);
         assertThat(schedule.getScheduleMembers().size()).isEqualTo(1);
         assertThat(schedule.getScheduleMembers().get(0).getMember().getId()).isEqualTo(member1.getId());
-
-        //권한x
-        assertThatThrownBy(() -> scheduleService.addSchedule(member3, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
     }
 
     @Test
@@ -109,7 +108,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
                 new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        assertThatThrownBy(() -> scheduleService.addSchedule(member2, team.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.addSchedule(member2, team.getId(), scheduleDto)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -155,7 +154,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -174,7 +173,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        assertThatThrownBy(() -> scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto)).isInstanceOf(BaseExceptionImpl.class);
+        assertThatThrownBy(() -> scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -225,7 +224,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -242,7 +241,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -261,7 +260,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -300,7 +299,7 @@ public class ScheduleServiceIntegrationTest {
         assertThat(owner).isNotNull();
         assertThat(owner.isOwner()).isTrue();
         //중복 요청
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -317,7 +316,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -336,7 +335,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -414,7 +413,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member1, team.getId(), schedule.getId())).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member1, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -466,7 +465,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -510,13 +509,13 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
-    void 그룹_스케줄_목록_조회_스케줄멤버x() {
+    void 그룹_스케줄_목록_조회_그룹멤버x() {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
 
         //when
-        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4, team.getId(), new SearchDateCond(), 1)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4, team.getId(), new SearchDateCond(), 1)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -692,11 +691,10 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();
@@ -726,13 +724,12 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule schedule1 = createSchedule(member1, team, 0);
         schedule1.addScheduleMember(member2, false, 0);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();
@@ -763,14 +760,13 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 100);
         schedule1.addScheduleMember(member2, false, 200);
         schedule1.addScheduleMember(member3, false, 300);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();
@@ -799,14 +795,13 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 100);
         schedule1.addScheduleMember(member2, false, 200);
         schedule1.addScheduleMember(member3, false, 300);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now().plusHours(4);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();
@@ -835,14 +830,13 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 100);
         schedule1.addScheduleMember(member2, false, 200);
         schedule1.addScheduleMember(member3, false, 300);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(5));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();
@@ -871,14 +865,13 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule1 = createSchedule(member1, team, 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(4));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime.plusHours(3).plusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime.plusHours(3));
         schedule1.setTerm(LocalDateTime.now());
-
-        em.persist(schedule1);
 
         em.flush();
         em.clear();

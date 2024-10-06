@@ -53,7 +53,7 @@ class TeamServiceTest {
         Team team = Team.create(member, "team1");
 
         when(teamRepository.existTeamMember(any(), any())).thenReturn(false);
-        when(teamRepository.findById(any())).thenReturn(Optional.of(team));
+        when(teamRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
 
         //when
         Long resultId = teamService.enterTeam(member, null);

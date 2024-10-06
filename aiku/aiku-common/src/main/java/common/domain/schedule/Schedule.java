@@ -58,12 +58,9 @@ public class Schedule extends BaseTime {
         this.location = location;
     }
 
-    //==CUD 편의 메서드==
     public static Schedule create(Member member, TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location, int pointAmount) {
-        //스케줄 생성
         Schedule schedule = new Schedule(team, scheduleName, scheduleTime, location);
 
-        //생성자를 스케줄 멤버로 추가
         schedule.addScheduleMember(member, true, pointAmount);
         return schedule;
     }
@@ -78,30 +75,49 @@ public class Schedule extends BaseTime {
         this.status = DELETE;
     }
 
-    //==편의 메서드==
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
     }
 
-    public void removeScheduleMember(ScheduleMember scheduleMember) {
-        scheduleMember.setStatus(DELETE);
+    public boolean removeScheduleMember(ScheduleMember scheduleMember) {
+        if(scheduleMember.getSchedule().getId().equals(id)){
+            scheduleMember.setStatus(DELETE);
+            return true;
+        }
+        return false;
     }
 
-    public void changeScheduleOwner(ScheduleMember nextOwner){
-        nextOwner.setOwner();
+    public boolean changeScheduleOwner(ScheduleMember nextOwner){
+        if(nextOwner.getSchedule().getId().equals(id)){
+            nextOwner.setOwner();
+            return true;
+        }
+        return false;
     }
 
-    public void arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
-        scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
+    public boolean arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
+        if(scheduleMember.getSchedule().id.equals(id)){
+            scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
+            return true;
+        }
+        return false;
     }
 
-    public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
-        scheduleMember.setRewardPointAmount(rewardPointAmount);
+    public boolean rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
+        if(scheduleMember.getSchedule().id.equals(id)) {
+            scheduleMember.setRewardPointAmount(rewardPointAmount);
+            return true;
+        }
+        return false;
     }
 
     public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
-        notArriveScheduleMembers.forEach(scheduleMember -> scheduleMember.arrive(closeTime, -30));
+        notArriveScheduleMembers.forEach(scheduleMember -> {
+            if(scheduleMember.getSchedule().getId().equals(id)){
+                scheduleMember.arrive(closeTime, -30);
+            }
+        });
         this.scheduleTermTime = closeTime;
         this.scheduleStatus = TERM;
         this.isAutoClose = true;

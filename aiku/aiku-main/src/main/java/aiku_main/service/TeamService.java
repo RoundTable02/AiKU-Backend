@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static common.domain.Status.ALIVE;
 import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
@@ -49,7 +50,6 @@ public class TeamService {
     public Long enterTeam(Member member, Long teamId) {
         //검증 로직
         Team team = findTeamById(teamId);
-        checkIsAlive(team);
         checkTeamMember(member.getId(), teamId, false);
 
         //서비스 로직
@@ -64,7 +64,6 @@ public class TeamService {
     public Long exitTeam(Member member, Long teamId) {
         //검증 로직
         Team team = findTeamById(teamId);
-        checkIsAlive(team);
         checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
@@ -185,7 +184,7 @@ public class TeamService {
 
     //== 검증 메서드 ==
     private Team findTeamById(Long teamId){
-        Team team = teamRepository.findById(teamId).orElse(null);
+        Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {
             throw new TeamException(NO_SUCH_TEAM);
         }
@@ -205,12 +204,6 @@ public class TeamService {
             }else {
                 throw new TeamException(ALREADY_IN_TEAM);
             }
-        }
-    }
-
-    private void checkIsAlive(Team team){
-        if(team.getStatus() == Status.DELETE){
-            throw new TeamException(DELETED_DATA);
         }
     }
 }

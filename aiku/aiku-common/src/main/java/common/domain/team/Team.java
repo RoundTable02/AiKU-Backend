@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static common.domain.Status.ALIVE;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -25,11 +27,11 @@ public class Team extends BaseTime {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private List<TeamMember> teamMembers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private TeamResult teamResult;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status = Status.ALIVE;
+    private Status status = ALIVE;
 
     private Team(String teamName) {
         this.teamName = teamName;

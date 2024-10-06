@@ -51,7 +51,7 @@ class ScheduleServiceTest {
         Long scheduleId = getRandomId();
 
         doReturn(scheduleId).when(schedule).getId();
-        when(scheduleRepository.findById(nullable(Long.class))).thenReturn(Optional.of(schedule));
+        when(scheduleRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
         when(scheduleRepository.isScheduleOwner(nullable(Long.class), nullable(Long.class))).thenReturn(true);
 
         //when
@@ -76,7 +76,7 @@ class ScheduleServiceTest {
 
 
         when(scheduleRepository.existScheduleMember(any(), any())).thenReturn(true);
-        when(scheduleRepository.findById(nullable(Long.class))).thenReturn(Optional.of(schedule));
+        when(scheduleRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
         when(scheduleReadRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
 
         //when

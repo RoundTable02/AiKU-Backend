@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static common.domain.Status.ALIVE;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -37,7 +39,7 @@ public class ScheduleMember extends BaseTime {
     private int arrivalTimeDiff;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status = Status.ALIVE;
+    private Status status = ALIVE;
 
     protected ScheduleMember(Member member, Schedule schedule, boolean isOwner, int pointAmount) {
         this.member = member;

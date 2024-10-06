@@ -34,16 +34,6 @@ public class TeamReadRepositoryImpl implements TeamReadRepository {
     private final JPAQueryFactory query;
 
     @Override
-    public Optional<Team> findTeamWithMember(Long teamId) {
-        return query.selectFrom(team)
-                .leftJoin(team.teamMembers, teamMember).fetchJoin()
-                .where(team.id.eq(teamId),
-                        team.status.eq(ALIVE),
-                        teamMember.status.eq(ALIVE))
-                .stream().findFirst();
-    }
-
-    @Override
     public List<TeamEachListResDto> getTeamList(Long memberId, int page) {
         QSchedule subSchedule = new QSchedule("subSchedule");
 

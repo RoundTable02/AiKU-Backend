@@ -3,7 +3,8 @@ package aiku_main.integration_test;
 import aiku_main.application_event.domain.ScheduleBetting;
 import aiku_main.application_event.domain.ScheduleBettingResult;
 import aiku_main.dto.BettingAddDto;
-import aiku_main.exception.CanNotBettingException;
+import aiku_main.exception.BettingException;
+import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleRepository;
@@ -114,7 +115,7 @@ class BettingServiceIntegrationTest {
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -145,7 +146,7 @@ class BettingServiceIntegrationTest {
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(CanNotBettingException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -195,7 +196,7 @@ class BettingServiceIntegrationTest {
 
         //when
         bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
-        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -211,7 +212,7 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -227,7 +228,7 @@ class BettingServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test

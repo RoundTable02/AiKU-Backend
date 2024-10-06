@@ -53,7 +53,7 @@ class TeamServiceTest {
         Team team = Team.create(member, "team1");
 
         when(teamRepository.existTeamMember(any(), any())).thenReturn(false);
-        when(teamRepository.findById(any())).thenReturn(Optional.of(team));
+        when(teamRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
 
         //when
         Long resultId = teamService.enterTeam(member, null);
@@ -68,7 +68,8 @@ class TeamServiceTest {
         team.addTeamMember(member2);
 
         when(teamRepository.existTeamMember(any(), any())).thenReturn(true);
-        when(teamReadRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
+        when(teamRepository.existsById(any())).thenReturn(true);
+        when(teamRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
 
         //when
         TeamDetailResDto result = teamService.getTeamDetail(member1, team.getId());

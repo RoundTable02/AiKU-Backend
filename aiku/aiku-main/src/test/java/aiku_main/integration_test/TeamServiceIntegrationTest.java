@@ -4,6 +4,7 @@ import aiku_main.application_event.domain.TeamBettingResult;
 import aiku_main.application_event.domain.TeamLateTimeResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.*;
+import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamRepository;
 import aiku_main.service.TeamService;
@@ -101,7 +102,7 @@ public class TeamServiceIntegrationTest {
         assertThat(teamMember).isNotNull();
 
         //중복 입장
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -115,7 +116,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(BaseExceptionImpl.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -154,7 +155,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -170,7 +171,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -225,7 +226,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(NoAuthorityException.class);
+        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -295,21 +296,23 @@ public class TeamServiceIntegrationTest {
                 LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(15));
         schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
-        em.persist(schedule1);
 
         Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
                 LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).minusMinutes(30));
         schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
-        em.persist(schedule2);
 
         em.flush();
         em.clear();

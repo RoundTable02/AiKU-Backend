@@ -53,4 +53,6 @@ class TeamTest {
         assertThat(teamMembers).extracting("team").containsExactly(team, team);
         assertThat(teamMembers).extracting("status").containsExactly(Status.ALIVE, Status.ALIVE);
     }
+
+
 }

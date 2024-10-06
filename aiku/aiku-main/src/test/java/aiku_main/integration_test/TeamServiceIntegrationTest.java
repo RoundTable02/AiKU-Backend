@@ -296,21 +296,23 @@ public class TeamServiceIntegrationTest {
                 LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(15));
         schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
-        em.persist(schedule1);
 
         Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
                 LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).minusMinutes(30));
         schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
-        em.persist(schedule2);
 
         em.flush();
         em.clear();

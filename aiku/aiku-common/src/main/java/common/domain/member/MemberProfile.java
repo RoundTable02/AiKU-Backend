@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
 public class MemberProfile {
@@ -24,4 +24,10 @@ public class MemberProfile {
 
     @Enumerated(EnumType.STRING)
     private MemberProfileBackground profileBackground;
+
+    public static MemberProfile makeMemberProfile(
+            MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter,
+            MemberProfileBackground profileBackground) {
+        return new MemberProfile(profileType, profileImg, profileCharacter, profileBackground);
+    }
 }

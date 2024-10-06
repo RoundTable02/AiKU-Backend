@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
 public class ServiceAgreement {
@@ -16,4 +16,11 @@ public class ServiceAgreement {
     private boolean isPersonalInformationPolicyAgreed;
     private boolean isLocationPolicyAgreed;
     private boolean isMarketingPolicyAgreed;
+
+    public static ServiceAgreement makeServiceAgreement(
+            boolean isServicePolicyAgreed, boolean isPersonalInformationPolicyAgreed,
+            boolean isLocationPolicyAgreed, boolean isMarketingPolicyAgreed) {
+        return new ServiceAgreement(isServicePolicyAgreed, isPersonalInformationPolicyAgreed,
+                isLocationPolicyAgreed, isMarketingPolicyAgreed);
+    }
 }

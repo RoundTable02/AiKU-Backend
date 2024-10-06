@@ -11,6 +11,5 @@ import java.util.Optional;
 public interface MemberReadRepository {
     TitleMemberResDto getTitle(Long titleId);
     List<TitleMemberResDto> getTitleMembers(Long memberId);
-
     TitleMember getTitleMemberByTitleMemberId(Long titleMemberId);
 }

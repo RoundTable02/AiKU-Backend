@@ -4,6 +4,7 @@ import aiku_main.dto.*;
 import aiku_main.repository.MemberReadRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
+import common.domain.ServiceAgreement;
 import common.domain.member.Member;
 import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileType;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -83,5 +86,36 @@ public class MemberService {
         member.updateMemberTitleByTitleMemberId(titleMemberValue);
 
         return member.getId();
+    }
+
+    @Transactional
+    public Long logout(Member member) {
+        // 멤버 리프레시 토큰 삭제
+        member.logout();
+
+        return member.getId();
+    }
+
+
+    @Transactional
+    public Long updateAuth(Member member, AuthorityUpdateDto authorityUpdateDto) {
+        member.updateAuth(authorityUpdateDto.isServicePolicyAgreed(), authorityUpdateDto.isPersonalInformationPolicyAgreed(),
+                authorityUpdateDto.isLocationPolicyAgreed(), authorityUpdateDto.isMarketingPolicyAgreed());
+
+        return member.getId();
+    }
+
+    public AuthorityResDto getAuthDetail(Member member) {
+        ServiceAgreement serviceAgreement = member.getServiceAgreement();
+
+        return new AuthorityResDto(
+                serviceAgreement.isServicePolicyAgreed(), serviceAgreement.isPersonalInformationPolicyAgreed(),
+                serviceAgreement.isLocationPolicyAgreed(), serviceAgreement.isMarketingPolicyAgreed());
+    }
+
+    public DataResDto<List<TitleMemberResDto>> getMemberTitles(Member member) {
+        List<TitleMemberResDto> titleMembers = memberReadRepository.getTitleMembers(member.getId());
+
+        return new DataResDto(1, titleMembers);
     }
 }

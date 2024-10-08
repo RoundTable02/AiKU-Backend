@@ -18,6 +18,11 @@ spring:
         default_batch_fetch_size: 100
         show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    refresh-token: ${GOOGLE_REFRESH_TOKEN}
+    to-email: ${GMAIL_ACCOUNT}
 
 jwt:
   secret: 64edba70789f212fd7e289c6b95f1251af01f3b4ac04c01071793cee94e4aec1 # Test용

@@ -29,6 +29,11 @@ dependencies {
     // S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+    // mail
+    implementation 'com.google.api-client:google-api-client:1.35.1'
+    implementation 'javax.mail:mail:1.4.7'
+    implementation 'com.google.apis:google-api-services-gmail:v1-rev20220404-1.32.1'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

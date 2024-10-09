@@ -1,20 +1,19 @@
 spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/Study/AIKU/aikuDb
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: localhost
       port: 6379
   jpa:
     hibernate:
-      ddl-auto: create
-      database-platform: org.hibernate.dialect.H2Dialect
+      ddl-auto: none #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
         show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션

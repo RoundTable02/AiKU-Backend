@@ -1,6 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.dto.*;
+import aiku_main.exception.TitleException;
 import aiku_main.repository.MemberReadRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -80,12 +83,20 @@ public class MemberService {
 
     @Transactional
     public Long updateTitle(Member member, Long titleMemberId) {
+        validateTitleMember(member.getId(), titleMemberId);
+
         TitleMember titleMember = memberReadRepository.getTitleMemberByTitleMemberId(titleMemberId);
         TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
 
         member.updateMemberTitleByTitleMemberId(titleMemberValue);
 
         return member.getId();
+    }
+
+    private void validateTitleMember(Long memberId, Long titleMemberId) {
+        if (!memberReadRepository.existTitleMember(memberId, titleMemberId)) {
+            throw new TitleException(MEMBER_NOT_WITH_TITLE);
+        }
     }
 
     @Transactional

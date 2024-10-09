@@ -36,7 +36,7 @@ public enum BaseErrorCode implements StatusCode{
     FREE_MEMBER_LIMIT(40305, "깍두기 제한 기능입니다.", HttpStatus.FORBIDDEN),
 
     MEMBER_NOT_FOUND(40401, "멤버가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-
+    MEMBER_NOT_WITH_TITLE(40402, "멤버가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR),

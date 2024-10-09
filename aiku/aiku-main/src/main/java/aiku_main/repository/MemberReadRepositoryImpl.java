@@ -9,11 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static common.domain.Status.ALIVE;
-import static common.domain.member.QMember.member;
-import static common.domain.schedule.QSchedule.schedule;
-import static common.domain.schedule.QScheduleMember.scheduleMember;
-import static common.domain.team.QTeam.team;
 import static common.domain.title.QTitleMember.titleMember;
 
 @RequiredArgsConstructor

@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
-import aiku_main.application_event.domain.ScheduleArrivalResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -61,7 +60,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
                         Projections.constructor(LocationDto.class,
                                 schedule.location.locationName, schedule.location.latitude, schedule.location.longitude),
                         schedule.scheduleTime, schedule.scheduleStatus,
-                        Expressions.stringTemplate("STRING_AGG({0}, ',')", scheduleMember.member.id)))
+                        Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", scheduleMember.member.id)))
                 .from(schedule)
                 .innerJoin(scheduleMember).on(
                         scheduleMember.schedule.id.eq(schedule.id),

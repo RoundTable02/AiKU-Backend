@@ -41,4 +41,14 @@ public class MemberReadRepositoryImpl implements MemberReadRepository{
                 .where(titleMember.id.eq(titleMemberId))
                 .fetchOne();
     }
+
+    @Override
+    public boolean existTitleMember(Long memberId, Long titleMemberId) {
+        Long count = query.select(titleMember.count())
+                .from(titleMember)
+                .where(titleMember.id.eq(titleMemberId),
+                        titleMember.member.id.eq(memberId))
+                .fetchOne();
+        return count != null && count > 0;
+    }
 }

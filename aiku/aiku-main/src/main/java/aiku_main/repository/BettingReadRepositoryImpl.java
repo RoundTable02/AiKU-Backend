@@ -5,7 +5,6 @@ import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Betting;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

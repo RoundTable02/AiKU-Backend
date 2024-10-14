@@ -13,8 +13,10 @@ import aiku_main.repository.EventRepository;
 import aiku_main.repository.MemberReadRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
+import common.domain.ServiceAgreement;
 import common.domain.event.RecommendEvent;
 import common.domain.member.Member;
+import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,13 +54,18 @@ public class MemberRegisterService {
             imgUrl = imageProvider.upload(profileImg);
         }
 
-        Member member = Member.register(memberRegisterDto.getEmail(), memberRegisterDto.getNickname(),
-                kakaoId, password,
-                memberProfile.getProfileType(), imgUrl, memberProfile.getProfileCharacter(),
-                memberProfile.getProfileBackground(),
-                memberRegisterDto.getIsServicePolicyAgreed(), memberRegisterDto.getIsPersonalInformationPolicyAgreed(),
-                memberRegisterDto.getIsLocationPolicyAgreed(), memberRegisterDto.getIsMarketingPolicyAgreed()
-        );
+        Member member = Member.builder()
+                .email(memberRegisterDto.getEmail())
+                .nickname(memberRegisterDto.getNickname())
+                .kakaoId(Long.valueOf(kakaoId))
+                .password(password)
+                .build();
+
+        member.updateProfile(memberProfile.getProfileType(), imgUrl, memberProfile.getProfileCharacter(), memberProfile.getProfileBackground());
+        member.updateAuth(memberRegisterDto.getIsServicePolicyAgreed(),
+                memberRegisterDto.getIsPersonalInformationPolicyAgreed(),
+                memberRegisterDto.getIsLocationPolicyAgreed(),
+                memberRegisterDto.getIsMarketingPolicyAgreed());
 
         memberRepository.save(member);
 

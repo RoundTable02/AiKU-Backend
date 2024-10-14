@@ -6,6 +6,7 @@ import common.domain.Status;
 import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,47 +48,44 @@ public class Member extends BaseTime {
         this.refreshToken = refreshToken;
     }
 
-    protected Member(
-            String email, String nickname, String kakaoId, String password, MemberRole memberRole,
-            MemberProfile memberProfile, ServiceAgreement serviceAgreement) {
-        this.email = email;
-        this.nickname = nickname;
-        this.kakaoId = Long.valueOf(kakaoId);
-        this.password = password;
-        this.role = memberRole;
-        this.profile = memberProfile;
-        this.serviceAgreement = serviceAgreement;
-        this.point = 0;
-        this.status = Status.ALIVE;
-    }
-    public static Member register(
-            String email, String nickname,
-            String kakaoId, String password,
-            MemberProfileType memberProfileType, String profileImg,
-            MemberProfileCharacter memberProfileCharacter,
-            MemberProfileBackground memberProfileBackground,
-            boolean isServicePolicyAgreed,
-            boolean isPersonalInformationPolicyAgreed,
-            boolean isLocationPolicyAgreed,
-            boolean isMarketingPolicyAgreed) {
-        MemberProfile memberProfile = new MemberProfile(
-                memberProfileType, profileImg,
-                memberProfileCharacter, memberProfileBackground);
-        ServiceAgreement serviceAgreement = ServiceAgreement.makeServiceAgreement(
-                isServicePolicyAgreed,
-                isPersonalInformationPolicyAgreed,
-                isLocationPolicyAgreed,
-                isMarketingPolicyAgreed);
+    public void updateProfile(MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter, MemberProfileBackground profileBackground) {
+        MemberProfile memberProfile = MemberProfile.builder()
+                .profileType(profileType)
+                .profileImg(profileImg)
+                .profileCharacter(profileCharacter)
+                .profileBackground(profileBackground)
+                .build();
 
-        return new Member(email, nickname, kakaoId, password, MemberRole.MEMBER, memberProfile, serviceAgreement);
+        this.profile = memberProfile;
+    }
+
+    public void updateAuth(boolean isServicePolicyAgreed, boolean isPersonalInformationPolicyAgreed,
+                           boolean isLocationPolicyAgreed, boolean isMarketingPolicyAgreed) {
+        ServiceAgreement serviceAgreement = ServiceAgreement.builder()
+                .isServicePolicyAgreed(isServicePolicyAgreed)
+                .isPersonalInformationPolicyAgreed(isPersonalInformationPolicyAgreed)
+                .isLocationPolicyAgreed(isLocationPolicyAgreed)
+                .isMarketingPolicyAgreed(isMarketingPolicyAgreed)
+                .build();
+
+        this.serviceAgreement = serviceAgreement;
     }
 
     public void updateMember(String nickname, MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter, MemberProfileBackground profileBackground) {
-        MemberProfile memberProfile = MemberProfile.makeMemberProfile(profileType, profileImg, profileCharacter, profileBackground);
+        updateProfile(profileType, profileImg, profileCharacter, profileBackground);
         this.nickname = nickname;
-        this.profile = memberProfile;
     }
 
+    @Builder
+    public Member(Long kakaoId, String nickname, String password, String email) {
+        this.kakaoId = kakaoId;
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+        this.role = MemberRole.MEMBER;
+        this.point = 0;
+        this.status = Status.ALIVE;
+    }
 
     public void updateMemberTitleByTitleMemberId(TitleMemberValue titleMemberValue) {
         this.mainTitle = titleMemberValue;
@@ -95,16 +93,6 @@ public class Member extends BaseTime {
 
     public void logout() {
         this.refreshToken = null;
-    }
-
-    public void updateAuth(
-            boolean isServicePolicyAgreed, boolean isPersonalInformationPolicyAgreed,
-            boolean isLocationPolicyAgreed, boolean isMarketingPolicyAgreed) {
-        ServiceAgreement serviceAgreement = ServiceAgreement.makeServiceAgreement(
-                isServicePolicyAgreed, isPersonalInformationPolicyAgreed,
-                isLocationPolicyAgreed, isMarketingPolicyAgreed);
-
-        this.serviceAgreement = serviceAgreement;
     }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.

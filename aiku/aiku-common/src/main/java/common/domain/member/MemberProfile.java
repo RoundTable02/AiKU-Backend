@@ -3,13 +3,11 @@ package common.domain.member;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
 public class MemberProfile {
@@ -25,9 +23,4 @@ public class MemberProfile {
     @Enumerated(EnumType.STRING)
     private MemberProfileBackground profileBackground;
 
-    public static MemberProfile makeMemberProfile(
-            MemberProfileType profileType, String profileImg, MemberProfileCharacter profileCharacter,
-            MemberProfileBackground profileBackground) {
-        return new MemberProfile(profileType, profileImg, profileCharacter, profileBackground);
-    }
 }

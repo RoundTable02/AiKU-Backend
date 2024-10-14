@@ -9,10 +9,9 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
 public class ServiceAgreement {
-    //알람 관련 세팅
+    // 약관 동의 여부 저장
     private boolean isServicePolicyAgreed;
     private boolean isPersonalInformationPolicyAgreed;
     private boolean isLocationPolicyAgreed;
     private boolean isMarketingPolicyAgreed;
-
 }

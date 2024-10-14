@@ -15,13 +15,12 @@ public class Term extends BaseTime{
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    private TermTitle title;
+    private TermTitle termTitle;
+
     private String content;
 
     @Enumerated(value = EnumType.STRING)
-    private AgreedType agreed_type;
+    private AgreedType agreedType;
 
-    @Enumerated(value = EnumType.STRING)
-    private TermStatus termStatus;
     private int version;
 }

@@ -15,8 +15,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
-        show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
-        format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
   kafka:
     bootstrap-servers: ${KAFKA_SERVER_URL}
     consumer:
@@ -25,7 +23,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
       enable-idempotence: true
-      acks: all
+      acks: 1
       max-in-flight-requests-per-connection: 1
       retries: 3
       linger-ms: 1
@@ -33,7 +31,6 @@ spring:
       buffer-memory: 1048576
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      transaction-id-prefix: tx-
   google:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}

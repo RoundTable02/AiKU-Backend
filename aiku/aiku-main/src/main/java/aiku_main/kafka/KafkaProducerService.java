@@ -23,5 +23,4 @@ public class KafkaProducerService {
             throw new JsonParseException();
         }
     }
-
 }

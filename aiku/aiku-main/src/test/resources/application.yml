@@ -17,6 +17,22 @@ spring:
         default_batch_fetch_size: 100
         show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+    consumer:
+      auto-offset-reset: latest
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      enable-idempotence: true
+      acks: 1
+      max-in-flight-requests-per-connection: 1
+      retries: 3
+      linger-ms: 1
+      batch-size: 16384
+      buffer-memory: 1048576
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   google:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}

@@ -77,11 +77,11 @@ public class MemberController {
         return new BaseResponse<>(resDto);
     }
 
-    @PostMapping("/users/inquiry")
+/*    @PostMapping("/users/inquiry")
     public BaseResponse<BaseResultDto> createInquiry(@RequestBody Member member,
                                                               @ModelAttribute @Valid InquiryDto inquiryDto) {
         Long memberId = memberService.sendInquiryToAikuEmail(member, inquiryDto);
 
         return BaseResponse.getSimpleRes(memberId);
-    }
+    }*/
 }

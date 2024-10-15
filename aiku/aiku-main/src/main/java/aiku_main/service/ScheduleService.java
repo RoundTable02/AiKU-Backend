@@ -7,6 +7,7 @@ import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
+import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
@@ -20,9 +21,13 @@ import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.Status;
 import common.domain.team.Team;
+import common.domain.team.TeamMember;
 import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
+import common.exception.JsonParseException;
 import common.exception.NotEnoughPoint;
+import common.kafka.AlarmMessage;
+import common.kafka.AlarmMessageType;
 import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +42,7 @@ import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.Status.ALIVE;
+import static common.kafka.KafkaTopic.alarm;
 import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
@@ -52,6 +58,7 @@ public class ScheduleService {
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
+    private final KafkaProducerService kafkaProducerService;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -67,10 +74,25 @@ public class ScheduleService {
                 scheduleDto.getPointAmount());
         scheduleRepository.save(schedule);
 
-        pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE_ENTER, schedule.getId());
+        if(scheduleDto.getPointAmount() > 0) {
+            pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE_ENTER, schedule.getId());
+        }
+
         scheduleScheduler.reserveSchedule(schedule);
 
+        sendMessageToTeamMembers(teamId, schedule.getId(), member, AlarmMessageType.SCHEDULE_ADD);
+
         return schedule.getId();
+    }
+
+    private void sendMessageToTeamMembers(Long teamId, Long scheduleId, Member excludeMember, AlarmMessageType messageType){
+        List<TeamMember> teamMembers = teamRepository.findTeamMembersWithMemberInTeam(teamId);
+        for (TeamMember teamMember : teamMembers) {
+            Member member = teamMember.getMember();
+            if(!member.getId().equals(excludeMember.getId())){
+                kafkaProducerService.sendMessage(alarm, new AlarmMessage(member.getId(), null, scheduleId, messageType));
+            }
+        }
     }
 
     @Transactional
@@ -85,6 +107,8 @@ public class ScheduleService {
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
 
         scheduleScheduler.changeSchedule(schedule);
+
+        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_UPDATE);
 
         return schedule.getId();
     }
@@ -104,7 +128,9 @@ public class ScheduleService {
 
         if(enterDto.getPointAmount() > 0) {
             pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE_ENTER, scheduleId);
-        };
+        }
+
+        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_ENTER);
 
         return schedule.getId();
     }
@@ -117,14 +143,17 @@ public class ScheduleService {
         checkScheduleMember(member.getId(), scheduleId, true);
 
         //서비스 로직
-        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(member.getId(), scheduleId).orElseThrow();
+        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(member.getId(), scheduleId).orElseThrow();
 
-        Long scheduleMemberCount = scheduleRepository.countOfAliveScheduleMember(scheduleId);
+        Long scheduleMemberCount = scheduleRepository.countOfScheduleMembers(scheduleId);
         if(scheduleMemberCount <= 1){
             schedule.delete();
         }else if(scheduleMember.isOwner()){
-            ScheduleMember nextScheduleOwner = findNextScheduleOwner(scheduleId, scheduleMember.getId());
+            ScheduleMember nextScheduleOwner = findNextScheduleOwnerWithMember(scheduleId, scheduleMember.getId());
             schedule.changeScheduleOwner(nextScheduleOwner);
+
+            Member nextMember = nextScheduleOwner.getMember();
+            kafkaProducerService.sendMessage(alarm, new AlarmMessage(nextMember.getId(), null, scheduleId, AlarmMessageType.SCHEDULE_OWNER));
         }
 
         schedule.removeScheduleMember(scheduleMember);
@@ -136,10 +165,29 @@ public class ScheduleService {
 
         scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
+        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_EXIT);
+
         return schedule.getId();
     }
 
-    //== 조회 서비스 ==
+    private ScheduleMember findNextScheduleOwnerWithMember(Long scheduleId, Long scheduleMemberId){
+        ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwnerWithMember(scheduleId, scheduleMemberId).orElse(null);
+        if (nextOwner == null) {
+            throw new ScheduleException(CAN_NOT_FIND_NEXT_SCHEDULE_OWNER);
+        }
+        return nextOwner;
+    }
+
+    private void sendMessageToScheduleMembers(Long scheduleId, Member excludeMember, AlarmMessageType messageType) {
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(scheduleId);
+        for (ScheduleMember scheduleMember : scheduleMembers) {
+            Member member = scheduleMember.getMember();
+            if(excludeMember == null || !member.getId().equals(excludeMember.getId())){
+                kafkaProducerService.sendMessage(alarm, new AlarmMessage(member.getId(), null, scheduleId, messageType));
+            }
+        }
+    }
+
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
         //검증 메서드
         Schedule schedule = findScheduleById(scheduleId);
@@ -157,7 +205,7 @@ public class ScheduleService {
         checkTeamMember(member.getId(), teamId);
 
         //서비스 로직
-        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamScheduleList(teamId, member.getId(), dateCond, page);
+        List<TeamScheduleListEachResDto> scheduleList = scheduleReadRepository.getTeamSchedules(teamId, member.getId(), dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(member.getId()));
         int runSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
@@ -167,7 +215,7 @@ public class ScheduleService {
 
     public MemberScheduleListResDto getMemberScheduleList(Member member, SearchDateCond dateCond, int page) {
         //서비스 로직
-        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberScheduleList(member.getId(), dateCond, page);
+        List<MemberScheduleListEachResDto> scheduleList = scheduleReadRepository.getMemberSchedules(member.getId(), dateCond, page);
         int runSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleReadRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.WAIT, dateCond);
 
@@ -205,7 +253,14 @@ public class ScheduleService {
         scheduleMembers.forEach((scheduleMember) ->{
             Schedule schedule = scheduleMember.getSchedule();
             schedule.removeScheduleMember(scheduleMember);
+
+            if(scheduleMember.getPointAmount() > 0){
+                pointChangeEventPublisher.publish(member, PLUS, scheduleMember.getPointAmount(), SCHEDULE_EXIT, schedule.getId());
+            }
+
             scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
+
+            sendMessageToScheduleMembers(schedule.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
 
@@ -214,7 +269,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         schedule.setRun();
 
-        //TODO 카프카, 알림
+        sendMessageToScheduleMembers(scheduleId, null, AlarmMessageType.SCHEDULE_OPEN);
     }
 
     @Transactional
@@ -227,6 +282,8 @@ public class ScheduleService {
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
+
+        sendMessageToScheduleMembers(scheduleId, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
     }
 
     @Transactional
@@ -264,16 +321,14 @@ public class ScheduleService {
         try {
             schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Can't Parse ScheduleArrivalResult");
+            throw new JsonParseException();
         } ;
     }
 
     public boolean isScheduleAutoClosed(Long scheduleId){
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        return schedule.isAutoClose();
+        return scheduleRepository.existsByIdAndIsAutoClose(scheduleId, true);
     }
 
-    //==* 기타 메서드 *==
     private Team findTeamById(Long teamId){
         Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {
@@ -328,14 +383,6 @@ public class ScheduleService {
         if(!scheduleRepository.isScheduleOwner(memberId, scheduleId)){
             throw new ScheduleException(NO_SCHEDULE_OWNER);
         }
-    }
-
-    private ScheduleMember findNextScheduleOwner(Long scheduleId, Long scheduleMemberId){
-        ScheduleMember nextOwner = scheduleRepository.findNextScheduleOwner(scheduleId, scheduleMemberId).orElse(null);
-        if (nextOwner == null) {
-            throw new ScheduleException(CAN_NOT_FIND_NEXT_SCHEDULE_OWNER);
-        }
-        return nextOwner;
     }
 
     private void checkEnoughPoint(Member member, int point){

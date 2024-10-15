@@ -49,7 +49,7 @@ public class Schedule extends BaseTime {
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    ScheduleResult scheduleResult;
+    private ScheduleResult scheduleResult;
 
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
         this.team = team;

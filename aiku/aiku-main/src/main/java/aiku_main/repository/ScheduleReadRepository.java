@@ -9,8 +9,8 @@ import java.util.List;
 public interface ScheduleReadRepository{
 
     List<ScheduleMemberResDto> getScheduleMembersWithMember(Long scheduleId);
-    List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page);
-    List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page);
+    List<TeamScheduleListEachResDto> getTeamSchedules(Long teamId, Long memberId, SearchDateCond dateCond, int page);
+    List<MemberScheduleListEachResDto> getMemberSchedules(Long memberId, SearchDateCond dateCond, int page);
 
     int countTeamScheduleByScheduleStatus(Long teamId, ExecStatus scheduleStatus, SearchDateCond dateCond);
     int countMemberScheduleByScheduleStatus(Long memberId, ExecStatus scheduleStatus, SearchDateCond dateCond);

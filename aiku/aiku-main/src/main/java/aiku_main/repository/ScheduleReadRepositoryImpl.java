@@ -42,7 +42,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<TeamScheduleListEachResDto> getTeamScheduleList(Long teamId, Long memberId, SearchDateCond dateCond, int page) {
+    public List<TeamScheduleListEachResDto> getTeamSchedules(Long teamId, Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(schedule)
@@ -74,7 +74,7 @@ public class ScheduleReadRepositoryImpl implements ScheduleReadRepository{
     }
 
     @Override
-    public List<MemberScheduleListEachResDto> getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
+    public List<MemberScheduleListEachResDto> getMemberSchedules(Long memberId, SearchDateCond dateCond, int page) {
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(scheduleMember)

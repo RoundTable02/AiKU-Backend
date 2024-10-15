@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
-import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.NotEnoughPoint;
@@ -229,7 +228,7 @@ public class BettingService {
     }
 
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        ScheduleMember scheduleMember = scheduleRepository.findAliveScheduleMember(memberId, scheduleId).orElse(null);
+        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, scheduleId).orElse(null);
         if (scheduleMember == null) {
             throw new ScheduleException(NOT_IN_SCHEDULE);
         }

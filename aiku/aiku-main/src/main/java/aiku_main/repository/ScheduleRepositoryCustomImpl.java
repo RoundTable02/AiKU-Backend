@@ -78,7 +78,7 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public Long countOfAliveScheduleMember(Long scheduleId) {
+    public Long countOfScheduleMembers(Long scheduleId) {
         return query.select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
@@ -87,7 +87,7 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public Optional<ScheduleMember> findAliveScheduleMember(Long memberId, Long scheduleId) {
+    public Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId) {
         ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
@@ -162,8 +162,9 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public Optional<ScheduleMember> findNextScheduleOwner(Long scheduleId, Long prevOwnerScheduleMemberId) {
+    public Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId) {
         ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
+                .join(scheduleMember.member, member).fetchJoin()
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
                         scheduleMember.id.ne(prevOwnerScheduleMemberId))

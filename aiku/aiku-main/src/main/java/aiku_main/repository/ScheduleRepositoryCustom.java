@@ -15,13 +15,13 @@ public interface ScheduleRepositoryCustom {
     boolean isScheduleOwner(Long memberId, Long scheduleId);
     boolean existScheduleMember(Long memberId, Long scheduleId);
     boolean existPaidScheduleMember(Long memberId, Long scheduleId);
-    Long countOfAliveScheduleMember(Long scheduleId);
-    Optional<ScheduleMember> findAliveScheduleMember(Long memberId, Long scheduleId);
+    Long countOfScheduleMembers(Long scheduleId);
+    Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     int findPointAmountOfLatePaidScheduleMember(Long scheduleId);
     List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId);
     List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId);
-    Optional<ScheduleMember> findNextScheduleOwner(Long scheduleId, Long prevOwnerScheduleMemberId);
+    Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);
 }

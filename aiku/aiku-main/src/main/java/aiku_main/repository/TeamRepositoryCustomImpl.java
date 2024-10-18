@@ -1,13 +1,16 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.member.QMember;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import static common.domain.Status.ALIVE;
+import static common.domain.member.QMember.member;
 import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
 
@@ -24,6 +27,16 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom{
                         team.status.eq(ALIVE),
                         teamMember.status.eq(ALIVE))
                 .stream().findFirst();
+    }
+
+    @Override
+    public List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId) {
+        return query
+                .selectFrom(teamMember)
+                .join(teamMember.member, member).fetchJoin()
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.status.eq(ALIVE))
+                .fetch();
     }
 
     @Override

@@ -16,9 +16,6 @@ import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
-import common.exception.BaseException;
-import common.exception.BaseExceptionImpl;
-import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -295,7 +292,7 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
         assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
 
-        ScheduleMember owner = scheduleRepository.findAliveScheduleMember(member1.getId(), schedule.getId()).orElse(null);
+        ScheduleMember owner = scheduleRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
         assertThat(owner).isNotNull();
         assertThat(owner.isOwner()).isTrue();
         //중복 요청
@@ -391,7 +388,7 @@ public class ScheduleServiceIntegrationTest {
         assertThat(findSchedule).isNotNull();
         assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
 
-        ScheduleMember nextOwner = scheduleRepository.findAliveScheduleMember(member2.getId(), schedule.getId()).orElse(null);
+        ScheduleMember nextOwner = scheduleRepository.findScheduleMember(member2.getId(), schedule.getId()).orElse(null);
         assertThat(nextOwner).isNotNull();
         assertThat(nextOwner.isOwner()).isTrue();
     }

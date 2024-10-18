@@ -2,10 +2,7 @@ package common.domain.title;
 
 import common.domain.BaseTime;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,4 +15,11 @@ public class Title extends BaseTime {
     private String titleName;
     private String titleDescription;
     private String titleImg;
+
+    @Builder
+    public Title(String titleName, String titleDescription, String titleImg) {
+        this.titleName = titleName;
+        this.titleDescription = titleDescription;
+        this.titleImg = titleImg;
+    }
 }

@@ -1,27 +1,25 @@
 spring:
   datasource:
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   data:
     redis:
       host: localhost
       port: 6379
   jpa:
     hibernate:
-      ddl-auto: none #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
-    properties:
+      ddl-auto: create #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
         show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
   google:
-    client-id: ${GOOGLE_CLIENT_ID}
-    client-secret: ${GOOGLE_CLIENT_SECRET}
-    refresh-token: ${GOOGLE_REFRESH_TOKEN}
-    to-email: ${GMAIL_ACCOUNT}
+    client-id: 1234
+    client-secret: 1234
+    refresh-token: 1234
+    to-email: 1234
 
 jwt:
   secret: 64edba70789f212fd7e289c6b95f1251af01f3b4ac04c01071793cee94e4aec1 # Test용

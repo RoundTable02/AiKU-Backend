@@ -3,6 +3,7 @@ package common.domain.member;
 import common.domain.BaseTime;
 import common.domain.ServiceAgreement;
 import common.domain.Status;
+import common.domain.title.TitleMember;
 import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

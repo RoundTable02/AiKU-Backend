@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static common.domain.title.QTitleMember.titleMember;
 
@@ -20,7 +21,7 @@ public class MemberReadRepositoryImpl implements MemberReadRepository{
     @Override
     public TitleMemberResDto getTitle(Long titleId) {
         return query.select(Projections.constructor(TitleMemberResDto.class,
-                        titleMember.id, titleMember.title.titleName, titleMember.title.titleDescription))
+                        titleMember.id, titleMember.title.titleName, titleMember.title.titleDescription, titleMember.title.titleImg))
                 .from(titleMember)
                 .where(titleMember.id.eq(titleId))
                 .fetchOne();
@@ -29,7 +30,7 @@ public class MemberReadRepositoryImpl implements MemberReadRepository{
     @Override
     public List<TitleMemberResDto> getTitleMembers(Long memberId) {
         return query.select(Projections.constructor(TitleMemberResDto.class,
-                        titleMember.id, titleMember.title.titleName, titleMember.title.titleDescription))
+                        titleMember.id, titleMember.title.titleName, titleMember.title.titleDescription, titleMember.title.titleImg))
                 .from(titleMember)
                 .where(titleMember.member.id.eq(memberId))
                 .fetch();

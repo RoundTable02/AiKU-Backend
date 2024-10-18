@@ -32,4 +32,8 @@ public class TitleMember extends BaseTime {
         this.member = member;
         this.title = title;
     }
+
+    public static TitleMember giveTitleToMember(Member member, Title title) {
+        return new TitleMember(member, title);
+    }
 }

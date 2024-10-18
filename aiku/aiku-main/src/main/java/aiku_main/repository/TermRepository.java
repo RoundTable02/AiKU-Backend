@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface TermRepository extends JpaRepository<Term, Long> {
-    @Query("SELECT t FROM Term t WHERE t.termTitle = :termTitle ORDER BY t.version DESC")
+    @Query("SELECT t FROM Term t WHERE t.termTitle = :termTitle ORDER BY t.version DESC LIMIT 1")
     Optional<Term> findTopByTermTitleOrderByVersionDesc(@Param("termTitle") TermTitle termTitle);
 }

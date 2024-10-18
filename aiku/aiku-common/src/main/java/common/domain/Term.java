@@ -2,6 +2,7 @@ package common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,4 +24,14 @@ public class Term extends BaseTime{
     private AgreedType agreedType;
 
     private int version;
+
+    public static Term create(TermTitle termTitle, String content, AgreedType agreedType, int version) {
+        Term term = new Term();
+        term.termTitle = termTitle;
+        term.content = content;
+        term.agreedType = agreedType;
+        term.version = version;
+
+        return term;
+    }
 }

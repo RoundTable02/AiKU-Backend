@@ -2,6 +2,7 @@ package common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,13 +16,22 @@ public class Term extends BaseTime{
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    private TermTitle title;
+    private TermTitle termTitle;
+
     private String content;
 
     @Enumerated(value = EnumType.STRING)
-    private AgreedType agreed_type;
+    private AgreedType agreedType;
 
-    @Enumerated(value = EnumType.STRING)
-    private TermStatus termStatus;
     private int version;
+
+    public static Term create(TermTitle termTitle, String content, AgreedType agreedType, int version) {
+        Term term = new Term();
+        term.termTitle = termTitle;
+        term.content = content;
+        term.agreedType = agreedType;
+        term.version = version;
+
+        return term;
+    }
 }

@@ -1,6 +1,7 @@
 package aiku_main.controller;
 
 import aiku_main.dto.*;
+import aiku_main.service.EmailService;
 import aiku_main.service.MemberService;
 import common.domain.member.Member;
 import common.response.BaseResponse;
@@ -18,6 +19,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final EmailService emailService;
 
     @GetMapping
     public BaseResponse<MemberResDto> getMemberDetail(
@@ -76,12 +78,4 @@ public class MemberController {
 
         return new BaseResponse<>(resDto);
     }
-
-/*    @PostMapping("/users/inquiry")
-    public BaseResponse<BaseResultDto> createInquiry(@RequestBody Member member,
-                                                              @ModelAttribute @Valid InquiryDto inquiryDto) {
-        Long memberId = memberService.sendInquiryToAikuEmail(member, inquiryDto);
-
-        return BaseResponse.getSimpleRes(memberId);
-    }*/
 }

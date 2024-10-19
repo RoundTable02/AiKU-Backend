@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
 
@@ -37,7 +38,12 @@ public class MemberService {
                 profile.getProfileCharacter(), profile.getProfileBackground());
 
         TitleMemberValue titleMemberValue = member.getMainTitle();
-        TitleMemberResDto mainTitle = memberReadRepository.getTitle(titleMemberValue.getId());
+
+        TitleMemberResDto mainTitle = null;
+        // 장착된 칭호가 존재하는 경우에만 조회
+        if (!Objects.isNull(titleMemberValue)) {
+            mainTitle = memberReadRepository.getTitle(titleMemberValue.getId());
+        }
 
         return new MemberResDto(
                 member.getId(), member.getNickname(), member.getKakaoId(),

@@ -2,6 +2,7 @@ package aiku_main.service;
 
 import aiku_main.dto.InquiryDto;
 import aiku_main.gmail.GmailAPIProvider;
+import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,11 @@ public class EmailService {
 
     private final GmailAPIProvider gmailAPIProvider;
 
-    public void submitContactRequest(InquiryDto inquiryDto) {
+    public Long submitContactRequest(Member member, InquiryDto inquiryDto) {
         String title = "<QA> " + inquiryDto.getTitle();
-        String content = "Sender : " + inquiryDto.getEmail() + "\n" + inquiryDto.getContent();
+        String sender = "Sender : " + inquiryDto.getEmail() + "\n"
+                + member.getId() + "&&" + member.getKakaoId() + " p" + member.getPoint() + "\n";
+        String content = sender + inquiryDto.getContent();
         try {
             gmailAPIProvider.sendMessage(
                     title,
@@ -33,6 +36,7 @@ public class EmailService {
                     "Not able to process request.");
         }
 
+        return member.getId();
     }
 
 }

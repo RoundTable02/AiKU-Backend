@@ -28,11 +28,11 @@ public class ScheduleScheduler {
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAutoCloseTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAlarmTasks = new ConcurrentHashMap<>();
 
-//    @PostConstruct
-//    public void initScheduler(){
-//        List<Schedule> schedules = scheduleRepository.findByScheduleStatus(ExecStatus.WAIT);
-//        schedules.forEach(schedule -> reserveSchedule(schedule));
-//    }
+    @PostConstruct
+    public void initScheduler(){
+        List<Schedule> schedules = scheduleRepository.findByScheduleStatus(ExecStatus.WAIT);
+        schedules.forEach(schedule -> reserveSchedule(schedule));
+    }
 
     public void reserveSchedule(Schedule schedule){
         reserveScheduleOpen(schedule);

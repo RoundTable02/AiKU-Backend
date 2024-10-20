@@ -28,6 +28,8 @@ public enum BaseErrorCode implements StatusCode{
     CAN_NOT_EXIT(40016, "실행중인 스케줄이 있습니다.", HttpStatus.BAD_REQUEST),
     NO_TERM_SCHEDULE(40017, "스케줄이 아직 종료되지 않았습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_HAS_BETTING(40018, "이미 베팅이 존재합니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATED_FCM_TOKEN(40019, "중복된 파이어베이스 토큰입니다.", HttpStatus.BAD_REQUEST),
+    NO_FCM_TOKEN(40020, "파이어베이스 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     NO_SCHEDULE_OWNER(40301, "스케줄장이 아닙니다.", HttpStatus.FORBIDDEN),
     NOT_AVAILABLE_SCHEDULE(40302, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),

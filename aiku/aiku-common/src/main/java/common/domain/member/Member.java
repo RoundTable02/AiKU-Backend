@@ -45,6 +45,9 @@ public class Member extends BaseTime {
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
+    private String firebaseToken;
+
+
     public void reissueRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
@@ -90,6 +93,10 @@ public class Member extends BaseTime {
 
     public void updateMemberTitleByTitleMemberId(TitleMemberValue titleMemberValue) {
         this.mainTitle = titleMemberValue;
+    }
+
+    public void updateFirebaseToken(String firebaseToken) {
+        this.firebaseToken = firebaseToken;
     }
 
     public void logout() {

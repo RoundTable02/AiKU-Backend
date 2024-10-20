@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class AlarmMessage {
+public class AlarmMemberInfo {
 
-    private List<AlarmMemberInfo> members;
-    private AlarmMessageType alarmMessageType;
+    private Long userId;
+    private String nickname;
+    private String firebaseToken;
 }

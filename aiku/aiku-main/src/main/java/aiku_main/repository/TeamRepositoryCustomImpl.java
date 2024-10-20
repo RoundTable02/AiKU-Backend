@@ -1,7 +1,6 @@
 package aiku_main.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.member.QMember;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import lombok.RequiredArgsConstructor;

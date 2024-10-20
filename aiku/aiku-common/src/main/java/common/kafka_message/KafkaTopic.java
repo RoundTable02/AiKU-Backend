@@ -1,4 +1,4 @@
-package common.kafka;
+package common.kafka_message;
 
 public enum KafkaTopic {
     alarm

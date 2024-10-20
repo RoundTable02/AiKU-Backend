@@ -26,8 +26,7 @@ import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.JsonParseException;
 import common.exception.NotEnoughPoint;
-import common.kafka.AlarmMessage;
-import common.kafka.AlarmMessageType;
+import common.kafka_message.alarm.*;
 import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,7 @@ import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.Status.ALIVE;
-import static common.kafka.KafkaTopic.alarm;
+import static common.kafka_message.KafkaTopic.alarm;
 import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
@@ -80,19 +79,20 @@ public class ScheduleService {
 
         scheduleScheduler.reserveSchedule(schedule);
 
-        sendMessageToTeamMembers(teamId, schedule.getId(), member, AlarmMessageType.SCHEDULE_ADD);
+        sendMessageToTeamMembers(teamId, schedule, member, AlarmMessageType.SCHEDULE_ADD);
 
         return schedule.getId();
     }
 
-    private void sendMessageToTeamMembers(Long teamId, Long scheduleId, Member excludeMember, AlarmMessageType messageType){
+    private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Member excludeMember, AlarmMessageType messageType){
         List<TeamMember> teamMembers = teamRepository.findTeamMembersWithMemberInTeam(teamId);
-        for (TeamMember teamMember : teamMembers) {
-            Member member = teamMember.getMember();
-            if(!member.getId().equals(excludeMember.getId())){
-                kafkaProducerService.sendMessage(alarm, new AlarmMessage(member.getId(), null, scheduleId, messageType));
-            }
-        }
+        List<AlarmMemberInfo> alarmMembers = teamMembers.stream()
+                .filter(teamMember -> !teamMember.getMember().getId().equals(excludeMember.getId()))
+                .map(TeamMember::getMember)
+                .map(AlarmMemberInfo::new)
+                .toList();
+
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
     }
 
     @Transactional
@@ -108,7 +108,7 @@ public class ScheduleService {
 
         scheduleScheduler.changeSchedule(schedule);
 
-        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_UPDATE);
+        sendMessageToScheduleMembers(schedule, member, AlarmMessageType.SCHEDULE_UPDATE);
 
         return schedule.getId();
     }
@@ -130,7 +130,7 @@ public class ScheduleService {
             pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE_ENTER, scheduleId);
         }
 
-        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_ENTER);
+        sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_ENTER);
 
         return schedule.getId();
     }
@@ -153,7 +153,8 @@ public class ScheduleService {
             schedule.changeScheduleOwner(nextScheduleOwner);
 
             Member nextMember = nextScheduleOwner.getMember();
-            kafkaProducerService.sendMessage(alarm, new AlarmMessage(nextMember.getId(), null, scheduleId, AlarmMessageType.SCHEDULE_OWNER));
+            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(
+                    List.of(new AlarmMemberInfo(nextMember)), schedule, AlarmMessageType.SCHEDULE_OWNER));
         }
 
         schedule.removeScheduleMember(scheduleMember);
@@ -165,7 +166,7 @@ public class ScheduleService {
 
         scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-        sendMessageToScheduleMembers(scheduleId, member, AlarmMessageType.SCHEDULE_EXIT);
+        sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_EXIT);
 
         return schedule.getId();
     }
@@ -178,14 +179,27 @@ public class ScheduleService {
         return nextOwner;
     }
 
-    private void sendMessageToScheduleMembers(Long scheduleId, Member excludeMember, AlarmMessageType messageType) {
-        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(scheduleId);
-        for (ScheduleMember scheduleMember : scheduleMembers) {
-            Member member = scheduleMember.getMember();
-            if(excludeMember == null || !member.getId().equals(excludeMember.getId())){
-                kafkaProducerService.sendMessage(alarm, new AlarmMessage(member.getId(), null, scheduleId, messageType));
-            }
-        }
+    private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, AlarmMessageType messageType) {
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
+        List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
+                .filter(scheduleMember -> !scheduleMember.getMember().getId().equals(excludeMember.getId()))
+                .map(ScheduleMember::getMember)
+                .map(AlarmMemberInfo::new)
+                .toList();
+
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
+    }
+
+    private void sendMessageToScheduleMembers(Member sourceMember, Schedule schedule, Member excludeMember, AlarmMessageType messageType) {
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
+        List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
+                .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
+                .map(ScheduleMember::getMember)
+                .map(AlarmMemberInfo::new)
+                .toList();
+        AlarmMemberInfo sourceMemberInfo = new AlarmMemberInfo(sourceMember);
+
+        kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(sourceMemberInfo, alarmMembers, schedule, messageType));
     }
 
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
@@ -260,7 +274,7 @@ public class ScheduleService {
 
             scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-            sendMessageToScheduleMembers(schedule.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
+            sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
 
@@ -269,7 +283,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         schedule.setRun();
 
-        sendMessageToScheduleMembers(scheduleId, null, AlarmMessageType.SCHEDULE_OPEN);
+        sendMessageToScheduleMembers(schedule, null, AlarmMessageType.SCHEDULE_OPEN);
     }
 
     @Transactional
@@ -283,7 +297,7 @@ public class ScheduleService {
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
 
-        sendMessageToScheduleMembers(scheduleId, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
+        sendMessageToScheduleMembers(schedule, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
     }
 
     @Transactional

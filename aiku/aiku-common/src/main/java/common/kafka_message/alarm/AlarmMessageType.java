@@ -1,4 +1,4 @@
-package common.kafka;
+package common.kafka_message.alarm;
 
 public enum AlarmMessageType {
     TEST, SCHEDULE_ADD, SCHEDULE_ENTER, SCHEDULE_EXIT, SCHEDULE_UPDATE, SCHEDULE_OWNER, SCHEDULE_OPEN, SCHEDULE_AUTO_CLOSE

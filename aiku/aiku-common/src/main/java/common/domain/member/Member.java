@@ -21,6 +21,7 @@ public class Member extends BaseTime {
     private Long id;
     private Long kakaoId;
     private String refreshToken;
+    private String firebaseToken;
 
     private String nickname;
     private String email;

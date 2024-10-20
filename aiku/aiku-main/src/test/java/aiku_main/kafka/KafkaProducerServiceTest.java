@@ -1,16 +1,13 @@
 package aiku_main.kafka;
 
-import common.kafka.AlarmMessage;
-import common.kafka.AlarmMessageType;
-import common.kafka.KafkaTopic;
+import common.kafka_message.alarm.AlarmMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import static common.kafka.AlarmMessageType.TEST;
-import static common.kafka.KafkaTopic.alarm;
-import static org.junit.jupiter.api.Assertions.*;
+import static common.kafka_message.alarm.AlarmMessageType.TEST;
+import static common.kafka_message.KafkaTopic.alarm;
 
 @Transactional
 @SpringBootTest

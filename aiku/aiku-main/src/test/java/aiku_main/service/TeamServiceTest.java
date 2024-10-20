@@ -26,7 +26,7 @@ class TeamServiceTest {
     @Mock
     TeamQueryRepository teamQueryRepository;
     @Mock
-    ScheduleQueryRepository scheduleRepository;
+    ScheduleQueryRepository scheduleQueryRepository;
     @Mock
     TeamEventPublisher teamEventPublisher;
 

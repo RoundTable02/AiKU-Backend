@@ -7,7 +7,7 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
-import aiku_main.repository.BettingRepository;
+import aiku_main.repository.BettingQueryRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,8 +43,8 @@ import static common.response.status.BaseErrorCode.*;
 public class BettingService {
 
     private final MemberRepository memberRepository;
-    private final BettingRepository bettingRepository;
-    private final ScheduleQueryRepository scheduleRepository;
+    private final BettingQueryRepository bettingQueryRepository;
+    private final ScheduleQueryRepository scheduleQueryRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ObjectMapper objectMapper;
 
@@ -64,7 +64,7 @@ public class BettingService {
 
         //서비스 로직
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
-        bettingRepository.save(betting);
+        bettingQueryRepository.save(betting);
 
         pointChangeEventPublisher.publish(member, MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());
 
@@ -89,7 +89,7 @@ public class BettingService {
     //==이벤트 핸들러==
     @Transactional
     public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBettor = bettingRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
+        Betting bettingForBettor = bettingQueryRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
         bettingForBettor.setStatus(DELETE);
 
         int pointAmount = bettingForBettor.getPointAmount();
@@ -99,26 +99,24 @@ public class BettingService {
 
     @Transactional
     public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
-        Betting bettingForBetee = bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
+        Betting bettingForBetee = bettingQueryRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE).orElse(null);
         bettingForBetee.setStatus(DELETE);
 
         int pointAmount = bettingForBetee.getPointAmount();
-        Member bettor = scheduleRepository.findScheduleMemberWithMemberById(bettingForBetee.getBettor().getId()).orElseThrow()
+        Member bettor = scheduleQueryRepository.findScheduleMemberWithMemberById(bettingForBetee.getBettor().getId()).orElseThrow()
                 .getMember();
         pointChangeEventPublisher.publish(bettor, PLUS, pointAmount, BETTING_CANCLE, bettingForBetee.getId());
-
-        //TODO 베터한테 푸쉬 알림 줘야함. 강제 베팅 취소기 때문에..
     }
 
     @Transactional
     public void processBettingResult(Long scheduleId) {
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
+        List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(scheduleId, WAIT);
         if(bettings.isEmpty()){
             return;
         }
 
         Map<Long, ScheduleMember> scheduleMembers =
-                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
+                scheduleQueryRepository.findScheduleMembersWithMember(scheduleId).stream()
                 .collect(Collectors.toMap(
                         sm -> sm.getId(),
                         sm -> sm
@@ -183,13 +181,13 @@ public class BettingService {
 
     @Transactional
     public void analyzeScheduleBettingResult(Long scheduleId) {
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
+        List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(scheduleId, TERM);
         if(bettings.isEmpty()){
             return;
         }
 
         Map<Long, ScheduleMember> scheduleMembers =
-                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
+                scheduleQueryRepository.findScheduleMembersWithMember(scheduleId).stream()
                         .collect(Collectors.toMap(
                                 sm -> sm.getId(),
                                 sm -> sm
@@ -204,7 +202,7 @@ public class BettingService {
 
         ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
 
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         try {
             schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
@@ -214,7 +212,7 @@ public class BettingService {
 
     //==* 기타 메서드 *==
     private Betting findBettingById(Long bettingId){
-        Betting betting = bettingRepository.findByIdAndStatus(bettingId, ALIVE).orElse(null);
+        Betting betting = bettingQueryRepository.findByIdAndStatus(bettingId, ALIVE).orElse(null);
         if (betting == null) {
             throw new BettingException(NO_SUCH_BETTING);
         }
@@ -222,13 +220,13 @@ public class BettingService {
     }
 
     private void checkExistSchedule(Long scheduleId){
-        if (!scheduleRepository.existsByIdAndStatus(scheduleId, ALIVE)) {
+        if (!scheduleQueryRepository.existsByIdAndStatus(scheduleId, ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }
 
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, scheduleId).orElse(null);
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElse(null);
         if (scheduleMember == null) {
             throw new ScheduleException(NOT_IN_SCHEDULE);
         }
@@ -236,19 +234,19 @@ public class BettingService {
     }
 
     private void checkScheduleWait(Long scheduleId) {
-        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, ALIVE)){
+        if(!scheduleQueryRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, ALIVE)){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }
 
     private void checkAlreadyHasBetting(ScheduleMemberValue bettor, Long scheduleId) {
-        if(bettingRepository.existBettorInSchedule(bettor, scheduleId)){
+        if(bettingQueryRepository.existBettorInSchedule(bettor, scheduleId)){
             throw new BettingException(ALREADY_IN_BETTING);
         }
     }
 
     private void checkPaidScheduleMember(Long memberId, Long scheduleId){
-        if(!scheduleRepository.existPaidScheduleMember(memberId, scheduleId)){
+        if(!scheduleQueryRepository.existPaidScheduleMember(memberId, scheduleId)){
             throw new PaidMemberLimitException();
         }
     }

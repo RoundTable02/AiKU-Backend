@@ -31,8 +31,8 @@ import static common.response.status.BaseErrorCode.*;
 public class TeamService {
 
     private final TeamQueryRepository teamQueryRepository;
-    private final ScheduleQueryRepository scheduleRepository;
-    private final BettingReadRepository bettingReadRepository;
+    private final ScheduleQueryRepository scheduleQueryRepository;
+    private final BettingQueryRepository bettingQueryRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
 
@@ -120,7 +120,7 @@ public class TeamService {
     //==* 이벤트 핸들러 호출 메서드*==
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
 
         List<TeamResultMember> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
@@ -135,10 +135,10 @@ public class TeamService {
 
     @Transactional
     public void analyzeBettingResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
 
-        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingReadRepository.findMemberTermBettingsInTeam(team.getId());
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
 
         List<TeamResultMember> teamResultMembers = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {

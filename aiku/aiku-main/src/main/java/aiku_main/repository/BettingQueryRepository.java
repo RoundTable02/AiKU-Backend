@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface BettingRepository extends JpaRepository<Betting, Long>, BettingRepositoryCustom {
+public interface BettingQueryRepository extends JpaRepository<Betting, Long>, BettingQueryRepositoryCustom {
 
     Optional<Betting> findByIdAndStatus(Long bettingId, Status status);
     Optional<Betting> findByBettorIdAndStatus(@Param(value = "bettorId") Long bettorScheduleMemberId, Status status);

@@ -13,5 +13,4 @@ public interface BettingQueryRepository extends JpaRepository<Betting, Long>, Be
     Optional<Betting> findByIdAndStatus(Long bettingId, Status status);
     Optional<Betting> findByBettorIdAndStatus(@Param(value = "bettorId") Long bettorScheduleMemberId, Status status);
     Optional<Betting> findByBeteeIdAndStatus(@Param(value = "beteeId") Long beteeScheduleMemberId, Status status);
-    boolean existsByIdAndBettorAndBettingStatusAndStatus(Long memberId, Long scheduleId, ExecStatus bettingStatus, Status status);
 }

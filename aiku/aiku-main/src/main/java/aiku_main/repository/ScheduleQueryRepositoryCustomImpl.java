@@ -58,6 +58,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         scheduleMember.isOwner.isTrue(),
                         scheduleMember.status.eq(ALIVE))
                 .fetchOne();
+
         return count != null && count > 0;
     }
 
@@ -69,6 +70,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
                 .fetchOne();
+
         return count != null && count > 0;
     }
 
@@ -79,9 +81,9 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.pointAmount.isNotNull(),
-//                        scheduleMember.pointAmount.gt(0),
                         scheduleMember.status.eq(ALIVE))
                 .fetchOne();
+
         return count != null && count > 0;
     }
 

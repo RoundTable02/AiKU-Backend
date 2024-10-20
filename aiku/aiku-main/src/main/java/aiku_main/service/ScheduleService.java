@@ -108,7 +108,7 @@ public class ScheduleService {
 
         scheduleScheduler.changeSchedule(schedule);
 
-        sendMessageToScheduleMembers(schedule, member, AlarmMessageType.SCHEDULE_UPDATE);
+        sendMessageToScheduleMembers(schedule, member, null, AlarmMessageType.SCHEDULE_UPDATE);
 
         return schedule.getId();
     }
@@ -130,7 +130,7 @@ public class ScheduleService {
             pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE_ENTER, scheduleId);
         }
 
-        sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_ENTER);
+        sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_ENTER);
 
         return schedule.getId();
     }
@@ -166,7 +166,7 @@ public class ScheduleService {
 
         scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-        sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_EXIT);
+        sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_EXIT);
 
         return schedule.getId();
     }
@@ -179,7 +179,7 @@ public class ScheduleService {
         return nextOwner;
     }
 
-    private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, AlarmMessageType messageType) {
+    private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, Member sourceMember, AlarmMessageType messageType) {
         List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
         List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
                 .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
@@ -187,19 +187,12 @@ public class ScheduleService {
                 .map(AlarmMemberInfo::new)
                 .toList();
 
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
-    }
-
-    private void sendMessageToScheduleMembers(Member sourceMember, Schedule schedule, Member excludeMember, AlarmMessageType messageType) {
-        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
-        List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
-                .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
-                .map(ScheduleMember::getMember)
-                .map(AlarmMemberInfo::new)
-                .toList();
-        AlarmMemberInfo sourceMemberInfo = new AlarmMemberInfo(sourceMember);
-
-        kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(sourceMemberInfo, alarmMembers, schedule, messageType));
+        if(sourceMember == null) {
+            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
+        } else {
+            AlarmMemberInfo sourceMemberInfo = new AlarmMemberInfo(sourceMember);
+            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(sourceMemberInfo, alarmMembers, schedule, messageType));
+        }
     }
 
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
@@ -274,7 +267,7 @@ public class ScheduleService {
 
             scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-            sendMessageToScheduleMembers(member, schedule, member, AlarmMessageType.SCHEDULE_EXIT);
+            sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
 
@@ -283,7 +276,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         schedule.setRun();
 
-        sendMessageToScheduleMembers(schedule, null, AlarmMessageType.SCHEDULE_OPEN);
+        sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_OPEN);
     }
 
     @Transactional
@@ -297,7 +290,7 @@ public class ScheduleService {
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
 
-        sendMessageToScheduleMembers(schedule, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
+        sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
     }
 
     @Transactional

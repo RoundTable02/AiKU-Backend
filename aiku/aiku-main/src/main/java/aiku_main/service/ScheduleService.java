@@ -182,7 +182,7 @@ public class ScheduleService {
     private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, AlarmMessageType messageType) {
         List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
         List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
-                .filter(scheduleMember -> !scheduleMember.getMember().getId().equals(excludeMember.getId()))
+                .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
                 .map(ScheduleMember::getMember)
                 .map(AlarmMemberInfo::new)
                 .toList();

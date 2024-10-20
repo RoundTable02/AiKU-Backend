@@ -11,7 +11,7 @@ import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.TeamQueryRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +53,7 @@ public class ScheduleService {
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleReadRepository scheduleReadRepository;
-    private final TeamRepository teamRepository;
+    private final TeamQueryRepository teamQueryRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
@@ -85,7 +85,7 @@ public class ScheduleService {
     }
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Member excludeMember, AlarmMessageType messageType){
-        List<TeamMember> teamMembers = teamRepository.findTeamMembersWithMemberInTeam(teamId);
+        List<TeamMember> teamMembers = teamQueryRepository.findTeamMembersWithMemberInTeam(teamId);
         List<AlarmMemberInfo> alarmMembers = teamMembers.stream()
                 .filter(teamMember -> !teamMember.getMember().getId().equals(excludeMember.getId()))
                 .map(TeamMember::getMember)
@@ -337,7 +337,7 @@ public class ScheduleService {
     }
 
     private Team findTeamById(Long teamId){
-        Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
+        Team team = teamQueryRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {
             throw new TeamException(NO_SUCH_TEAM);
         }
@@ -353,7 +353,7 @@ public class ScheduleService {
     }
 
     private void checkExistTeam(Long teamId){
-        if(!teamRepository.existsById(teamId)){
+        if(!teamQueryRepository.existsById(teamId)){
             throw new TeamException(NO_SUCH_TEAM);
         }
     }
@@ -371,7 +371,7 @@ public class ScheduleService {
     }
 
     private void checkTeamMember(Long memberId, Long teamId){
-        if(!teamRepository.existTeamMember(memberId, teamId)){
+        if(!teamQueryRepository.existTeamMember(memberId, teamId)){
             throw new TeamException(NOT_IN_TEAM);
         }
     }

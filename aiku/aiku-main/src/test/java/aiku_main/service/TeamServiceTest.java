@@ -3,8 +3,7 @@ package aiku_main.service;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamReadRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.TeamQueryRepository;
 import common.domain.member.Member;
 import common.domain.team.Team;
 import org.junit.jupiter.api.Test;
@@ -25,9 +24,7 @@ import static org.mockito.Mockito.when;
 class TeamServiceTest {
 
     @Mock
-    TeamRepository teamRepository;
-    @Mock
-    TeamReadRepository teamReadRepository;
+    TeamQueryRepository teamQueryRepository;
     @Mock
     ScheduleRepository scheduleRepository;
     @Mock
@@ -52,8 +49,8 @@ class TeamServiceTest {
         Member member = new Member("member1");
         Team team = Team.create(member, "team1");
 
-        when(teamRepository.existTeamMember(any(), any())).thenReturn(false);
-        when(teamRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
+        when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(false);
+        when(teamQueryRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
 
         //when
         Long resultId = teamService.enterTeam(member, null);
@@ -67,9 +64,9 @@ class TeamServiceTest {
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
 
-        when(teamRepository.existTeamMember(any(), any())).thenReturn(true);
-        when(teamRepository.existsById(any())).thenReturn(true);
-        when(teamRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
+        when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(true);
+        when(teamQueryRepository.existsById(any())).thenReturn(true);
+        when(teamQueryRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
 
         //when
         TeamDetailResDto result = teamService.getTeamDetail(member1, team.getId());
@@ -87,7 +84,7 @@ class TeamServiceTest {
         Member member1 = new Member("member1");
 
         List<TeamEachListResDto> data = new ArrayList<>();
-        when(teamReadRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
+        when(teamQueryRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
 
         //when
         int page = 3;

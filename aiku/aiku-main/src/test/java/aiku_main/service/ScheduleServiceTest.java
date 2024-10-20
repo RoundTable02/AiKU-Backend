@@ -6,7 +6,7 @@ import aiku_main.dto.ScheduleDetailResDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.repository.ScheduleReadRepository;
 import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.TeamQueryRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Location;
 import common.domain.member.Member;
@@ -34,7 +34,7 @@ class ScheduleServiceTest {
     @Mock
     ScheduleReadRepository scheduleReadRepository;
     @Mock
-    TeamRepository teamRepository;
+    TeamQueryRepository teamQueryRepository;
     @Mock
     ScheduleScheduler scheduleScheduler;
     @Mock

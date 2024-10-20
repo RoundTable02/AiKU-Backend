@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static common.domain.ExecStatus.*;
 import static common.domain.Status.ALIVE;
@@ -145,6 +146,14 @@ public class Schedule extends BaseTime {
     public void setScheduleRacingResult(String scheduleRacingResult) {
         checkScheduleResultExist();
         scheduleResult.setScheduleRacingResult(scheduleRacingResult);
+    }
+
+    public boolean checkAllMembersArrive() {
+        long count = scheduleMembers.stream()
+                .filter(s -> Objects.isNull(s.getArrivalTime()))
+                .count();
+
+        return count == 0;
     }
 
     private void checkScheduleResultExist(){

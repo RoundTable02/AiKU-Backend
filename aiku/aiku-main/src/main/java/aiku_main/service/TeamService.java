@@ -31,7 +31,7 @@ import static common.response.status.BaseErrorCode.*;
 public class TeamService {
 
     private final TeamQueryRepository teamQueryRepository;
-    private final ScheduleRepository scheduleRepository;
+    private final ScheduleQueryRepository scheduleRepository;
     private final BettingReadRepository bettingReadRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;

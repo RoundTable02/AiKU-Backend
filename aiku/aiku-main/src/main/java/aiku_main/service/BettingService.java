@@ -9,7 +9,7 @@ import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.ScheduleQueryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
@@ -44,7 +44,7 @@ public class BettingService {
 
     private final MemberRepository memberRepository;
     private final BettingRepository bettingRepository;
-    private final ScheduleRepository scheduleRepository;
+    private final ScheduleQueryRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ObjectMapper objectMapper;
 

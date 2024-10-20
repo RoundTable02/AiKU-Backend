@@ -7,7 +7,7 @@ import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.ScheduleQueryRepository;
 import aiku_main.service.BettingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +46,7 @@ class BettingServiceIntegrationTest {
     @Autowired
     MemberRepository memberRepository;
     @Autowired
-    ScheduleRepository scheduleRepository;
+    ScheduleQueryRepository scheduleRepository;
     @Autowired
     BettingRepository bettingRepository;
     @Autowired

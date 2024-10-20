@@ -1,7 +1,7 @@
 package aiku_main.scheduler;
 
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
-import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.ScheduleQueryRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 public class ScheduleScheduler {
 
     private final TaskScheduler scheduler;
-    private final ScheduleRepository scheduleRepository;
+    private final ScheduleQueryRepository scheduleRepository;
     private final ScheduleEventPublisher scheduleEventPublisher;
 
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();

@@ -8,6 +8,7 @@ import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.dto.*;
+import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
@@ -87,10 +88,27 @@ public class MapService {
     }
 
     public Long sendEmoji(Long memberId, Long scheduleId, EmojiDto emojiDto) {
-        // TODO : 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증,
+        // 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증,
+        checkMemberInSchedule(memberId, scheduleId);
+        checkScheduleInRun(scheduleId);
+
         //  카프카로 이모지 데이터 전송
-        //  @return scheduleId
-        return null;
+        AlarmMemberInfo sender = getMemberInfo(memberId);
+        AlarmMemberInfo receiver = getMemberInfo(emojiDto.getReceiverId());
+
+        List<AlarmMemberInfo> alarmMemberInfos = List.of(sender, receiver);
+
+        Schedule schedule = findSchedule(scheduleId);
+
+        kafkaService.sendMessage(KafkaTopic.alarm,
+                new EmojiMessage(alarmMemberInfos, AlarmMessageType.EMOJI,
+                        scheduleId,
+                        schedule.getScheduleName(),
+                        emojiDto.getEmojiType().name()
+                )
+        );
+
+        return scheduleId;
     }
 
     public DataResDto<List<RacingResDto>> getRacings(Long memberId, Long scheduleId) {
@@ -142,6 +160,11 @@ public class MapService {
 
     private List<AlarmMemberInfo> getScheduleMemberInfos(Long scheduleId) {
         return scheduleRepository.findScheduleMemberInfosByScheduleId(scheduleId);
+    }
+
+    private AlarmMemberInfo getMemberInfo(Long memberId) {
+        return memberRepository.findMemberInfo(memberId)
+                .orElseThrow(() -> new MemberNotFoundException());
     }
 
     private void checkMemberInSchedule(Long memberId, Long scheduleId) {

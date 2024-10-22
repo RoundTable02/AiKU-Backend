@@ -13,4 +13,6 @@ public interface ScheduleQueryRepository {
     boolean existMemberInSchedule(Long memberId, Long scheduleId);
 
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
+
+    boolean existPaidScheduleMember(Long memberId, Long scheduleId);
 }

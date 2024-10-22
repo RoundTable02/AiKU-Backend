@@ -30,6 +30,7 @@ public enum BaseErrorCode implements StatusCode{
     ALREADY_HAS_BETTING(40018, "이미 베팅이 존재합니다.", HttpStatus.BAD_REQUEST),
     DUPLICATED_FCM_TOKEN(40019, "중복된 파이어베이스 토큰입니다.", HttpStatus.BAD_REQUEST),
     NO_FCM_TOKEN(40020, "파이어베이스 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    NOT_IN_RACING(40021, "레이싱에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
 
     NO_SCHEDULE_OWNER(40301, "스케줄장이 아닙니다.", HttpStatus.FORBIDDEN),
     NOT_AVAILABLE_SCHEDULE(40302, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),
@@ -38,7 +39,7 @@ public enum BaseErrorCode implements StatusCode{
     FREE_MEMBER_LIMIT(40305, "깍두기 제한 기능입니다.", HttpStatus.FORBIDDEN),
 
     MEMBER_NOT_FOUND(40401, "멤버가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
-    MEMBER_NOT_WITH_TITLE(40402, "멤버가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    MEMBER_NOT_WITH_TITLE(40402, "멤버가 칭호를 소유하지 않습니다.", HttpStatus.NOT_FOUND),
 
     //5XX 서버 에러
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR),

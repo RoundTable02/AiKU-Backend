@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.dto.*;
 import map.service.MapService;
+import map.service.RacingService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 public class MapController {
 
     private final MapService mapService;
+    private final RacingService racingService;
 
     @PostMapping("/location")
     public BaseResponse<BaseResultDto> sendLocation(@PathVariable Long scheduleId,
@@ -50,7 +52,7 @@ public class MapController {
     @GetMapping("/racing")
     public BaseResponse<DataResDto> getRacings(@PathVariable Long scheduleId,
                                                @RequestBody Long accessMemberId) {
-        DataResDto<List<RacingResDto>> racings = mapService.getRacings(accessMemberId, scheduleId);
+        DataResDto<List<RacingResDto>> racings = racingService.getRacings(accessMemberId, scheduleId);
 
         return new BaseResponse<>(racings);
     }
@@ -59,7 +61,7 @@ public class MapController {
     public BaseResponse<BaseResultDto> makeRacing(@PathVariable Long scheduleId,
                                                   @RequestBody Long accessMemberId,
                                                   @RequestBody @Valid RacingAddDto racingAddDto) {
-        Long racingId = mapService.makeRacing(accessMemberId, scheduleId, racingAddDto);
+        Long racingId = racingService.makeRacing(accessMemberId, scheduleId, racingAddDto);
 
         return BaseResponse.getSimpleRes(racingId);
     }
@@ -68,7 +70,7 @@ public class MapController {
     public BaseResponse<BaseResultDto> acceptRacing(@PathVariable Long scheduleId,
                                                     @PathVariable Long racingId,
                                                     @RequestBody Long accessMemberId) {
-        Long acceptRacingId = mapService.acceptRacing(accessMemberId, scheduleId, racingId);
+        Long acceptRacingId = racingService.acceptRacing(accessMemberId, scheduleId, racingId);
 
         return BaseResponse.getSimpleRes(acceptRacingId);
     }
@@ -77,7 +79,7 @@ public class MapController {
     public BaseResponse<BaseResultDto> denyRacing(@PathVariable Long scheduleId,
                                                   @PathVariable Long racingId,
                                                   @RequestBody Long accessMemberId) {
-        Long deniedRacingId = mapService.denyRacing(accessMemberId, scheduleId, racingId);
+        Long deniedRacingId = racingService.denyRacing(accessMemberId, scheduleId, racingId);
 
         return BaseResponse.getSimpleRes(deniedRacingId);
     }

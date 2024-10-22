@@ -27,4 +27,14 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepository {
 
         return Optional.ofNullable(alarmMemberInfo);
     }
+
+    @Override
+    public boolean checkEnoughRacingPoint(Long memberId, Integer point) {
+        Long count = query.select(member.count())
+                .from(member)
+                .where(member.id.eq(memberId), member.point.goe(point))
+                .fetchOne();
+
+        return count != null && count > 0;
+    }
 }

@@ -1,17 +1,21 @@
 package map.service;
 
+import common.domain.Racing;
 import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
+import common.exception.PaidMemberLimitException;
 import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import map.application_event.publisher.RacingEventPublisher;
 import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
+import map.repository.RacingRepository;
 import map.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,43 +113,6 @@ public class MapService {
         );
 
         return scheduleId;
-    }
-
-    public DataResDto<List<RacingResDto>> getRacings(Long memberId, Long scheduleId) {
-        // TODO : 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증,
-        //  해당 스케줄에 속해 있으며 현재 진행 중인 레이싱 종합하여 전달
-        return null;
-    }
-
-    @Transactional
-    public Long makeRacing(Long memberId, Long scheduleId, RacingAddDto racingAddDto) {
-        // TODO : 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증,
-        //  두 유저 모두 깍두기 멤버가 아닌지, 이미 중복된 레이싱이 존재하는지 검증,
-        //  두 유저 모두 충분한 포인트를 가졌는지 확인 (누가 돈이 없는지 에러 분리)
-        //  대기 중 레이싱 DB 저장,
-        //  카프카로 레이싱 신청 대상자에게 알림 전달
-        //  Runnable 이용해 30초 후 레이싱 상태 확인, 대기 중이면 삭제하고 두 사용자에게 알림 발송하는 로직 실행
-        //  @return racingId
-        return null;
-    }
-
-    @Transactional
-    public Long acceptRacing(Long memberId, Long scheduleId, Long racingId) {
-        // TODO : 레이싱이 대기 중인지 검증,
-        //  두 유저 모두 충분한 포인트를 가졌는지 확인 (누가 돈이 없는지 에러 분리)
-        //  카프카로 레이싱 신청자에게 알림 전달 두 대상자의 포인트 차감, 레이싱 상태 진행 중으로 변경
-        //  @return racingId
-        return null;
-    }
-
-
-    @Transactional
-    public Long denyRacing(Long memberId, Long scheduleId, Long racingId) {
-        // TODO : 레이싱이 대기 중인지 검증, 거절을 누른 멤버가 레이싱의 대상자인지 검증
-        //  대기 중 레이싱 DB 삭제,
-        //  카프카로 레이싱 신청 참가자에게 알림 전송
-        //  @return racingId
-        return null;
     }
 
     private Schedule findSchedule(Long scheduleId) {

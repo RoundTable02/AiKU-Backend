@@ -7,4 +7,7 @@ import java.util.Optional;
 public interface MemberQueryRepository {
 
     Optional<AlarmMemberInfo> findMemberInfo(Long memberId);
+
+    boolean checkEnoughRacingPoint(Long memberId, Integer point);
+
 }

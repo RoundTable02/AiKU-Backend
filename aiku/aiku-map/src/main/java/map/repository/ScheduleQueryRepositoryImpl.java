@@ -63,4 +63,17 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
         return Optional.ofNullable(scheduleMemberRes);
     }
 
+    @Override
+    public boolean existPaidScheduleMember(Long memberId, Long scheduleId) {
+        Long count = query.select(scheduleMember.count())
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .where(schedule.id.eq(scheduleId),
+                        scheduleMember.member.id.eq(memberId),
+                        scheduleMember.isPaid)
+                .fetchOne();
+
+        return count != null && count > 0;
+    }
+
 }

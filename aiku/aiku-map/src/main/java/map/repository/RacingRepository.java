@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RacingRepository extends JpaRepository<Racing, Long>, RacingQueryRepository {
 
-    boolean existsByIdAndRacingStatusAndStatus(Long racingId, ExecStatus scheduleStatus, Status status);
+    boolean existsByIdAndRaceStatusAndStatus(Long racingId, ExecStatus scheduleStatus, Status status);
 }

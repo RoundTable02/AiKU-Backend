@@ -71,7 +71,7 @@ public class RacingService {
         Racing racing = Racing.create(memberId, racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
         racingRepository.save(racing);
 
-        //  카프카로 레이싱 신청 대상자에게 알림 전달.. point 값 필요해서 AlarmRacingMemberInfo로 전달
+        //  카프카로 레이싱 신청 대상자에게 알림 전달
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingAddDto.getTargetMemberId());
         Schedule schedule = findSchedule(scheduleId);
 
@@ -157,7 +157,7 @@ public class RacingService {
                 new RacingDeniedMessage(memberInfosInRacing, AlarmMessageType.RACING_DENIED,
                         scheduleId, schedule.getScheduleName(), racingId)
         );
-        
+
         return racingId;
     }
 
@@ -193,7 +193,7 @@ public class RacingService {
     }
 
     private void checkRacingInWait(Long racingId) {
-        if (!racingRepository.existsByIdAndRacingStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
+        if (!racingRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }

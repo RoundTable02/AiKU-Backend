@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberProfileDto {
 
     private MemberProfileType profileType;
-    private MultipartFile profileImg;
+    private String profileImg;
     private MemberProfileCharacter profileCharacter;
     private MemberProfileBackground profileBackground;
 }

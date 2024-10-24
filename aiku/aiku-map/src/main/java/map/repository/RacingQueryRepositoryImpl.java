@@ -5,8 +5,11 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.member.QMember;
+import common.domain.schedule.QScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
+import map.dto.MemberProfileDto;
 import map.dto.RacerResDto;
 import map.dto.RacingResDto;
 
@@ -24,26 +27,43 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
 
     @Override
     public List<RacingResDto> getAllRunningRacingsInSchedule(Long scheduleId) {
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
+
+        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
+        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
+
         return query.select(Projections.constructor(RacingResDto.class,
-                Projections.constructor(RacerResDto.class,
-                        scheduleMember.member.id,
-                        scheduleMember.member.nickname,
-                        scheduleMember.member.profile
-                ),
-                Projections.constructor(RacerResDto.class,
-                        scheduleMember.member.id,
-                        scheduleMember.member.nickname,
-                        scheduleMember.member.profile
-                ),
-                racing.createdAt))
+                        Projections.constructor(RacerResDto.class,
+                                firstRacerMember.member.id,
+                                firstRacerMember.member.nickname,
+                                Projections.constructor(MemberProfileDto.class,
+                                        firstRacerMember.member.profile.profileType,
+                                        firstRacerMember.member.profile.profileImg,
+                                        firstRacerMember.member.profile.profileCharacter,
+                                        firstRacerMember.member.profile.profileBackground
+                                )
+                        ),
+                        Projections.constructor(RacerResDto.class,
+                                secondRacerMember.member.id,
+                                secondRacerMember.member.nickname,
+                                Projections.constructor(MemberProfileDto.class,
+                                        secondRacerMember.member.profile.profileType,
+                                        secondRacerMember.member.profile.profileImg,
+                                        secondRacerMember.member.profile.profileCharacter,
+                                        secondRacerMember.member.profile.profileBackground
+                                )
+                        ),
+                        racing.createdAt))
                 .from(racing)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
-                .join(scheduleMember.member, member)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.secondRacer.id))
-                .join(scheduleMember.member, member)
-                .where(scheduleMember.schedule.id.eq(scheduleId))
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
+                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인 (첫 번째 별칭 사용)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
+                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인 (두 번째 별칭 사용)
+                .where(firstRacerMember.schedule.id.eq(scheduleId)) // 스케줄 ID 조건
                 .fetch();
     }
+
 
     @Override
     public boolean checkBothMemberHaveEnoughRacingPoint(Long racingId) {

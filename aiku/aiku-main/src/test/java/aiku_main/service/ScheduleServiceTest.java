@@ -4,9 +4,9 @@ import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleDetailResDto;
 import aiku_main.dto.ScheduleUpdateDto;
-import aiku_main.repository.ScheduleReadRepository;
-import aiku_main.repository.ScheduleRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.kafka.KafkaProducerService;
+import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.TeamQueryRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.Location;
 import common.domain.member.Member;
@@ -30,15 +30,15 @@ import static org.mockito.Mockito.*;
 class ScheduleServiceTest {
 
     @Mock
-    ScheduleRepository scheduleRepository;
+    ScheduleQueryRepository scheduleQueryRepository;
     @Mock
-    ScheduleReadRepository scheduleReadRepository;
-    @Mock
-    TeamRepository teamRepository;
+    TeamQueryRepository teamQueryRepository;
     @Mock
     ScheduleScheduler scheduleScheduler;
     @Mock
     ScheduleEventPublisher scheduleEventPublisher;
+    @Mock
+    KafkaProducerService kafkaProducerService;
 
     @InjectMocks
     ScheduleService scheduleService;
@@ -51,8 +51,8 @@ class ScheduleServiceTest {
         Long scheduleId = getRandomId();
 
         doReturn(scheduleId).when(schedule).getId();
-        when(scheduleRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
-        when(scheduleRepository.isScheduleOwner(nullable(Long.class), nullable(Long.class))).thenReturn(true);
+        when(scheduleQueryRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
+        when(scheduleQueryRepository.isScheduleOwner(nullable(Long.class), nullable(Long.class))).thenReturn(true);
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new Schedule",
@@ -75,9 +75,9 @@ class ScheduleServiceTest {
         schedule.addScheduleMember(member2, false, 0);
 
 
-        when(scheduleRepository.existScheduleMember(any(), any())).thenReturn(true);
-        when(scheduleRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
-        when(scheduleReadRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
+        when(scheduleQueryRepository.existScheduleMember(any(), any())).thenReturn(true);
+        when(scheduleQueryRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
+        when(scheduleQueryRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
 
         //when
         ScheduleDetailResDto result = scheduleService.getScheduleDetail(member1, null, null);

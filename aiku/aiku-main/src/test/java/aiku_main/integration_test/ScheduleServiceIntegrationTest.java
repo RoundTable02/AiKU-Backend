@@ -6,7 +6,7 @@ import aiku_main.dto.*;
 import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.ScheduleQueryRepository;
 import aiku_main.service.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +44,7 @@ public class ScheduleServiceIntegrationTest {
     @Autowired
     ScheduleService scheduleService;
     @Autowired
-    ScheduleRepository scheduleRepository;
+    ScheduleQueryRepository scheduleQueryRepository;
     @Autowired
     MemberRepository memberRepository;
     @Autowired
@@ -89,7 +89,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
         assertThat(schedule).isNotNull();
         assertThat(schedule.getScheduleStatus()).isEqualTo(ExecStatus.WAIT);
         assertThat(schedule.getScheduleMembers().size()).isEqualTo(1);
@@ -129,7 +129,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).get();
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
         assertThat(findSchedule.getScheduleName()).isEqualTo(scheduleDto.getScheduleName());
         assertThat(findSchedule.getLocation().getLocationName()).isEqualTo(scheduleDto.getLocation().getLocationName());
     }
@@ -194,7 +194,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(scheduleId).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
         assertThat(findSchedule).isNotNull();
 
         List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
@@ -283,7 +283,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
         assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
 
@@ -292,7 +292,7 @@ public class ScheduleServiceIntegrationTest {
         assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
         assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
 
-        ScheduleMember owner = scheduleRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
+        ScheduleMember owner = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
         assertThat(owner).isNotNull();
         assertThat(owner.isOwner()).isTrue();
         //중복 요청
@@ -354,7 +354,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
         assertThat(findSchedule.getStatus()).isEqualTo(DELETE);
 
@@ -384,11 +384,11 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
         assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
 
-        ScheduleMember nextOwner = scheduleRepository.findScheduleMember(member2.getId(), schedule.getId()).orElse(null);
+        ScheduleMember nextOwner = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule.getId()).orElse(null);
         assertThat(nextOwner).isNotNull();
         assertThat(nextOwner.isOwner()).isTrue();
     }
@@ -671,10 +671,10 @@ public class ScheduleServiceIntegrationTest {
         scheduleService.exitAllScheduleInTeam(member1.getId(), team.getId());
 
         //then
-        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule1.getId())).isFalse();
-        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule2.getId())).isFalse();
-        assertThat(scheduleRepository.existScheduleMember(member1.getId(), schedule3.getId())).isTrue();
-        assertThat(scheduleRepository.existScheduleMember(member1.getId(), scheduleB1.getId())).isTrue();
+        assertThat(scheduleQueryRepository.existScheduleMember(member1.getId(), schedule1.getId())).isFalse();
+        assertThat(scheduleQueryRepository.existScheduleMember(member1.getId(), schedule2.getId())).isFalse();
+        assertThat(scheduleQueryRepository.existScheduleMember(member1.getId(), schedule3.getId())).isTrue();
+        assertThat(scheduleQueryRepository.existScheduleMember(member1.getId(), scheduleB1.getId())).isTrue();
     }
 
     @Test
@@ -703,7 +703,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
         assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
 
@@ -738,7 +738,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
 
         List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
 
@@ -775,7 +775,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
         assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
@@ -810,7 +810,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
         assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
@@ -845,7 +845,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
         assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(0, 250, 350);
@@ -879,7 +879,7 @@ public class ScheduleServiceIntegrationTest {
         em.clear();
 
         //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
         String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();

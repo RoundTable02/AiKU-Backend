@@ -193,6 +193,22 @@ public class ScheduleService {
         }
     }
 
+    @Transactional
+    public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
+        Schedule schedule = findScheduleById(scheduleId);
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+
+        schedule.arriveScheduleMember(scheduleMember, arrivalTime);
+    }
+
+    @Transactional
+    public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
+        Schedule schedule = findScheduleById(scheduleId);
+        schedule.close(scheduleCloseTime);
+
+        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
+    }
+
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
         //검증 메서드
         Schedule schedule = findScheduleById(scheduleId);
@@ -283,10 +299,11 @@ public class ScheduleService {
             return;
         }
 
-        Schedule schedule = scheduleQueryRepository.findScheduleWithNotArriveScheduleMember(scheduleId).orElseThrow();
+        Schedule schedule = findScheduleById(scheduleId);
+        List<ScheduleMember> notArriveScheduleMembers = scheduleQueryRepository.findNotArriveScheduleMember(scheduleId);
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
-        schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
+        schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
     }

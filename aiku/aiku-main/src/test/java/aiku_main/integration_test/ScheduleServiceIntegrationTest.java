@@ -20,6 +20,8 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 public class ScheduleServiceIntegrationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(ScheduleServiceIntegrationTest.class);
     @Autowired
     EntityManager em;
     @Autowired
@@ -85,9 +88,6 @@ public class ScheduleServiceIntegrationTest {
                 new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
         Long scheduleId = scheduleService.addSchedule(member1, team.getId(), scheduleDto);
 
-        em.flush();
-        em.clear();
-
         //then
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
         assertThat(schedule).isNotNull();
@@ -117,16 +117,10 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 0);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
         scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto);
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
@@ -145,9 +139,6 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member2, false, 0);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
@@ -163,9 +154,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = Schedule.create(member1, null, "sche1", LocalDateTime.now().plusMinutes(30),
                 new Location("loc1", 1.0, 1.0), 0);
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
@@ -183,15 +171,9 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 100);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
         Long scheduleId = scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto);
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
@@ -216,9 +198,6 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member2, false, 0);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
         assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
@@ -232,9 +211,6 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule schedule = createSchedule(member1, team, 100);
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
@@ -251,9 +227,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 100);
         schedule.setRun();
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
@@ -273,14 +246,8 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member3, false, 100);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -309,9 +276,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 100);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
@@ -328,8 +292,6 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
@@ -344,14 +306,8 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 100);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -371,17 +327,10 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule schedule = createSchedule(member1, team, 0);
         schedule.addScheduleMember(member2, false, 0);
-
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -403,14 +352,47 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule = createSchedule(member1, team, 0);
         schedule.setTerm(LocalDateTime.now());
         schedule.addScheduleMember(member2, false, 0);
-
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> scheduleService.exitSchedule(member1, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+    }
+
+    @Test
+    void 스케줄_종료(){
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        //when
+        schedule.close(LocalDateTime.now());
+
+        //then
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
+    }
+
+    @Test
+    void 스케줄_도착() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        //when
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        scheduleService.arriveSchedule(schedule.getId(), member1.getId(), arrivalTime);
+
+        //then
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
+        assertThat(scheduleMember).isNotNull();
+        assertThat(scheduleMember.getArrivalTimeDiff()).isEqualTo(Duration.between(arrivalTime, schedule.getScheduleTime()).toMinutes());
     }
 
     @Test
@@ -427,14 +409,8 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member3, false, 100);
         em.persist(schedule);
 
-        em.flush();
-        em.clear();
-
         //when
         ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member1, team.getId(), schedule.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
@@ -457,9 +433,6 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member2, false, 0);
         schedule.addScheduleMember(member3, false, 100);
         em.persist(schedule);
-
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
@@ -486,14 +459,8 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule3 = createSchedule(member3, team, 100);
         em.persist(schedule3);
 
-        em.flush();
-        em.clear();
-
         //when
         TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(), 1);
-
-        em.flush();
-        em.clear();
 
         //then
         assertThat(result.getRunSchedule()).isEqualTo(1);
@@ -535,14 +502,8 @@ public class ScheduleServiceIntegrationTest {
         Schedule schedule3 = createSchedule(member3, team, 100);
         em.persist(schedule3);
 
-        em.flush();
-        em.clear();
-
         //when
         TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(startDate, endDate), 1);
-
-        em.flush();
-        em.clear();
 
         //then
         assertThat(result.getRunSchedule()).isEqualTo(0);
@@ -576,9 +537,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule scheduleB1 = createSchedule(member1, teamB, 0);
         scheduleB1.setRun();
         em.persist(scheduleB1);
-
-        em.flush();
-        em.clear();
 
         //when
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(), 1);
@@ -622,9 +580,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule scheduleB2 = createSchedule(member1, teamB, 0);
         em.persist(scheduleB2);
 
-        em.flush();
-        em.clear();
-
         //when
         MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(startDate, null), 1);
 
@@ -664,9 +619,6 @@ public class ScheduleServiceIntegrationTest {
         Schedule scheduleB1 = createSchedule(member1, teamB, 100);
         em.persist(scheduleB1);
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.exitAllScheduleInTeam(member1.getId(), team.getId());
 
@@ -685,22 +637,19 @@ public class ScheduleServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = createSchedule(member1, team, 0);
+        Schedule schedule1 = createSchedule(member1,  team, 0);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
-
         em.flush();
         em.clear();
-
         //when
+        log.info("시작");
         scheduleService.closeScheduleAuto(schedule1.getId());
-
-        em.flush();
-        em.clear();
+        log.info("끝");
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -728,14 +677,8 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.closeScheduleAuto(schedule1.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -765,14 +708,8 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.processScheduleResultPoint(schedule1.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -800,14 +737,8 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.processScheduleResultPoint(schedule1.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -835,14 +766,8 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime);
         schedule1.setTerm(LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.processScheduleResultPoint(schedule1.getId());
-
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -870,13 +795,8 @@ public class ScheduleServiceIntegrationTest {
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime.plusHours(3));
         schedule1.setTerm(LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         scheduleService.analyzeScheduleArrivalResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);

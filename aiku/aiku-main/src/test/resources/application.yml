@@ -19,6 +19,8 @@ spring:
         format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
   kafka:
     bootstrap-servers: ${KAFKA_SERVER_URL}
+    listener:
+      ack-mode: manual  # 수동 AckMode 설정
     consumer:
       auto-offset-reset: latest
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

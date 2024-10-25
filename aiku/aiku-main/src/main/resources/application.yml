@@ -17,6 +17,8 @@ spring:
         default_batch_fetch_size: 100
   kafka:
     bootstrap-servers: ${KAFKA_SERVER_URL}
+    listener:
+      ack-mode: manual  # 수동 AckMode 설정
     consumer:
       auto-offset-reset: latest
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

@@ -1,4 +1,4 @@
-package gateway.domain.member;
+package gateway.dto.member;
 
 public enum MemberRole {
     MANAGER, MEMBER

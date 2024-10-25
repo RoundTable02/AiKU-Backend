@@ -377,6 +377,25 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
+    void 스케줄_도착() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        //when
+        LocalDateTime arrivalTime = LocalDateTime.now();
+        scheduleService.arriveSchedule(schedule.getId(), member1.getId(), arrivalTime);
+
+        //then
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
+        assertThat(scheduleMember).isNotNull();
+        assertThat(scheduleMember.getArrivalTimeDiff()).isEqualTo(Duration.between(arrivalTime, schedule.getScheduleTime()).toMinutes());
+    }
+
+    @Test
     void 스케줄_상세_조회() {
         //given
         Team team = Team.create(member1, "team1");

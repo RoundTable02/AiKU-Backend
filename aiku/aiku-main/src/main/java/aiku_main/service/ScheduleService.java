@@ -194,6 +194,14 @@ public class ScheduleService {
     }
 
     @Transactional
+    public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
+        Schedule schedule = findScheduleById(scheduleId);
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+
+        schedule.arriveScheduleMember(scheduleMember, arrivalTime);
+    }
+
+    @Transactional
     public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
         Schedule schedule = findScheduleById(scheduleId);
         schedule.close(scheduleCloseTime);

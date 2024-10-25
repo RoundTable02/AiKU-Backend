@@ -1,6 +1,6 @@
 package gateway.service;
 
-import common.domain.member.Member;
+import gateway.domain.member.Member;
 import gateway.exception.MemberNotFoundException;
 import gateway.repository.MemberReadRepository;
 import gateway.security.MemberAdaptor;

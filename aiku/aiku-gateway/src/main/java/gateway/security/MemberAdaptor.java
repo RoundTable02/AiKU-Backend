@@ -1,6 +1,6 @@
 package gateway.security;
 
-import common.domain.member.Member;
+import gateway.domain.member.Member;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

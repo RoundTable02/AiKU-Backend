@@ -36,7 +36,7 @@ public class KafkaConsumerService {
         } catch (JsonProcessingException e) {
             log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다.", e);
         }
-        
+
         ack.acknowledge();
     }
 }

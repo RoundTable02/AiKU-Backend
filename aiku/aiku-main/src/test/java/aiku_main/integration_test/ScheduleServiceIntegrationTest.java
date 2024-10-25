@@ -368,7 +368,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        schedule.close();
+        schedule.close(LocalDateTime.now());
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);

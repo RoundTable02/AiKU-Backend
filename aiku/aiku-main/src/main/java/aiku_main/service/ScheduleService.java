@@ -194,9 +194,9 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void closeSchedule(Long scheduleId){
+    public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
         Schedule schedule = findScheduleById(scheduleId);
-        schedule.close();
+        schedule.close(scheduleCloseTime);
 
         scheduleEventPublisher.publishScheduleCloseEvent(schedule);
     }

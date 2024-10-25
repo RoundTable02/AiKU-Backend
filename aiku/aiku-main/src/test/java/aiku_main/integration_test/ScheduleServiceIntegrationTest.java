@@ -625,9 +625,12 @@ public class ScheduleServiceIntegrationTest {
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
-
+        em.flush();
+        em.clear();
         //when
+        log.info("시작");
         scheduleService.closeScheduleAuto(schedule1.getId());
+        log.info("끝");
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -636,7 +639,7 @@ public class ScheduleServiceIntegrationTest {
 
         List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
         assertThat(scheduleMembers).extracting("arrivalTimeDiff")
-                .contains(-30, -30, (int) Duration.between(schedule1.getScheduleTime(), arrivalTime).toMinutes());
+                .contains(-30, -30, (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes());
     }
 
     @Test

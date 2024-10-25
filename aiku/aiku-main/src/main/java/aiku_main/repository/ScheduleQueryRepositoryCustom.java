@@ -14,12 +14,12 @@ import java.util.Optional;
 
 public interface ScheduleQueryRepositoryCustom {
 
-    Optional<Schedule> findScheduleWithNotArriveScheduleMember(Long scheduleId);
     List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId);
 
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);
+    List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId);
     List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId);

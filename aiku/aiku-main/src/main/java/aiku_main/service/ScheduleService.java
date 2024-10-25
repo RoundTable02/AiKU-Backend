@@ -291,10 +291,11 @@ public class ScheduleService {
             return;
         }
 
-        Schedule schedule = scheduleQueryRepository.findScheduleWithNotArriveScheduleMember(scheduleId).orElseThrow();
+        Schedule schedule = findScheduleById(scheduleId);
+        List<ScheduleMember> notArriveScheduleMembers = scheduleQueryRepository.findNotArriveScheduleMember(scheduleId);
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
-        schedule.autoClose(schedule.getScheduleMembers(), autoCloseTime);
+        schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
     }

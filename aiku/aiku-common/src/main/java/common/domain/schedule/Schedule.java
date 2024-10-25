@@ -112,6 +112,11 @@ public class Schedule extends BaseTime {
         return false;
     }
 
+    public void close(){
+        this.scheduleStatus = TERM;
+        this.isAutoClose = false;
+    }
+
     public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
         notArriveScheduleMembers.forEach(scheduleMember -> {
             if(scheduleMember.getSchedule().getId().equals(id)){

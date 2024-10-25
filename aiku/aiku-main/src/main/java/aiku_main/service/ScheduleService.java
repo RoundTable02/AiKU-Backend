@@ -193,6 +193,14 @@ public class ScheduleService {
         }
     }
 
+    @Transactional
+    public void closeSchedule(Long scheduleId){
+        Schedule schedule = findScheduleById(scheduleId);
+        schedule.close();
+
+        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
+    }
+
     public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
         //검증 메서드
         Schedule schedule = findScheduleById(scheduleId);

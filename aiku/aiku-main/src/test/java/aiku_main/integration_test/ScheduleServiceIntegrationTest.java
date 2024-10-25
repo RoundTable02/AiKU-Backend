@@ -414,6 +414,24 @@ public class ScheduleServiceIntegrationTest {
     }
 
     @Test
+    void 스케줄_종료(){
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        em.persist(schedule);
+
+        //when
+        schedule.close();
+
+        //then
+        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
+        assertThat(findSchedule).isNotNull();
+        assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
+    }
+
+    @Test
     void 스케줄_상세_조회() {
         //given
         Team team = Team.create(member1, "team1");

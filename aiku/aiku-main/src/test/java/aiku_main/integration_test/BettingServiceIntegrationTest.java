@@ -93,9 +93,6 @@ class BettingServiceIntegrationTest {
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
         Long bettingId = bettingService.addBetting(member1, schedule1.getId(), bettingDto);
 
-        em.flush();
-        em.clear();
-
         //then
         Betting betting = bettingQueryRepository.findById(bettingId).orElse(null);
         ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
@@ -139,9 +136,6 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 0);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
         assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(BettingException.class);
@@ -165,9 +159,6 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
 
@@ -189,9 +180,6 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
         assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
@@ -206,9 +194,6 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
         assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
     }
@@ -221,9 +206,6 @@ class BettingServiceIntegrationTest {
 
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
-
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(ScheduleException.class);
@@ -238,13 +220,8 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());
-        em.flush();
-        em.clear();
+        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());em.clear();
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElse(null);
@@ -261,13 +238,8 @@ class BettingServiceIntegrationTest {
         Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
         em.persist(betting);
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.exitSchedule_deleteBettingForBettor(member2.getId(), bettor.getId(), schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElse(null);
@@ -292,13 +264,8 @@ class BettingServiceIntegrationTest {
         schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
         schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now());
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.processBettingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
@@ -325,13 +292,8 @@ class BettingServiceIntegrationTest {
         schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
         schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now().plusMinutes(30));
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.processBettingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
@@ -357,15 +319,10 @@ class BettingServiceIntegrationTest {
         List<ScheduleMember> scheduleMembers = schedule1.getScheduleMembers();
         schedule1.arriveScheduleMember(scheduleMembers.get(0), schedule1.getScheduleTime().plusMinutes(30));
         schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
-        schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));
-
-        em.flush();
-        em.clear();
+        schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));em.clear();
 
         //when
         bettingService.processBettingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
@@ -390,13 +347,8 @@ class BettingServiceIntegrationTest {
         em.persist(betting2);
         em.persist(betting3);
 
-        em.flush();
-        em.clear();
-
         //when
         bettingService.analyzeScheduleBettingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);

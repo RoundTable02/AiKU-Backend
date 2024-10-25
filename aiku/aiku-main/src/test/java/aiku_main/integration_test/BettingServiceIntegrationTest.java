@@ -83,8 +83,8 @@ class BettingServiceIntegrationTest {
 
     @AfterEach
     void afterEach(){
-        memberRepository.deleteAll();
         scheduleQueryRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Test
@@ -162,9 +162,6 @@ class BettingServiceIntegrationTest {
         //when
         bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
 
-        em.flush();
-        em.clear();
-
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElseThrow();
         assertThat(findBetting.getBettingStatus()).isEqualTo(WAIT);
@@ -221,7 +218,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());em.clear();
+        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElse(null);
@@ -319,7 +316,7 @@ class BettingServiceIntegrationTest {
         List<ScheduleMember> scheduleMembers = schedule1.getScheduleMembers();
         schedule1.arriveScheduleMember(scheduleMembers.get(0), schedule1.getScheduleTime().plusMinutes(30));
         schedule1.arriveScheduleMember(scheduleMembers.get(1), LocalDateTime.now());
-        schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));em.clear();
+        schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));
 
         //when
         bettingService.processBettingResult(schedule1.getId());

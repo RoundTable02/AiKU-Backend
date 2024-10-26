@@ -177,7 +177,7 @@ class RacingServiceTest {
     }
 
     @Test
-    void 레이싱_생성_스케줄_종료_예외() {
+    void 레이싱_생성_스케줄_대기_예외() {
         Member member4 = Member.builder()
                 .kakaoId(4L)
                 .nickname("member4")
@@ -308,7 +308,12 @@ class RacingServiceTest {
 
         racingService.denyRacing(member3.getId(), schedule1.getId(), newRacing.getId());
 
+        em.flush();
+        em.clear();
+
         Racing findRacing = em.find(Racing.class, newRacing.getId());
+
+        assertThat(findRacing).isNull();
     }
 
 

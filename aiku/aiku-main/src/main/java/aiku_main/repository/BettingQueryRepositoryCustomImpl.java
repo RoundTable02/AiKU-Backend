@@ -5,8 +5,10 @@ import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.Betting;
+import common.domain.ExecStatus;
+import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -21,10 +23,34 @@ import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
 
 @RequiredArgsConstructor
-@Repository
-public class BettingReadRepositoryImpl implements BettingReadRepository{
+public class BettingQueryRepositoryCustomImpl implements BettingQueryRepositoryCustom {
 
     private final JPAQueryFactory query;
+
+    @Override
+    public boolean existBettorInSchedule(ScheduleMemberValue bettor, Long scheduleId) {
+        Long count = query
+                .select(betting.count())
+                .from(betting)
+                .join(scheduleMember).on(scheduleMember.id.eq(bettor.getId()))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        betting.bettor.id.eq(bettor.getId()),
+                        betting.status.eq(ALIVE))
+                .fetchOne();
+
+        return count != null && count > 0;
+    }
+
+    @Override
+    public List<Betting> findBettingsInSchedule(Long scheduleId, ExecStatus bettingStatus) {
+        return query.selectFrom(betting)
+                .join(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE),
+                        betting.bettingStatus.eq(bettingStatus),
+                        betting.status.eq(ALIVE))
+                .fetch();
+    }
 
     @Override
     public Map<Long, List<TeamBettingResultMemberDto>> findMemberTermBettingsInTeam(Long teamId) {

@@ -6,7 +6,7 @@ import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.*;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.TeamRepository;
+import aiku_main.repository.TeamQueryRepository;
 import aiku_main.service.TeamService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +17,6 @@ import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
-import common.exception.BaseExceptionImpl;
-import common.exception.NoAuthorityException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ public class TeamServiceIntegrationTest {
     @Autowired
     TeamService teamService;
     @Autowired
-    TeamRepository teamRepository;
+    TeamQueryRepository teamQueryRepository;
     @Autowired
     MemberRepository memberRepository;
     @Autowired
@@ -77,7 +75,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //then
-        Team team = teamRepository.findById(teamId).get();
+        Team team = teamQueryRepository.findById(teamId).get();
         assertThat(team.getTeamName()).isEqualTo(teamDto.getGroupName());
         assertThat(team.getTeamMembers().size()).isEqualTo(1);
 
@@ -98,7 +96,7 @@ public class TeamServiceIntegrationTest {
         Long teamId = teamService.enterTeam(member2, team.getId());
 
         //then
-        TeamMember teamMember = teamRepository.findAliveTeamMember(teamId, member2.getId()).orElse(null);
+        TeamMember teamMember = teamQueryRepository.findAliveTeamMember(teamId, member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
 
         //중복 입장
@@ -136,11 +134,11 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //then
-        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
         assertThat(findTeam.getStatus()).isEqualTo(Status.ALIVE);
 
-        TeamMember teamMember = teamRepository.findTeamMember(team.getId(), member2.getId()).orElse(null);
+        TeamMember teamMember = teamQueryRepository.findTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
         assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
     }
@@ -189,7 +187,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //then
-        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
         assertThat(findTeam.getStatus()).isEqualTo(Status.DELETE);
     }
@@ -323,7 +321,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //then
-        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
 
         TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
@@ -378,7 +376,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //then
-        Team findTeam = teamRepository.findById(team.getId()).orElse(null);
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
         List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
                 .getMembers();

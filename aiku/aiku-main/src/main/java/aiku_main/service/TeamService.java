@@ -11,7 +11,6 @@ import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.member.Member;
-import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
@@ -31,17 +30,16 @@ import static common.response.status.BaseErrorCode.*;
 @Service
 public class TeamService {
 
-    private final TeamRepository teamRepository;
-    private final TeamReadRepository teamReadRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final BettingReadRepository bettingReadRepository;
+    private final TeamQueryRepository teamQueryRepository;
+    private final ScheduleQueryRepository scheduleQueryRepository;
+    private final BettingQueryRepository bettingQueryRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
 
     @Transactional
     public Long addTeam(Member member, TeamAddDto teamDto){
         Team team = Team.create(member, teamDto.getGroupName());
-        teamRepository.save(team);
+        teamQueryRepository.save(team);
 
         return team.getId();
     }
@@ -67,12 +65,12 @@ public class TeamService {
         checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
-        Long teamMemberCount = teamRepository.countOfAliveTeamMember(teamId);
+        Long teamMemberCount = teamQueryRepository.countOfAliveTeamMember(teamId);
         if (teamMemberCount <= 1){
             team.delete();
         }
 
-        TeamMember teamMember = teamRepository.findAliveTeamMember(teamId, member.getId()).orElseThrow();
+        TeamMember teamMember = teamQueryRepository.findAliveTeamMember(teamId, member.getId()).orElseThrow();
         team.removeTeamMember(teamMember);
 
         teamEventPublisher.publishTeamExitEvent(member, team);
@@ -87,7 +85,7 @@ public class TeamService {
         checkTeamMember(member.getId(), teamId, true);
 
         //서비스 로직
-        Team team = teamRepository.findTeamWithMember(teamId).orElseThrow();
+        Team team = teamQueryRepository.findTeamWithMember(teamId).orElseThrow();
         TeamDetailResDto resultDto = new TeamDetailResDto(team);
 
         return resultDto;
@@ -95,7 +93,7 @@ public class TeamService {
 
     public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
         //서비스 로직
-        List<TeamEachListResDto> data = teamReadRepository.getTeamList(member.getId(), page);
+        List<TeamEachListResDto> data = teamQueryRepository.getTeamList(member.getId(), page);
         DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
         return resultDto;
@@ -122,10 +120,10 @@ public class TeamService {
     //==* 이벤트 핸들러 호출 메서드*==
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
 
-        List<TeamResultMember> lateTeamMemberRanking = teamReadRepository.getTeamLateTimeResult(team.getId());
+        List<TeamResultMember> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
         TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
 
         try {
@@ -137,10 +135,10 @@ public class TeamService {
 
     @Transactional
     public void analyzeBettingResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        Team team = teamRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
 
-        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingReadRepository.findMemberTermBettingsInTeam(team.getId());
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
 
         List<TeamResultMember> teamResultMembers = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
@@ -163,7 +161,7 @@ public class TeamService {
 
     @Transactional
     public void updateLateTimeResultOfExitMember(Long memberId, Long teamId) {
-        Team team = teamRepository.findById(teamId).orElseThrow();
+        Team team = teamQueryRepository.findById(teamId).orElseThrow();
         if (team.getTeamResult() == null || team.getTeamResult().getLateTimeResult() == null) {
             return;
         }
@@ -184,7 +182,7 @@ public class TeamService {
 
     //==* 기타 메서드 *==
     private Team findTeamById(Long teamId){
-        Team team = teamRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
+        Team team = teamQueryRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {
             throw new TeamException(NO_SUCH_TEAM);
         }
@@ -192,13 +190,13 @@ public class TeamService {
     }
 
     private void checkExistTeam(Long teamId){
-        if(!teamRepository.existsById(teamId)){
+        if(!teamQueryRepository.existsById(teamId)){
             throw new TeamException(NO_SUCH_TEAM);
         }
     }
 
     private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
-        if(teamRepository.existTeamMember(memberId, teamId) != isMember){
+        if(teamQueryRepository.existTeamMember(memberId, teamId) != isMember){
             if(isMember){
                 throw new TeamException(NOT_IN_TEAM);
             }else {

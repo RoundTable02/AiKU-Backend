@@ -1,21 +1,17 @@
 package map.service;
 
-import common.domain.Racing;
 import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
-import common.exception.PaidMemberLimitException;
 import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import map.application_event.publisher.RacingEventPublisher;
 import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
-import map.repository.RacingRepository;
 import map.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,7 +137,7 @@ public class MapService {
     }
 
     private void checkScheduleInRun(Long scheduleId) {
-        if (scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, RUN, Status.ALIVE)) {
+        if (!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, RUN, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }

@@ -12,17 +12,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
-public class BettingHandler {
+public class RacingHandler {
 
     private final RacingService racingService;
     private final RacingScheduler racingScheduler;
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAskRacingEvent(AskRacingEvent event){
         racingScheduler.checkRacingStatus30secsLater(event.getRacingInfo());
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleRacingStatusNotChangedEvent(RacingStatusNotChangedEvent event){
         racingService.autoDeleteRacingById(event.getRacingInfo());
     }

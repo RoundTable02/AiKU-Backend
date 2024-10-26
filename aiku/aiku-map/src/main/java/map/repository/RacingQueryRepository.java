@@ -14,4 +14,6 @@ public interface RacingQueryRepository {
     List<AlarmMemberInfo> findMemberInfoByScheduleMemberId(Long racingId);
 
     boolean checkMemberIsSecondRacerInRacing(Long memberId, Long racingId);
+
+    boolean existsByFirstMemberIdAndSecondMemberId(Long scheduleId, Long firstMemberId, Long secondMemberId);
 }

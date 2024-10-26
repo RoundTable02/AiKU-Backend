@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Racing extends BaseTime{
 
-    @Column(name = "bettingId")
+    @Column(name = "racingId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

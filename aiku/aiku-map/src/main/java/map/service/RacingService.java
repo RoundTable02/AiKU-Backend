@@ -13,10 +13,7 @@ import map.application_event.publisher.RacingEventPublisher;
 import map.dto.DataResDto;
 import map.dto.RacingAddDto;
 import map.dto.RacingResDto;
-import map.exception.MemberNotFoundException;
-import map.exception.MemberNotInRacingException;
-import map.exception.NoSuchRacingException;
-import map.exception.ScheduleException;
+import map.exception.*;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
 import map.repository.RacingRepository;
@@ -63,6 +60,8 @@ public class RacingService {
         checkPaidScheduleMember(memberId, scheduleId);
         checkPaidScheduleMember(racingAddDto.getTargetMemberId(), scheduleId);
 
+        checkDuplicateRacing(scheduleId, memberId, racingAddDto.getTargetMemberId());
+
         //  두 유저 모두 충분한 포인트를 가졌는지 확인
         checkEnoughRacingPoint(memberId, racingAddDto.getPoint());
         checkEnoughRacingPoint(racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
@@ -102,6 +101,8 @@ public class RacingService {
         racingRepository.deleteById(racingInfo.getRacingId());
         AlarmMemberInfo firstRacerInfo = getMemberInfo(racingInfo.getFirstRacerId());
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingInfo.getSecondRacerId());
+
+        log.info("Racing Deleted");
 
         kafkaService.sendMessage(KafkaTopic.alarm,
                 new RacingAutoDeletedMessage(List.of(firstRacerInfo, secondRacerInfo),
@@ -146,9 +147,6 @@ public class RacingService {
         checkRacingInWait(racingId);
         checkMemberIsSecondRacerInRacing(memberId, racingId);
 
-        //  대기 중 레이싱 DB 삭제,
-        racingRepository.deleteById(racingId);
-
         //  카프카로 레이싱 신청 참가자에게 알림 전송
         Schedule schedule = findSchedule(scheduleId);
 
@@ -157,6 +155,9 @@ public class RacingService {
                 new RacingDeniedMessage(memberInfosInRacing, AlarmMessageType.RACING_DENIED,
                         scheduleId, schedule.getScheduleName(), racingId)
         );
+
+        //  대기 중 레이싱 DB 삭제
+        racingRepository.deleteById(racingId);
 
         return racingId;
     }
@@ -192,6 +193,12 @@ public class RacingService {
         }
     }
 
+    private void checkDuplicateRacing(Long scheduleId, Long firstMemberId, Long secondMemberId) {
+        if (racingRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
+            throw new DuplicateRacingException();
+        }
+    }
+
     private void checkRacingInWait(Long racingId) {
         if (!racingRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
@@ -206,13 +213,13 @@ public class RacingService {
 
     private void checkEnoughRacingPoint(Long memberId, Integer point){
         if(!memberRepository.checkEnoughRacingPoint(memberId, point)){
-            throw new PaidMemberLimitException();
+            throw new NotEnoughPointException();
         }
     }
 
     private void checkBothMemberHaveEnoughRacingPoint(Long racingId){
         if(!racingRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
-            throw new PaidMemberLimitException();
+            throw new NotEnoughPointException();
         }
     }
 

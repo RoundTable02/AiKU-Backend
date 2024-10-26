@@ -1,6 +1,5 @@
 package map.controller;
 
-import common.domain.member.Member;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;
@@ -59,7 +58,7 @@ public class MapController {
 
     @PostMapping("/racing")
     public BaseResponse<BaseResultDto> makeRacing(@PathVariable Long scheduleId,
-                                                  @RequestBody Long accessMemberId,
+                                                  @RequestParam Long accessMemberId,
                                                   @RequestBody @Valid RacingAddDto racingAddDto) {
         Long racingId = racingService.makeRacing(accessMemberId, scheduleId, racingAddDto);
 

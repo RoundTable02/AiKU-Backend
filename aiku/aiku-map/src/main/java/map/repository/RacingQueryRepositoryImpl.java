@@ -13,7 +13,9 @@ import map.dto.MemberProfileDto;
 import map.dto.RacerResDto;
 import map.dto.RacingResDto;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static common.domain.QRacing.racing;
 import static common.domain.member.QMember.member;
@@ -67,14 +69,20 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
 
     @Override
     public boolean checkBothMemberHaveEnoughRacingPoint(Long racingId) {
-        Tuple tuple = query.select(member.point.as("firstPoint"),
-                        member.point.as("secondPoint"),
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
+
+        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
+        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
+
+        Tuple tuple = query.select(firstMember.point.as("firstPoint"),
+                        secondMember.point.as("secondPoint"),
                         racing.pointAmount.as("pointAmount"))
                 .from(racing)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
-                .join(scheduleMember.member, member)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.secondRacer.id))
-                .join(scheduleMember.member, member)
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
+                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인 (첫 번째 별칭 사용)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
+                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인 (두 번째 별칭 사용)
                 .where(racing.id.eq(racingId))
                 .fetchOne();
 
@@ -87,19 +95,41 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
 
     @Override
     public List<AlarmMemberInfo> findMemberInfoByScheduleMemberId(Long racingId) {
-        return query.select(Projections.constructor(AlarmMemberInfo.class,
-                        member.id,
-                        member.nickname,
-                        member.profile,
-                        member.firebaseToken
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
+
+        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
+        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
+
+        AlarmMemberInfo firstAlarmMemberInfo = query.select(Projections.constructor(AlarmMemberInfo.class,
+                        firstMember.id,            // 첫 번째 레이서 멤버 ID
+                        firstMember.nickname,      // 첫 번째 레이서 멤버 닉네임
+                        firstMember.profile,       // 첫 번째 레이서 멤버 프로필
+                        firstMember.firebaseToken  // 첫 번째 레이서 멤버 Firebase 토큰
                 ))
                 .from(racing)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
-                .join(scheduleMember.member, member)
-                .join(scheduleMember).on(scheduleMember.id.eq(racing.secondRacer.id))
-                .join(scheduleMember.member, member)
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id))  // 첫 번째 레이서와 조인
+                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인
                 .where(racing.id.eq(racingId))
-                .fetch();
+                .fetchOne();
+
+        AlarmMemberInfo secondAlarmMemberInfo = query.select(Projections.constructor(AlarmMemberInfo.class,
+                        secondMember.id,           // 두 번째 레이서 멤버 ID
+                        secondMember.nickname,     // 두 번째 레이서 멤버 닉네임
+                        secondMember.profile,      // 두 번째 레이서 멤버 프로필
+                        secondMember.firebaseToken // 두 번째 레이서 멤버 Firebase 토큰
+                ))
+                .from(racing)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
+                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인
+                .where(racing.id.eq(racingId))
+                .fetchOne();
+
+        if (Objects.isNull(firstAlarmMemberInfo) || Objects.isNull(secondAlarmMemberInfo)) {
+            return Collections.emptyList();
+        } else {
+            return List.of(firstAlarmMemberInfo, secondAlarmMemberInfo);
+        }
     }
 
     @Override
@@ -109,6 +139,31 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
                 .join(scheduleMember).on(scheduleMember.id.eq(racing.secondRacer.id))
                 .join(scheduleMember.member, member)
                 .where(member.id.eq(memberId), racing.id.eq(racingId))
+                .fetchOne();
+
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByFirstMemberIdAndSecondMemberId(Long scheduleId, Long firstMemberId, Long secondMemberId) {
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
+
+        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
+        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
+
+        Long count = query.select(racing.count())
+                .from(racing)
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
+                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인 (첫 번째 별칭 사용)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
+                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인 (두 번째 별칭 사용)
+                .where(
+                        firstRacerMember.schedule.id.eq(scheduleId),
+                        secondRacerMember.schedule.id.eq(scheduleId),
+                        (firstMember.id.eq(firstMemberId).and(secondMember.id.eq(secondMemberId)))
+                                .or(secondMember.id.eq(firstMemberId).and(firstMember.id.eq(secondMemberId)))
+                )
                 .fetchOne();
 
         return count != null && count > 0;

@@ -20,3 +20,5 @@
 /.idea
 *.iml
 .idea/modules/aiku-map/aiku.aiku-map.main.iml
+aiku/aiku-map/src/test/resources/application-test.yml
+aiku/aiku-map/src/test/resources/application-test.yml

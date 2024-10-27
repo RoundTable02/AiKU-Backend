@@ -2,7 +2,9 @@ package gateway.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -27,7 +29,13 @@ public class JwtAuthenticationFilter implements WebFilter {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContext context = new SecurityContextImpl(authentication);
-            return chain.filter(exchange)
+
+            ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                    .header("Access-Member-Id", MDC.get("accessMemberId"))
+                    .build();
+
+            ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
+            return chain.filter(mutatedExchange)
                     .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
         }
 

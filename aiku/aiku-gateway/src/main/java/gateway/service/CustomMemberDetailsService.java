@@ -6,6 +6,7 @@ import gateway.repository.MemberQueryRepository;
 import gateway.security.MemberAdaptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +26,8 @@ public class CustomMemberDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
         Member member = memberQueryRepository.findMemberByKakaoId(Long.parseLong(kakaoId))
                 .orElseThrow(() -> new MemberNotFoundException());
+
+        MDC.put("accessMemberId", String.valueOf(member.getId()));
 
         // Member Role을 리스트 형태로 전달
         return new MemberAdaptor(member, List.of(new SimpleGrantedAuthority(member.getRole().name())));

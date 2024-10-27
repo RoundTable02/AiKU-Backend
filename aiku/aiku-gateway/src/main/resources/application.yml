@@ -21,6 +21,8 @@ spring:
     web-application-type: reactive
   cloud:
     gateway:
+      default-filters:
+        - PreserveHostHeader
       discovery:
         locator:
           enabled: true

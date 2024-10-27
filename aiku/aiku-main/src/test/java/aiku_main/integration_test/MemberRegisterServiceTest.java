@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 class MemberRegisterServiceTest {
 
     @Autowired

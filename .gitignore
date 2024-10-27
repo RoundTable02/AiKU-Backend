@@ -21,4 +21,4 @@
 *.iml
 .idea/modules/aiku-map/aiku.aiku-map.main.iml
 application-test.yml
-aiku/aiku-map/src/test/resources/application-test.yml
+**/test/resources/application.yml

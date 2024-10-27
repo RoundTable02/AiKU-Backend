@@ -2,46 +2,53 @@ package gateway.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import gateway.exception.JwtAccessDeniedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
-public class JwtExceptionFilter extends OncePerRequestFilter {
+public class JwtExceptionFilter implements WebFilter {
 
     /*
-    인증 오류가 아닌, JWT 관련 오류는 이 필터에서 따로 잡아낸다.
-    이를 통해 JWT 만료 에러와 인증 에러를 따로 잡아낼 수 있다.
+     * 인증 오류가 아닌, JWT 관련 오류는 이 필터에서 따로 잡아낸다.
+     * 이를 통해 JWT 만료 에러와 인증 에러를 따로 잡아낼 수 있다.
      */
     private final ObjectMapper objectMapper;
 
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         try {
-            chain.doFilter(request, response); // JwtAuthenticationFilter로 이동
+            return chain.filter(exchange)
+                    .onErrorResume(JwtException.class, ex -> setErrorResponse(exchange, ex));
         } catch (JwtException ex) {
-            // JwtAuthenticationFilter에서 예외 발생하면 바로 setErrorResponse 호출
-            setErrorResponse(request, response, ex);
+            return setErrorResponse(exchange, ex);
         }
     }
 
-    public void setErrorResponse(HttpServletRequest request, HttpServletResponse response, Throwable ex) throws IOException {
-        response.setCharacterEncoding("utf-8");
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(
-                new JwtAccessDeniedException())
-        );
+    private Mono<Void> setErrorResponse(ServerWebExchange exchange, Throwable ex) {
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        // JWT 예외에 대한 커스텀 응답 객체 생성
+        String errorResponse = "";
+        try {
+            errorResponse = objectMapper.writeValueAsString(new JwtAccessDeniedException());
+        } catch (Exception e) {
+            errorResponse = "{\"error\": \"Access Denied\"}";
+        }
+
+        byte[] bytes = errorResponse.getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+        return exchange.getResponse().writeWith(Mono.just(buffer));
     }
 }

@@ -4,17 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.web.server.WebFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
@@ -22,35 +20,27 @@ public class SecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .httpBasic(HttpBasicConfigurer::disable) // REST API이기 때문에 basic auth와 csrf 보안 사용x
-                .cors(CorsConfigurer::disable)
-                .csrf(CsrfConfigurer::disable)
-                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 권한 설정 시작
-                .authorizeHttpRequests(authorize ->
-                        authorize
-                                .requestMatchers("/login/sign-in").permitAll() // 모든 사용자 허용
-                                .requestMatchers("/login/refresh").permitAll() // 모든 사용자 허용
-                                .requestMatchers(HttpMethod.POST, "/users").permitAll() // 모든 사용자 허용
-                                .requestMatchers("/users/nickname").permitAll() // 모든 사용자 허용
-                                .anyRequest().authenticated() // 이외 모든 요청 인증 필요
-//                                .anyRequest().permitAll() // 이외 모든 요청 허용
-                        )
-                // 구현한 필터 적용
-                .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        return http
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) // REST API이기 때문에 Basic Auth 비활성화
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable) // 폼 기반 로그인 비활성화
+                .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (6.1부터 권장되는 방식)
+                .cors(cors -> cors.disable()) // CORS 비활성화
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // 상태 비저장
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers("/login/sign-in", "/login/refresh", "/error").permitAll() // 공개 경로 설정
+                        .pathMatchers(HttpMethod.POST, "/users").permitAll()
+                        .pathMatchers("/users/nickname").permitAll()
+                        .anyExchange().authenticated() // 이외의 모든 요청 인증 필요
                 )
-                .addFilterBefore(
-                        jwtExceptionFilter,
-                        JwtAuthenticationFilter.class
-                )
-                .exceptionHandling((exceptionConfig)->
-                        exceptionConfig
-                                .accessDeniedHandler(jwtAccessDeniedHandler)
+                .addFilterAt(jwtAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler)
                 )
                 .build();
+    }
+
+    private WebFilter jwtAuthenticationWebFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider);
     }
 }

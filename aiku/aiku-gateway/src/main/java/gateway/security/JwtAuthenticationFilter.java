@@ -1,42 +1,42 @@
 package gateway.security;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter implements WebFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // Request Header -> JWT token
-        String token = resolveToken((HttpServletRequest) request);
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        String token = resolveToken(exchange);
 
-        // validateToken으로 유효성 검사
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContext context = new SecurityContextImpl(authentication);
+            return chain.filter(exchange)
+                    .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
         }
 
-        // 다음 필터로 요청 전달
-        chain.doFilter(request, response);
+        return chain.filter(exchange);
     }
 
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+    private String resolveToken(ServerWebExchange exchange) {
+        String bearerToken = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;

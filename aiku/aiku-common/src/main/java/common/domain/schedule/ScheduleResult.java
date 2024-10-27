@@ -19,10 +19,15 @@ public class ScheduleResult extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Schedule schedule;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String scheduleArrivalResult;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String scheduleBettingResult;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String scheduleRacingResult;
 

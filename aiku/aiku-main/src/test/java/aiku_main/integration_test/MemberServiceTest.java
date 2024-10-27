@@ -26,7 +26,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 class MemberServiceTest {
 
     @Autowired

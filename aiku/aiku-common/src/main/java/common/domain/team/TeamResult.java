@@ -19,12 +19,15 @@ public class TeamResult extends BaseTime {
     @OneToOne(fetch = FetchType.LAZY)
     private Team team;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String lateTimeResult;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String teamBettingResult;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     @Lob
     private String teamRacingResult;
 

@@ -21,7 +21,7 @@ import java.time.Month;
 import java.util.List;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 public class MapServiceTest {
     @Autowired
     EntityManager em;

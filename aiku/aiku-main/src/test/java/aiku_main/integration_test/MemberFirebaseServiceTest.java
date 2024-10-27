@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 class MemberFirebaseServiceTest {
 
     @Autowired

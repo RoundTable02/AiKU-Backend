@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 class RacingServiceTest {
 
     @Autowired

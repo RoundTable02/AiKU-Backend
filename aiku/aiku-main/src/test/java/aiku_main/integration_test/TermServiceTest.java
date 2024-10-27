@@ -1,44 +1,25 @@
 package aiku_main.integration_test;
 
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
-import aiku_main.dto.*;
-import aiku_main.exception.MemberNotFoundException;
+import aiku_main.dto.TermResDto;
 import aiku_main.exception.NoSuchTermException;
-import aiku_main.oauth.KakaoOauthHelper;
-import aiku_main.oauth.OauthInfo;
-import aiku_main.repository.EventRepository;
-import aiku_main.repository.MemberReadRepository;
-import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TermRepository;
-import aiku_main.s3.S3ImageProvider;
-import aiku_main.service.MemberRegisterService;
 import aiku_main.service.TermService;
 import common.domain.AgreedType;
-import common.domain.Status;
 import common.domain.Term;
 import common.domain.TermTitle;
-import common.domain.event.RecommendEvent;
-import common.domain.member.*;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @Transactional
-@SpringBootTest(properties = "spring.config.location=classpath:application-test.yml")
+@SpringBootTest
 class TermServiceTest {
 
     @Autowired

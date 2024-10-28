@@ -38,7 +38,7 @@ subprojects {
 
 	dependencies {
 		if (!project.name.contains('aiku-gateway')) {
-			implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+			implementation 'org.springframework.boot:spring-boot-starter-web'
 			implementation 'org.apache.kafka:kafka-streams'
 			implementation 'org.springframework.kafka:spring-kafka'
 			testImplementation 'org.springframework.kafka:spring-kafka-test'

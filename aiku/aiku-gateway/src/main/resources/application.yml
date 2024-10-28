@@ -28,20 +28,12 @@ spring:
           enabled: true
           lowerCaseServiceId: true
       routes:
-        - id: aiku-main-user
-          uri: http://localhost:8081
-          predicates:
-            - Path=/users,/user/nickname
-        - id: aiku-main-login
-          uri: http://localhost:8081
-          predicates:
-            - Path=/login/sign-in
         - id: aiku-main
-          uri: http://localhost:8081
+          uri: http://3.36.57.4:8080
           predicates:
-            - Path=/users/**,/term,/groups/**,/schedules/**
+            - Path=/login/sign-in,/users/**,/term,/groups/**,/schedules/**,/member/schedules
         - id: aiku-map
-          uri: http://localhost:8082
+          uri: http://43.203.205.111:8080
           predicates:
             - Path=/map/**
 

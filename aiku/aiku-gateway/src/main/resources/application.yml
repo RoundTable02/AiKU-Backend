@@ -25,11 +25,11 @@ spring:
           lowerCaseServiceId: true
       routes:
         - id: aiku-main
-          uri: http://3.36.57.4:8080
+          uri: ${AIKU_MAIN_IP}
           predicates:
             - Path=/login/sign-in,/users/**,/term,/groups/**,/schedules/**,/member/schedules
         - id: aiku-map
-          uri: http://43.203.205.111:8080
+          uri: ${AIKU_MAP_IP}
           predicates:
             - Path=/map/**
 

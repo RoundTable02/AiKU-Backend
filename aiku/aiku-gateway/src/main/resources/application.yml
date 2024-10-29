@@ -11,8 +11,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
-        show_sql: true
-        format_sql: true
+#        show_sql: true
+#        format_sql: true
   main:
     web-application-type: reactive
   cloud:
@@ -25,11 +25,11 @@ spring:
           lowerCaseServiceId: true
       routes:
         - id: aiku-main
-          uri: http://3.36.57.4:8080
+          uri: ${AIKU_MAIN_IP}
           predicates:
             - Path=/login/sign-in,/users/**,/term,/groups/**,/schedules/**,/member/schedules
         - id: aiku-map
-          uri: http://43.203.205.111:8080
+          uri: ${AIKU_MAP_IP}
           predicates:
             - Path=/map/**
 
@@ -42,4 +42,5 @@ custom:
 logging:
   level:
     root: INFO
-    org.springframework.cloud.gateway: DEBUG
+  file:
+    name: /spring-log/application.log

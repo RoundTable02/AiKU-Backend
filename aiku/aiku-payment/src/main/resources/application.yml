@@ -11,9 +11,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
-        show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
-        format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
+#        show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
+#        format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
 
 logging:
   level:
     root: INFO
+  file:
+    name: /spring-log/application.log

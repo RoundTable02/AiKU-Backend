@@ -23,7 +23,7 @@ public class MapController {
 
     @PostMapping("/location")
     public BaseResponse<BaseResultDto> sendLocation(@PathVariable Long scheduleId,
-                                                    @RequestBody Long accessMemberId,
+                                                    @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
                                                     @RequestBody @Valid RealTimeLocationDto realTimeLocationDto) {
         Long scheduleResId = mapService.sendLocation(accessMemberId, scheduleId, realTimeLocationDto);
 
@@ -32,7 +32,7 @@ public class MapController {
 
     @PostMapping("/arrival")
     public BaseResponse<BaseResultDto> makeMemberArrive(@PathVariable Long scheduleId,
-                                                        @RequestBody Long accessMemberId,
+                                                        @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
                                                         @RequestBody @Valid MemberArrivalDto arrivalDto) {
         Long scheduleResId = mapService.makeMemberArrive(accessMemberId, scheduleId, arrivalDto);
 
@@ -41,7 +41,7 @@ public class MapController {
 
     @PostMapping("/emoji")
     public BaseResponse<BaseResultDto> sendEmoji(@PathVariable Long scheduleId,
-                                                        @RequestBody Long accessMemberId,
+                                                 @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
                                                         @RequestBody @Valid EmojiDto emojiDto) {
         Long scheduleResId = mapService.sendEmoji(accessMemberId, scheduleId, emojiDto);
 
@@ -50,7 +50,7 @@ public class MapController {
 
     @GetMapping("/racing")
     public BaseResponse<DataResDto> getRacings(@PathVariable Long scheduleId,
-                                               @RequestBody Long accessMemberId) {
+                                               @RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
         DataResDto<List<RacingResDto>> racings = racingService.getRacings(accessMemberId, scheduleId);
 
         return new BaseResponse<>(racings);
@@ -58,7 +58,7 @@ public class MapController {
 
     @PostMapping("/racing")
     public BaseResponse<BaseResultDto> makeRacing(@PathVariable Long scheduleId,
-                                                  @RequestParam Long accessMemberId,
+                                                  @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
                                                   @RequestBody @Valid RacingAddDto racingAddDto) {
         Long racingId = racingService.makeRacing(accessMemberId, scheduleId, racingAddDto);
 
@@ -68,7 +68,7 @@ public class MapController {
     @PostMapping("/racing/{racingId}/accept")
     public BaseResponse<BaseResultDto> acceptRacing(@PathVariable Long scheduleId,
                                                     @PathVariable Long racingId,
-                                                    @RequestBody Long accessMemberId) {
+                                                    @RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
         Long acceptRacingId = racingService.acceptRacing(accessMemberId, scheduleId, racingId);
 
         return BaseResponse.getSimpleRes(acceptRacingId);
@@ -77,7 +77,7 @@ public class MapController {
     @PostMapping("/racing/{racingId}/deny")
     public BaseResponse<BaseResultDto> denyRacing(@PathVariable Long scheduleId,
                                                   @PathVariable Long racingId,
-                                                  @RequestBody Long accessMemberId) {
+                                                  @RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
         Long deniedRacingId = racingService.denyRacing(accessMemberId, scheduleId, racingId);
 
         return BaseResponse.getSimpleRes(deniedRacingId);

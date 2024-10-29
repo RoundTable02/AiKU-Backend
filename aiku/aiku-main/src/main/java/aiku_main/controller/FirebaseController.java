@@ -18,14 +18,16 @@ public class FirebaseController {
     private final MemberFirebaseService memberFirebaseService;
 
     @PostMapping
-    public BaseResponse<BaseResultDto> saveToken(@RequestBody Long accessMemberId, @RequestBody @Valid FirebaseTokenDto firebaseTokenDto) {
+    public BaseResponse<BaseResultDto> saveToken(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                 @RequestBody @Valid FirebaseTokenDto firebaseTokenDto) {
         Long memberId = memberFirebaseService.saveToken(accessMemberId, firebaseTokenDto);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @PatchMapping
-    public BaseResponse<BaseResultDto> updateToken(@RequestBody Long accessMemberId, @RequestBody @Valid FirebaseTokenDto firebaseTokenDto) {
+    public BaseResponse<BaseResultDto> updateToken(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                   @RequestBody @Valid FirebaseTokenDto firebaseTokenDto) {
         Long memberId = memberFirebaseService.updateToken(accessMemberId, firebaseTokenDto);
 
         return BaseResponse.getSimpleRes(memberId);

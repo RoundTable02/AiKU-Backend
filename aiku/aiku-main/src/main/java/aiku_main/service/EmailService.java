@@ -1,7 +1,9 @@
 package aiku_main.service;
 
 import aiku_main.dto.InquiryDto;
+import aiku_main.exception.MemberNotFoundException;
 import aiku_main.gmail.GmailAPIProvider;
+import aiku_main.repository.MemberRepository;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,8 +20,12 @@ import java.io.IOException;
 public class EmailService {
 
     private final GmailAPIProvider gmailAPIProvider;
+    private final MemberRepository memberRepository;
 
-    public Long submitContactRequest(Member member, InquiryDto inquiryDto) {
+    public Long submitContactRequest(Long accessMemberId, InquiryDto inquiryDto) {
+        Member member = memberRepository.findById(accessMemberId)
+                .orElseThrow(() -> new MemberNotFoundException());
+
         String title = "<QA> " + inquiryDto.getTitle();
         String sender = "Sender : " + inquiryDto.getEmail() + "\n"
                 + member.getId() + "&&" + member.getKakaoId() + " p" + member.getPoint() + "\n";

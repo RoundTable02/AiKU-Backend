@@ -19,7 +19,7 @@ public class TermController {
     private final TermService termService;
 
     @GetMapping
-    public BaseResponse<DataResDto> getMemberDetail() {
+    public BaseResponse<DataResDto> getTerms() {
         List<TermResDto> termsRes = termService.getTermsRes();
 
         DataResDto<List<TermResDto>> listDataResDto = new DataResDto<>(1, termsRes);

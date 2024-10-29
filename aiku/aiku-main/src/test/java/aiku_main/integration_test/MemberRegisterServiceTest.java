@@ -9,7 +9,7 @@ import aiku_main.exception.MemberNotFoundException;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
 import aiku_main.repository.EventRepository;
-import aiku_main.repository.MemberReadRepository;
+import aiku_main.repository.MemberQueryRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
 import aiku_main.service.MemberRegisterService;
@@ -37,22 +37,9 @@ class MemberRegisterServiceTest {
     @Autowired
     EntityManager em;
 
-    @Autowired
-    MemberRepository memberRepository;
-    @Autowired
-    MemberReadRepository memberReadRepository;
     @MockBean
     KakaoOauthHelper kakaoOauthHelper;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    S3ImageProvider imageProvider;
-
-    @Autowired
-    EventRepository eventRepository;
-    @Autowired
-    PointChangeEventPublisher pointChangeEventPublisher;
-
+    
     @Autowired
     MemberRegisterService memberRegisterService;
 
@@ -73,7 +60,7 @@ class MemberRegisterServiceTest {
         Long registerMemberId = memberRegisterService.register(memberRegisterDto);
 
         // then
-        Member member = memberRepository.findById(registerMemberId).orElseThrow(() -> new MemberNotFoundException());
+        Member member = em.find(Member.class, registerMemberId);
 
         assertThat(member.getNickname()).isEqualTo("nickname1");
         assertThat(member.getEmail()).isEqualTo("asd@gmail.com");
@@ -115,8 +102,9 @@ class MemberRegisterServiceTest {
         Long registerMemberId = memberRegisterService.register(memberRegisterDto);
 
         // then
-        RecommendEvent recommendEvent = eventRepository.findRecommendEventByMemberId(registerMemberId)
-                .orElseThrow(() -> new NoSuchElementException());
+        RecommendEvent recommendEvent = (RecommendEvent) em.createQuery("select c FROM RecommendEvent c WHERE c.member.id = :registerMemberId")
+                .setParameter("registerMemberId", registerMemberId)
+                .getSingleResult();
 
         assertThat(recommendEvent.getMember().getId()).isEqualTo(registerMemberId);
         assertThat(recommendEvent.getRecommender().getId()).isEqualTo(recommenderId);

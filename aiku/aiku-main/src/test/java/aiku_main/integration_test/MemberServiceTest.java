@@ -2,7 +2,7 @@ package aiku_main.integration_test;
 
 import aiku_main.dto.*;
 import aiku_main.exception.TitleException;
-import aiku_main.repository.MemberReadRepository;
+import aiku_main.repository.MemberQueryRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
 import aiku_main.service.MemberService;
@@ -31,15 +31,6 @@ class MemberServiceTest {
 
     @Autowired
     EntityManager em;
-
-    @Autowired
-    MemberReadRepository memberReadRepository;
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    @MockBean
-    S3ImageProvider s3ImageProvider;
 
     @Autowired
     MemberService memberService;
@@ -89,7 +80,7 @@ class MemberServiceTest {
         em.persist(title);
 
         // when
-        MemberResDto memberDetail = memberService.getMemberDetail(member);
+        MemberResDto memberDetail = memberService.getMemberDetail(member.getId());
 
         // then
         assertThat(memberDetail.getMemberProfile().getProfileType())
@@ -122,7 +113,7 @@ class MemberServiceTest {
         member.updateMemberTitleByTitleMemberId(titleMemberValue);
 
         // when
-        MemberResDto memberDetail = memberService.getMemberDetail(member);
+        MemberResDto memberDetail = memberService.getMemberDetail(member.getId());
 
         // then
         assertThat(memberDetail.getMemberProfile().getProfileType())
@@ -169,8 +160,8 @@ class MemberServiceTest {
         member.updateMemberTitleByTitleMemberId(titleMemberValueNew);
 
         // when
-        memberService.updateTitle(member, titleMemberValueNew.getId());
-        MemberResDto memberDetail = memberService.getMemberDetail(member);
+        memberService.updateTitle(member.getId(), titleMemberValueNew.getId());
+        MemberResDto memberDetail = memberService.getMemberDetail(member.getId());
 
         // then
         assertThat(memberDetail.getTitle().getTitleMemberId())
@@ -212,7 +203,7 @@ class MemberServiceTest {
         // then
         org.junit.jupiter.api.Assertions.assertThrows(
                 TitleException.class, () -> {
-                    memberService.updateTitle(member, titleMemberValueNew.getId());
+                    memberService.updateTitle(member.getId(), titleMemberValueNew.getId());
                 }
         );
     }
@@ -247,7 +238,7 @@ class MemberServiceTest {
         member.updateMemberTitleByTitleMemberId(titleMemberValueNew);
 
         // when
-        DataResDto<List<TitleMemberResDto>> memberTitles = memberService.getMemberTitles(member);
+        DataResDto<List<TitleMemberResDto>> memberTitles = memberService.getMemberTitles(member.getId());
         List<TitleMemberResDto> resData = memberTitles.getData();
 
         // then
@@ -262,7 +253,7 @@ class MemberServiceTest {
 
     @Test
     void 멤버_권한_조회() {
-        AuthorityResDto authDetail = memberService.getAuthDetail(member);
+        AuthorityResDto authDetail = memberService.getAuthDetail(member.getId());
         assertThat(authDetail.isPersonalInformationPolicyAgreed())
                 .isTrue();
         assertThat(authDetail.isServicePolicyAgreed())
@@ -276,9 +267,9 @@ class MemberServiceTest {
     @Test
     void 멤버_권한_갱신() {
         AuthorityUpdateDto authorityUpdateDto = new AuthorityUpdateDto(false, true, true, false);
-        memberService.updateAuth(member, authorityUpdateDto);
+        memberService.updateAuth(member.getId(), authorityUpdateDto);
 
-        AuthorityResDto authDetail = memberService.getAuthDetail(member);
+        AuthorityResDto authDetail = memberService.getAuthDetail(member.getId());
         assertThat(authDetail.isPersonalInformationPolicyAgreed())
                 .isTrue();
         assertThat(authDetail.isServicePolicyAgreed())

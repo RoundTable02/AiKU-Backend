@@ -1,8 +1,8 @@
 package aiku_main.service;
 
 import aiku_main.dto.*;
+import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TitleException;
-import aiku_main.repository.MemberReadRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.s3.S3ImageProvider;
 import common.domain.ServiceAgreement;
@@ -27,14 +27,15 @@ import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final MemberReadRepository memberReadRepository;
     private final S3ImageProvider s3ImageProvider;
 
-    public MemberResDto getMemberDetail(Member member) {
+    public MemberResDto getMemberDetail(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
         MemberProfile profile = member.getProfile();
         MemberProfileResDto memberProfileResDto
                 = new MemberProfileResDto(
-                        profile.getProfileType(), profile.getProfileImg(),
+                profile.getProfileType(), profile.getProfileImg(),
                 profile.getProfileCharacter(), profile.getProfileBackground());
 
         TitleMemberValue titleMemberValue = member.getMainTitle();
@@ -42,7 +43,7 @@ public class MemberService {
         TitleMemberResDto mainTitle = null;
         // 장착된 칭호가 존재하는 경우에만 조회
         if (!Objects.isNull(titleMemberValue)) {
-            mainTitle = memberReadRepository.getTitle(titleMemberValue.getId());
+            mainTitle = memberRepository.getTitle(titleMemberValue.getId());
         }
 
         return new MemberResDto(
@@ -51,7 +52,9 @@ public class MemberService {
     }
 
     @Transactional
-    public Long updateMember(Member member, MemberUpdateDto memberUpdateDto) {
+    public Long updateMember(Long accessMemberId, MemberUpdateDto memberUpdateDto) {
+        Member member = getMemberById(accessMemberId);
+
         MemberProfileDto afterProfile = memberUpdateDto.getMemberProfileDto();
         MemberProfile beforeProfile = member.getProfile();
         MemberProfileType beforeProfileType = beforeProfile.getProfileType();
@@ -81,17 +84,19 @@ public class MemberService {
     }
 
     @Transactional
-    public Long deleteMember(Member member) {
-        memberRepository.delete(member);
+    public Long deleteMember(Long accessMemberId) {
+        memberRepository.deleteById(accessMemberId);
 
-        return member.getId();
+        return accessMemberId;
     }
 
     @Transactional
-    public Long updateTitle(Member member, Long titleMemberId) {
+    public Long updateTitle(Long accessMemberId, Long titleMemberId) {
+        Member member = getMemberById(accessMemberId);
+
         validateTitleMember(member.getId(), titleMemberId);
 
-        TitleMember titleMember = memberReadRepository.getTitleMemberByTitleMemberId(titleMemberId);
+        TitleMember titleMember = memberRepository.getTitleMemberByTitleMemberId(titleMemberId);
         TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
 
         member.updateMemberTitleByTitleMemberId(titleMemberValue);
@@ -100,14 +105,16 @@ public class MemberService {
     }
 
     private void validateTitleMember(Long memberId, Long titleMemberId) {
-        if (!memberReadRepository.existTitleMember(memberId, titleMemberId)) {
+        if (!memberRepository.existTitleMember(memberId, titleMemberId)) {
             throw new TitleException(MEMBER_NOT_WITH_TITLE);
         }
     }
 
     @Transactional
-    public Long logout(Member member) {
+    public Long logout(Long accessMemberId) {
         // 멤버 리프레시 토큰 삭제
+        Member member = getMemberById(accessMemberId);
+
         member.logout();
 
         return member.getId();
@@ -115,14 +122,18 @@ public class MemberService {
 
 
     @Transactional
-    public Long updateAuth(Member member, AuthorityUpdateDto authorityUpdateDto) {
+    public Long updateAuth(Long accessMemberId, AuthorityUpdateDto authorityUpdateDto) {
+        Member member = getMemberById(accessMemberId);
+
         member.updateAuth(authorityUpdateDto.isServicePolicyAgreed(), authorityUpdateDto.isPersonalInformationPolicyAgreed(),
                 authorityUpdateDto.isLocationPolicyAgreed(), authorityUpdateDto.isMarketingPolicyAgreed());
 
         return member.getId();
     }
 
-    public AuthorityResDto getAuthDetail(Member member) {
+    public AuthorityResDto getAuthDetail(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
         ServiceAgreement serviceAgreement = member.getServiceAgreement();
 
         return new AuthorityResDto(
@@ -130,9 +141,16 @@ public class MemberService {
                 serviceAgreement.isLocationPolicyAgreed(), serviceAgreement.isMarketingPolicyAgreed());
     }
 
-    public DataResDto<List<TitleMemberResDto>> getMemberTitles(Member member) {
-        List<TitleMemberResDto> titleMembers = memberReadRepository.getTitleMembers(member.getId());
+    public DataResDto<List<TitleMemberResDto>> getMemberTitles(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
+        List<TitleMemberResDto> titleMembers = memberRepository.getTitleMembers(member.getId());
 
         return new DataResDto(1, titleMembers);
+    }
+
+    private Member getMemberById(Long accessMemberId) {
+        return memberRepository.findById(accessMemberId)
+                .orElseThrow(() -> new MemberNotFoundException());
     }
 }

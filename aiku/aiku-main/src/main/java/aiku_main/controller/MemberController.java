@@ -19,62 +19,62 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
-    private final EmailService emailService;
 
     @GetMapping
-    public BaseResponse<MemberResDto> getMemberDetail(
-            @RequestBody Member member) {
-        MemberResDto memberResDto = memberService.getMemberDetail(member);
+    public BaseResponse<MemberResDto> getMemberDetail(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        MemberResDto memberResDto = memberService.getMemberDetail(accessMemberId);
         return new BaseResponse<>(memberResDto);
     }
 
     @PatchMapping
     public BaseResponse<BaseResultDto> updateMember(
-            @RequestBody Member member,
+            @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
             @ModelAttribute @Valid MemberUpdateDto memberUpdateDto) {
-        Long memberId = memberService.updateMember(member, memberUpdateDto);
+        Long memberId = memberService.updateMember(accessMemberId, memberUpdateDto);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @DeleteMapping
-    public BaseResponse<BaseResultDto> deleteMember(@RequestBody Member member) {
-        Long memberId = memberService.deleteMember(member);
+    public BaseResponse<BaseResultDto> deleteMember(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        Long memberId = memberService.deleteMember(accessMemberId);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @PatchMapping("/titles/{userTitleId}")
-    public BaseResponse<BaseResultDto> updateTitle(@RequestBody Member member, @PathVariable Long userTitleId) {
-        Long memberId = memberService.updateTitle(member, userTitleId);
+    public BaseResponse<BaseResultDto> updateTitle(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                   @PathVariable Long userTitleId) {
+        Long memberId = memberService.updateTitle(accessMemberId, userTitleId);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @PostMapping("/logout")
-    public BaseResponse<BaseResultDto> logout(@RequestBody Member member) {
-        Long memberId = memberService.logout(member);
+    public BaseResponse<BaseResultDto> logout(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        Long memberId = memberService.logout(accessMemberId);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @PatchMapping("/setting/authority")
-    public BaseResponse<BaseResultDto> updateAuth(@RequestBody Member member, @RequestBody @Valid AuthorityUpdateDto authorityUpdateDto) {
-        Long memberId = memberService.updateAuth(member, authorityUpdateDto);
+    public BaseResponse<BaseResultDto> updateAuth(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                  @RequestBody @Valid AuthorityUpdateDto authorityUpdateDto) {
+        Long memberId = memberService.updateAuth(accessMemberId, authorityUpdateDto);
 
         return BaseResponse.getSimpleRes(memberId);
     }
 
     @GetMapping("/setting/authority")
-    public BaseResponse<AuthorityResDto> getAuthDetail(@RequestBody Member member) {
-        AuthorityResDto authorityResDto = memberService.getAuthDetail(member);
+    public BaseResponse<AuthorityResDto> getAuthDetail(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        AuthorityResDto authorityResDto = memberService.getAuthDetail(accessMemberId);
 
         return new BaseResponse<>(authorityResDto);
     }
 
     @GetMapping("/titles")
-    public BaseResponse<DataResDto> getMemberTitles(@RequestBody Member member) {
-        DataResDto<List<TitleMemberResDto>> resDto = memberService.getMemberTitles(member);
+    public BaseResponse<DataResDto> getMemberTitles(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        DataResDto<List<TitleMemberResDto>> resDto = memberService.getMemberTitles(accessMemberId);
 
         return new BaseResponse<>(resDto);
     }

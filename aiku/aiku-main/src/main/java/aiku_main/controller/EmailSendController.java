@@ -17,8 +17,9 @@ public class EmailSendController {
     private final EmailService emailService;
 
     @PostMapping(path = "/request")
-    public BaseResponse<BaseResultDto> submitContactRequest(@RequestBody Member member, @ModelAttribute @Valid InquiryDto inquiryDto) {
-        Long memberId = emailService.submitContactRequest(member, inquiryDto);
+    public BaseResponse<BaseResultDto> submitContactRequest(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                            @ModelAttribute @Valid InquiryDto inquiryDto) {
+        Long memberId = emailService.submitContactRequest(accessMemberId, inquiryDto);
 
         return BaseResponse.getSimpleRes(memberId);
     }

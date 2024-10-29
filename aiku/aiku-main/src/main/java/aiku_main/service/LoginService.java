@@ -75,7 +75,10 @@ public class LoginService {
      * 이후 Access Token 재발급과 동시에 Refresh Token 역시 재발급 (RTR 방식)
      */
     @Transactional
-    public RefreshTokenResDto refreshToken(Member member, String refreshToken) {
+    public RefreshTokenResDto refreshToken(Long accessMemberId, String refreshToken) {
+        Member member = memberRepository.findById(accessMemberId)
+                .orElseThrow(() -> new MemberNotFoundException());
+
         if (member.getRefreshToken().equals(refreshToken)) {
             Long kakaoId = member.getKakaoId();
             UsernamePasswordAuthenticationToken authenticationFilter

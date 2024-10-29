@@ -8,13 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import static common.domain.title.QTitleMember.titleMember;
 
 @RequiredArgsConstructor
 @Repository
-public class MemberReadRepositoryImpl implements MemberReadRepository{
+public class MemberQueryRepositoryImpl implements MemberQueryRepository {
 
     private final JPAQueryFactory query;
 

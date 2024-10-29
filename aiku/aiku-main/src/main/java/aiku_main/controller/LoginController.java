@@ -27,9 +27,9 @@ public class LoginController {
 
     @PostMapping("/refresh")
     public BaseResponse<RefreshTokenResDto> refreshToken(
-            @RequestBody Member member,
+            @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
             @CookieValue("refreshToken") String refreshToken){
-        RefreshTokenResDto refreshTokenResDto = loginService.refreshToken(member, refreshToken);
+        RefreshTokenResDto refreshTokenResDto = loginService.refreshToken(accessMemberId, refreshToken);
 
         return new BaseResponse<>(refreshTokenResDto);
     }

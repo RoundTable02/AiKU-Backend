@@ -36,6 +36,7 @@ class TeamControllerTest {
     void addTeam() throws Exception {
         TeamAddDto teamAddDto = new TeamAddDto("group name");
         mockMvc.perform(post("/groups")
+                .header("Access-Member-Id", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(teamAddDto)))
                 .andExpect(status().isOk());
@@ -43,7 +44,7 @@ class TeamControllerTest {
 
     @Test
     void addTeamWithFaultDto() throws Exception {
-        mockMvc.perform(post("/groups")
+        mockMvc.perform(post("/groups").header("Access-Member-Id", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new TeamAddDto(" "))))
                 .andExpect(status().isBadRequest());

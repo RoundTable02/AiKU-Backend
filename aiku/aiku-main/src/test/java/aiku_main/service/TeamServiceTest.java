@@ -2,6 +2,8 @@ package aiku_main.service;
 
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.repository.BettingQueryRepository;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
 import aiku_main.repository.TeamQueryRepository;
 import common.domain.member.Member;
@@ -28,6 +30,10 @@ class TeamServiceTest {
     @Mock
     ScheduleQueryRepository scheduleQueryRepository;
     @Mock
+    BettingQueryRepository bettingQueryRepository;
+    @Mock
+    MemberRepository memberRepository;
+    @Mock
     TeamEventPublisher teamEventPublisher;
 
     @InjectMocks
@@ -38,9 +44,11 @@ class TeamServiceTest {
         //given
         Member member = new Member("member1");
 
+        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
+
         //when
         TeamAddDto teamDto = new TeamAddDto("team1");
-        Long teamId = teamService.addTeam(member, teamDto);
+        Long teamId = teamService.addTeam(member.getId(), teamDto);
     }
 
     @Test
@@ -51,9 +59,10 @@ class TeamServiceTest {
 
         when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(false);
         when(teamQueryRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
+        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
 
         //when
-        Long resultId = teamService.enterTeam(member, null);
+        Long resultId = teamService.enterTeam(member.getId(), null);
     }
 
     @Test
@@ -69,7 +78,7 @@ class TeamServiceTest {
         when(teamQueryRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
 
         //when
-        TeamDetailResDto result = teamService.getTeamDetail(member1, team.getId());
+        TeamDetailResDto result = teamService.getTeamDetail(member1.getId(), team.getId());
 
         //then
         assertThat(result.getGroupName()).isEqualTo(team.getTeamName());
@@ -88,7 +97,7 @@ class TeamServiceTest {
 
         //when
         int page = 3;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1, 3);
+        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), 3);
 
         //then
         assertThat(result.getPage()).isEqualTo(3);

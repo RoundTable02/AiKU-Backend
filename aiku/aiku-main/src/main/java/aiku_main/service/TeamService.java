@@ -33,11 +33,14 @@ public class TeamService {
     private final TeamQueryRepository teamQueryRepository;
     private final ScheduleQueryRepository scheduleQueryRepository;
     private final BettingQueryRepository bettingQueryRepository;
+    private final MemberRepository memberRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public Long addTeam(Member member, TeamAddDto teamDto){
+    public Long addTeam(Long memberId, TeamAddDto teamDto){
+        Member member = findMember(memberId);
+
         Team team = Team.create(member, teamDto.getGroupName());
         teamQueryRepository.save(team);
 
@@ -45,8 +48,9 @@ public class TeamService {
     }
 
     @Transactional
-    public Long enterTeam(Member member, Long teamId) {
+    public Long enterTeam(Long memberId, Long teamId) {
         //검증 로직
+        Member member = findMember(memberId);
         Team team = findTeamById(teamId);
         checkTeamMember(member.getId(), teamId, false);
 
@@ -59,8 +63,9 @@ public class TeamService {
     }
 
     @Transactional
-    public Long exitTeam(Member member, Long teamId) {
+    public Long exitTeam(Long memberId, Long teamId) {
         //검증 로직
+        Member member = findMember(memberId);
         Team team = findTeamById(teamId);
         checkTeamMember(member.getId(), teamId, true);
 
@@ -79,10 +84,10 @@ public class TeamService {
     }
 
     //==* 조회 서비스 *==
-    public TeamDetailResDto getTeamDetail(Member member, Long teamId) {
+    public TeamDetailResDto getTeamDetail(Long memberId, Long teamId) {
         //검증 로직
         checkExistTeam(teamId);
-        checkTeamMember(member.getId(), teamId, true);
+        checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
         Team team = teamQueryRepository.findTeamWithMember(teamId).orElseThrow();
@@ -91,27 +96,27 @@ public class TeamService {
         return resultDto;
     }
 
-    public DataResDto<List<TeamEachListResDto>> getTeamList(Member member, int page) {
+    public DataResDto<List<TeamEachListResDto>> getTeamList(Long memberId, int page) {
         //서비스 로직
-        List<TeamEachListResDto> data = teamQueryRepository.getTeamList(member.getId(), page);
+        List<TeamEachListResDto> data = teamQueryRepository.getTeamList(memberId, page);
         DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
 
         return resultDto;
     }
 
-    public String getTeamLateTimeResult(Member member, Long teamId){
+    public String getTeamLateTimeResult(Long memberId, Long teamId){
         //검증 로직
         Team team = findTeamById(teamId);
-        checkTeamMember(member.getId(), teamId, true);
+        checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
         return team.getTeamResult().getLateTimeResult();
     }
 
-    public String getTeamBettingResult(Member member, Long teamId){
+    public String getTeamBettingResult(Long memberId, Long teamId){
         //검증 로직
         Team team = findTeamById(teamId);
-        checkTeamMember(member.getId(), teamId, true);
+        checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
         return team.getTeamResult().getTeamBettingResult();
@@ -181,6 +186,10 @@ public class TeamService {
     }
 
     //==* 기타 메서드 *==
+    private Member findMember(Long memberId){
+        return memberRepository.findById(memberId).orElseThrow();
+    }
+
     private Team findTeamById(Long teamId){
         Team team = teamQueryRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
         if (team == null) {

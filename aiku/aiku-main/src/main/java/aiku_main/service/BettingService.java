@@ -49,8 +49,9 @@ public class BettingService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public Long addBetting(Member member, Long scheduleId, BettingAddDto bettingDto){
+    public Long addBetting(Long memberId, Long scheduleId, BettingAddDto bettingDto){
         //검증 로직
+        Member member = findMember(memberId);
         checkExistSchedule(scheduleId);
         checkScheduleWait(scheduleId);
         checkPaidScheduleMember(member.getId(), scheduleId);
@@ -72,8 +73,9 @@ public class BettingService {
     }
 
     @Transactional
-    public Long cancelBetting(Member member, Long scheduleId, Long bettingId){
+    public Long cancelBetting(Long memberId, Long scheduleId, Long bettingId){
         //검증 로직
+        Member member = findMember(memberId);
         ScheduleMember bettor = findScheduleMember(member.getId(), scheduleId);
         Betting betting = findBettingById(bettingId);
         checkBettingMember(betting, bettor);
@@ -211,6 +213,10 @@ public class BettingService {
     }
 
     //==* 기타 메서드 *==
+    private Member findMember(Long memberId){
+        return memberRepository.findById(memberId).orElseThrow();
+    }
+
     private Betting findBettingById(Long bettingId){
         Betting betting = bettingQueryRepository.findByIdAndStatus(bettingId, ALIVE).orElse(null);
         if (betting == null) {

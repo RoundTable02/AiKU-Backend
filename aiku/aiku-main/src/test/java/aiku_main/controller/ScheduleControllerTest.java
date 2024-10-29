@@ -47,6 +47,7 @@ class ScheduleControllerTest {
         ScheduleAddDto scheduleAddDto = new ScheduleAddDto("sche1",
                 new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1), 10);
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleAddDto)))
                 .andExpect(status().isOk());
@@ -55,6 +56,7 @@ class ScheduleControllerTest {
     @Test
     void addScheduleWithFaultDto() throws Exception {
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto(" ",
@@ -64,6 +66,7 @@ class ScheduleControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("schedule name is too long",
@@ -73,6 +76,7 @@ class ScheduleControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -82,6 +86,7 @@ class ScheduleControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -91,6 +96,7 @@ class ScheduleControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -103,6 +109,7 @@ class ScheduleControllerTest {
     @Test
     void addScheduleWithFaultPoint() throws Exception {
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -112,6 +119,7 @@ class ScheduleControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -124,6 +132,7 @@ class ScheduleControllerTest {
     @Test
     void addScheduleWithFaultScheduleTime() throws Exception {
         mockMvc.perform(post("/groups/1/schedules")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ScheduleAddDto("name1",
@@ -138,6 +147,7 @@ class ScheduleControllerTest {
         ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto("sche1",
                 new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1));
         mockMvc.perform(patch("/groups/1/schedules/1")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
                 .andExpect(status().isOk());
@@ -148,6 +158,7 @@ class ScheduleControllerTest {
         ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto(" ",
                 new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1));
         mockMvc.perform(patch("/groups/1/schedules/1")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
                 .andExpect(status().isBadRequest());
@@ -158,6 +169,7 @@ class ScheduleControllerTest {
         ScheduleUpdateDto scheduleUpdateDto = new ScheduleUpdateDto(" ",
                 new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusMinutes(30));
         mockMvc.perform(patch("/groups/1/schedules/1")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(scheduleUpdateDto)))
                 .andExpect(status().isBadRequest());
@@ -166,6 +178,7 @@ class ScheduleControllerTest {
     @Test
     void enterSchedule() throws Exception {
         mockMvc.perform(post("/groups/1/schedules/1/enter")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ScheduleEnterDto(0))))
                 .andExpect(status().isOk());
@@ -174,6 +187,7 @@ class ScheduleControllerTest {
     @Test
     void enterScheduleWithFaultPoint() throws Exception {
         mockMvc.perform(post("/groups/1/schedules/1/enter")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ScheduleEnterDto(3))))
                 .andExpect(status().isBadRequest());

@@ -69,7 +69,7 @@ public class TeamServiceIntegrationTest {
         //given
         //when
         TeamAddDto teamDto = new TeamAddDto("group1");
-        Long teamId = teamService.addTeam(member1, teamDto);
+        Long teamId = teamService.addTeam(member1.getId(), teamDto);
 
         em.flush();
         em.clear();
@@ -93,14 +93,11 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        Long teamId = teamService.enterTeam(member2, team.getId());
+        Long teamId = teamService.enterTeam(member2.getId(), team.getId());
 
         //then
         TeamMember teamMember = teamQueryRepository.findAliveTeamMember(teamId, member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
-
-        //중복 입장
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -114,7 +111,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.enterTeam(member2, team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -129,7 +126,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        teamService.exitTeam(member2, team.getId());
+        teamService.exitTeam(member2.getId(), team.getId());
         em.flush();
         em.clear();
 
@@ -153,7 +150,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -164,12 +161,12 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member2);
         em.persist(team);
 
-        teamService.exitTeam(member2, team.getId());
+        teamService.exitTeam(member2.getId(), team.getId());
         em.flush();
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2, team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -182,7 +179,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        teamService.exitTeam(member1, team.getId());
+        teamService.exitTeam(member1.getId(), team.getId());
         em.flush();
         em.clear();
 
@@ -203,7 +200,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        TeamDetailResDto result = teamService.getTeamDetail(member1, team.getId());
+        TeamDetailResDto result = teamService.getTeamDetail(member1.getId(), team.getId());
 
         //then
         assertThat(result.getGroupId()).isEqualTo(team.getId());
@@ -224,7 +221,7 @@ public class TeamServiceIntegrationTest {
         em.clear();
 
         //when
-        assertThatThrownBy(() -> teamService.getTeamDetail(member2, team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.getTeamDetail(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -273,7 +270,7 @@ public class TeamServiceIntegrationTest {
 
         //when
         int page = 1;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1, page);
+        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), page);
 
         //then
         List<TeamEachListResDto> data = result.getData();

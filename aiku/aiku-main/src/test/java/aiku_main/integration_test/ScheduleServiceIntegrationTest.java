@@ -86,7 +86,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
                 new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        Long scheduleId = scheduleService.addSchedule(member1, team.getId(), scheduleDto);
+        Long scheduleId = scheduleService.addSchedule(member1.getId(), team.getId(), scheduleDto);
 
         //then
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
@@ -105,7 +105,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
                 new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        assertThatThrownBy(() -> scheduleService.addSchedule(member2, team.getId(), scheduleDto)).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> scheduleService.addSchedule(member2.getId(), team.getId(), scheduleDto)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto);
+        scheduleService.updateSchedule(member1.getId(), schedule.getId(), scheduleDto);
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
@@ -142,7 +142,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        assertThatThrownBy(() -> scheduleService.updateSchedule(member2, schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.updateSchedule(member2.getId(), schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ScheduleServiceIntegrationTest {
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new",
                 new LocationDto("new", 2.0, 2.0), LocalDateTime.now().plusHours(2));
-        assertThatThrownBy(() -> scheduleService.updateSchedule(member1, schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.updateSchedule(member1.getId(), schedule.getId(), scheduleDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        Long scheduleId = scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto);
+        Long scheduleId = scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId(), enterDto);
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
@@ -200,7 +200,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -214,7 +214,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId(), enterDto)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ScheduleServiceIntegrationTest {
 
         //when
         ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member2, team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId(), enterDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
+        scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -262,8 +262,6 @@ public class ScheduleServiceIntegrationTest {
         ScheduleMember owner = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
         assertThat(owner).isNotNull();
         assertThat(owner.isOwner()).isTrue();
-        //중복 요청
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -277,7 +275,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -291,10 +289,10 @@ public class ScheduleServiceIntegrationTest {
         schedule.addScheduleMember(member2, false, 0);
         em.persist(schedule);
 
-        scheduleService.exitSchedule(member2, team.getId(), schedule.getId());
+        scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -307,7 +305,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
+        scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId());
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -330,7 +328,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        scheduleService.exitSchedule(member1, team.getId(), schedule.getId());
+        scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId());
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
@@ -355,7 +353,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member1, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -410,7 +408,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member1, team.getId(), schedule.getId());
+        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member1.getId(), team.getId(), schedule.getId());
 
         //then
         assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
@@ -435,7 +433,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4, team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -460,7 +458,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule3);
 
         //when
-        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(), 1);
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1.getId(), team.getId(), new SearchDateCond(), 1);
 
         //then
         assertThat(result.getRunSchedule()).isEqualTo(1);
@@ -479,7 +477,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         //when
-        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4, team.getId(), new SearchDateCond(), 1)).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4.getId(), team.getId(), new SearchDateCond(), 1)).isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -503,7 +501,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule3);
 
         //when
-        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1, team.getId(), new SearchDateCond(startDate, endDate), 1);
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(member1.getId(), team.getId(), new SearchDateCond(startDate, endDate), 1);
 
         //then
         assertThat(result.getRunSchedule()).isEqualTo(0);
@@ -539,7 +537,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(scheduleB1);
 
         //when
-        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(), 1);
+        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1.getId(), new SearchDateCond(), 1);
 
         //then
         assertThat(result.getWaitSchedule()).isEqualTo(0);
@@ -581,7 +579,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(scheduleB2);
 
         //when
-        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1, new SearchDateCond(startDate, null), 1);
+        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(member1.getId(), new SearchDateCond(startDate, null), 1);
 
         //then
         assertThat(result.getWaitSchedule()).isEqualTo(1);

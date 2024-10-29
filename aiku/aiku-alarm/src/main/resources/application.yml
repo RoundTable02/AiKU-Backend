@@ -17,3 +17,5 @@ spring:
 logging:
   level:
     root: INFO
+  file:
+    name: /spring-log/application.log

@@ -53,10 +53,6 @@ kakao:
   base_url: https://kauth.kakao.com
   app_id: ${KAKAO_APP_ID}
 
-logging:
-  level:
-    root: INFO
-
 cloud:
   aws:
     s3:
@@ -66,3 +62,9 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS}
       secretKey: ${AWS_SECRET}
+
+logging:
+  level:
+    root: INFO
+  file:
+    name: /spring-log/application.log

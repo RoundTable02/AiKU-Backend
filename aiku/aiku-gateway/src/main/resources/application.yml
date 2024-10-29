@@ -42,4 +42,5 @@ custom:
 logging:
   level:
     root: INFO
-    org.springframework.cloud.gateway: DEBUG
+  file:
+    name: /spring-log/application.log

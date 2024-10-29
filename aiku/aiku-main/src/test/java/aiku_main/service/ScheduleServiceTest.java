@@ -5,6 +5,7 @@ import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleDetailResDto;
 import aiku_main.dto.ScheduleUpdateDto;
 import aiku_main.kafka.KafkaProducerService;
+import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
 import aiku_main.repository.TeamQueryRepository;
 import aiku_main.scheduler.ScheduleScheduler;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -33,6 +35,8 @@ class ScheduleServiceTest {
     ScheduleQueryRepository scheduleQueryRepository;
     @Mock
     TeamQueryRepository teamQueryRepository;
+    @Mock
+    MemberRepository memberRepository;
     @Mock
     ScheduleScheduler scheduleScheduler;
     @Mock
@@ -53,12 +57,13 @@ class ScheduleServiceTest {
         doReturn(scheduleId).when(schedule).getId();
         when(scheduleQueryRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
         when(scheduleQueryRepository.isScheduleOwner(nullable(Long.class), nullable(Long.class))).thenReturn(true);
+        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.ofNullable(member));
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto("new Schedule",
                 new LocationDto("new location", 2.2, 2.2),
                 LocalDateTime.now());
-        Long resultId = scheduleService.updateSchedule(member, schedule.getId(), scheduleDto);
+        Long resultId = scheduleService.updateSchedule(member.getId(), schedule.getId(), scheduleDto);
 
         //then
         assertThat(resultId).isEqualTo(scheduleId);
@@ -80,7 +85,7 @@ class ScheduleServiceTest {
         when(scheduleQueryRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
 
         //when
-        ScheduleDetailResDto result = scheduleService.getScheduleDetail(member1, null, null);
+        ScheduleDetailResDto result = scheduleService.getScheduleDetail(member1.getId(), null, null);
 
         //then
         assertThat(result.getScheduleName()).isEqualTo(schedule.getScheduleName());

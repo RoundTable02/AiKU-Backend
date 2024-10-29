@@ -59,10 +59,11 @@ public class ScheduleService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public Long addSchedule(Member member, Long teamId, ScheduleAddDto scheduleDto){
+    public Long addSchedule(Long memberId, Long teamId, ScheduleAddDto scheduleDto){
         //검증 로직
+        Member member = findMember(memberId);
         Team team = findTeamById(teamId);
-        checkTeamMember(member.getId(), teamId);
+        checkTeamMember(memberId, teamId);
         checkEnoughPoint(member, scheduleDto.getPointAmount());
 
         //서비스 로직
@@ -94,12 +95,13 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Long updateSchedule(Member member, Long scheduleId, ScheduleUpdateDto scheduleDto){
+    public Long updateSchedule(Long memberId, Long scheduleId, ScheduleUpdateDto scheduleDto){
         //검증 로직
+        Member member = findMember(memberId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsWait(schedule);
         checkScheduleUpdateTime(schedule);
-        checkIsOwner(member.getId(), scheduleId);
+        checkIsOwner(memberId, scheduleId);
 
         //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
@@ -112,8 +114,9 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Long enterSchedule(Member member, Long teamId, Long scheduleId, ScheduleEnterDto enterDto) {
+    public Long enterSchedule(Long memberId, Long teamId, Long scheduleId, ScheduleEnterDto enterDto) {
         //검증 로직
+        Member member = findMember(memberId);
         checkExistTeam(teamId);
         checkTeamMember(member.getId(), teamId);
         Schedule schedule = findScheduleById(scheduleId);
@@ -134,14 +137,15 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Long exitSchedule(Member member, Long teamId, Long scheduleId) {
+    public Long exitSchedule(Long memberId, Long teamId, Long scheduleId) {
         //검증 로직
+        Member member = findMember(memberId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsWait(schedule);
-        checkScheduleMember(member.getId(), scheduleId, true);
+        checkScheduleMember(memberId, scheduleId, true);
 
         //서비스 로직
-        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(member.getId(), scheduleId).orElseThrow();
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
 
         Long scheduleMemberCount = scheduleQueryRepository.countOfScheduleMembers(scheduleId);
         if(scheduleMemberCount <= 1){
@@ -209,10 +213,10 @@ public class ScheduleService {
         scheduleEventPublisher.publishScheduleCloseEvent(schedule);
     }
 
-    public ScheduleDetailResDto getScheduleDetail(Member member, Long teamId, Long scheduleId) {
+    public ScheduleDetailResDto getScheduleDetail(Long memberId, Long teamId, Long scheduleId) {
         //검증 메서드
         Schedule schedule = findScheduleById(scheduleId);
-        checkScheduleMember(member.getId(), scheduleId, true);
+        checkScheduleMember(memberId, scheduleId, true);
 
         //서비스 로직
         List<ScheduleMemberResDto> membersDtoList = scheduleQueryRepository.getScheduleMembersWithMember(scheduleId);
@@ -220,33 +224,33 @@ public class ScheduleService {
         return new ScheduleDetailResDto(schedule, membersDtoList);
     }
 
-    public TeamScheduleListResDto getTeamScheduleList(Member member, Long teamId, SearchDateCond dateCond, int page) {
+    public TeamScheduleListResDto getTeamScheduleList(Long memberId, Long teamId, SearchDateCond dateCond, int page) {
         //검증 메서드
         Team team = findTeamById(teamId);
-        checkTeamMember(member.getId(), teamId);
+        checkTeamMember(memberId, teamId);
 
         //서비스 로직
-        List<TeamScheduleListEachResDto> scheduleList = scheduleQueryRepository.getTeamSchedules(teamId, member.getId(), dateCond, page);
-        scheduleList.forEach((schedule) -> schedule.setAccept(member.getId()));
+        List<TeamScheduleListEachResDto> scheduleList = scheduleQueryRepository.getTeamSchedules(teamId, memberId, dateCond, page);
+        scheduleList.forEach((schedule) -> schedule.setAccept(memberId));
         int runSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
         return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
     }
 
-    public MemberScheduleListResDto getMemberScheduleList(Member member, SearchDateCond dateCond, int page) {
+    public MemberScheduleListResDto getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
         //서비스 로직
-        List<MemberScheduleListEachResDto> scheduleList = scheduleQueryRepository.getMemberSchedules(member.getId(), dateCond, page);
-        int runSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.RUN, dateCond);
-        int waitSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(member.getId(), ExecStatus.WAIT, dateCond);
+        List<MemberScheduleListEachResDto> scheduleList = scheduleQueryRepository.getMemberSchedules(memberId, dateCond, page);
+        int runSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.RUN, dateCond);
+        int waitSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.WAIT, dateCond);
 
         return new MemberScheduleListResDto(page, runSchedule, waitSchedule, scheduleList);
     }
 
-    public String getScheduleArrivalResult(Member member, Long teamId, Long scheduleId) {
+    public String getScheduleArrivalResult(Long memberId, Long teamId, Long scheduleId) {
         //검증 로직
         checkExistTeam(teamId);
-        checkTeamMember(member.getId(), teamId);
+        checkTeamMember(memberId, teamId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsTerm(schedule);
 
@@ -254,10 +258,10 @@ public class ScheduleService {
         return schedule.getScheduleResult().getScheduleArrivalResult();
     }
 
-    public String getScheduleBettingResult(Member member, Long teamId, Long scheduleId) {
+    public String getScheduleBettingResult(Long memberId, Long teamId, Long scheduleId) {
         //검증 로직
         checkExistTeam(teamId);
-        checkTeamMember(member.getId(), teamId);
+        checkTeamMember(memberId, teamId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsTerm(schedule);
 
@@ -349,6 +353,10 @@ public class ScheduleService {
 
     public boolean isScheduleAutoClosed(Long scheduleId){
         return scheduleQueryRepository.existsByIdAndIsAutoClose(scheduleId, true);
+    }
+
+    private Member findMember(Long memberId){
+        return memberRepository.findById(memberId).orElseThrow();
     }
 
     private Team findTeamById(Long teamId){

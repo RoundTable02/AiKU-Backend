@@ -18,76 +18,85 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping()
-    public BaseResponse<BaseResultDto> addSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> addSchedule(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                   @PathVariable Long groupId,
                                                    @RequestBody @Valid ScheduleAddDto scheduleDto){
-        Long addId = scheduleService.addSchedule(null, groupId, scheduleDto);
+        Long addId = scheduleService.addSchedule(memberId, groupId, scheduleDto);
 
         return BaseResponse.getSimpleRes(addId);
     }
 
     @PatchMapping("/{scheduleId}")
-    public BaseResponse<BaseResultDto> updateSchedule(@PathVariable Long groupId,
+    public BaseResponse<BaseResultDto> updateSchedule(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                      @PathVariable Long groupId,
                                                       @PathVariable Long scheduleId,
                                                       @RequestBody @Valid ScheduleUpdateDto scheduleDto){
-        Long updateId = scheduleService.updateSchedule(null, scheduleId, scheduleDto);
+        Long updateId = scheduleService.updateSchedule(memberId, scheduleId, scheduleDto);
 
         return BaseResponse.getSimpleRes(updateId);
     }
 
     @PostMapping("/{scheduleId}/enter")
-    public BaseResponse<BaseResultDto> enterSchedule(@PathVariable Long groupId,
-                                                      @PathVariable Long scheduleId,
-                                                      @RequestBody @Valid ScheduleEnterDto enterDto){
-        Long enterId = scheduleService.enterSchedule(null, groupId, scheduleId, enterDto);
+    public BaseResponse<BaseResultDto> enterSchedule(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                     @PathVariable Long groupId,
+                                                     @PathVariable Long scheduleId,
+                                                     @RequestBody @Valid ScheduleEnterDto enterDto){
+        Long enterId = scheduleService.enterSchedule(memberId, groupId, scheduleId, enterDto);
 
         return BaseResponse.getSimpleRes(enterId);
     }
 
     @PostMapping("/{scheduleId}/exit")
-    public BaseResponse<BaseResultDto> exitSchedule(@PathVariable Long groupId,
-                                                     @PathVariable Long scheduleId){
-        Long exitId = scheduleService.exitSchedule(null, groupId, scheduleId);
+    public BaseResponse<BaseResultDto> exitSchedule(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                    @PathVariable Long groupId,
+                                                    @PathVariable Long scheduleId){
+        Long exitId = scheduleService.exitSchedule(memberId, groupId, scheduleId);
 
         return BaseResponse.getSimpleRes(exitId);
     }
 
     @GetMapping("/{scheduleId}")
-    public BaseResponse<ScheduleDetailResDto> getScheduleDetail(@PathVariable Long groupId,
+    public BaseResponse<ScheduleDetailResDto> getScheduleDetail(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                                @PathVariable Long groupId,
                                                                 @PathVariable Long scheduleId){
-        ScheduleDetailResDto result = scheduleService.getScheduleDetail(null, groupId, scheduleId);
+        ScheduleDetailResDto result = scheduleService.getScheduleDetail(memberId, groupId, scheduleId);
 
         return new BaseResponse<>(result);
     }
 
     @GetMapping
-    public BaseResponse<TeamScheduleListResDto> getTeamScheduleList(@PathVariable Long groupId,
+    public BaseResponse<TeamScheduleListResDto> getTeamScheduleList(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                                    @PathVariable Long groupId,
                                                                     @ModelAttribute SearchDateCond dateCond,
                                                                     @RequestParam(defaultValue = "1") int page){
-        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(null, groupId, dateCond, page);
+        TeamScheduleListResDto result = scheduleService.getTeamScheduleList(memberId, groupId, dateCond, page);
 
         return new BaseResponse<>(result);
     }
 
     @GetMapping("/schedules")
-    public BaseResponse<MemberScheduleListResDto> getMemberScheduleList(@ModelAttribute SearchDateCond dateCond,
+    public BaseResponse<MemberScheduleListResDto> getMemberScheduleList(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                                        @ModelAttribute SearchDateCond dateCond,
                                                                         @RequestParam(defaultValue = "1") int page){
-        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(null, dateCond, page);
+        MemberScheduleListResDto result = scheduleService.getMemberScheduleList(memberId, dateCond, page);
 
         return new BaseResponse<>(result);
     }
 
     @GetMapping("/{scheduleId}/arrival/result")
-    public BaseResponse<String> getScheduleArrivalResult(@PathVariable Long groupId,
-                                                   @PathVariable Long scheduleId){
-        String result = scheduleService.getScheduleArrivalResult(null, groupId, scheduleId);
+    public BaseResponse<String> getScheduleArrivalResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                         @PathVariable Long groupId,
+                                                         @PathVariable Long scheduleId){
+        String result = scheduleService.getScheduleArrivalResult(memberId, groupId, scheduleId);
 
         return new BaseResponse<>(result);
     }
 
     @GetMapping("/{scheduleId}/betting/result")
-    public BaseResponse<String> getScheduleBettingResult(@PathVariable Long groupId,
+    public BaseResponse<String> getScheduleBettingResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                         @PathVariable Long groupId,
                                                          @PathVariable Long scheduleId){
-        String result = scheduleService.getScheduleBettingResult(null, groupId, scheduleId);
+        String result = scheduleService.getScheduleBettingResult(memberId, groupId, scheduleId);
 
         return new BaseResponse<>(result);
     }

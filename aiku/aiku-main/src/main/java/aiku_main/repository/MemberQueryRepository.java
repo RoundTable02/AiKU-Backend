@@ -4,9 +4,8 @@ import aiku_main.dto.TitleMemberResDto;
 import common.domain.title.TitleMember;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface MemberReadRepository {
+public interface MemberQueryRepository {
     TitleMemberResDto getTitle(Long titleId);
     List<TitleMemberResDto> getTitleMembers(Long memberId);
     TitleMember getTitleMemberByTitleMemberId(Long titleMemberId);

@@ -39,6 +39,7 @@ class BettingControllerTest {
     @Test
     void addBetting() throws Exception {
         mockMvc.perform(post("/schedules/1/bettings")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new BettingAddDto(1L, 100)
@@ -49,6 +50,7 @@ class BettingControllerTest {
     @Test
     void addBettingWithFaultDto() throws Exception {
         mockMvc.perform(post("/schedules/1/bettings")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new BettingAddDto(null, 100)
@@ -59,6 +61,7 @@ class BettingControllerTest {
     @Test
     void addBettingWithFaultPoint() throws Exception {
         mockMvc.perform(post("/schedules/1/bettings")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new BettingAddDto(1L, 0)
@@ -66,6 +69,7 @@ class BettingControllerTest {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/schedules/1/bettings")
+                        .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new BettingAddDto(1L, 101)

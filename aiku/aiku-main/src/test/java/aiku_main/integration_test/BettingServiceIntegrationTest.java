@@ -91,7 +91,7 @@ class BettingServiceIntegrationTest {
     void 베팅_등록() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        Long bettingId = bettingService.addBetting(member1, schedule1.getId(), bettingDto);
+        Long bettingId = bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto);
 
         //then
         Betting betting = bettingQueryRepository.findById(bettingId).orElse(null);
@@ -110,21 +110,21 @@ class BettingServiceIntegrationTest {
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(ScheduleException.class);
     }
 
     @Test
     void 베팅_등록_스케줄멤버x() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto)).isInstanceOf(BaseException.class);
     }
 
     @Test
     void 베팅_등록_깍두기멤버() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(freeMember.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember, schedule1.getId(), bettingDto)).isInstanceOf(PaidMemberLimitException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto)).isInstanceOf(PaidMemberLimitException.class);
     }
 
     @Test
@@ -138,7 +138,7 @@ class BettingServiceIntegrationTest {
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(BettingException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -147,7 +147,7 @@ class BettingServiceIntegrationTest {
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 1000);
 
         //then
-        assertThatThrownBy(() -> bettingService.addBetting(member1, schedule1.getId(), bettingDto)).isInstanceOf(NotEnoughPoint.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(NotEnoughPoint.class);
     }
 
     @Test
@@ -160,7 +160,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
+        bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId());
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElseThrow();
@@ -178,8 +178,8 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        bettingService.cancelBetting(member1, schedule1.getId(), betting.getId());
-        assertThatThrownBy(() -> bettingService.cancelBetting(member1, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
+        bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId());
+        assertThatThrownBy(() -> bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -192,7 +192,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        assertThatThrownBy(() -> bettingService.cancelBetting(member2, schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(member2.getId(), schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -205,7 +205,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember, schedule1.getId(), betting.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(noScheduleMember.getId(), schedule1.getId(), betting.getId())).isInstanceOf(ScheduleException.class);
     }
 
     @Test

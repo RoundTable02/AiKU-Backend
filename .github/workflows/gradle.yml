@@ -64,13 +64,7 @@ jobs:
           ./gradlew :aiku-gateway:build
           ./gradlew :aiku-main:build
           ./gradlew :aiku-alarm:build
-          
-    - name: Verify JAR file
-      run: |
-          ls aiku/aiku-gateway/build/libs
-          ls aiku/aiku-main/build/libs
-          ls aiku/aiku-alarm/build/libs
-          docker container ls
+          ./gradlew :aiku-map:build
 
     - name: Stop MySQL
       if: always()

@@ -122,7 +122,7 @@ jobs:
             --log-driver=awslogs \
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-gateway \
-            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
+            --log-opt awslogs-stream=${{ secrets.EC2_GATEWAY_ID }} \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
@@ -167,28 +167,6 @@ jobs:
             -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
             -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
-          
-    # - name: excuting remote ssh commands to map
-    #   uses: appleboy/ssh-action@v0.1.9
-    #   with:
-    #     host: ${{ secrets.EC2_AIKU_MAP_HOST }}
-    #     username: ${{ secrets.EC2_USERNAME }}
-    #     key : ${{ secrets.EC2_SSH_KEY }}
-    #     port: 22
-    #     script: |
-    #      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
-    #       docker stop aiku-map || true
-    #       docker rm aiku-map || true
-          
-    #       docker run -d \
-    #         --name aiku-map \
-    #         --log-driver=awslogs \
-    #         --log-opt awslogs-region=ap-northeast-2 \
-    #         --log-opt awslogs-group=aiku-map \
-    #         --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
-    #         --network="host" \
-    #         --env-file ./env.list \
-    #         ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
 
     - name: excuting remote ssh commands to alarm
       uses: appleboy/ssh-action@v0.1.9
@@ -207,7 +185,7 @@ jobs:
             --log-driver=awslogs \
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-alarm \
-            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_ALARM_ID }} \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \

@@ -63,5 +63,21 @@ jobs:
       run: |
           ./gradlew :aiku-gateway:build
           ./gradlew :aiku-main:build
-          ./gradlew :aiku-map:build
           ./gradlew :aiku-alarm:build
+          
+    - name: Verify JAR file
+      run: |
+          ls aiku/aiku-gateway/build/libs
+          ls aiku/aiku-main/build/libs
+          ls aiku/aiku-alarm/build/libs
+          
+          
+    # - name: Log in to Docker Hub
+    #   run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+    
+    # - name: Build Docker image
+    #   working-directory: aiku
+    #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/gpt-service:latest .
+
+    # - name: Push Docker image to Docker Hub
+    #   run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gpt-service:latest

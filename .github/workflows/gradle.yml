@@ -40,10 +40,6 @@ jobs:
       run: |
         mkdir -p aiku/aiku-main/src/test/resources
         echo "${{ secrets.AIKU_MAIN_TEST_CONFIG }}" > aiku/aiku-main/src/test/resources/application.yml
-        mkdir -p aiku/aiku-alarm/src/test/resources
-        echo "${{ secrets.AIKU_ALARM_TEST_CONFIG }}" > aiku/aiku-alarm/src/test/resources/application.yml
-        mkdir -p aiku/aiku-map/src/test/resources
-        echo "${{ secrets.AIKU_MAP_TEST_CONFIG }}" > aiku/aiku-map/src/test/resources/application.yml
 
     - name: Build with Gradle Wrapper
       working-directory: aiku
@@ -64,4 +60,8 @@ jobs:
         KAFKA_SERVER_URL: ${{ secrets.KAFKA_SERVER_URL }}
         AIKU_MAIN_IP: ${{ secrets.AIKU_MAIN_IP }}
         AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}
-      run: ./gradlew build
+      run: |
+          ./gradlew :aiku-gateway:build
+          ./gradlew :aiku-main:build
+          ./gradlew :aiku-map:build
+          ./gradlew :aiku-alarm:build

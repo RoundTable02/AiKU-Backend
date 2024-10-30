@@ -70,6 +70,15 @@ jobs:
           ls aiku/aiku-gateway/build/libs
           ls aiku/aiku-main/build/libs
           ls aiku/aiku-alarm/build/libs
+
+    - name: Stop MySQL
+      if: always()
+      run: docker stop mysql || true
+
+    - name: Stop Redis
+      if: always()
+      run: docker stop redis || true
+
           
           
     # - name: Log in to Docker Hub
@@ -81,6 +90,7 @@ jobs:
 
     # - name: Push Docker image to Docker Hub
     #   run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gpt-service:latest
+    
   deploy: 
     runs-on: ubuntu-latest
     needs: build

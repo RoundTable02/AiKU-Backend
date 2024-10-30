@@ -182,7 +182,7 @@ jobs:
             --name aiku-map \
             --log-driver=awslogs \
             --log-opt awslogs-region=ap-northeast-2 \
-            --log-opt awslogs-group=aiku-alarm \
+            --log-opt awslogs-group=aiku-map \
             --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAP_ID }} \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \

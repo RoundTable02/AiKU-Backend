@@ -82,14 +82,23 @@ jobs:
     
     - name: Build Docker image of aiku-gateway
       working-directory: aiku/aiku-gateway
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest .
 
     - name: Build Docker image of aiku-main
       working-directory: aiku/aiku-main
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest .
     - name: Build Docker image of aiku-alarm
       working-directory: aiku/aiku-alarm
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest .
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gatewayalarm:latest
     
   deploy: 
     runs-on: ubuntu-latest

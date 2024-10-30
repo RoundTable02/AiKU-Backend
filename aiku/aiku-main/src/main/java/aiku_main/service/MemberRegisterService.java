@@ -42,7 +42,7 @@ public class MemberRegisterService {
         String idToken = memberRegisterDto.getIdToken();
         String kakaoId = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
 
-        String password = passwordEncoder.encode(kakaoId.toString());
+        String password = passwordEncoder.encode(kakaoId);
 
         String imgUrl = ""; // S3 이미지 URL
         if (memberProfile.getProfileType().equals(MemberProfileType.IMG)) {

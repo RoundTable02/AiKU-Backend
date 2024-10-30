@@ -53,7 +53,8 @@ public class RacingService {
     @Transactional
     public Long makeRacing(Long memberId, Long scheduleId, RacingAddDto racingAddDto) {
         // 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증
-        checkMemberInSchedule(memberId, scheduleId);
+        Long firstScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
+        Long secondScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(racingAddDto.getTargetMemberId(), scheduleId);
         checkScheduleInRun(scheduleId);
 
         //  두 유저 모두 깍두기 멤버가 아닌지, 이미 중복된 레이싱이 존재하는지 검증,
@@ -67,7 +68,7 @@ public class RacingService {
         checkEnoughRacingPoint(racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
 
         //  대기 중 레이싱 DB 저장
-        Racing racing = Racing.create(memberId, racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
+        Racing racing = Racing.create(firstScheduleMemberId, secondScheduleMemberId, racingAddDto.getPoint());
         racingRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
@@ -170,6 +171,11 @@ public class RacingService {
     private AlarmMemberInfo getMemberInfo(Long memberId) {
         return memberRepository.findMemberInfo(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());
+    }
+
+    private Long getScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId) {
+        return scheduleRepository.findScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId)
+                .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private Racing findRacing(Long racingId) {

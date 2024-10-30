@@ -16,7 +16,7 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepository {
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<Member> memberRowMapper = (rs, rowNum) -> new Member(
-            rs.getLong("id"),
+            rs.getLong("member_id"),
             rs.getLong("kakao_id"),
             rs.getString("refresh_token"),
             rs.getString("nickname"),

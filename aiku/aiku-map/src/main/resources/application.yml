@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+    consumer:
+      auto-offset-reset: latest
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      enable-idempotence: true
+      acks: 1
+      max-in-flight-requests-per-connection: 1
+      retries: 3
+      linger-ms: 1
+      batch-size: 16384
+      buffer-memory: 1048576
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+logging:
+  level:
+    root: INFO
+  file:
+    name: /spring-log/application.log

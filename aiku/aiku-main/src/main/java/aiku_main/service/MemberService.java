@@ -1,0 +1,156 @@
+package aiku_main.service;
+
+import aiku_main.dto.*;
+import aiku_main.exception.MemberNotFoundException;
+import aiku_main.exception.TitleException;
+import aiku_main.repository.MemberRepository;
+import aiku_main.s3.S3ImageProvider;
+import common.domain.ServiceAgreement;
+import common.domain.member.Member;
+import common.domain.member.MemberProfile;
+import common.domain.member.MemberProfileType;
+import common.domain.title.TitleMember;
+import common.domain.value_reference.TitleMemberValue;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
+
+import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
+
+@Slf4j
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+@Service
+public class MemberService {
+    private final MemberRepository memberRepository;
+    private final S3ImageProvider s3ImageProvider;
+
+    public MemberResDto getMemberDetail(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
+        MemberProfile profile = member.getProfile();
+        MemberProfileResDto memberProfileResDto
+                = new MemberProfileResDto(
+                profile.getProfileType(), profile.getProfileImg(),
+                profile.getProfileCharacter(), profile.getProfileBackground());
+
+        TitleMemberValue titleMemberValue = member.getMainTitle();
+
+        TitleMemberResDto mainTitle = null;
+        // 장착된 칭호가 존재하는 경우에만 조회
+        if (!Objects.isNull(titleMemberValue)) {
+            mainTitle = memberRepository.getTitle(titleMemberValue.getId());
+        }
+
+        return new MemberResDto(
+                member.getId(), member.getNickname(), member.getKakaoId(),
+                memberProfileResDto, mainTitle, member.getPoint());
+    }
+
+    @Transactional
+    public Long updateMember(Long accessMemberId, MemberUpdateDto memberUpdateDto) {
+        Member member = getMemberById(accessMemberId);
+
+        MemberProfileDto afterProfile = memberUpdateDto.getMemberProfileDto();
+        MemberProfile beforeProfile = member.getProfile();
+        MemberProfileType beforeProfileType = beforeProfile.getProfileType();
+
+        String profileImg = "";
+        if (afterProfile.getProfileImg().isEmpty()) {
+            if (beforeProfileType.equals(MemberProfileType.IMG)
+                    && afterProfile.getProfileType().equals(MemberProfileType.CHAR)) {
+                // 이미지 -> 캐릭터, 이전 이미지는 삭제
+                s3ImageProvider.deleteImageFromS3(beforeProfile.getProfileImg());
+            }
+        } else {
+            // 이미지 변경된 경우
+            if (beforeProfileType.equals(MemberProfileType.IMG)) {
+                // 이미지 -> 이미지, 이전 이미지는 삭제
+                s3ImageProvider.deleteImageFromS3(beforeProfile.getProfileImg());
+            }
+            profileImg = s3ImageProvider.upload(afterProfile.getProfileImg());
+        }
+
+        member.updateMember(
+                memberUpdateDto.getNickname(), afterProfile.getProfileType(),
+                profileImg, afterProfile.getProfileCharacter(), afterProfile.getProfileBackground()
+        );
+
+        return member.getId();
+    }
+
+    @Transactional
+    public Long deleteMember(Long accessMemberId) {
+        memberRepository.deleteById(accessMemberId);
+
+        return accessMemberId;
+    }
+
+    @Transactional
+    public Long updateTitle(Long accessMemberId, Long titleMemberId) {
+        Member member = getMemberById(accessMemberId);
+
+        validateTitleMember(member.getId(), titleMemberId);
+
+        TitleMember titleMember = memberRepository.getTitleMemberByTitleMemberId(titleMemberId);
+        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
+
+        member.updateMemberTitleByTitleMemberId(titleMemberValue);
+
+        return member.getId();
+    }
+
+    private void validateTitleMember(Long memberId, Long titleMemberId) {
+        if (!memberRepository.existTitleMember(memberId, titleMemberId)) {
+            throw new TitleException(MEMBER_NOT_WITH_TITLE);
+        }
+    }
+
+    @Transactional
+    public Long logout(Long accessMemberId) {
+        // 멤버 리프레시 토큰 삭제
+        Member member = getMemberById(accessMemberId);
+
+        member.logout();
+
+        return member.getId();
+    }
+
+
+    @Transactional
+    public Long updateAuth(Long accessMemberId, AuthorityUpdateDto authorityUpdateDto) {
+        Member member = getMemberById(accessMemberId);
+
+        member.updateAuth(authorityUpdateDto.isServicePolicyAgreed(), authorityUpdateDto.isPersonalInformationPolicyAgreed(),
+                authorityUpdateDto.isLocationPolicyAgreed(), authorityUpdateDto.isMarketingPolicyAgreed());
+
+        return member.getId();
+    }
+
+    public AuthorityResDto getAuthDetail(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
+        ServiceAgreement serviceAgreement = member.getServiceAgreement();
+
+        return new AuthorityResDto(
+                serviceAgreement.isServicePolicyAgreed(), serviceAgreement.isPersonalInformationPolicyAgreed(),
+                serviceAgreement.isLocationPolicyAgreed(), serviceAgreement.isMarketingPolicyAgreed());
+    }
+
+    public DataResDto<List<TitleMemberResDto>> getMemberTitles(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+
+        List<TitleMemberResDto> titleMembers = memberRepository.getTitleMembers(member.getId());
+
+        return new DataResDto(1, titleMembers);
+    }
+
+    private Member getMemberById(Long accessMemberId) {
+        return memberRepository.findById(accessMemberId)
+                .orElseThrow(() -> new MemberNotFoundException());
+    }
+}

@@ -188,6 +188,7 @@ jobs:
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
     
     - name: excuting remote ssh commands to alarm

@@ -26,7 +26,7 @@ jobs:
         container port: 3306
         mysql version: '8.0'
         mysql database: 'aiku'
-        mysql root password: ${{ secrets.MYSQL_PASSWORD }}
+        mysql root password: 1234
         
     - name: Start Redis
       uses: supercharge/redis-github-action@1.1.0
@@ -58,9 +58,9 @@ jobs:
         GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         KAKAO_APP_ID: ${{ secrets.KAKAO_APP_ID }}
-        MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        MYSQL_URL: ${{ secrets.MYSQL_URL }}
-        MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+        MYSQL_PASSWORD: 1234
+        MYSQL_URL: jdbc:mysql://localhost:3306/aiku
+        MYSQL_USERNAME: root
         KAFKA_SERVER_URL: ${{ secrets.KAFKA_SERVER_URL }}
         AIKU_MAIN_IP: ${{ secrets.AIKU_MAIN_IP }}
         AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}

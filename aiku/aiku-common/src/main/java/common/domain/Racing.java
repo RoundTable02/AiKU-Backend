@@ -35,10 +35,10 @@ public class Racing extends BaseTime{
     @Enumerated(value = EnumType.STRING)
     private Status status;
 
-    public static Racing create(Long firstRacerId, Long secondRacerId, Integer pointAmount) {
+    public static Racing create(Long firstScheduleMemberId, Long secondScheduleMemberId, Integer pointAmount) {
         Racing racing = new Racing();
-        racing.firstRacer = new ScheduleMemberValue(firstRacerId);
-        racing.secondRacer = new ScheduleMemberValue(secondRacerId);
+        racing.firstRacer = new ScheduleMemberValue(firstScheduleMemberId);
+        racing.secondRacer = new ScheduleMemberValue(secondScheduleMemberId);
         racing.pointAmount = pointAmount;
 
         racing.raceStatus = ExecStatus.WAIT;

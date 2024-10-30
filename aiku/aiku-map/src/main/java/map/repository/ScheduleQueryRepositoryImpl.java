@@ -76,4 +76,16 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
         return count != null && count > 0;
     }
 
+    @Override
+    public Optional<Long> findScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId) {
+        Long scheduleMemberId = query.select(scheduleMember.id)
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .leftJoin(scheduleMember.member, member)
+                .where(schedule.id.eq(scheduleId), member.id.eq(memberId))
+                .fetchOne();
+
+        return Optional.ofNullable(scheduleMemberId);
+    }
+
 }

@@ -1,0 +1,217 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Start MySQL
+      uses: mirromutth/mysql-action@v1.1
+      with:
+        host port: 3306
+        container port: 3306
+        mysql version: '8.0'
+        mysql database: 'aiku'
+        mysql root password: 1234
+        
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.1.0
+      with:
+        redis-version: 6
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+
+    - name: Create test/resources/application.yml
+      run: |
+        mkdir -p aiku/aiku-main/src/test/resources
+        echo "${{ secrets.AIKU_MAIN_TEST_CONFIG }}" > aiku/aiku-main/src/test/resources/application.yml
+
+    - name: Build with Gradle Wrapper
+      working-directory: aiku
+      env:
+        AWS_ACCESS: ${{ secrets.AWS_ACCESS }}
+        AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+        AWS_SECRET: ${{ secrets.AWS_SECRET }}
+        CUSTOM_PASSWORD: ${{ secrets.CUSTOM_PASSWORD }}
+        GMAIL_ACCOUNT: ${{ secrets.GMAIL_ACCOUNT }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        KAKAO_APP_ID: ${{ secrets.KAKAO_APP_ID }}
+        MYSQL_PASSWORD: 1234
+        MYSQL_URL: jdbc:mysql://localhost:3306/aiku
+        MYSQL_USERNAME: root
+        KAFKA_SERVER_URL: ${{ secrets.KAFKA_SERVER_URL }}
+        AIKU_MAIN_IP: ${{ secrets.AIKU_MAIN_IP }}
+        AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}
+      run: |
+          ./gradlew :aiku-gateway:build
+          ./gradlew :aiku-main:build
+          ./gradlew :aiku-alarm:build
+          ./gradlew :aiku-map:build
+
+    - name: Stop MySQL
+      if: always()
+      run: docker stop mysql || true
+
+    - name: Stop Redis
+      if: always()
+      run: docker stop redis || true
+    
+    - name: Build Docker image of aiku-gateway
+      working-directory: aiku/aiku-gateway
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest .
+
+    - name: Build Docker image of aiku-main
+      working-directory: aiku/aiku-main
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest .
+    - name: Build Docker image of aiku-alarm
+      working-directory: aiku/aiku-alarm
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest .
+    - name: Build Docker image of aiku-map
+      working-directory: aiku/aiku-map
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest .
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
+    
+  deploy: 
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    
+    - name: excuting remote ssh commands to gateway
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_GATEWAY_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest
+          docker stop aiku-gateway || true
+          docker rm aiku-gateway || true
+          
+          docker run -d \
+            --name aiku-gateway \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-gateway \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_GATEWAY_ID }} \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e AIKU_MAIN_IP=${{ secrets.AIKU_MAIN_IP }} \
+            -e AIKU_MAP_IP=${{ secrets.AIKU_MAP_IP }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest
+          
+    - name: excuting remote ssh commands to main
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_MAIN_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+          docker stop aiku-main || true
+          docker rm aiku-main || true
+          
+          docker run -d \
+            --name aiku-main \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-main \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
+            -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+            -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+            -e GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }} \
+            -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
+            -e KAKAO_APP_ID=${{ secrets.KAKAO_APP_ID }} \
+            -e AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
+            -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
+            -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+            
+    - name: excuting remote ssh commands to map
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_MAP_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
+          docker stop aiku-map || true
+          docker rm aiku-map || true
+          
+          docker run -d \
+            --name aiku-map \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-map \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAP_ID }} \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
+    
+    - name: excuting remote ssh commands to alarm
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_ALARM_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
+          docker stop aiku-alarm || true
+          docker rm aiku-alarm || true
+          
+          docker run -d \
+            --name aiku-alarm \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-alarm \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_ALARM_ID }} \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
+    

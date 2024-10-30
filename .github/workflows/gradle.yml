@@ -6,13 +6,13 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -70,6 +70,7 @@ jobs:
           ls aiku/aiku-gateway/build/libs
           ls aiku/aiku-main/build/libs
           ls aiku/aiku-alarm/build/libs
+          docker container ls
 
     - name: Stop MySQL
       if: always()
@@ -78,18 +79,18 @@ jobs:
     - name: Stop Redis
       if: always()
       run: docker stop redis || true
-
-          
-          
-    # - name: Log in to Docker Hub
-    #   run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
     
-    # - name: Build Docker image
-    #   working-directory: aiku
-    #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/gpt-service:latest .
+    - name: Build Docker image of aiku-gateway
+      working-directory: aiku/aiku-gateway
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest .
 
-    # - name: Push Docker image to Docker Hub
-    #   run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gpt-service:latest
+    - name: Build Docker image of aiku-main
+      working-directory: aiku/aiku-main
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest .
+
+    - name: Build Docker image of aiku-alarm
+      working-directory: aiku/aiku-alarm
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest .
     
   deploy: 
     runs-on: ubuntu-latest
@@ -105,6 +106,7 @@ jobs:
         port: 22
         script: |
           ls
+          exit
           
     - name: excuting remote ssh commands to main
       uses: appleboy/ssh-action@v0.1.9
@@ -125,6 +127,7 @@ jobs:
         port: 22
         script: |
           ls
+          exit
 
     - name: excuting remote ssh commands to alarm
       uses: appleboy/ssh-action@v0.1.9
@@ -135,4 +138,5 @@ jobs:
         port: 22
         script: |
           ls
+          exit
     

@@ -82,15 +82,14 @@ jobs:
     
     - name: Build Docker image of aiku-gateway
       working-directory: aiku/aiku-gateway
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest /aiku-gateway/Dockerfile
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
 
     - name: Build Docker image of aiku-main
       working-directory: aiku/aiku-main
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest /aiku-main/Dockerfile
-
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
     - name: Build Docker image of aiku-alarm
       working-directory: aiku/aiku-alarm
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest /aiku-alarm/Dockerfile
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}:latest .
     
   deploy: 
     runs-on: ubuntu-latest

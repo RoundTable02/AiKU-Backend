@@ -4,17 +4,17 @@ import common.exception.BaseException;
 import common.response.status.BaseErrorCode;
 import common.response.status.StatusCode;
 
-public class NoFcmTokenException extends BaseException {
+public class FcmException extends BaseException {
 
-    public NoFcmTokenException(StatusCode status, String errorMessage) {
+    public FcmException(StatusCode status, String errorMessage) {
         super(status, errorMessage);
     }
 
-    public NoFcmTokenException(StatusCode status){
+    public FcmException(StatusCode status){
         super(status, "토큰 중복 에러입니다.");
     }
 
-    public NoFcmTokenException() {
-        this(BaseErrorCode.NO_FCM_TOKEN);
+    public FcmException() {
+        this(BaseErrorCode.BAD_REQUEST);
     }
 }

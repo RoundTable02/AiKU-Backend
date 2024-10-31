@@ -5,7 +5,7 @@ import common.domain.Racing;
 import lombok.RequiredArgsConstructor;
 import map.application_event.domain.RacingInfo;
 import map.application_event.publisher.RacingEventPublisher;
-import map.exception.NoSuchRacingException;
+import map.exception.RacingException;
 import map.repository.RacingRepository;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import static common.response.status.BaseErrorCode.NO_SUCH_RACING;
 
 
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class RacingScheduler {
     // 30초 후 Racing의 상태를 확인하고 WAIT이면 삭제
     private void checkRacingStatus(RacingInfo racingInfo) {
         Racing racing = racingRepository.findById(racingInfo.getRacingId())
-                .orElseThrow(() -> new NoSuchRacingException());
+                .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
 
         if (racing.getRaceStatus().equals(ExecStatus.WAIT)) {
             racingEventPublisher.publishRacingStatusNotChangedEvent(racingInfo);

@@ -19,6 +19,8 @@ public enum BaseErrorCode implements StatusCode{
     NO_SUCH_TEAM(40002, "팀이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NO_SUCH_SCHEDULE(40003, "스케줄이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NO_SUCH_BETTING(40004, "베팅이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    NO_SUCH_RACING(40005, "레이싱이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    NO_SUCH_TERM(40006, "약관이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_TEAM(40010, "팀에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
     ALREADY_IN_TEAM(40011, "이미 팀에 소속되어 있습니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_SCHEDULE(40012, "스케줄에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
@@ -31,6 +33,7 @@ public enum BaseErrorCode implements StatusCode{
     DUPLICATED_FCM_TOKEN(40019, "중복된 파이어베이스 토큰입니다.", HttpStatus.BAD_REQUEST),
     NO_FCM_TOKEN(40020, "파이어베이스 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_RACING(40021, "레이싱에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_RACING(40022, "중복된 레이싱입니다.", HttpStatus.BAD_REQUEST),
 
     NO_SCHEDULE_OWNER(40301, "스케줄장이 아닙니다.", HttpStatus.FORBIDDEN),
     NOT_AVAILABLE_SCHEDULE(40302, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),

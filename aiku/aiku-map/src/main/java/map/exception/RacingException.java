@@ -4,17 +4,17 @@ import common.exception.BaseException;
 import common.response.status.BaseErrorCode;
 import common.response.status.StatusCode;
 
-public class MemberNotInRacingException extends BaseException {
+public class RacingException extends BaseException {
 
-    public MemberNotInRacingException(StatusCode status, String errorMessage) {
+    public RacingException(StatusCode status, String errorMessage) {
         super(status, errorMessage);
     }
 
-    public MemberNotInRacingException(StatusCode status){
+    public RacingException(StatusCode status){
         super(status, "RacingException 서버 내부 오류입니다.");
     }
 
-    public MemberNotInRacingException() {
+    public RacingException() {
         this(BaseErrorCode.BAD_REQUEST);
     }
 }

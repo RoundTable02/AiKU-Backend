@@ -23,12 +23,4 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(requestLogInterceptor)
                 .addPathPatterns("/**");
     }
-
-    @Bean
-    public FilterRegistrationBean<MdcFilter> mdcFilter() {
-        FilterRegistrationBean<MdcFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(mdcFilter);
-        registrationBean.addUrlPatterns("/*");
-        return registrationBean;
-    }
 }

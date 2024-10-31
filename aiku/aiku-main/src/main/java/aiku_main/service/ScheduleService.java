@@ -255,7 +255,7 @@ public class ScheduleService {
         checkIsTerm(schedule);
 
         //서비스 로직
-        return schedule.getScheduleResult().getScheduleArrivalResult();
+        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleArrivalResult();
     }
 
     public String getScheduleBettingResult(Long memberId, Long teamId, Long scheduleId) {
@@ -266,7 +266,7 @@ public class ScheduleService {
         checkIsTerm(schedule);
 
         //서비스 로직
-        return schedule.getScheduleResult().getScheduleBettingResult();
+        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleBettingResult();
     }
 
     //== 이벤트 핸들러 ==

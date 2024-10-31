@@ -110,7 +110,7 @@ public class TeamService {
         checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
-        return team.getTeamResult().getLateTimeResult();
+        return team.getTeamResult() == null? null : team.getTeamResult().getLateTimeResult();
     }
 
     public String getTeamBettingResult(Long memberId, Long teamId){
@@ -119,7 +119,7 @@ public class TeamService {
         checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
-        return team.getTeamResult().getTeamBettingResult();
+        return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
     }
 
     //==* 이벤트 핸들러 호출 메서드*==

@@ -29,7 +29,7 @@ public class TeamController {
 
     @PostMapping("/{groupId}/enter")
     public BaseResponse enterTeam(@RequestHeader(name = "Access-Member-Id") Long memberId,
-                                  @RequestParam Long groupId){
+                                  @PathVariable Long groupId){
         Long teamId = teamService.enterTeam(memberId, groupId);
 
         return BaseResponse.getSimpleRes(teamId);
@@ -37,7 +37,7 @@ public class TeamController {
 
     @PostMapping("/{groupId}/exit")
     public BaseResponse exitTeam(@RequestHeader(name = "Access-Member-Id") Long memberId,
-                                 @RequestParam Long groupId){
+                                 @PathVariable Long groupId){
         Long teamId = teamService.exitTeam(memberId, groupId);
 
         return BaseResponse.getSimpleRes(teamId);
@@ -45,7 +45,7 @@ public class TeamController {
 
     @GetMapping("/{groupId}")
     public BaseResponse getGroupDetail(@RequestHeader(name = "Access-Member-Id") Long memberId,
-                                       @RequestParam Long groupId){
+                                       @PathVariable Long groupId){
         TeamDetailResDto result = teamService.getTeamDetail(memberId, groupId);
 
         return new BaseResponse(result);

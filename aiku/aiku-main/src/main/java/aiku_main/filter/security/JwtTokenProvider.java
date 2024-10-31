@@ -1,4 +1,4 @@
-package aiku_main.security;
+package aiku_main.filter.security;
 
 import aiku_main.exception.JwtAccessDeniedException;
 import io.jsonwebtoken.*;

@@ -17,5 +17,7 @@ spring:
 logging:
   level:
     root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ, Asia/Seoul} [%X{request_id}] %-5level [%thread] %logger{36} - %msg%n"
   file:
     name: /spring-log/application.log

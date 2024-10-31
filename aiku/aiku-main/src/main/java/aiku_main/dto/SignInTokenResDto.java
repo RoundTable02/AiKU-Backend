@@ -1,6 +1,6 @@
 package aiku_main.dto;
 
-import aiku_main.security.JwtToken;
+import aiku_main.filter.security.JwtToken;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

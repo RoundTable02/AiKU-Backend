@@ -64,6 +64,8 @@ cloud:
       secretKey: ${AWS_SECRET}
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ, Asia/Seoul} [%X{request_id}] %-5level [%thread] %logger{36} - %msg%n"
   level:
     root: INFO
   file:

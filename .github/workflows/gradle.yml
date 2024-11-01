@@ -121,6 +121,7 @@ jobs:
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-gateway \
             --log-opt awslogs-stream=${{ secrets.EC2_AIKU_GATEWAY_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
@@ -149,6 +150,7 @@ jobs:
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-main \
             --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
@@ -184,6 +186,7 @@ jobs:
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-map \
             --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAP_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
@@ -209,6 +212,7 @@ jobs:
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-alarm \
             --log-opt awslogs-stream=${{ secrets.EC2_AIKU_ALARM_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
             --network="host" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \

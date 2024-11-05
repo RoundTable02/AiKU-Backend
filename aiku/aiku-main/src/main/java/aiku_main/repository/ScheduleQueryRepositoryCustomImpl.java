@@ -5,8 +5,11 @@ import aiku_main.dto.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
+import common.domain.QBetting;
+import common.domain.schedule.QScheduleMember;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static common.domain.ExecStatus.WAIT;
+import static common.domain.QBetting.betting;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
@@ -181,15 +185,23 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
-    public List<ScheduleMemberResDto> getScheduleMembersWithMember(Long scheduleId) {
+    public List<ScheduleMemberResDto> getScheduleMembersWithBettingInfo(Long memberId, Long scheduleId) {
+        QScheduleMember subScheduleMember = new QScheduleMember("subScheduleMember");
+
         return query
                 .select(Projections.constructor(ScheduleMemberResDto.class,
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        member.point))
+                        scheduleMember.isOwner, member.point, betting.betee.id))
                 .from(scheduleMember)
-                .innerJoin(scheduleMember.member, member)
+                .innerJoin(member).on(member.id.eq(scheduleMember.member.id))
+                .leftJoin(betting).on(betting.betee.id.eq(scheduleMember.id),
+                        betting.bettor.id.eq(
+                                JPAExpressions.select(subScheduleMember.id)
+                                        .from(subScheduleMember)
+                                        .where(subScheduleMember.member.id.eq(memberId))
+                        ))
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
                 .orderBy(scheduleMember.createdAt.asc())

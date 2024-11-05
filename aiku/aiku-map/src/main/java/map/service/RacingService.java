@@ -180,7 +180,7 @@ public class RacingService {
 
     private Racing findRacing(Long racingId) {
         return racingRepository.findById(racingId)
-                .orElseThrow(() -> new NoSuchRacingException());
+                .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
     }
 
     private List<AlarmMemberInfo> getMemberInfosInRacing(Long racingId) {
@@ -201,7 +201,7 @@ public class RacingService {
 
     private void checkDuplicateRacing(Long scheduleId, Long firstMemberId, Long secondMemberId) {
         if (racingRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
-            throw new DuplicateRacingException();
+            throw new RacingException(DUPLICATE_RACING);
         }
     }
 
@@ -231,7 +231,7 @@ public class RacingService {
 
     private void checkMemberIsSecondRacerInRacing(Long memberId, Long racingId) {
         if (!racingRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
-            throw new MemberNotInRacingException(NOT_IN_RACING);
+            throw new RacingException(NOT_IN_RACING);
         }
     }
 }

@@ -1,9 +1,8 @@
 package aiku_main.integration_test;
 
 import aiku_main.dto.FirebaseTokenDto;
-import aiku_main.exception.FcmTokenDuplicateException;
+import aiku_main.exception.FcmException;
 import aiku_main.exception.MemberNotFoundException;
-import aiku_main.exception.NoFcmTokenException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.service.MemberFirebaseService;
 import common.domain.member.Member;
@@ -14,16 +13,11 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
@@ -89,7 +83,7 @@ class MemberFirebaseServiceTest {
     void 토큰o_토큰저장_예외() {
         memberFirebaseService.saveToken(member.getId(), originalFcm);
 
-        Assertions.assertThrows(FcmTokenDuplicateException.class, () -> {
+        Assertions.assertThrows(FcmException.class, () -> {
             memberFirebaseService.saveToken(member.getId(), newFcm);
         });
     }
@@ -104,7 +98,7 @@ class MemberFirebaseServiceTest {
 
     @Test
     void 토큰x_토큰수정_예() {
-        Assertions.assertThrows(NoFcmTokenException.class, () -> {
+        Assertions.assertThrows(FcmException.class, () -> {
             memberFirebaseService.updateToken(member.getId(), newFcm);
         });
     }

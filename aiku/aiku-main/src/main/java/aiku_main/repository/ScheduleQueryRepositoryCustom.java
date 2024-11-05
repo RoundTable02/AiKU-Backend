@@ -33,7 +33,7 @@ public interface ScheduleQueryRepositoryCustom {
     int countTeamScheduleByScheduleStatus(Long teamId, ExecStatus scheduleStatus, SearchDateCond dateCond);
     int countMemberScheduleByScheduleStatus(Long memberId, ExecStatus scheduleStatus, SearchDateCond dateCond);
 
-    List<ScheduleMemberResDto> getScheduleMembersWithMember(Long scheduleId);
+    List<ScheduleMemberResDto> getScheduleMembersWithBettingInfo(Long memberId, Long scheduleId);
     List<TeamScheduleListEachResDto> getTeamSchedules(Long teamId, Long memberId, SearchDateCond dateCond, int page);
     List<MemberScheduleListEachResDto> getMemberSchedules(Long memberId, SearchDateCond dateCond, int page);
     List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId);

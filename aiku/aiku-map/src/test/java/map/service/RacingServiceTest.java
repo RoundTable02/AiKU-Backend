@@ -13,8 +13,8 @@ import jakarta.persistence.EntityManager;
 import map.dto.DataResDto;
 import map.dto.RacingAddDto;
 import map.dto.RacingResDto;
-import map.exception.DuplicateRacingException;
 import map.exception.NotEnoughPointException;
+import map.exception.RacingException;
 import map.exception.ScheduleException;
 import map.repository.RacingRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -22,14 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -242,13 +239,13 @@ class RacingServiceTest {
     void 레이싱_생성_중복_예외() {
         RacingAddDto racingAddDto = new RacingAddDto(member2.getId(), 0);
 
-        org.junit.jupiter.api.Assertions.assertThrows(DuplicateRacingException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(RacingException.class, () -> {
             racingService.makeRacing(member1.getId(), schedule1.getId(), racingAddDto);
         });
 
         RacingAddDto racingAddDto2 = new RacingAddDto(member1.getId(), 0);
 
-        org.junit.jupiter.api.Assertions.assertThrows(DuplicateRacingException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(RacingException.class, () -> {
             racingService.makeRacing(member2.getId(), schedule1.getId(), racingAddDto2);
         });
     }

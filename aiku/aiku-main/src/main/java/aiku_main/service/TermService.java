@@ -1,7 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.dto.TermResDto;
-import aiku_main.exception.NoSuchTermException;
+import aiku_main.exception.TermException;
 import aiku_main.repository.TermRepository;
 import common.domain.Term;
 import common.domain.TermTitle;
@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static common.response.status.BaseErrorCode.NO_SUCH_TERM;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,13 +30,13 @@ public class TermService {
 
     private List<Term> getTerms() {
         Term serviceTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.SERVICE)
-                .orElseThrow(() -> new NoSuchTermException());
+                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
         Term marketingTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.MARKETING)
-                .orElseThrow(() -> new NoSuchTermException());
+                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
         Term personalInfoTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.PERSONALINFO)
-                .orElseThrow(() -> new NoSuchTermException());
+                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
         Term locationTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.LOCATION)
-                .orElseThrow(() -> new NoSuchTermException());
+                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
 
         return List.of(serviceTerm, marketingTerm, personalInfoTerm, locationTerm);
     }

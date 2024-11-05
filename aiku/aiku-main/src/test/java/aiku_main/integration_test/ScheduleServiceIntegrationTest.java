@@ -417,6 +417,7 @@ public class ScheduleServiceIntegrationTest {
         List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
         assertThat(scheduleMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+        assertThat(scheduleMembers).extracting("isOwner").containsExactly(true, false, false);
     }
 
     @Test

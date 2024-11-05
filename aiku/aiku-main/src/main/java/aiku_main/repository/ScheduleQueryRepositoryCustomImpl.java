@@ -193,7 +193,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        member.point, betting.betee.id))
+                        scheduleMember.isOwner, member.point, betting.betee.id))
                 .from(scheduleMember)
                 .innerJoin(member).on(member.id.eq(scheduleMember.member.id))
                 .leftJoin(betting).on(betting.betee.id.eq(scheduleMember.id),

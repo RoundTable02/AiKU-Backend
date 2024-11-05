@@ -135,7 +135,6 @@ public class TeamService {
         Map<Long, Integer> previousResultMembers = getPreviousLateTimeResult(team);
         int rank = 1;
         for (TeamResultMember resultMember : lateTeamMemberRanking) {
-            System.out.println("rank = " + rank);
             resultMember.setRank(rank++);
             resultMember.setPreviousRank(previousResultMembers.getOrDefault(resultMember.getMemberId(), -1));
         }
@@ -171,16 +170,23 @@ public class TeamService {
 
         Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
 
+        Map<Long, Integer> previousResult = getPreviousBettingResult(team);
+
         List<TeamResultMember> teamResultMembers = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
             long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
             int analysis = (int) ((double)count/memberBettingList.size() * 100);
 
             TeamBettingResultMemberDto data = memberBettingList.get(0);
-            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.getIsTeamMember()));
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
         teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+
+        int rank = 1;
+        for (TeamResultMember resultMember : teamResultMembers) {
+            resultMember.setRank(rank++);
+        }
 
         TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamResultMembers);
         try {
@@ -188,6 +194,21 @@ public class TeamService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<Long, Integer> getPreviousBettingResult(Team team) {
+        if(team.getTeamResult() != null && team.getTeamResult().getTeamBettingResult() != null){
+            try {
+                TeamBettingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamBettingResult(), TeamBettingResult.class);
+                return previousResult.getMembers().stream()
+                        .collect(Collectors.toMap(TeamResultMember::getMemberId, teamMember -> teamMember.getRank()));
+            } catch (JsonMappingException e) {
+                throw new TeamException(CAN_NOT_PROCESS_JSON);
+            } catch (JsonProcessingException e) {
+                throw new TeamException(CAN_NOT_PROCESS_JSON);
+            }
+        }
+        return new HashMap<>();
     }
 
     @Transactional

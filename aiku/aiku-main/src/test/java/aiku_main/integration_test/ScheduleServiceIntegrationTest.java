@@ -15,6 +15,7 @@ import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
+import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -416,6 +417,37 @@ public class ScheduleServiceIntegrationTest {
         List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
         assertThat(scheduleMembers.size()).isEqualTo(3);
         assertThat(scheduleMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+        assertThat(scheduleMembers).extracting("isOwner").containsExactly(true, false, false);
+    }
+
+    @Test
+    void 스케줄_상세_조회_꼴찌_멤버_선택() {
+        //given
+        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        team.addTeamMember(member4);
+        em.persist(team);
+
+        Schedule schedule = createSchedule(member1, team, 100);
+        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member3, false, 100);
+        em.persist(schedule);
+
+        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElseThrow();
+        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule.getId()).orElseThrow();
+        Betting betting = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember2), 100);
+        em.persist(betting);
+
+        //when
+        ScheduleDetailResDto resultDto = scheduleService.getScheduleDetail(member1.getId(), team.getId(), schedule.getId());
+
+        //then
+        assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
+
+        List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
+        assertThat(scheduleMembers).extracting("isBetee").containsExactly(false, true, false);
+
     }
 
     @Test

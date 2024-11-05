@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamLateTimeResult {
+
     private Long groupId;
     private List<TeamResultMember> members;
 }

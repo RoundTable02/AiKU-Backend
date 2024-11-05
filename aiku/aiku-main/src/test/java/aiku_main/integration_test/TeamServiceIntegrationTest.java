@@ -328,6 +328,53 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
+    void 이벤트핸들러_그룹_지각_분석_이전결과존재() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).plusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(5));
+        schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
+
+        teamService.analyzeLateTimeResult(schedule1.getId());
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).plusMinutes(50));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(100));
+        schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
+
+        //when
+        teamService.analyzeLateTimeResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+
+        TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
+        List<TeamResultMember> lateMemberRanking = result.getMembers();
+        assertThat(lateMemberRanking).extracting("previousRank").containsExactly(3, 2, 1);
+        assertThat(lateMemberRanking).extracting("rank").containsExactly(1, 2, 3);
+    }
+
+    @Test
     void 이벤트핸들러_베팅_분석() throws JsonProcessingException {
         //given
         Team team = Team.create(member1, "team");
@@ -379,5 +426,55 @@ public class TeamServiceIntegrationTest {
                 .getMembers();
         assertThat(teamResultMembers.size()).isEqualTo(3);
         assertThat(teamResultMembers).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
+    }
+
+    @Test
+    void 이벤트핸들러_베팅_분석_이전결과존재() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
+        Betting betting1 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), 100);
+        betting1.setWin(100);
+        em.persist(betting1);
+
+        Betting betting2 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), 100);
+        betting2.setLose();
+        em.persist(betting2);
+
+        teamService.analyzeBettingResult(schedule1.getId());
+
+        Betting betting4 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
+        betting4.setWin(100);
+        em.persist(betting4);
+
+        Betting betting5 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
+        betting5.setWin(100);
+        em.persist(betting5);
+
+        //when
+        teamService.analyzeBettingResult(schedule1.getId());
+
+        //then
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
+                .getMembers();
+        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3);
+        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, -1, 2);
     }
 }

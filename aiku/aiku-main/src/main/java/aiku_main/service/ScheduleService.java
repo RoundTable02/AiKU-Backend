@@ -219,7 +219,7 @@ public class ScheduleService {
         checkScheduleMember(memberId, scheduleId, true);
 
         //서비스 로직
-        List<ScheduleMemberResDto> membersDtoList = scheduleQueryRepository.getScheduleMembersWithMember(scheduleId);
+        List<ScheduleMemberResDto> membersDtoList = scheduleQueryRepository.getScheduleMembersWithBettingInfo(memberId, scheduleId);
 
         return new ScheduleDetailResDto(schedule, membersDtoList);
     }

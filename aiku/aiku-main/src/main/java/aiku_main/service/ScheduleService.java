@@ -269,6 +269,15 @@ public class ScheduleService {
         return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleBettingResult();
     }
 
+    public String getScheduleRacingResult(Long memberId, Long teamId, Long scheduleId) {
+        checkExistTeam(teamId);
+        checkTeamMember(memberId, teamId);
+        Schedule schedule = findScheduleById(scheduleId);
+        checkIsTerm(schedule);
+
+        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleRacingResult();
+    }
+
     //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {

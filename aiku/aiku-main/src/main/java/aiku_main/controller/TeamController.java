@@ -74,4 +74,12 @@ public class TeamController {
 
         return new BaseResponse(result);
     }
+
+    @GetMapping("/{groupId}/analytics/racing")
+    public BaseResponse getGroupRacingResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                              @PathVariable Long groupId){
+        String result = teamService.getTeamRacingResult(memberId, groupId);
+
+        return new BaseResponse(result);
+    }
 }

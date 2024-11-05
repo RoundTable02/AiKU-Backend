@@ -2,12 +2,14 @@ package aiku_main.service;
 
 import aiku_main.application_event.domain.TeamBettingResult;
 import aiku_main.application_event.domain.TeamLateTimeResult;
+import aiku_main.application_event.domain.TeamRacingResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
+import aiku_main.repository.dto.TeamRacingResultMemberDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +37,7 @@ public class TeamService {
     private final TeamQueryRepository teamQueryRepository;
     private final ScheduleQueryRepository scheduleQueryRepository;
     private final BettingQueryRepository bettingQueryRepository;
+    private final RacingQueryRepository racingQueryRepository;
     private final MemberRepository memberRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapper objectMapper;
@@ -116,6 +119,15 @@ public class TeamService {
     }
 
     public String getTeamBettingResult(Long memberId, Long teamId){
+        //검증 로직
+        Team team = findTeamById(teamId);
+        checkTeamMember(memberId, teamId, true);
+
+        //서비스 로직
+        return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
+    }
+
+    public String getTeamRacingResult(Long memberId, Long teamId) {
         //검증 로직
         Team team = findTeamById(teamId);
         checkTeamMember(memberId, teamId, true);
@@ -209,6 +221,32 @@ public class TeamService {
             }
         }
         return new HashMap<>();
+    }
+
+    @Transactional
+    public void analyzeRacingResult(Long scheduleId) {
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
+
+        Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingQueryRepository.findMemberWithTermRacingsInTeam(team.getId());
+
+        List<TeamResultMember> teamResultMembers = new ArrayList<>();
+        memberRacingsMap.forEach((memberId, memberRacingList) -> {
+            long count = memberRacingList.stream().filter(TeamRacingResultMemberDto::isWinner).count();
+            int analysis = (int) ((double) count / memberRacingList.size() * 100);
+
+            TeamRacingResultMemberDto data = memberRacingList.get(0);
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.getIsTeamMember()));
+        });
+
+        teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+
+        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamResultMembers);
+        try {
+            team.setTeamBettingResult(objectMapper.writeValueAsString(teamRacingResult));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Transactional

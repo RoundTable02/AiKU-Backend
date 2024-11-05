@@ -12,14 +12,16 @@ import static common.domain.Status.ALIVE;
 @Getter @Setter
 @NoArgsConstructor
 public class TeamResultMember {
+
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;
     private int analysis;
+    private int previousRank;
+    private int rank;
     private boolean isTeamMember;
 
     @QueryProjection
-
     public TeamResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, Status isTeamMember) {
         this.memberId = memberId;
         this.nickname = nickname;

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -82,7 +81,7 @@ class ScheduleServiceTest {
 
         when(scheduleQueryRepository.existScheduleMember(any(), any())).thenReturn(true);
         when(scheduleQueryRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(schedule));
-        when(scheduleQueryRepository.getScheduleMembersWithMember(nullable(Long.class))).thenReturn(null);
+        when(scheduleQueryRepository.getScheduleMembersWithBettingInfo(nullable(Long.class), nullable(Long.class))).thenReturn(null);
 
         //when
         ScheduleDetailResDto result = scheduleService.getScheduleDetail(member1.getId(), null, null);

@@ -10,12 +10,14 @@ public class ScheduleMemberResDto {
     private String nickname;
     private MemberProfileResDto memberProfile;
     private int point;
+    private boolean isBetee;
 
     @QueryProjection
-    public ScheduleMemberResDto(Long memberId, String nickname, MemberProfileResDto memberProfile, int point) {
+    public ScheduleMemberResDto(Long memberId, String nickname, MemberProfileResDto memberProfile, int point, Long beteeId) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;
         this.point = point;
+        this.isBetee = (beteeId == null)? false : true;
     }
 }

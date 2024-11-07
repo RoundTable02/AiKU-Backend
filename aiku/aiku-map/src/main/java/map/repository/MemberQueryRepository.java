@@ -10,4 +10,5 @@ public interface MemberQueryRepository {
 
     boolean checkEnoughRacingPoint(Long memberId, Integer point);
 
+    Optional<AlarmMemberInfo> findMemberInfoByScheduleMemberId(Long scheduleMemberId);
 }

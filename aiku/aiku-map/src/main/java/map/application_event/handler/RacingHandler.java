@@ -2,6 +2,7 @@ package map.application_event.handler;
 
 import lombok.RequiredArgsConstructor;
 import map.application_event.event.AskRacingEvent;
+import map.application_event.event.MemberArrivalEvent;
 import map.application_event.event.RacingStatusNotChangedEvent;
 import map.scheduler.RacingScheduler;
 import map.service.RacingService;
@@ -25,6 +26,11 @@ public class RacingHandler {
     @EventListener
     public void handleRacingStatusNotChangedEvent(RacingStatusNotChangedEvent event){
         racingService.autoDeleteRacingById(event.getRacingInfo());
+    }
+
+    @EventListener
+    public void handleMemberArrivalEvent(MemberArrivalEvent event){
+        racingService.terminateRacings(event.getMemberId(), event.getScheduleId(), event.getScheduleName());
     }
 
 }

@@ -72,6 +72,8 @@ public class MapService {
                 )
         );
 
+        // TODO: 멤버 도착 내부 이벤트 발생 (레이싱 처리 용)
+
         //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
         if(schedule.checkAllMembersArrive()) {
             kafkaService.sendMessage(KafkaTopic.alarm,

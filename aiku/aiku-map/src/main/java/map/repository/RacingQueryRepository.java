@@ -1,19 +1,11 @@
 package map.repository;
 
-import common.kafka_message.alarm.AlarmMemberInfo;
-import map.dto.RacingResDto;
+import common.domain.ExecStatus;
+import common.domain.Racing;
+import common.domain.Status;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+public interface RacingQueryRepository extends JpaRepository<Racing, Long>, RacingQueryRepositoryCustom {
 
-public interface RacingQueryRepository {
-
-    List<RacingResDto> getAllRunningRacingsInSchedule(Long scheduleId);
-
-    boolean checkBothMemberHaveEnoughRacingPoint(Long racingId);
-
-    List<AlarmMemberInfo> findMemberInfoByScheduleMemberId(Long racingId);
-
-    boolean checkMemberIsSecondRacerInRacing(Long memberId, Long racingId);
-
-    boolean existsByFirstMemberIdAndSecondMemberId(Long scheduleId, Long firstMemberId, Long secondMemberId);
+    boolean existsByIdAndRaceStatusAndStatus(Long racingId, ExecStatus scheduleStatus, Status status);
 }

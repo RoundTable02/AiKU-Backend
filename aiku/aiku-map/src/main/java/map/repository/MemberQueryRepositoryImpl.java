@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Optional;
 
 import static common.domain.member.QMember.member;
+import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
 public class MemberQueryRepositoryImpl implements MemberQueryRepository {
@@ -36,5 +37,20 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepository {
                 .fetchOne();
 
         return count != null && count > 0;
+    }
+
+    @Override
+    public Optional<AlarmMemberInfo> findMemberInfoByScheduleMemberId(Long scheduleMemberId) {
+        AlarmMemberInfo alarmMemberInfo = query.select(Projections.constructor(AlarmMemberInfo.class,
+                        member.id,
+                        member.nickname,
+                        member.profile,
+                        member.firebaseToken))
+                .from(scheduleMember)
+                .leftJoin(scheduleMember.member, member)
+                .where(scheduleMember.id.eq(scheduleMemberId))
+                .fetchOne();
+
+        return Optional.ofNullable(alarmMemberInfo);
     }
 }

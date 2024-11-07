@@ -13,15 +13,18 @@ import map.application_event.publisher.RacingEventPublisher;
 import map.dto.DataResDto;
 import map.dto.RacingAddDto;
 import map.dto.RacingResDto;
+import map.dto.RunningRacingDto;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
-import map.repository.RacingRepository;
+import map.repository.RacingCommandRepository;
+import map.repository.RacingQueryRepository;
 import map.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
@@ -35,7 +38,8 @@ public class RacingService {
 
     private final KafkaProducerService kafkaService;
     private final RacingEventPublisher racingEventPublisher;
-    private final RacingRepository racingRepository;
+    private final RacingQueryRepository racingQueryRepository;
+    private final RacingCommandRepository racingCommandRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
 
@@ -45,7 +49,7 @@ public class RacingService {
         checkScheduleInRun(scheduleId);
 
         //  해당 스케줄에 속해 있으며 현재 진행 중인 레이싱 종합하여 전달
-        List<RacingResDto> racings = racingRepository.getAllRunningRacingsInSchedule(scheduleId);
+        List<RacingResDto> racings = racingQueryRepository.getAllRunningRacingsInSchedule(scheduleId);
 
         return new DataResDto<>(1, racings);
     }
@@ -69,7 +73,7 @@ public class RacingService {
 
         //  대기 중 레이싱 DB 저장
         Racing racing = Racing.create(firstScheduleMemberId, secondScheduleMemberId, racingAddDto.getPoint());
-        racingRepository.save(racing);
+        racingCommandRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingAddDto.getTargetMemberId());
@@ -99,7 +103,7 @@ public class RacingService {
 
     @Transactional
     public void autoDeleteRacingById(RacingInfo racingInfo) {
-        racingRepository.deleteById(racingInfo.getRacingId());
+        racingCommandRepository.deleteById(racingInfo.getRacingId());
         AlarmMemberInfo firstRacerInfo = getMemberInfo(racingInfo.getFirstRacerId());
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingInfo.getSecondRacerId());
 
@@ -131,12 +135,12 @@ public class RacingService {
         List<AlarmMemberInfo> racingMemberInfos = getMemberInfosInRacing(racingId);
 
         // 두 대상자에게 포인트 차감 전달
-        racingMemberInfos
-                .stream()
-                        .forEach(r -> kafkaService.sendMessage(KafkaTopic.alarm,
-                                new PointChangedMessage(List.of(r), AlarmMessageType.POINT_CHANGED,
-                                        r.getMemberId(), racing.getPointAmount())
-                        ));
+        racingMemberInfos.forEach(r ->
+                kafkaService.sendMessage(KafkaTopic.alarm,
+                        new PointChangedMessage(List.of(r), AlarmMessageType.POINT_CHANGED,
+                                r.getMemberId(), PointChangedType.MINUS, racing.getPointAmount())
+                )
+        );
 
         return racingId;
     }
@@ -158,9 +162,49 @@ public class RacingService {
         );
 
         //  대기 중 레이싱 DB 삭제
-        racingRepository.deleteById(racingId);
+        racingCommandRepository.deleteById(racingId);
 
         return racingId;
+    }
+
+    // 이벤트 핸들
+    @Transactional
+    public void terminateRacings(Long memberId, Long scheduleId, String scheduleName) {
+        Long scheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
+
+        // 회원이 소속된 진행 중인 레이싱 정보 조회
+        List<RunningRacingDto> runningRacingDtos = racingQueryRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
+
+        // 레이싱 종료 처리를 위한 update 벌크 쿼리
+        racingCommandRepository.terminateRacingsByScheduleMemberId(scheduleMemberId);
+
+        runningRacingDtos.forEach(r -> {
+            Long loserId = r.getFirstScheduleMemberId();
+            if (r.getFirstScheduleMemberId().equals(scheduleMemberId)) {
+                loserId = r.getSecondScheduleMemberId();
+            }
+
+            terminateRacing(scheduleId, scheduleName, r.getRacingId(), scheduleMemberId, loserId, r.getPointAmount());
+        });
+
+    }
+
+    private void terminateRacing(Long scheduleId, String scheduleName, Long racingId, Long winnerScheduleMemberId, Long loserScheduleMemberId, Integer pointAmount) {
+        AlarmMemberInfo winnerInfo = getMemberInfoByScheduleMemberId(winnerScheduleMemberId);
+        AlarmMemberInfo loserInfo = getMemberInfoByScheduleMemberId(loserScheduleMemberId);
+
+        // 승리자 아쿠 추가 (레이싱 성사 때 차감된 금액 + 상금)
+        kafkaService.sendMessage(KafkaTopic.alarm,
+                new PointChangedMessage(List.of(winnerInfo), AlarmMessageType.POINT_CHANGED,
+                        winnerInfo.getMemberId(), PointChangedType.MINUS, pointAmount * 2)
+        );
+
+        // 레이싱 종료 알림
+        kafkaService.sendMessage(KafkaTopic.alarm,
+                new RacingTermMessage(List.of(winnerInfo, loserInfo), AlarmMessageType.RACING_TERM,
+                        scheduleId, scheduleName, racingId, pointAmount
+                )
+        );
     }
 
     private Schedule findSchedule(Long scheduleId) {
@@ -173,18 +217,27 @@ public class RacingService {
                 .orElseThrow(() -> new MemberNotFoundException());
     }
 
+    private AlarmMemberInfo getMemberInfoByScheduleMemberId(Long scheduleMemberId) {
+        return memberRepository.findMemberInfoByScheduleMemberId(scheduleMemberId)
+                .orElseThrow(() -> new MemberNotFoundException());
+    }
+
     private Long getScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId) {
         return scheduleRepository.findScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private Racing findRacing(Long racingId) {
-        return racingRepository.findById(racingId)
+        return racingQueryRepository.findById(racingId)
                 .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
     }
 
     private List<AlarmMemberInfo> getMemberInfosInRacing(Long racingId) {
-        return racingRepository.findMemberInfoByScheduleMemberId(racingId);
+        return racingQueryRepository.findMemberInfoByScheduleMemberId(racingId);
+    }
+
+    private List<Racing> findAllRacingsByMemberId(Long memberId) {
+        return racingQueryRepository.findRacingsByMemberId(memberId);
     }
 
     private void checkMemberInSchedule(Long memberId, Long scheduleId) {
@@ -200,13 +253,13 @@ public class RacingService {
     }
 
     private void checkDuplicateRacing(Long scheduleId, Long firstMemberId, Long secondMemberId) {
-        if (racingRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
+        if (racingQueryRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
             throw new RacingException(DUPLICATE_RACING);
         }
     }
 
     private void checkRacingInWait(Long racingId) {
-        if (!racingRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
+        if (!racingQueryRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }
@@ -224,13 +277,13 @@ public class RacingService {
     }
 
     private void checkBothMemberHaveEnoughRacingPoint(Long racingId){
-        if(!racingRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
+        if(!racingQueryRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
             throw new NotEnoughPointException();
         }
     }
 
     private void checkMemberIsSecondRacerInRacing(Long memberId, Long racingId) {
-        if (!racingRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
+        if (!racingQueryRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
             throw new RacingException(NOT_IN_RACING);
         }
     }

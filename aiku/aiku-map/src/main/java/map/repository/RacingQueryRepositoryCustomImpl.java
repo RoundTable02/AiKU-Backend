@@ -1,10 +1,10 @@
 package map.repository;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.ExecStatus;
+import common.domain.Racing;
 import common.domain.member.QMember;
 import common.domain.schedule.QScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import map.dto.MemberProfileDto;
 import map.dto.RacerResDto;
 import map.dto.RacingResDto;
+import map.dto.RunningRacingDto;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,11 +20,10 @@ import java.util.Objects;
 
 import static common.domain.QRacing.racing;
 import static common.domain.member.QMember.member;
-import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class RacingQueryRepositoryImpl implements RacingQueryRepository {
+public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCustom {
 
     private final JPAQueryFactory query;
 
@@ -167,5 +167,38 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
                 .fetchOne();
 
         return count != null && count > 0;
+    }
+
+    @Override
+    public List<Racing> findRacingsByMemberId(Long memberId) {
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
+
+        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
+        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
+
+        return query.selectFrom(racing)
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
+                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인 (첫 번째 별칭 사용)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
+                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인 (두 번째 별칭 사용)
+                .where(
+                        firstRacerMember.member.id.eq(memberId)
+                                .or(secondRacerMember.member.id.eq(memberId))
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<RunningRacingDto> findRunningRacingsByScheduleMemberId(Long scheduleMemberId) {
+        return query.select(Projections.constructor(RunningRacingDto.class,
+                        racing.id, racing.firstRacer.id, racing.secondRacer.id, racing.pointAmount)
+                )
+                .from(racing)
+                .where(racing.firstRacer.id.eq(scheduleMemberId)
+                                .or(racing.secondRacer.id.eq(scheduleMemberId)),
+                        racing.raceStatus.eq(ExecStatus.RUN)
+                )
+                .fetch();
     }
 }

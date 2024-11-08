@@ -2,9 +2,6 @@ package aiku_main.integration_test;
 
 import aiku_main.dto.*;
 import aiku_main.exception.TitleException;
-import aiku_main.repository.MemberQueryRepository;
-import aiku_main.repository.MemberRepository;
-import aiku_main.s3.S3ImageProvider;
 import aiku_main.service.MemberService;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
@@ -18,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -48,7 +44,7 @@ class MemberServiceTest {
                 .email("asdasd@gmail.com")
                 .build();
 
-        member.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+        member.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
 
         member.updateAuth(true, true, false, true);
 
@@ -61,7 +57,7 @@ class MemberServiceTest {
                 .email("asdasd2@gmail.com")
                 .build();
 
-        member2.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+        member2.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
 
         member2.updateAuth(true, true, false, true);
 

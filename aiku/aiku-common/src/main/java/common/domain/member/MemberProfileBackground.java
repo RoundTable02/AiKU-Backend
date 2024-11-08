@@ -1,5 +1,5 @@
 package common.domain.member;
 
 public enum MemberProfileBackground {
-    RED, GREEN, BLUE
+    GREEN, YELLOW, PURPLE, GRAY
 }

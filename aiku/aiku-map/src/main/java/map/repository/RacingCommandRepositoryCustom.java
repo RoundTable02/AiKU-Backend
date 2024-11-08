@@ -2,5 +2,7 @@ package map.repository;
 
 public interface RacingCommandRepositoryCustom {
 
-    void terminateRacingsByScheduleMemberId(Long scheduleMemberId);
+    void setWinnerAndTermRacingByScheduleMemberId(Long scheduleMemberId);
+
+    void terminateRunningRacing(Long scheduleId);
 }

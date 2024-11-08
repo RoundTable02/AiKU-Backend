@@ -51,8 +51,4 @@ public class Racing extends BaseTime{
         this.raceStatus = ExecStatus.RUN;
     }
 
-    public void terminateRacing() {
-        this.raceStatus = ExecStatus.TERM;
-    }
-
 }

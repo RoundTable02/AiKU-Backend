@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
@@ -169,14 +168,15 @@ public class RacingService {
 
     // 이벤트 핸들
     @Transactional
-    public void terminateRacings(Long memberId, Long scheduleId, String scheduleName) {
+    public void makeMemberWinnerInRacing(Long memberId, Long scheduleId, String scheduleName) {
+        // 멤버의 도착으로 해당 멤버의 모든 레이싱 종료 처리
         Long scheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
 
         // 회원이 소속된 진행 중인 레이싱 정보 조회
         List<RunningRacingDto> runningRacingDtos = racingQueryRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
 
         // 레이싱 종료 처리를 위한 update 벌크 쿼리
-        racingCommandRepository.terminateRacingsByScheduleMemberId(scheduleMemberId);
+        racingCommandRepository.setWinnerAndTermRacingByScheduleMemberId(scheduleMemberId);
 
         runningRacingDtos.forEach(r -> {
             Long loserId = r.getFirstScheduleMemberId();
@@ -184,19 +184,19 @@ public class RacingService {
                 loserId = r.getSecondScheduleMemberId();
             }
 
-            terminateRacing(scheduleId, scheduleName, r.getRacingId(), scheduleMemberId, loserId, r.getPointAmount());
+            makeRacingTermAndWinnerPrized(scheduleId, scheduleName, r.getRacingId(), scheduleMemberId, loserId, r.getPointAmount());
         });
 
     }
 
-    private void terminateRacing(Long scheduleId, String scheduleName, Long racingId, Long winnerScheduleMemberId, Long loserScheduleMemberId, Integer pointAmount) {
+    private void makeRacingTermAndWinnerPrized(Long scheduleId, String scheduleName, Long racingId, Long winnerScheduleMemberId, Long loserScheduleMemberId, Integer pointAmount) {
         AlarmMemberInfo winnerInfo = getMemberInfoByScheduleMemberId(winnerScheduleMemberId);
         AlarmMemberInfo loserInfo = getMemberInfoByScheduleMemberId(loserScheduleMemberId);
 
         // 승리자 아쿠 추가 (레이싱 성사 때 차감된 금액 + 상금)
         kafkaService.sendMessage(KafkaTopic.alarm,
                 new PointChangedMessage(List.of(winnerInfo), AlarmMessageType.POINT_CHANGED,
-                        winnerInfo.getMemberId(), PointChangedType.MINUS, pointAmount * 2)
+                        winnerInfo.getMemberId(), PointChangedType.PLUS, pointAmount * 2)
         );
 
         // 레이싱 종료 알림
@@ -205,6 +205,12 @@ public class RacingService {
                         scheduleId, scheduleName, racingId, pointAmount
                 )
         );
+    }
+
+    @Transactional
+    public void terminateRunningRacing(Long scheduleId) {
+        // 스케줄 종료 이후 진행 중인 레이싱 모두 무승부 처리
+        racingCommandRepository.terminateRunningRacing(scheduleId);
     }
 
     private Schedule findSchedule(Long scheduleId) {

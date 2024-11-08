@@ -5,7 +5,6 @@ import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.MemberProfileDto;
 import aiku_main.dto.MemberRegisterDto;
-import aiku_main.dto.NicknameExistDto;
 import aiku_main.dto.NicknameExistResDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.oauth.KakaoOauthHelper;
@@ -86,8 +85,8 @@ public class MemberRegisterService {
     }
 
 
-    public NicknameExistResDto checkNickname(NicknameExistDto nicknameExistDto) {
-        boolean exist = memberRepository.existsByNickname(nicknameExistDto.getNickname());
+    public NicknameExistResDto checkNickname(String nickname) {
+        boolean exist = memberRepository.existsByNickname(nickname);
         return new NicknameExistResDto(exist);
     }
 }

@@ -1,7 +1,6 @@
 package aiku_main.controller;
 
 import aiku_main.dto.MemberRegisterDto;
-import aiku_main.dto.NicknameExistDto;
 import aiku_main.dto.NicknameExistResDto;
 import aiku_main.service.MemberRegisterService;
 import common.response.BaseResponse;
@@ -25,8 +24,8 @@ public class MemberRegisterController {
     }
 
     @GetMapping("/nickname")
-    public BaseResponse<NicknameExistResDto> checkNickname(@RequestBody NicknameExistDto nicknameExistDto) {
-        NicknameExistResDto checkNickname = memberRegisterService.checkNickname(nicknameExistDto);
+    public BaseResponse<NicknameExistResDto> checkNickname(@RequestParam String nickname) {
+        NicknameExistResDto checkNickname = memberRegisterService.checkNickname(nickname);
 
         return new BaseResponse<>(checkNickname);
     }

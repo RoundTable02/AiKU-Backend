@@ -133,7 +133,7 @@ public class TeamService {
         checkTeamMember(memberId, teamId, true);
 
         //서비스 로직
-        return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
+        return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
     }
 
     //==* 이벤트 핸들러 호출 메서드*==
@@ -240,6 +240,11 @@ public class TeamService {
         });
 
         teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+
+        int rank = 1;
+        for (TeamResultMember resultMember : teamResultMembers) {
+            resultMember.setRank(rank++);
+        }
 
         TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamResultMembers);
         try {

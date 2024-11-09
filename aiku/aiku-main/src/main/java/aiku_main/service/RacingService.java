@@ -32,6 +32,7 @@ public class RacingService {
     @Transactional
     public void analyzeScheduleRacingResult(Long scheduleId) {
         List<Racing> racings = racingQueryRepository.findTermRacingsInSchedule(scheduleId);
+        System.out.println("racings = " + racings.size());
 
         if (racings.isEmpty()) {
             return;
@@ -55,7 +56,7 @@ public class RacingService {
 
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         try {
-            schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
+            schedule.setScheduleRacingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new BettingException(INTERNAL_SERVER_ERROR, "Can't Parse ScheduleBettingResult");
         }

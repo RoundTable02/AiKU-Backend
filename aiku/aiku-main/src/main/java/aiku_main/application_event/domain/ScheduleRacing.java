@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScheduleRacing {
 
-    private ScheduleRacingMember bettor;
-    private ScheduleRacingMember betee;
+    private ScheduleRacingMember firstRacer;
+    private ScheduleRacingMember secondRacer;
     private int pointAmount;
 }

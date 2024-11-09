@@ -51,4 +51,9 @@ public class Racing extends BaseTime{
         this.raceStatus = ExecStatus.RUN;
     }
 
+    public void termRacing(Long winnerId) {
+        this.raceStatus = ExecStatus.TERM;
+        this.winner = new ScheduleMemberValue(winnerId);
+    }
+
 }

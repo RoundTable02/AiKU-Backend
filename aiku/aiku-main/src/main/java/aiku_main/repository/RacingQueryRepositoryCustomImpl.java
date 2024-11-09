@@ -7,8 +7,6 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.Racing;
-import common.domain.member.QMember;
-import common.domain.schedule.QScheduleMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +20,7 @@ import static common.domain.ExecStatus.TERM;
 import static common.domain.QRacing.racing;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
+import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
@@ -99,11 +98,11 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
 
     @Override
     public List<Racing> findTermRacingsInSchedule(Long scheduleId) {
-        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
-
         return query.selectFrom(racing)
-                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
-                .where(firstRacerMember.schedule.id.eq(scheduleId), racing.raceStatus.eq(TERM)) // 스케줄 ID 조건
+                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
+                .join(scheduleMember.schedule, schedule)
+                .where(schedule.id.eq(scheduleId),
+                        racing.raceStatus.eq(TERM))
                 .fetch();
     }
 }

@@ -100,4 +100,13 @@ public class ScheduleController {
 
         return new BaseResponse<>(result);
     }
+
+    @GetMapping("/{scheduleId}/racing/result")
+    public BaseResponse<String> getScheduleRacingResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                         @PathVariable Long groupId,
+                                                         @PathVariable Long scheduleId){
+        String result = scheduleService.getScheduleRacingResult(memberId, groupId, scheduleId);
+
+        return new BaseResponse<>(result);
+    }
 }

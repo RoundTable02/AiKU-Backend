@@ -11,16 +11,18 @@ import java.util.List;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class PointChangedMessage extends AlarmMessage{
+public class RacingTermMessage extends AlarmMessage{
 
-    private Long memberId;
-    private PointChangedType pointChangedType;
+    private Long scheduleId;
+    private String scheduleName;
+    private Long racingId;
     private Integer pointAmount;
 
-    public PointChangedMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long memberId, PointChangedType pointChangedType, Integer pointAmount) {
+    public RacingTermMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId, Integer pointAmount) {
         super(members, alarmMessageType);
-        this.memberId = memberId;
-        this.pointChangedType = pointChangedType;
+        this.scheduleId = scheduleId;
+        this.scheduleName = scheduleName;
+        this.racingId = racingId;
         this.pointAmount = pointAmount;
     }
 }

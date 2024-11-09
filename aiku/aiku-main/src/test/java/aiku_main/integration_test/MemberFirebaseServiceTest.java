@@ -46,7 +46,7 @@ class MemberFirebaseServiceTest {
                 .email("asdasd@gmail.com")
                 .build();
 
-        member.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+        member.updateProfile(MemberProfileType.CHAR, "", MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
 
         member.updateAuth(true, true, false, true);
 

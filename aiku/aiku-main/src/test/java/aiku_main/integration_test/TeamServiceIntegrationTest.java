@@ -2,6 +2,7 @@ package aiku_main.integration_test;
 
 import aiku_main.application_event.domain.TeamBettingResult;
 import aiku_main.application_event.domain.TeamLateTimeResult;
+import aiku_main.application_event.domain.TeamRacingResult;
 import aiku_main.application_event.domain.TeamResultMember;
 import aiku_main.dto.*;
 import aiku_main.exception.TeamException;
@@ -476,5 +477,123 @@ public class TeamServiceIntegrationTest {
                 .getMembers();
         assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3);
         assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, -1, 2);
+    }
+
+    @Test
+    void 이벤트핸들러_레이싱_분석() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
+        Racing racing1 = Racing.create(schedule1.getScheduleMembers().get(0).getId(), schedule1.getScheduleMembers().get(1).getId(), 20);
+        racing1.termRacing(schedule1.getScheduleMembers().get(0).getId());
+        em.persist(racing1);
+
+        Racing racing2 = Racing.create(schedule1.getScheduleMembers().get(1).getId(), schedule1.getScheduleMembers().get(2).getId(), 10);
+        racing2.termRacing(schedule1.getScheduleMembers().get(1).getId());
+        em.persist(racing2);
+
+        Racing racing3 = Racing.create(schedule2.getScheduleMembers().get(0).getId(), schedule2.getScheduleMembers().get(1).getId(), 20);
+        racing3.termRacing(schedule2.getScheduleMembers().get(0).getId());
+        em.persist(racing3);
+
+        Racing racing4 = Racing.create(schedule2.getScheduleMembers().get(1).getId(), schedule2.getScheduleMembers().get(2).getId(), 10);
+        racing4.termRacing(schedule2.getScheduleMembers().get(1).getId());
+        em.persist(racing4);
+
+        Racing racing5 = Racing.create(schedule2.getScheduleMembers().get(2).getId(), schedule2.getScheduleMembers().get(0).getId(), 10);
+        racing5.termRacing(schedule2.getScheduleMembers().get(0).getId());
+        em.persist(racing5);
+
+        //when
+        teamService.analyzeRacingResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
+                .getMembers();
+        assertThat(teamResultMembers.size()).isEqualTo(3);
+        assertThat(teamResultMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+    }
+
+    @Test
+    void 이벤트핸들러_레이싱_분석_이전결과존재() throws JsonProcessingException {
+        //given
+        Team team = Team.create(member1, "team");
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.persist(team);
+
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member3, false, 0);
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
+                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member3, false, 0);
+        em.persist(schedule2);
+
+        Racing racing1 = Racing.create(schedule1.getScheduleMembers().get(0).getId(), schedule1.getScheduleMembers().get(1).getId(), 20);
+        racing1.termRacing(schedule1.getScheduleMembers().get(0).getId());
+        em.persist(racing1);
+
+        Racing racing2 = Racing.create(schedule1.getScheduleMembers().get(1).getId(), schedule1.getScheduleMembers().get(2).getId(), 10);
+        racing2.termRacing(schedule1.getScheduleMembers().get(1).getId());
+        em.persist(racing2);
+
+        teamService.analyzeRacingResult(schedule1.getId());
+
+        Member member4 = Member.create("member4");
+        em.persist(member4);
+        team.addTeamMember(member4);
+        schedule2.addScheduleMember(member4, false, 0);
+
+        em.flush();
+        em.clear();
+
+        Racing racing3 = Racing.create(schedule2.getScheduleMembers().get(0).getId(), schedule2.getScheduleMembers().get(1).getId(), 20);
+        racing3.termRacing(schedule2.getScheduleMembers().get(0).getId());
+        em.persist(racing3);
+
+        Racing racing4 = Racing.create(schedule2.getScheduleMembers().get(1).getId(), schedule2.getScheduleMembers().get(2).getId(), 10);
+        racing4.termRacing(schedule2.getScheduleMembers().get(1).getId());
+        em.persist(racing4);
+
+        Racing racing5 = Racing.create(schedule2.getScheduleMembers().get(2).getId(), schedule2.getScheduleMembers().get(3).getId(), 10);
+        racing5.termRacing(schedule2.getScheduleMembers().get(2).getId());
+        em.persist(racing5);
+
+        //when
+        teamService.analyzeRacingResult(schedule1.getId());
+        em.flush();
+        em.clear();
+
+        //then
+        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(findTeam).isNotNull();
+        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
+                .getMembers();
+        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3, 4);
+        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, 2, 3, -1);
     }
 }

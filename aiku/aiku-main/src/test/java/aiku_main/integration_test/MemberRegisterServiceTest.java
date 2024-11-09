@@ -1,17 +1,10 @@
 package aiku_main.integration_test;
 
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.MemberProfileDto;
 import aiku_main.dto.MemberRegisterDto;
-import aiku_main.dto.NicknameExistDto;
 import aiku_main.dto.NicknameExistResDto;
-import aiku_main.exception.MemberNotFoundException;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
-import aiku_main.repository.EventRepository;
-import aiku_main.repository.MemberQueryRepository;
-import aiku_main.repository.MemberRepository;
-import aiku_main.s3.S3ImageProvider;
 import aiku_main.service.MemberRegisterService;
 import common.domain.Status;
 import common.domain.event.RecommendEvent;
@@ -21,10 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +40,7 @@ class MemberRegisterServiceTest {
         when(kakaoOauthHelper.getOauthInfoByIdToken(any())).thenReturn(mockOauthInfo);
 
         MemberProfileDto memberProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
-                MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+                MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto memberRegisterDto = new MemberRegisterDto(
                 "nickname1", "asd@gmail.com", "idToken", memberProfileDto,
                 true, true, true, true, ""
@@ -73,7 +63,7 @@ class MemberRegisterServiceTest {
         assertThat(profile.getProfileImg()).isBlank();
         assertThat(profile.getProfileType()).isEqualTo(MemberProfileType.CHAR);
         assertThat(profile.getProfileCharacter()).isEqualTo(MemberProfileCharacter.C01);
-        assertThat(profile.getProfileBackground()).isEqualTo(MemberProfileBackground.BLUE);
+        assertThat(profile.getProfileBackground()).isEqualTo(MemberProfileBackground.PURPLE);
     }
 
     @Test
@@ -83,7 +73,7 @@ class MemberRegisterServiceTest {
         when(kakaoOauthHelper.getOauthInfoByIdToken(any())).thenReturn(mockOauthInfo);
 
         MemberProfileDto recommenderProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
-                MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+                MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto recommenderRegisterDto = new MemberRegisterDto(
                 "recommender", "asd@gmail.com", "rIdToken", recommenderProfileDto,
                 true, true, true, true, ""
@@ -117,7 +107,7 @@ class MemberRegisterServiceTest {
         when(kakaoOauthHelper.getOauthInfoByIdToken(any())).thenReturn(mockOauthInfo);
 
         MemberProfileDto member1ProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
-                MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+                MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto member1RegisterDto = new MemberRegisterDto(
                 "member1", "asd@gmail.com", "rIdToken", member1ProfileDto,
                 true, true, true, true, ""
@@ -125,12 +115,10 @@ class MemberRegisterServiceTest {
         memberRegisterService.register(member1RegisterDto);
 
         // when
-        NicknameExistDto member1ExistDto = new NicknameExistDto("member1");
-        NicknameExistResDto member1ExistResDto = memberRegisterService.checkNickname(member1ExistDto);
+        NicknameExistResDto member1ExistResDto = memberRegisterService.checkNickname("member1");
         Boolean member1Exist = member1ExistResDto.getExist();
 
-        NicknameExistDto member2ExistDto = new NicknameExistDto("member2");
-        NicknameExistResDto member2ExistResDto = memberRegisterService.checkNickname(member2ExistDto);
+        NicknameExistResDto member2ExistResDto = memberRegisterService.checkNickname("member2");
         Boolean member2Exist = member2ExistResDto.getExist();
 
         // then

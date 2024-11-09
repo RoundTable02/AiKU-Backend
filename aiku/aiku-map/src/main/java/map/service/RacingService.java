@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.application_event.domain.RacingInfo;
 import map.application_event.publisher.RacingEventPublisher;
-import map.dto.DataResDto;
-import map.dto.RacingAddDto;
-import map.dto.RacingResDto;
-import map.dto.RunningRacingDto;
+import map.dto.*;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
@@ -211,6 +208,23 @@ public class RacingService {
     public void terminateRunningRacing(Long scheduleId) {
         // 스케줄 종료 이후 진행 중인 레이싱 모두 무승부 처리
         racingCommandRepository.terminateRunningRacing(scheduleId);
+
+        List<TermRacingDto> racingDtos = racingQueryRepository.findTermRacingIdsWithNoWinnerInSchedule(scheduleId);
+
+        racingDtos.forEach(r -> {
+            AlarmMemberInfo firstInfo = getMemberInfoByScheduleMemberId(r.getFirstScheduleMemberId());
+            AlarmMemberInfo secondInfo = getMemberInfoByScheduleMemberId(r.getSecondScheduleMemberId());
+
+            kafkaService.sendMessage(KafkaTopic.alarm,
+                    new PointChangedMessage(List.of(firstInfo), AlarmMessageType.POINT_CHANGED,
+                            firstInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount())
+            );
+
+            kafkaService.sendMessage(KafkaTopic.alarm,
+                    new PointChangedMessage(List.of(secondInfo), AlarmMessageType.POINT_CHANGED,
+                            secondInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount())
+            );
+        });
     }
 
     private Schedule findSchedule(Long scheduleId) {
@@ -240,10 +254,6 @@ public class RacingService {
 
     private List<AlarmMemberInfo> getMemberInfosInRacing(Long racingId) {
         return racingQueryRepository.findMemberInfoByScheduleMemberId(racingId);
-    }
-
-    private List<Racing> findAllRacingsByMemberId(Long memberId) {
-        return racingQueryRepository.findRacingsByMemberId(memberId);
     }
 
     private void checkMemberInSchedule(Long memberId, Long scheduleId) {

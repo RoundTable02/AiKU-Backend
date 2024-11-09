@@ -9,10 +9,7 @@ import common.domain.member.QMember;
 import common.domain.schedule.QScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
-import map.dto.MemberProfileDto;
-import map.dto.RacerResDto;
-import map.dto.RacingResDto;
-import map.dto.RunningRacingDto;
+import map.dto.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -169,25 +166,6 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
         return count != null && count > 0;
     }
 
-    @Override
-    public List<Racing> findRacingsByMemberId(Long memberId) {
-        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");  // 첫 번째 스케줄 멤버 별칭
-        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember"); // 두 번째 스케줄 멤버 별칭
-
-        QMember firstMember = new QMember("firstMember"); // 첫 번째 멤버 별칭
-        QMember secondMember = new QMember("secondMember"); // 두 번째 멤버 별칭
-
-        return query.selectFrom(racing)
-                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id)) // 첫 번째 레이서와 조인
-                .join(firstRacerMember.member, firstMember) // 첫 번째 레이서의 멤버와 조인 (첫 번째 별칭 사용)
-                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id)) // 두 번째 레이서와 조인
-                .join(secondRacerMember.member, secondMember) // 두 번째 레이서의 멤버와 조인 (두 번째 별칭 사용)
-                .where(
-                        firstRacerMember.member.id.eq(memberId)
-                                .or(secondRacerMember.member.id.eq(memberId))
-                )
-                .fetch();
-    }
 
     @Override
     public List<RunningRacingDto> findRunningRacingsByScheduleMemberId(Long scheduleMemberId) {
@@ -198,6 +176,20 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
                 .where(racing.firstRacer.id.eq(scheduleMemberId)
                                 .or(racing.secondRacer.id.eq(scheduleMemberId)),
                         racing.raceStatus.eq(ExecStatus.RUN)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<TermRacingDto> findTermRacingIdsWithNoWinnerInSchedule(Long scheduleId) {
+        return query.select(Projections.constructor(TermRacingDto.class,
+                        racing.id, racing.firstRacer.id, racing.secondRacer.id, racing.pointAmount)
+                )
+                .from(racing)
+                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        racing.winner.isNull(),
+                        racing.raceStatus.eq(ExecStatus.TERM)
                 )
                 .fetch();
     }

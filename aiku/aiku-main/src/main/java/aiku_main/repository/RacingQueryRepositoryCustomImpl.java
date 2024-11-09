@@ -35,7 +35,7 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
     public Map<Long, List<TeamRacingResultMemberDto>> findMemberWithTermRacingsInTeam(Long teamId) {
         // 레이싱 신청자 조회
         List<Tuple> firstRacerRacings = query
-                .select(member.id, Projections.constructor(TeamBettingResultMemberDto.class,
+                .select(member.id, Projections.constructor(TeamRacingResultMemberDto.class,
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
@@ -52,7 +52,7 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
 
         // 레이싱 수락자 조회
         List<Tuple> secondRacerRacings = query
-                .select(member.id, Projections.constructor(TeamBettingResultMemberDto.class,
+                .select(member.id, Projections.constructor(TeamRacingResultMemberDto.class,
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),

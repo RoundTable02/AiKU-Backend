@@ -230,13 +230,15 @@ public class TeamService {
 
         Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingQueryRepository.findMemberWithTermRacingsInTeam(team.getId());
 
+        Map<Long, Integer> previousResult = getPreviousRacingResult(team);
+
         List<TeamResultMember> teamResultMembers = new ArrayList<>();
         memberRacingsMap.forEach((memberId, memberRacingList) -> {
             long count = memberRacingList.stream().filter(TeamRacingResultMemberDto::isWinner).count();
             int analysis = (int) ((double) count / memberRacingList.size() * 100);
 
             TeamRacingResultMemberDto data = memberRacingList.get(0);
-            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, data.getIsTeamMember()));
+            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
         teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
@@ -248,10 +250,25 @@ public class TeamService {
 
         TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamResultMembers);
         try {
-            team.setTeamBettingResult(objectMapper.writeValueAsString(teamRacingResult));
+            team.setTeamRacingResult(objectMapper.writeValueAsString(teamRacingResult));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<Long, Integer> getPreviousRacingResult(Team team) {
+        if(team.getTeamResult() != null && team.getTeamResult().getTeamRacingResult() != null){
+            try {
+                TeamRacingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamRacingResult(), TeamRacingResult.class);
+                return previousResult.getMembers().stream()
+                        .collect(Collectors.toMap(TeamResultMember::getMemberId, teamMember -> teamMember.getRank()));
+            } catch (JsonMappingException e) {
+                throw new TeamException(CAN_NOT_PROCESS_JSON);
+            } catch (JsonProcessingException e) {
+                throw new TeamException(CAN_NOT_PROCESS_JSON);
+            }
+        }
+        return new HashMap<>();
     }
 
     @Transactional

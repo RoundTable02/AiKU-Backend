@@ -72,9 +72,6 @@ public class TeamServiceIntegrationTest {
         TeamAddDto teamDto = new TeamAddDto("group1");
         Long teamId = teamService.addTeam(member1.getId(), teamDto);
 
-        em.flush();
-        em.clear();
-
         //then
         Team team = teamQueryRepository.findById(teamId).get();
         assertThat(team.getTeamName()).isEqualTo(teamDto.getGroupName());
@@ -89,9 +86,6 @@ public class TeamServiceIntegrationTest {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
-
-        em.flush();
-        em.clear();
 
         //when
         Long teamId = teamService.enterTeam(member2.getId(), team.getId());
@@ -108,9 +102,6 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member2);
         em.persist(team);
 
-        em.flush();
-        em.clear();
-
         //when
         assertThatThrownBy(() -> teamService.enterTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
     }
@@ -123,13 +114,8 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member2);
         em.persist(team);
 
-        em.flush();
-        em.clear();
-
         //when
         teamService.exitTeam(member2.getId(), team.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -146,9 +132,6 @@ public class TeamServiceIntegrationTest {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
-
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
@@ -177,8 +160,6 @@ public class TeamServiceIntegrationTest {
         em.persist(team);
 
         teamService.exitTeam(member2.getId(), team.getId());
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
@@ -190,13 +171,8 @@ public class TeamServiceIntegrationTest {
         Team team = Team.create(member1, "team1");
         em.persist(team);
 
-        em.flush();
-        em.clear();
-
         //when
         teamService.exitTeam(member1.getId(), team.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -210,9 +186,6 @@ public class TeamServiceIntegrationTest {
         Team team = Team.create(member1, "team1");
         team.addTeamMember(member2);
         em.persist(team);
-
-        em.flush();
-        em.clear();
 
         //when
         TeamDetailResDto result = teamService.getTeamDetail(member1.getId(), team.getId());
@@ -231,9 +204,6 @@ public class TeamServiceIntegrationTest {
         //given
         Team team = Team.create(member1, "team1");
         em.persist(team);
-
-        em.flush();
-        em.clear();
 
         //when
         assertThatThrownBy(() -> teamService.getTeamDetail(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
@@ -280,9 +250,6 @@ public class TeamServiceIntegrationTest {
         scheduleC1.setTerm(LocalDateTime.now());
         em.persist(scheduleC1);
 
-        em.flush();
-        em.clear();
-
         //when
         int page = 1;
         DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), page);
@@ -324,13 +291,8 @@ public class TeamServiceIntegrationTest {
         schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).minusMinutes(30));
         schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
 
-        em.flush();
-        em.clear();
-
         //when
         teamService.analyzeLateTimeResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -376,8 +338,6 @@ public class TeamServiceIntegrationTest {
 
         //when
         teamService.analyzeLateTimeResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -431,8 +391,6 @@ public class TeamServiceIntegrationTest {
 
         //when
         teamService.analyzeBettingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -535,8 +493,6 @@ public class TeamServiceIntegrationTest {
 
         //when
         teamService.analyzeRacingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
@@ -582,9 +538,6 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member4);
         schedule2.addScheduleMember(member4, false, 0);
 
-        em.flush();
-        em.clear();
-
         Racing racing3 = Racing.create(schedule2.getScheduleMembers().get(0).getId(), schedule2.getScheduleMembers().get(1).getId(), 20);
         racing3.termRacing(schedule2.getScheduleMembers().get(0).getId());
         em.persist(racing3);
@@ -599,8 +552,6 @@ public class TeamServiceIntegrationTest {
 
         //when
         teamService.analyzeRacingResult(schedule1.getId());
-        em.flush();
-        em.clear();
 
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);

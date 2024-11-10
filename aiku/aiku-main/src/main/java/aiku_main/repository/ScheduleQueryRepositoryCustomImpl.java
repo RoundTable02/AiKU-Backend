@@ -8,13 +8,13 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
-import common.domain.QBetting;
 import common.domain.schedule.QScheduleMember;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -301,6 +301,23 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         scheduleTimeLoe(dateCond.getEndDate()))
                 .fetchFirst()
                 .intValue();
+    }
+
+    @Override
+    public List<LocalDateTime> findScheduleDatesInMonth(Long memberId, int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        return query
+                .select(schedule.scheduleTime)
+                .from(scheduleMember)
+                .innerJoin(scheduleMember.member, member)
+                .innerJoin(scheduleMember.schedule, schedule)
+                .where(member.id.eq(memberId),
+                        schedule.scheduleTime.between(startOfMonth, endOfMonth))
+                .orderBy(schedule.scheduleTime.asc())
+                .fetch();
     }
 
     @Override

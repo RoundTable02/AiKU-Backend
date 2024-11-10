@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -278,6 +279,16 @@ public class ScheduleService {
         return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleRacingResult();
     }
 
+    public SimpleResDto<List<LocalDate>> getScheduleDatesInMonth(Long memberId, MonthDto monthDto) {
+        List<LocalDate> scheduleTimeList = scheduleQueryRepository.findScheduleDatesInMonth(memberId, monthDto.getYear(), monthDto.getMonth())
+                .stream()
+                .map(dateTime -> dateTime.toLocalDate())
+                .distinct()
+                .toList();
+
+        return new SimpleResDto<>(scheduleTimeList);
+    }
+
     //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
@@ -436,4 +447,5 @@ public class ScheduleService {
             throw new ScheduleException(FORBIDDEN_SCHEDULE_UPDATE_TIME);
         }
     }
+
 }

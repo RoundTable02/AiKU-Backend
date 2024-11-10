@@ -18,6 +18,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
 import static common.domain.QBetting.betting;
 import static common.domain.Status.ALIVE;
@@ -82,6 +83,23 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.pointAmount.isNotNull(),
+                        scheduleMember.status.eq(ALIVE))
+                .fetchOne();
+
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existRunScheduleOfMemberInTeam(Long memberId, Long teamId) {
+        Long count = query
+                .select(schedule.count())
+                .from(scheduleMember)
+                .innerJoin(scheduleMember.member, member)
+                .innerJoin(scheduleMember.schedule, schedule)
+                .where(member.id.eq(memberId),
+                        schedule.team.id.eq(teamId),
+                        schedule.scheduleStatus.eq(RUN),
+                        schedule.status.eq(ALIVE),
                         scheduleMember.status.eq(ALIVE))
                 .fetchOne();
 
@@ -315,7 +333,9 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .innerJoin(scheduleMember.member, member)
                 .innerJoin(scheduleMember.schedule, schedule)
                 .where(member.id.eq(memberId),
-                        schedule.scheduleTime.between(startOfMonth, endOfMonth))
+                        schedule.scheduleTime.between(startOfMonth, endOfMonth),
+                        schedule.status.eq(ALIVE),
+                        scheduleMember.status.eq(ALIVE))
                 .orderBy(schedule.scheduleTime.asc())
                 .fetch();
     }

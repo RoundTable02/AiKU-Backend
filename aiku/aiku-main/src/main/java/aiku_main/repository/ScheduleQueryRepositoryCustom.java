@@ -26,6 +26,7 @@ public interface ScheduleQueryRepositoryCustom {
     boolean isScheduleOwner(Long memberId, Long scheduleId);
     boolean existScheduleMember(Long memberId, Long scheduleId);
     boolean existPaidScheduleMember(Long memberId, Long scheduleId);
+    boolean existRunScheduleOfMemberInTeam(Long memberId, Long teamId);
     Long countOfScheduleMembers(Long scheduleId);
     int findPointAmountOfLatePaidScheduleMember(Long scheduleId);
     int countTeamScheduleByScheduleStatus(Long teamId, ExecStatus scheduleStatus, SearchDateCond dateCond);

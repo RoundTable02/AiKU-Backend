@@ -155,6 +155,20 @@ public class TeamServiceIntegrationTest {
     }
 
     @Test
+    void 그룹_퇴장_실행중인스케줄O() {
+        //given
+        Team team = Team.create(member1, "team1");
+        em.persist(team);
+
+        Schedule schedule = Schedule.create(member1, new TeamValue(team), "sche1", LocalDateTime.now().plusDays(1), new Location("loc", 1.0, 1.0), 0);
+        schedule.setRun();
+        em.persist(schedule);
+
+        //when
+        assertThatThrownBy(() -> teamService.exitTeam(member1.getId(), team.getId())).isInstanceOf(TeamException.class);
+    }
+
+    @Test
     void 그룹_퇴장_중복() {
         //given
         Team team = Team.create(member1, "team1");

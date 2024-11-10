@@ -1,8 +1,12 @@
 package common.domain.title;
 
 import common.domain.BaseTime;
+import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -16,10 +20,20 @@ public class Title extends BaseTime {
     private String titleDescription;
     private String titleImg;
 
-    @Builder
-    public Title(String titleName, String titleDescription, String titleImg) {
-        this.titleName = titleName;
-        this.titleDescription = titleDescription;
-        this.titleImg = titleImg;
+    @OneToMany(mappedBy = "title", cascade = CascadeType.ALL)
+    private List<TitleMember> titleMembers = new ArrayList<>();
+
+    public static Title create(String titleName, String titleDescription, String titleImg) {
+        Title title = new Title();
+        title.titleName = titleName;
+        title.titleDescription = titleDescription;
+        title.titleImg = titleImg;
+
+        return title;
+    }
+
+    public void giveTitleToMember(Member member) {
+        TitleMember titleMember = new TitleMember(member, this);
+        this.titleMembers.add(titleMember);
     }
 }

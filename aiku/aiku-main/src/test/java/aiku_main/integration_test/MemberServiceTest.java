@@ -2,6 +2,7 @@ package aiku_main.integration_test;
 
 import aiku_main.dto.*;
 import aiku_main.exception.TitleException;
+import aiku_main.repository.TitleQueryRepository;
 import aiku_main.service.MemberService;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
@@ -30,6 +31,9 @@ class MemberServiceTest {
 
     @Autowired
     MemberService memberService;
+
+    @Autowired
+    TitleQueryRepository titleQueryRepository;
 
     Member member;
 
@@ -67,11 +71,7 @@ class MemberServiceTest {
     @Test
     void 멤버_조회_타이틀x_정상() {
         // given
-        Title title = Title.builder()
-                .titleDescription("타이틀설명")
-                .titleImg("타이틀이미지")
-                .titleName("타이틀1")
-                .build();
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
 
         em.persist(title);
 
@@ -87,26 +87,19 @@ class MemberServiceTest {
                 .isEqualTo("nickname1");
         assertThat(memberDetail.getKakaoId())
                 .isEqualTo(123L);
-
-
     }
 
     @Test
     void 멤버_조회_타이틀o_정상() {
         // given
-        Title title = Title.builder()
-                .titleDescription("타이틀설명")
-                .titleImg("타이틀이미지")
-                .titleName("타이틀1")
-                .build();
-
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        title.giveTitleToMember(member);
         em.persist(title);
 
-        TitleMember titleMember = TitleMember.giveTitleToMember(member, title);
-        em.persist(titleMember);
+        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+                .orElseThrow();
 
-        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
-        member.updateMemberTitleByTitleMemberId(titleMemberValue);
+        member.updateMainTitle(titleMemberId);
 
         // when
         MemberResDto memberDetail = memberService.getMemberDetail(member.getId());
@@ -121,7 +114,7 @@ class MemberServiceTest {
         assertThat(memberDetail.getKakaoId())
                 .isEqualTo(123L);
         assertThat(memberDetail.getTitle().getTitleMemberId())
-                .isEqualTo(titleMemberValue.getId());
+                .isEqualTo(titleMemberId);
         assertThat(memberDetail.getTitle().getTitleName())
                 .isEqualTo("타이틀1");
     }
@@ -129,39 +122,30 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_갱신_정상() {
         // given
-        Title title = Title.builder()
-                .titleDescription("타이틀설명")
-                .titleImg("타이틀이미지")
-                .titleName("타이틀1")
-                .build();
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.builder()
-                .titleDescription("타이틀설명2")
-                .titleImg("타이틀이미지2")
-                .titleName("타이틀2")
-                .build();
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 
-        TitleMember titleMember = TitleMember.giveTitleToMember(member, title);
-        em.persist(titleMember);
+        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+                .orElseThrow();
 
-        TitleMember titleMemberNew = TitleMember.giveTitleToMember(member, titleNew);
-        em.persist(titleMemberNew);
+        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
+                .orElseThrow();
 
-        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
-        member.updateMemberTitleByTitleMemberId(titleMemberValue);
-
-        TitleMemberValue titleMemberValueNew = new TitleMemberValue(titleMemberNew);
-        member.updateMemberTitleByTitleMemberId(titleMemberValueNew);
+        member.updateMainTitle(titleMemberId);
+        member.updateMainTitle(titleNewMemberId);
 
         // when
-        memberService.updateTitle(member.getId(), titleMemberValueNew.getId());
+        memberService.updateTitle(member.getId(), titleNew.getId());
         MemberResDto memberDetail = memberService.getMemberDetail(member.getId());
 
         // then
         assertThat(memberDetail.getTitle().getTitleMemberId())
-                .isEqualTo(titleMemberNew.getId());
+                .isEqualTo(titleNewMemberId);
         assertThat(memberDetail.getTitle().getTitleName())
                 .isEqualTo("타이틀2");
     }
@@ -169,37 +153,28 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_갱신_보유x_예외() {
         // given
-        Title title = Title.builder()
-                .titleDescription("타이틀설명")
-                .titleImg("타이틀이미지")
-                .titleName("타이틀1")
-                .build();
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.builder()
-                .titleDescription("타이틀설명2")
-                .titleImg("타이틀이미지2")
-                .titleName("타이틀2")
-                .build();
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        titleNew.giveTitleToMember(member2);
         em.persist(titleNew);
 
-        TitleMember titleMember = TitleMember.giveTitleToMember(member, title);
-        em.persist(titleMember);
+        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+                .orElseThrow();
 
-        TitleMember titleMemberNew = TitleMember.giveTitleToMember(member2, titleNew);
-        em.persist(titleMemberNew);
+        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member2.getId(), titleNew.getId())
+                .orElseThrow();
 
-        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
-        member.updateMemberTitleByTitleMemberId(titleMemberValue);
-
-        TitleMemberValue titleMemberValueNew = new TitleMemberValue(titleMemberNew);
-        member.updateMemberTitleByTitleMemberId(titleMemberValueNew);
+        member.updateMainTitle(titleMemberId);
+        member2.updateMainTitle(titleNewMemberId);
 
         // when
         // then
         org.junit.jupiter.api.Assertions.assertThrows(
                 TitleException.class, () -> {
-                    memberService.updateTitle(member.getId(), titleMemberValueNew.getId());
+                    memberService.updateTitle(member.getId(), titleNew.getId());
                 }
         );
     }
@@ -207,31 +182,22 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_리스트_조회() {
         // given
-        Title title = Title.builder()
-                .titleDescription("타이틀설명")
-                .titleImg("타이틀이미지")
-                .titleName("타이틀1")
-                .build();
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.builder()
-                .titleDescription("타이틀설명2")
-                .titleImg("타이틀이미지2")
-                .titleName("타이틀2")
-                .build();
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 
-        TitleMember titleMember = TitleMember.giveTitleToMember(member, title);
-        em.persist(titleMember);
+        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+                .orElseThrow();
 
-        TitleMember titleMemberNew = TitleMember.giveTitleToMember(member, titleNew);
-        em.persist(titleMemberNew);
+        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
+                .orElseThrow();
 
-        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
-        member.updateMemberTitleByTitleMemberId(titleMemberValue);
-
-        TitleMemberValue titleMemberValueNew = new TitleMemberValue(titleMemberNew);
-        member.updateMemberTitleByTitleMemberId(titleMemberValueNew);
+        member.updateMainTitle(titleMemberId);
+        member.updateMainTitle(titleNewMemberId);
 
         // when
         DataResDto<List<TitleMemberResDto>> memberTitles = memberService.getMemberTitles(member.getId());
@@ -240,10 +206,6 @@ class MemberServiceTest {
         // then
         assertThat(resData.size())
                 .isEqualTo(2);
-
-//        for (TitleMemberResDto resDatum : resData) {
-//            System.out.println(resDatum.getTitleDescription());
-//        }
 
     }
 

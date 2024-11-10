@@ -19,4 +19,8 @@ public class TitleMemberValue {
     public TitleMemberValue(TitleMember titleMember) {
         this.id = titleMember.getId();
     }
+
+    public TitleMemberValue(Long id) {
+        this.id = id;
+    }
 }

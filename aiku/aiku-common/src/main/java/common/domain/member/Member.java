@@ -90,8 +90,8 @@ public class Member extends BaseTime {
         this.status = Status.ALIVE;
     }
 
-    public void updateMemberTitleByTitleMemberId(TitleMemberValue titleMemberValue) {
-        this.mainTitle = titleMemberValue;
+    public void updateMainTitle(Long titleMemberId) {
+        this.mainTitle = new TitleMemberValue(titleMemberId);
     }
 
     public void updateFirebaseToken(String firebaseToken) {

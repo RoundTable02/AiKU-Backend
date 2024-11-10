@@ -1,9 +1,6 @@
 package aiku_main.controller;
 
-import aiku_main.dto.LocationDto;
-import aiku_main.dto.ScheduleAddDto;
-import aiku_main.dto.ScheduleEnterDto;
-import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.dto.*;
 import aiku_main.service.ScheduleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,8 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -190,6 +186,24 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ScheduleEnterDto(3))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getScheduleDates() throws Exception {
+        mockMvc.perform(get("/member/schedules/dates")
+                        .header("Access-Member-Id", 1L)
+                        .param("year", "2025")
+                        .param("month", "11"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getScheduleDatesWithFaultDate() throws Exception {
+        mockMvc.perform(get("/member/schedules/dates")
+                        .header("Access-Member-Id", 1L)
+                        .param("year", "2024")
+                        .param("month", "13"))
                 .andExpect(status().isBadRequest());
     }
 }

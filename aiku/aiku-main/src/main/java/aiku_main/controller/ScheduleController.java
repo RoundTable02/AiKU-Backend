@@ -115,7 +115,7 @@ public class ScheduleController {
 
     @GetMapping("/schedules/dates")
     public BaseResponse<SimpleResDto<List<LocalDate>>> getScheduleDates(@RequestHeader(name = "Access-Member-Id") Long memberId,
-                                                                        @ModelAttribute MonthDto monthDto){
+                                                                        @ModelAttribute @Valid MonthDto monthDto){
         SimpleResDto<List<LocalDate>> result = scheduleService.getScheduleDatesInMonth(memberId, monthDto);
 
         return new BaseResponse<>(result);

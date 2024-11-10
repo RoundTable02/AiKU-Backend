@@ -3,7 +3,6 @@ package common.domain.member;
 import common.domain.BaseTime;
 import common.domain.ServiceAgreement;
 import common.domain.Status;
-import common.domain.title.TitleMember;
 import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -107,7 +106,7 @@ public class Member extends BaseTime {
 
     public Member(String nickname) {
         this.nickname = nickname;
-        this.profile = new MemberProfile(MemberProfileType.CHAR, "1", MemberProfileCharacter.C01, MemberProfileBackground.BLUE);
+        this.profile = new MemberProfile(MemberProfileType.CHAR, "1", MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         this.status = Status.ALIVE;
     }
     public static Member create(String nickname){

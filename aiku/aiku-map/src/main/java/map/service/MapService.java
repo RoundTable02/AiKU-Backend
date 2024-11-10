@@ -7,6 +7,7 @@ import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import map.application_event.publisher.RacingEventPublisher;
 import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
@@ -31,6 +32,7 @@ public class MapService {
     private final KafkaProducerService kafkaService;
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
+    private final RacingEventPublisher racingEventPublisher;
 
     public Long sendLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
         // 카프카로 위도, 경도 데이터를 스케줄 상의 다른 유저에게 전송하는 로직
@@ -71,6 +73,8 @@ public class MapService {
                         arrivalDto.getArrivalTime()
                 )
         );
+
+        racingEventPublisher.publishMemberArrivalEvent(memberId, scheduleId, schedule.getScheduleName());
 
         //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
         if(schedule.checkAllMembersArrive()) {

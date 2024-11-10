@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Slf4j
 @RequestMapping({"/groups/{groupId}/schedules", "/member"})
 @RequiredArgsConstructor
@@ -97,6 +100,23 @@ public class ScheduleController {
                                                          @PathVariable Long groupId,
                                                          @PathVariable Long scheduleId){
         String result = scheduleService.getScheduleBettingResult(memberId, groupId, scheduleId);
+
+        return new BaseResponse<>(result);
+    }
+
+    @GetMapping("/{scheduleId}/racing/result")
+    public BaseResponse<String> getScheduleRacingResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                         @PathVariable Long groupId,
+                                                         @PathVariable Long scheduleId){
+        String result = scheduleService.getScheduleRacingResult(memberId, groupId, scheduleId);
+
+        return new BaseResponse<>(result);
+    }
+
+    @GetMapping("/schedules/dates")
+    public BaseResponse<SimpleResDto<List<LocalDate>>> getScheduleDates(@RequestHeader(name = "Access-Member-Id") Long memberId,
+                                                                        @ModelAttribute @Valid MonthDto monthDto){
+        SimpleResDto<List<LocalDate>> result = scheduleService.getScheduleDatesInMonth(memberId, monthDto);
 
         return new BaseResponse<>(result);
     }

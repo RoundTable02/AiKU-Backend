@@ -1,17 +1,15 @@
 package map.repository;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.ExecStatus;
+import common.domain.Racing;
 import common.domain.member.QMember;
 import common.domain.schedule.QScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
-import map.dto.MemberProfileDto;
-import map.dto.RacerResDto;
-import map.dto.RacingResDto;
+import map.dto.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,11 +17,10 @@ import java.util.Objects;
 
 import static common.domain.QRacing.racing;
 import static common.domain.member.QMember.member;
-import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class RacingQueryRepositoryImpl implements RacingQueryRepository {
+public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCustom {
 
     private final JPAQueryFactory query;
 
@@ -167,5 +164,33 @@ public class RacingQueryRepositoryImpl implements RacingQueryRepository {
                 .fetchOne();
 
         return count != null && count > 0;
+    }
+
+
+    @Override
+    public List<RunningRacingDto> findRunningRacingsByScheduleMemberId(Long scheduleMemberId) {
+        return query.select(Projections.constructor(RunningRacingDto.class,
+                        racing.id, racing.firstRacer.id, racing.secondRacer.id, racing.pointAmount)
+                )
+                .from(racing)
+                .where(racing.firstRacer.id.eq(scheduleMemberId)
+                                .or(racing.secondRacer.id.eq(scheduleMemberId)),
+                        racing.raceStatus.eq(ExecStatus.RUN)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<TermRacingDto> findTermRacingIdsWithNoWinnerInSchedule(Long scheduleId) {
+        return query.select(Projections.constructor(TermRacingDto.class,
+                        racing.id, racing.firstRacer.id, racing.secondRacer.id, racing.pointAmount)
+                )
+                .from(racing)
+                .join(scheduleMember).on(scheduleMember.id.eq(racing.firstRacer.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        racing.winner.isNull(),
+                        racing.raceStatus.eq(ExecStatus.TERM)
+                )
+                .fetch();
     }
 }

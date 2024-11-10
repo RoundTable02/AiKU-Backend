@@ -70,6 +70,11 @@ public class Team extends BaseTime {
         teamResult.setTeamBettingResult(teamBettingResult);
     }
 
+    public void setTeamRacingResult(String teamRacingResult){
+        checkTeamResultExist();
+        teamResult.setTeamRacingResult(teamRacingResult);
+    }
+
     private void checkTeamResultExist(){
         if (teamResult == null) {
             teamResult = new TeamResult(this);

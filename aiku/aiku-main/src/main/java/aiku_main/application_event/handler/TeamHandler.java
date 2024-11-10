@@ -31,6 +31,13 @@ public class TeamHandler {
         }
     }
 
+    @EventListener
+    public void analyzeRacingResult(ScheduleAutoCloseEvent event){
+        if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())){
+            teamService.analyzeRacingResult(event.getSchedule().getId());
+        }
+    }
+
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void updateLateTimeResultOfExitMember(TeamExitEvent event) {

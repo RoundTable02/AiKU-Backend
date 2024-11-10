@@ -16,7 +16,7 @@ import map.dto.RacingResDto;
 import map.exception.NotEnoughPointException;
 import map.exception.RacingException;
 import map.exception.ScheduleException;
-import map.repository.RacingRepository;
+import map.repository.RacingQueryRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class RacingServiceTest {
     Racing racing2;
 
     @Autowired
-    private RacingRepository racingRepository;
+    private RacingQueryRepository racingRepository;
 
     @BeforeEach
     void setUp() {
@@ -313,7 +313,51 @@ class RacingServiceTest {
         assertThat(findRacing).isNull();
     }
 
+    @Test
+    void 멤버_도착_레이싱_종료() {
+        Racing newRacing = Racing.create(scheduleMember1.getId(), scheduleMember3.getId(), 0);
+        newRacing.startRacing();
+        em.persist(newRacing);
 
+        racingService.makeMemberWinnerInRacing(member2.getId(), schedule1.getId(), schedule1.getScheduleName());
 
+        em.flush();
+        em.clear();
+
+        racing1 = em.find(Racing.class, racing1.getId());
+        racing2 = em.find(Racing.class, racing2.getId());
+        newRacing = em.find(Racing.class, newRacing.getId());
+
+        assertThat(racing1.getRaceStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(racing1.getWinner().getId()).isEqualTo(scheduleMember2.getId());
+        assertThat(racing2.getRaceStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(racing2.getWinner().getId()).isEqualTo(scheduleMember2.getId());
+        assertThat(newRacing.getRaceStatus()).isEqualTo(ExecStatus.RUN);
+        assertThat(newRacing.getWinner()).isNull();
+    }
+
+    @Test
+    void 스케줄_종료_레이싱_무승부() {
+        Racing newRacing = Racing.create(scheduleMember1.getId(), scheduleMember3.getId(), 0);
+        newRacing.startRacing();
+        em.persist(newRacing);
+
+        racingService.makeMemberWinnerInRacing(member2.getId(), schedule1.getId(), schedule1.getScheduleName());
+        racingService.terminateRunningRacing(schedule1.getId());
+
+        em.flush();
+        em.clear();
+
+        racing1 = em.find(Racing.class, racing1.getId());
+        racing2 = em.find(Racing.class, racing2.getId());
+        newRacing = em.find(Racing.class, newRacing.getId());
+
+        assertThat(racing1.getRaceStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(racing1.getWinner().getId()).isEqualTo(scheduleMember2.getId());
+        assertThat(racing2.getRaceStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(racing2.getWinner().getId()).isEqualTo(scheduleMember2.getId());
+        assertThat(newRacing.getRaceStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(newRacing.getWinner()).isNull();
+    }
 
 }

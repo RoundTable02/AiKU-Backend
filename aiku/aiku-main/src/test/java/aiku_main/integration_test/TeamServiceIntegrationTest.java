@@ -538,6 +538,9 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member4);
         schedule2.addScheduleMember(member4, false, 0);
 
+        em.flush();
+        em.clear();
+
         Racing racing3 = Racing.create(schedule2.getScheduleMembers().get(0).getId(), schedule2.getScheduleMembers().get(1).getId(), 20);
         racing3.termRacing(schedule2.getScheduleMembers().get(0).getId());
         em.persist(racing3);
@@ -556,6 +559,7 @@ public class TeamServiceIntegrationTest {
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
+        System.out.println(findTeam.getTeamResult().getTeamRacingResult());
         List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
                 .getMembers();
         assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3, 4);

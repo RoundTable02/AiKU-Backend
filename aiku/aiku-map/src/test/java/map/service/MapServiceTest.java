@@ -8,6 +8,8 @@ import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.EntityManager;
 import map.dto.MemberArrivalDto;
+import map.dto.ScheduleDetailResDto;
+import map.dto.ScheduleMemberResDto;
 import map.exception.ScheduleException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest
@@ -111,7 +115,7 @@ public class MapServiceTest {
 
         ScheduleMember scheduleMember = em.find(ScheduleMember.class, scheduleMember1.getId());
 
-        Assertions.assertThat(scheduleMember.getArrivalTime()).isEqualTo(arrivalTime);
+        assertThat(scheduleMember.getArrivalTime()).isEqualTo(arrivalTime);
     }
 
     @Test
@@ -168,6 +172,47 @@ public class MapServiceTest {
         org.junit.jupiter.api.Assertions.assertThrows(ScheduleException.class, () -> {
             mapService.makeMemberArrive(member4.getId(), schedule2.getId(), memberArrivalDto);
         });
+    }
+
+    @Test
+    void 맵_스케줄_상세_조회() {
+        //given
+        Member memb1 = Member.builder()
+                .kakaoId(1L)
+                .nickname("member1")
+                .email("member1@sample.com")
+                .password("1")
+                .build();
+        em.persist(memb1);
+
+        Member memb2 = Member.builder()
+                .kakaoId(2L)
+                .nickname("member2")
+                .email("member2@sample.com")
+                .password("2")
+                .build();
+        em.persist(memb2);
+
+        Team team = Team.create(memb1, "team");
+        team.addTeamMember(memb2);
+        em.persist(team);
+
+        Schedule schedule = Schedule.create(memb1, new TeamValue(team), "sche", LocalDateTime.now(),
+                new Location("loc", 1.0, 1.0), 100);
+        schedule.addScheduleMember(memb2, false, 0);
+        em.persist(schedule);
+
+        //when
+        ScheduleDetailResDto result = mapService.getScheduleDetail(memb1.getId(), schedule.getId());
+
+        //then
+        assertThat(result.getScheduleId()).isEqualTo(schedule.getId());
+
+        List<ScheduleMemberResDto> scheduleMembers = result.getMembers();
+        assertThat(scheduleMembers.size()).isEqualTo(2);
+        assertThat(scheduleMembers).extracting("memberId").contains(memb1.getId(), memb2.getId());
+        assertThat(scheduleMembers).extracting("isArrive").contains(false, false);
+        assertThat(scheduleMembers).extracting("isPaidMember").contains(true, false);
     }
 
 }

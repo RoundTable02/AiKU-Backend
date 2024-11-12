@@ -34,6 +34,14 @@ public class MapService {
     private final ScheduleRepository scheduleRepository;
     private final RacingEventPublisher racingEventPublisher;
 
+    public ScheduleDetailResDto getScheduleDetail(Long memberId, Long scheduleId) {
+        Schedule schedule = findSchedule(scheduleId);
+        checkMemberInSchedule(memberId, scheduleId);
+
+        List<ScheduleMemberResDto> scheduleMembers = scheduleRepository.getScheduleMembersInfo(scheduleId);
+        return new ScheduleDetailResDto(schedule, scheduleMembers);
+    }
+
     public Long sendLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
         // 카프카로 위도, 경도 데이터를 스케줄 상의 다른 유저에게 전송하는 로직
         List<AlarmMemberInfo> alarmMemberInfos = getScheduleMemberInfos(scheduleId);

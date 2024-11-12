@@ -88,7 +88,7 @@ public class TitleService {
 
     @Transactional
     public void checkAndGiveBettingWinning5TimesTitle(List<Long> memberIds) {
-        // ** 누적 지각 도착 5회 이상 칭호 **
+        // ** 누적 베팅 승리 5회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
         List<Member> members = titleQueryRepository.findBettingWinning5TimesMembersByMemberIds(memberIds);
@@ -102,7 +102,7 @@ public class TitleService {
 
     @Transactional
     public void checkAndGiveBettingWinning10TimesTitle(List<Long> memberIds) {
-        // ** 누적 지각 도착 5회 이상 칭호 **
+        // ** 누적 베팅 승리 10회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
         List<Member> members = titleQueryRepository.findBettingWinning10TimesMembersByMemberIds(memberIds);

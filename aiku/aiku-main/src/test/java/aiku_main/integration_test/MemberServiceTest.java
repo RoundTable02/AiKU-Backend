@@ -9,8 +9,7 @@ import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
 import common.domain.member.MemberProfileType;
 import common.domain.title.Title;
-import common.domain.title.TitleMember;
-import common.domain.value_reference.TitleMemberValue;
+import common.domain.title.TitleCode;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ class MemberServiceTest {
     @Test
     void 멤버_조회_타이틀x_정상() {
         // given
-        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명", TitleCode.POINTS_MORE_THAN_10K);
 
         em.persist(title);
 
@@ -92,7 +91,7 @@ class MemberServiceTest {
     @Test
     void 멤버_조회_타이틀o_정상() {
         // given
-        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명", TitleCode.POINTS_MORE_THAN_10K);
         title.giveTitleToMember(member);
         em.persist(title);
 
@@ -122,11 +121,11 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_갱신_정상() {
         // given
-        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명", TitleCode.POINTS_MORE_THAN_10K);
         title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2", TitleCode.POINTS_MORE_THAN_10K);
         titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 
@@ -153,11 +152,11 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_갱신_보유x_예외() {
         // given
-        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명", TitleCode.POINTS_MORE_THAN_10K);
         title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2", TitleCode.POINTS_MORE_THAN_10K);
         titleNew.giveTitleToMember(member2);
         em.persist(titleNew);
 
@@ -182,11 +181,11 @@ class MemberServiceTest {
     @Test
     void 멤버_타이틀_리스트_조회() {
         // given
-        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명");
+        Title title = Title.create("타이틀1", "타이틀설명", "타이틀설명", TitleCode.POINTS_MORE_THAN_10K);
         title.giveTitleToMember(member);
         em.persist(title);
 
-        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2");
+        Title titleNew = Title.create("타이틀2", "타이틀설명2", "타이틀설명2", TitleCode.POINTS_MORE_THAN_10K);
         titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 

@@ -20,14 +20,18 @@ public class Title extends BaseTime {
     private String titleDescription;
     private String titleImg;
 
+    @Enumerated(value = EnumType.STRING)
+    private TitleCode titleCode;
+
     @OneToMany(mappedBy = "title", cascade = CascadeType.ALL)
     private List<TitleMember> titleMembers = new ArrayList<>();
 
-    public static Title create(String titleName, String titleDescription, String titleImg) {
+    public static Title create(String titleName, String titleDescription, String titleImg, TitleCode titleCode) {
         Title title = new Title();
         title.titleName = titleName;
         title.titleDescription = titleDescription;
         title.titleImg = titleImg;
+        title.titleCode = titleCode;
 
         return title;
     }

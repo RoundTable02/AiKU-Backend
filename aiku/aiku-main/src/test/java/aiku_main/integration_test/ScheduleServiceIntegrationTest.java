@@ -28,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -621,6 +622,35 @@ public class ScheduleServiceIntegrationTest {
         assertThat(schedules).extracting("groupId").containsExactly(teamB.getId(), teamB.getId());
         assertThat(schedules).extracting("scheduleId").containsExactly(scheduleB2.getId(), scheduleB1.getId());
         assertThat(schedules).extracting("memberSize").containsExactly(1, 1);
+    }
+    
+    @Test
+    void 멤버_지정된달의_스케줄있는_날짜_조회() {
+        //given
+        Team team1 = Team.create(member1, "team1");
+        em.persist(team1);
+
+        Team team2 = Team.create(member1, "team2");
+        em.persist(team2);
+
+        LocalDateTime now = LocalDateTime.now();
+        Schedule schedule1 = Schedule.create(member1, new TeamValue(team1), "sche1", now.plusDays(1), new Location("loc", 1.0, 1.0), 0);
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.create(member1, new TeamValue(team1), "sche2", now.plusDays(1), new Location("loc", 1.0, 1.0), 0);
+        em.persist(schedule2);
+
+        Schedule schedule3 = Schedule.create(member1, new TeamValue(team1), "sche3", now.plusDays(2), new Location("loc", 1.0, 1.0), 0);
+        em.persist(schedule3);
+        
+        //when
+        List<LocalDate> result = scheduleService.getScheduleDatesInMonth(member1.getId(), new MonthDto(now.getYear(), now.getMonth().getValue()))
+                .getData();
+
+        //then
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result).contains(LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 1),
+                LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 2));
     }
 
     @Test

@@ -73,6 +73,7 @@ public class TeamService {
         Member member = findMember(memberId);
         Team team = findTeamById(teamId);
         checkTeamMember(member.getId(), teamId, true);
+        checkHasRunSchedule(member.getId(), teamId);
 
         //서비스 로직
         Long teamMemberCount = teamQueryRepository.countOfAliveTeamMember(teamId);
@@ -318,6 +319,12 @@ public class TeamService {
             }else {
                 throw new TeamException(ALREADY_IN_TEAM);
             }
+        }
+    }
+
+    private void checkHasRunSchedule(Long memberId, Long teamId) {
+        if(scheduleQueryRepository.existRunScheduleOfMemberInTeam(memberId, teamId)){
+            throw new TeamException(CAN_NOT_EXIT);
         }
     }
 }

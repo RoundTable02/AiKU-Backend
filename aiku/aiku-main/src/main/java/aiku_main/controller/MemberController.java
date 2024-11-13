@@ -42,10 +42,10 @@ public class MemberController {
         return BaseResponse.getSimpleRes(memberId);
     }
 
-    @PatchMapping("/titles/{userTitleId}")
+    @PatchMapping("/titles/{titleId}")
     public BaseResponse<BaseResultDto> updateTitle(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
-                                                   @PathVariable Long userTitleId) {
-        Long memberId = memberService.updateTitle(accessMemberId, userTitleId);
+                                                   @PathVariable Long titleId) {
+        Long memberId = memberService.updateTitle(accessMemberId, titleId);
 
         return BaseResponse.getSimpleRes(memberId);
     }

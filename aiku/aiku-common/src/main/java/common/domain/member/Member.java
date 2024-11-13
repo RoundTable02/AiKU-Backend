@@ -90,8 +90,8 @@ public class Member extends BaseTime {
         this.status = Status.ALIVE;
     }
 
-    public void updateMemberTitleByTitleMemberId(TitleMemberValue titleMemberValue) {
-        this.mainTitle = titleMemberValue;
+    public void updateMainTitle(Long titleMemberId) {
+        this.mainTitle = new TitleMemberValue(titleMemberId);
     }
 
     public void updateFirebaseToken(String firebaseToken) {
@@ -100,6 +100,10 @@ public class Member extends BaseTime {
 
     public void logout() {
         this.refreshToken = null;
+    }
+
+    public void updatePointAmount(int changedPointAmount) {
+        this.point += changedPointAmount;
     }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.

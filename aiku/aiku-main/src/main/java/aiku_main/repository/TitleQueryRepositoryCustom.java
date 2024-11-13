@@ -22,5 +22,5 @@ public interface TitleQueryRepositoryCustom {
 
     List<Member> findBettingWinning5TimesMembersByMemberIds(List<Long> members);
 
-    List<Member> findBettingWinning10TimesMembersByMemberIds(List<Long> members);
+    List<Member> findBettingLosing10TimesMembersByMemberIds(List<Long> members);
 }

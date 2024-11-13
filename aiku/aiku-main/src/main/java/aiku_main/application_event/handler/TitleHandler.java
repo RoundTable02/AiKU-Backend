@@ -53,6 +53,6 @@ public class TitleHandler {
         titleService.checkAndGiveBettingWinning5TimesTitle(memberIds);
 
         // ** 누적 베팅 승리 10회 이상 칭호 **
-        titleService.checkAndGiveBettingWinning10TimesTitle(memberIds);
+        titleService.checkAndGiveBettingLosing10TimesTitle(memberIds);
     }
 }

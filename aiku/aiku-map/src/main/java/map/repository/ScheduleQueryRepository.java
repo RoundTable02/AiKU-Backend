@@ -18,5 +18,4 @@ public interface ScheduleQueryRepository {
 
     Optional<Long> findScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId);
 
-    List<Long> find10kPointsMembersByScheduleId(Long scheduleId);
 }

@@ -3,6 +3,7 @@ package aiku_main.repository;
 import aiku_main.dto.TitleMemberResDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.ExecStatus;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 
@@ -74,7 +75,7 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
 
     @Override
     public List<Member> find10kPointsMembersByMemberIds(List<Long> members) {
-        return query.select(member)
+        return query.selectFrom(member)
                 .where(member.id.in(members), member.point.goe(10000))
                 .fetch();
     }
@@ -84,7 +85,9 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
         return query.select(member)
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(member.id.in(members), scheduleMember.arrivalTimeDiff.loe(0), List<Long> members)
+                .where(member.id.in(members),
+                        scheduleMember.arrivalTime.isNotNull(),
+                        scheduleMember.arrivalTimeDiff.goe(0))
                 .groupBy(member.id)
                 .having(member.id.count().eq(10L))
                 .fetch();
@@ -95,7 +98,9 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
         return query.select(member)
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(member.id.in(members), scheduleMember.arrivalTimeDiff.goe(0))
+                .where(member.id.in(members),
+                        scheduleMember.arrivalTime.isNotNull(),
+                        scheduleMember.arrivalTimeDiff.loe(0))
                 .groupBy(member.id)
                 .having(member.id.count().eq(5L))
                 .fetch();
@@ -106,7 +111,9 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
         return query.select(member)
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(member.id.in(members), scheduleMember.arrivalTimeDiff.goe(0))
+                .where(member.id.in(members),
+                        scheduleMember.arrivalTime.isNotNull(),
+                        scheduleMember.arrivalTimeDiff.loe(0))
                 .groupBy(member.id)
                 .having(member.id.count().eq(10L))
                 .fetch();
@@ -117,6 +124,7 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
         return query.select(member)
                 .from(betting)
                 .innerJoin(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
+                .innerJoin(scheduleMember.member, member)
                 .where(member.id.in(members), betting.isWinner)
                 .groupBy(member.id)
                 .having(member.id.count().eq(5L))
@@ -124,11 +132,12 @@ public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCusto
     }
 
     @Override
-    public List<Member> findBettingWinning10TimesMembersByMemberIds(List<Long> members) {
+    public List<Member> findBettingLosing10TimesMembersByMemberIds(List<Long> members) {
         return query.select(member)
                 .from(betting)
                 .innerJoin(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
-                .where(member.id.in(members), betting.isWinner)
+                .innerJoin(scheduleMember.member, member)
+                .where(member.id.in(members), betting.isWinner.isFalse())
                 .groupBy(member.id)
                 .having(member.id.count().eq(10L))
                 .fetch();

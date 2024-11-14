@@ -102,8 +102,8 @@ public class Member extends BaseTime {
         this.refreshToken = null;
     }
 
-    public void updatePointAmount(int changedPointAmount) {
-        this.point += changedPointAmount;
+    public void updatePointAmount(int signedChangePointAmount) {
+        this.point += signedChangePointAmount;
     }
 
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.

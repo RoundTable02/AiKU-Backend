@@ -14,4 +14,9 @@ public class RacingPointLog extends PointLog{
 
     @Embedded
     private RacingValue racing;
+
+    public RacingPointLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus, RacingValue racing) {
+        super(memberId, pointAmount, description, pointLogStatus);
+        this.racing = racing;
+    }
 }

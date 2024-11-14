@@ -16,4 +16,8 @@ public class ScheduleValue {
     public ScheduleValue(Schedule schedule) {
         this.id = schedule.getId();
     }
+
+    public ScheduleValue(Long id) {
+        this.id = id;
+    }
 }

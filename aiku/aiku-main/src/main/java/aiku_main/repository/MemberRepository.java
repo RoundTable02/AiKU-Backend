@@ -11,9 +11,15 @@ import org.springframework.data.jpa.repository.QueryHints;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
     Optional<Member> findByNickname(String recommenderNickname);
 
     Optional<Member> findByKakaoId(Long aLong);
 
     boolean existsByNickname(String nickname);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
+    @Query("SELECT m FROM Member m WHERE m.id = :memberId")
+    Optional<Member> findByMemberIdForUpdate(Long memberId);
 }

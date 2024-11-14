@@ -15,7 +15,7 @@ public class EventValue {
     @Column(name = "eventId")
     private Long id;
 
-    public EventValue(CommonEvent event) {
-        this.id = event.getId();
+    public EventValue(Long id) {
+        this.id = id;
     }
 }

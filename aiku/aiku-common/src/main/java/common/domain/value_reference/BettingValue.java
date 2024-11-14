@@ -15,7 +15,7 @@ public class BettingValue {
     @Column(name = "bettingId")
     private Long id;
 
-    public BettingValue(Betting betting) {
-        this.id = betting.getId();
+    public BettingValue(Long id) {
+        this.id = id;
     }
 }

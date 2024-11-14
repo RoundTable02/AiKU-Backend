@@ -17,10 +17,15 @@ public class PointChangedMessage extends AlarmMessage{
     private PointChangedType pointChangedType;
     private Integer pointAmount;
 
-    public PointChangedMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long memberId, PointChangedType pointChangedType, Integer pointAmount) {
+    private PointChangeReason reason;
+    private Long reasonId;
+
+    public PointChangedMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long memberId, PointChangedType pointChangedType, Integer pointAmount, PointChangeReason reason, Long reasonId) {
         super(members, alarmMessageType);
         this.memberId = memberId;
         this.pointChangedType = pointChangedType;
         this.pointAmount = pointAmount;
+        this.reason = reason;
+        this.reasonId = reasonId;
     }
 }

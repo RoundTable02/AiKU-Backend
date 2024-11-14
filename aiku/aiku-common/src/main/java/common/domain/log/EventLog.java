@@ -15,4 +15,9 @@ public class EventLog extends PointLog{
 
     @Embedded
     private EventValue event;
+
+    public EventLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus, EventValue event) {
+        super(memberId, pointAmount, description, pointLogStatus);
+        this.event = event;
+    }
 }

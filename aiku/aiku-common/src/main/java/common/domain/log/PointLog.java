@@ -1,7 +1,6 @@
 package common.domain.log;
 
 import common.domain.BaseTime;
-import common.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,12 +17,17 @@ public class PointLog extends BaseTime {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "memberId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
+    private Long memberId;
 
     private int pointAmount;
     private String description;
 
-    private PointLogStatus PointLogStatus;
+    private PointLogStatus pointLogStatus;
+
+    protected PointLog(Long memberId, int pointAmount, String description, common.domain.log.PointLogStatus pointLogStatus) {
+        this.memberId = memberId;
+        this.pointAmount = pointAmount;
+        this.description = description;
+        this.pointLogStatus = pointLogStatus;
+    }
 }

@@ -1,5 +1,6 @@
 package aiku_main.service;
 
+import aiku_main.application_event.event.PointChangeType;
 import aiku_main.dto.*;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TitleException;
@@ -11,6 +12,7 @@ import common.domain.member.Member;
 import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileType;
 import common.domain.value_reference.TitleMemberValue;
+import common.exception.NotEnoughPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -103,6 +105,23 @@ public class MemberService {
         return member.getId();
     }
 
+    @Transactional
+    public void updateMemberPoint(Long memberId, PointChangeType pointChangeType, int pointAmount) {
+        Member member = memberRepository.findByMemberIdForUpdate(memberId)
+                .orElseThrow(() -> new MemberNotFoundException());
+
+        int signedChangeAmount;
+        if (pointChangeType.equals(PointChangeType.PLUS)) {
+            signedChangeAmount = pointAmount;
+        }
+        else {
+            checkEnoughPoint(member.getPoint(), pointAmount);
+            signedChangeAmount = (-1) * pointAmount;
+        }
+
+        member.updatePointAmount(signedChangeAmount);
+    }
+
     private Long getTitleMemberId(Long titleId, Member member) {
         return titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleId)
                 .orElseThrow(() -> new TitleException(MEMBER_NOT_WITH_TITLE));
@@ -111,6 +130,12 @@ public class MemberService {
     private void validateTitleMember(Long memberId, Long titleId) {
         if (!titleQueryRepository.existTitleMember(memberId, titleId)) {
             throw new TitleException(MEMBER_NOT_WITH_TITLE);
+        }
+    }
+
+    private void checkEnoughPoint(int memberPoint, int changePoint) {
+        if (memberPoint < changePoint) {
+            throw new NotEnoughPoint();
         }
     }
 

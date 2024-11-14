@@ -14,4 +14,9 @@ public class ShopPointLog extends PointLog{
 
     @Embedded
     private ShopProductValue shopProduct;
+
+    public ShopPointLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus, ShopProductValue shopProduct) {
+        super(memberId, pointAmount, description, pointLogStatus);
+        this.shopProduct = shopProduct;
+    }
 }

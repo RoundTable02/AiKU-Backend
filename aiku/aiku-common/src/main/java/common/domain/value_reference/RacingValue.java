@@ -15,7 +15,7 @@ public class RacingValue {
     @Column(name = "racingId")
     private Long id;
 
-    public RacingValue(Racing racing) {
-        this.id = racing.getId();
+    public RacingValue(Long id) {
+        this.id = id;
     }
 }

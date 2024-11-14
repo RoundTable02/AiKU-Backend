@@ -15,7 +15,7 @@ public class ShopProductValue {
     @Column(name = "shopProductId")
     private Long id;
 
-    public ShopProductValue(ShopProduct shopProduct) {
-        this.id = shopProduct.getId();
+    public ShopProductValue(Long id) {
+        this.id = id;
     }
 }

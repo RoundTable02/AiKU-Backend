@@ -11,8 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @DiscriminatorValue(value = "BETTING")
 @Entity
-public class BettingPointLog extends PointLog{
+public class BettingPointLog extends PointLog {
 
     @Embedded
     private BettingValue betting;
+
+    public BettingPointLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus, BettingValue betting) {
+        super(memberId, pointAmount, description, pointLogStatus);
+        this.betting = betting;
+    }
 }

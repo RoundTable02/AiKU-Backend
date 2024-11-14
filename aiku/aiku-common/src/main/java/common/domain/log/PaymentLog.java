@@ -11,4 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class PaymentLog extends PointLog{
 
+    public PaymentLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus) {
+        super(memberId, pointAmount, description, pointLogStatus);
+    }
 }

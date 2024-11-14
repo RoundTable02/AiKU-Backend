@@ -4,12 +4,12 @@ import aiku_main.dto.*;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.MemberRepository;
+import aiku_main.repository.TitleQueryRepository;
 import aiku_main.s3.S3ImageProvider;
 import common.domain.ServiceAgreement;
 import common.domain.member.Member;
 import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileType;
-import common.domain.title.TitleMember;
 import common.domain.value_reference.TitleMemberValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final TitleQueryRepository titleQueryRepository;
     private final S3ImageProvider s3ImageProvider;
 
     public MemberResDto getMemberDetail(Long accessMemberId) {
@@ -43,7 +44,7 @@ public class MemberService {
         TitleMemberResDto mainTitle = null;
         // 장착된 칭호가 존재하는 경우에만 조회
         if (!Objects.isNull(titleMemberValue)) {
-            mainTitle = memberRepository.getTitle(titleMemberValue.getId());
+            mainTitle = titleQueryRepository.getTitleMemberResDtoByTitleId(titleMemberValue.getId());
         }
 
         return new MemberResDto(
@@ -91,21 +92,24 @@ public class MemberService {
     }
 
     @Transactional
-    public Long updateTitle(Long accessMemberId, Long titleMemberId) {
+    public Long updateTitle(Long accessMemberId, Long titleId) {
         Member member = getMemberById(accessMemberId);
 
-        validateTitleMember(member.getId(), titleMemberId);
+        validateTitleMember(member.getId(), titleId);
+        Long titleMemberId = getTitleMemberId(titleId, member);
 
-        TitleMember titleMember = memberRepository.getTitleMemberByTitleMemberId(titleMemberId);
-        TitleMemberValue titleMemberValue = new TitleMemberValue(titleMember);
-
-        member.updateMemberTitleByTitleMemberId(titleMemberValue);
+        member.updateMainTitle(titleMemberId);
 
         return member.getId();
     }
 
-    private void validateTitleMember(Long memberId, Long titleMemberId) {
-        if (!memberRepository.existTitleMember(memberId, titleMemberId)) {
+    private Long getTitleMemberId(Long titleId, Member member) {
+        return titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleId)
+                .orElseThrow(() -> new TitleException(MEMBER_NOT_WITH_TITLE));
+    }
+
+    private void validateTitleMember(Long memberId, Long titleId) {
+        if (!titleQueryRepository.existTitleMember(memberId, titleId)) {
             throw new TitleException(MEMBER_NOT_WITH_TITLE);
         }
     }
@@ -144,7 +148,7 @@ public class MemberService {
     public DataResDto<List<TitleMemberResDto>> getMemberTitles(Long accessMemberId) {
         Member member = getMemberById(accessMemberId);
 
-        List<TitleMemberResDto> titleMembers = memberRepository.getTitleMembers(member.getId());
+        List<TitleMemberResDto> titleMembers = titleQueryRepository.getTitleMembers(member.getId());
 
         return new DataResDto(1, titleMembers);
     }

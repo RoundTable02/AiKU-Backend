@@ -21,6 +21,15 @@ public class MapController {
     private final MapService mapService;
     private final RacingService racingService;
 
+    @GetMapping
+    public BaseResponse<ScheduleDetailResDto> getScheduleDetail(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
+                                                                @PathVariable Long scheduleId){
+        ScheduleDetailResDto result = mapService.getScheduleDetail(accessMemberId, scheduleId);
+
+        return new BaseResponse<>(result);
+    }
+
+
     @PostMapping("/location")
     public BaseResponse<BaseResultDto> sendLocation(@PathVariable Long scheduleId,
                                                     @RequestHeader(name = "Access-Member-Id") Long accessMemberId,

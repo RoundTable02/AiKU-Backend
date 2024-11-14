@@ -2,9 +2,12 @@ package map.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
+import map.dto.MemberProfileDto;
+import map.dto.ScheduleMemberResDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -86,6 +89,20 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
                 .fetchOne();
 
         return Optional.ofNullable(scheduleMemberId);
+    }
+
+    @Override
+    public List<ScheduleMemberResDto> getScheduleMembersInfo(Long scheduleId) {
+        return query.select(Projections.constructor(ScheduleMemberResDto.class,
+                        member.id, member.nickname,
+                        Projections.constructor(MemberProfileDto.class,
+                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
+                        scheduleMember.arrivalTime, scheduleMember.isPaid))
+                .from(scheduleMember)
+                .innerJoin(member).on(member.id.eq(scheduleMember.member.id))
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE))
+                .fetch();
     }
 
 }

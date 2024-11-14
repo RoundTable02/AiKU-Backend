@@ -2,6 +2,7 @@ package map.repository;
 
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
+import map.dto.ScheduleMemberResDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +18,6 @@ public interface ScheduleQueryRepository {
     boolean existPaidScheduleMember(Long memberId, Long scheduleId);
 
     Optional<Long> findScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId);
+
+    List<ScheduleMemberResDto> getScheduleMembersInfo(Long scheduleId);
 }

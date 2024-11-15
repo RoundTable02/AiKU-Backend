@@ -88,7 +88,13 @@ public class MemberService {
 
     @Transactional
     public Long deleteMember(Long accessMemberId) {
-        memberRepository.deleteById(accessMemberId);
+        Member member = getMemberById(accessMemberId);
+
+        if (member.getProfile().getProfileType().equals(MemberProfileType.IMG)) {
+            s3ImageProvider.deleteImageFromS3(member.getProfile().getProfileImg());
+        }
+
+        member.deleteMember();
 
         return accessMemberId;
     }

@@ -106,6 +106,15 @@ public class Member extends BaseTime {
         this.point += signedChangePointAmount;
     }
 
+    public void deleteMember() {
+        this.kakaoId = null;
+        this.email = null;
+        this.refreshToken = null;
+        this.firebaseToken = null;
+
+        this.status = Status.DELETE;
+    }
+
     //TODO 후에 수정 or 삭제하세요. TeamService 테스트를 위해 생성 메서드 만들어 둡니다.
 
     public Member(String nickname) {

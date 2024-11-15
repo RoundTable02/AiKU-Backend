@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -27,7 +27,7 @@ spring:
         - id: aiku-main
           uri: ${AIKU_MAIN_IP}
           predicates:
-            - Path=/login/sign-in,/users/**,/term,/groups/**,/schedules/**,/member/schedules/**
+            - Path=/login/sign-in,/login/refresh,/users/**,/term,/groups/**,/schedules/**,/member/schedules/**
         - id: aiku-map
           uri: ${AIKU_MAP_IP}
           predicates:

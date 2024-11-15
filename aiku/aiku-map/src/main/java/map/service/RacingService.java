@@ -134,7 +134,9 @@ public class RacingService {
         racingMemberInfos.forEach(r ->
                 kafkaService.sendMessage(KafkaTopic.alarm,
                         new PointChangedMessage(List.of(r), AlarmMessageType.POINT_CHANGED,
-                                r.getMemberId(), PointChangedType.MINUS, racing.getPointAmount())
+                                r.getMemberId(), PointChangedType.MINUS, racing.getPointAmount(),
+                                PointChangeReason.RACING, racingId
+                        )
                 )
         );
 
@@ -193,7 +195,9 @@ public class RacingService {
         // 승리자 아쿠 추가 (레이싱 성사 때 차감된 금액 + 상금)
         kafkaService.sendMessage(KafkaTopic.alarm,
                 new PointChangedMessage(List.of(winnerInfo), AlarmMessageType.POINT_CHANGED,
-                        winnerInfo.getMemberId(), PointChangedType.PLUS, pointAmount * 2)
+                        winnerInfo.getMemberId(), PointChangedType.PLUS, pointAmount * 2,
+                        PointChangeReason.RACING_REWARD, racingId
+                )
         );
 
         // 레이싱 종료 알림
@@ -217,12 +221,15 @@ public class RacingService {
 
             kafkaService.sendMessage(KafkaTopic.alarm,
                     new PointChangedMessage(List.of(firstInfo), AlarmMessageType.POINT_CHANGED,
-                            firstInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount())
+                            firstInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount(),
+                            PointChangeReason.RACING, r.getRacingId()
+                    )
             );
 
             kafkaService.sendMessage(KafkaTopic.alarm,
                     new PointChangedMessage(List.of(secondInfo), AlarmMessageType.POINT_CHANGED,
-                            secondInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount())
+                            secondInfo.getMemberId(), PointChangedType.PLUS, r.getPointAmount(),
+                            PointChangeReason.RACING, r.getRacingId())
             );
         });
     }

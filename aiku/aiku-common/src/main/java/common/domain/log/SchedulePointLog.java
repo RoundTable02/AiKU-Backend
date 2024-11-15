@@ -15,4 +15,8 @@ public class SchedulePointLog extends PointLog{
     @Embedded
     private ScheduleValue schedule;
 
+    public SchedulePointLog(Long memberId, int pointAmount, String description, PointLogStatus pointLogStatus, ScheduleValue schedule) {
+        super(memberId, pointAmount, description, pointLogStatus);
+        this.schedule = schedule;
+    }
 }

@@ -5,6 +5,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -22,5 +25,16 @@ public class MemberProfile {
 
     @Enumerated(EnumType.STRING)
     private MemberProfileBackground profileBackground;
+
+    public String getMemberProfileJson() {
+        String json = "{" +
+                "profileType" + ":" + profileType.name() + "," +
+                "profileImg" + ":" + profileImg + "," +
+                "profileCharacter" + ":" + profileCharacter.name() + "," +
+                "profileBackground" + ":" + profileBackground.name() +
+                "}";
+
+        return json;
+    }
 
 }

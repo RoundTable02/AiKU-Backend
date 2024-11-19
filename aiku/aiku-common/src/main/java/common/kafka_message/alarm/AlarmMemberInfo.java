@@ -23,4 +23,14 @@ public class AlarmMemberInfo {
         this.memberProfile = member.getProfile();
         this.firebaseToken = member.getFirebaseToken();
     }
+
+    public String getAlarmMemberInfoJsonString() {
+        String json = "{" +
+                "memberId" + ":" + memberId + "," +
+                "nickname" + ":" + nickname + "," +
+                "memberProfile" + ":" + memberProfile.getMemberProfileJson() +
+                "}";
+
+        return json;
+    }
 }

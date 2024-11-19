@@ -72,13 +72,15 @@ public class MapService {
 
         //  해당 약속의 멤버들에게 멤버 도착 카프카로 전달
         List<AlarmMemberInfo> alarmMemberInfos = getScheduleMemberInfos(scheduleId);
+        AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
 
         kafkaService.sendMessage(KafkaTopic.alarm,
                 new ArrivalAlarmMessage(alarmMemberInfos, AlarmMessageType.MEMBER_ARRIVAL,
                         memberId,
                         scheduleId,
                         schedule.getScheduleName(),
-                        arrivalDto.getArrivalTime()
+                        arrivalDto.getArrivalTime(),
+                        arriveMemberInfo
                 )
         );
 

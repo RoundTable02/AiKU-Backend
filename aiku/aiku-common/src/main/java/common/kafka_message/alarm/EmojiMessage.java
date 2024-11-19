@@ -4,7 +4,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -20,5 +22,16 @@ public class EmojiMessage extends AlarmMessage {
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.emojiType = emojiType;
+    }
+
+    @Override
+    public Map<String, String> getMessage() {
+        Map messageData = new HashMap();
+        messageData.put("title", this.getAlarmMessageType().name());
+        messageData.put("scheduleId", scheduleId);
+        messageData.put("scheduleName", scheduleName);
+        messageData.put("sender", racingId);
+
+        return messageData;
     }
 }

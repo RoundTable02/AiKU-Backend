@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // AlarmMessageType = SCHEDULE_ADD, SCHEDULE_UPDATE, SCHEDULE_OWNER, SCHEDULE_OPEN, SCHEDULE_AUTO_CLOSE
 @Getter
@@ -19,11 +21,28 @@ public class AskRacingMessage extends AlarmMessage{
     private Long scheduleId;
     private String scheduleName;
     private Long racingId;
+    private int point;
+    private AlarmMemberInfo firstRacerInfo;
 
-    public AskRacingMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId) {
+    public AskRacingMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId, int point, AlarmMemberInfo firstRacerInfo) {
         super(members, alarmMessageType);
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.racingId = racingId;
+        this.point = point;
+        this.firstRacerInfo = firstRacerInfo;
+    }
+
+    @Override
+    public Map<String, String> getMessage() {
+        Map messageData = new HashMap();
+        messageData.put("title", this.getAlarmMessageType().name());
+        messageData.put("scheduleId", scheduleId);
+        messageData.put("scheduleName", scheduleName);
+        messageData.put("racingId", racingId);
+        messageData.put("point", point);
+        messageData.put("member", firstRacerInfo.getAlarmMemberInfoJsonString());
+
+        return messageData;
     }
 }

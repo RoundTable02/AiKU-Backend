@@ -72,6 +72,7 @@ public class RacingService {
         racingCommandRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
+        AlarmMemberInfo firstRacerInfo = getMemberInfo(memberId);
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingAddDto.getTargetMemberId());
         Schedule schedule = findSchedule(scheduleId);
 
@@ -79,7 +80,9 @@ public class RacingService {
                 new AskRacingMessage(List.of(secondRacerInfo), AlarmMessageType.ASK_RACING,
                         scheduleId,
                         schedule.getScheduleName(),
-                        racing.getId()
+                        racing.getId(),
+                        racingAddDto.getPoint(),
+                        firstRacerInfo
                 )
         );
 

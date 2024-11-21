@@ -31,7 +31,7 @@ public class KafkaConsumerService {
         try {
             AlarmMessage message = objectMapper.readValue(data.value(), AlarmMessage.class);
 
-            List<String> fcmTokens = message.getAlarmMembersFcmTokens();
+            List<String> fcmTokens = message.getAlarmReceiverTokens();
             Map<String, String> messageData = message.getMessage();
 
             messageSender.sendMessage(messageData, fcmTokens);

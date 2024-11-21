@@ -26,15 +26,4 @@ public class MemberProfile {
     @Enumerated(EnumType.STRING)
     private MemberProfileBackground profileBackground;
 
-    public String getMemberProfileJson() {
-        String json = "{" +
-                "profileType" + ":" + profileType.name() + "," +
-                "profileImg" + ":" + profileImg + "," +
-                "profileCharacter" + ":" + profileCharacter.name() + "," +
-                "profileBackground" + ":" + profileBackground.name() +
-                "}";
-
-        return json;
-    }
-
 }

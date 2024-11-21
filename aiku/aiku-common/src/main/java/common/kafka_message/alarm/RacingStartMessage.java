@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // AlarmMessageType = SCHEDULE_ADD, SCHEDULE_UPDATE, SCHEDULE_OWNER, SCHEDULE_OPEN, SCHEDULE_AUTO_CLOSE
 @Getter
@@ -16,11 +18,31 @@ public class RacingStartMessage extends AlarmMessage{
     private Long scheduleId;
     private String scheduleName;
     private Long racingId;
+    private Integer point;
+    private AlarmMemberInfo firstRacerInfo;
+    private AlarmMemberInfo secondRacerInfo;
 
-    public RacingStartMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId) {
-        super(members, alarmMessageType);
+    public RacingStartMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId, Integer point, AlarmMemberInfo firstRacerInfo, AlarmMemberInfo secondRacerInfo) {
+        super(alarmReceiverTokens, alarmMessageType);
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.racingId = racingId;
+        this.point = point;
+        this.firstRacerInfo = firstRacerInfo;
+        this.secondRacerInfo = secondRacerInfo;
+    }
+
+    @Override
+    public Map<String, String> getMessage() {
+        Map messageData = new HashMap();
+        messageData.put("title", this.getAlarmMessageType().name());
+        messageData.put("scheduleId", scheduleId);
+        messageData.put("scheduleName", scheduleName);
+        messageData.put("racingId", racingId);
+        messageData.put("point", point);
+        messageData.put("firstRacer", firstRacerInfo.getAlarmMemberInfoJsonString());
+        messageData.put("secondRacer", secondRacerInfo.getAlarmMemberInfoJsonString());
+
+        return messageData;
     }
 }

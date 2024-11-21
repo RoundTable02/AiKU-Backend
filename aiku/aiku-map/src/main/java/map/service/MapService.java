@@ -44,12 +44,13 @@ public class MapService {
 
     public Long sendLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
         // 카프카로 위도, 경도 데이터를 스케줄 상의 다른 유저에게 전송하는 로직
-        List<AlarmMemberInfo> alarmMemberInfos = getScheduleMemberInfos(scheduleId);
+        AlarmMemberInfo memberInfo = getMemberInfo(memberId);
+        List<String> fcmTokensInSchedule = findAllFcmTokensInSchedule(scheduleId);
 
         kafkaService.sendMessage(KafkaTopic.alarm,
-                new LocationAlarmMessage(alarmMemberInfos, AlarmMessageType.MEMBER_REAL_TIME_LOCATION,
-                        memberId,
+                new LocationAlarmMessage(fcmTokensInSchedule, AlarmMessageType.MEMBER_REAL_TIME_LOCATION,
                         scheduleId,
+                        memberInfo,
                         realTimeLocationDto.getLatitude(),
                         realTimeLocationDto.getLongitude()
                 )
@@ -71,11 +72,11 @@ public class MapService {
         schedule.arriveScheduleMember(scheduleMember, arrivalDto.getArrivalTime());
 
         //  해당 약속의 멤버들에게 멤버 도착 카프카로 전달
-        List<AlarmMemberInfo> alarmMemberInfos = getScheduleMemberInfos(scheduleId);
+        List<String> fcmTokens = findAllFcmTokensInSchedule(scheduleId);
         AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
 
         kafkaService.sendMessage(KafkaTopic.alarm,
-                new ArrivalAlarmMessage(alarmMemberInfos, AlarmMessageType.MEMBER_ARRIVAL,
+                new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
                         memberId,
                         scheduleId,
                         schedule.getScheduleName(),
@@ -89,7 +90,7 @@ public class MapService {
         //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
         if(schedule.checkAllMembersArrive()) {
             kafkaService.sendMessage(KafkaTopic.alarm,
-                    new ScheduleClosedMessage(alarmMemberInfos, AlarmMessageType.SCHEDULE_MAP_CLOSE,
+                    new ScheduleClosedMessage(fcmTokens, AlarmMessageType.SCHEDULE_MAP_CLOSE,
                             scheduleId,
                             schedule.getScheduleName(),
                             schedule.getLocation().getLocationName(),
@@ -110,15 +111,17 @@ public class MapService {
         AlarmMemberInfo sender = getMemberInfo(memberId);
         AlarmMemberInfo receiver = getMemberInfo(emojiDto.getReceiverId());
 
-        List<AlarmMemberInfo> alarmMemberInfos = List.of(sender, receiver);
+        String receiverFcmToken = findFcmTokenByMemberId(emojiDto.getReceiverId());
 
         Schedule schedule = findSchedule(scheduleId);
 
         kafkaService.sendMessage(KafkaTopic.alarm,
-                new EmojiMessage(alarmMemberInfos, AlarmMessageType.EMOJI,
+                new EmojiMessage(List.of(receiverFcmToken), AlarmMessageType.EMOJI,
                         scheduleId,
                         schedule.getScheduleName(),
-                        emojiDto.getEmojiType().name()
+                        emojiDto.getEmojiType().name(),
+                        sender,
+                        receiver
                 )
         );
 
@@ -133,6 +136,15 @@ public class MapService {
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
         return scheduleRepository.findScheduleMember(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NO_SUCH_SCHEDULE));
+    }
+
+    private List<String> findAllFcmTokensInSchedule(Long scheduleId) {
+        return scheduleRepository.findAllFcmTokensInSchedule(scheduleId);
+    }
+
+    private String findFcmTokenByMemberId(Long memberId) {
+        return memberRepository.findMemberFirebaseTokenById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException());
     }
 
     private List<AlarmMemberInfo> getScheduleMemberInfos(Long scheduleId) {

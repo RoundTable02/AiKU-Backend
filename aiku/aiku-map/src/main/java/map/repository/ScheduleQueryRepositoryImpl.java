@@ -105,4 +105,14 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
                 .fetch();
     }
 
+    @Override
+    public List<String> findAllFcmTokensInSchedule(Long scheduleId) {
+        return query.select(member.firebaseToken)
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .leftJoin(scheduleMember.member, member)
+                .where(schedule.id.eq(scheduleId))
+                .fetch();
+    }
+
 }

@@ -14,21 +14,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public abstract class AlarmMessage {
 
-    private List<AlarmMemberInfo> members;
+    private List<String> alarmReceiverTokens;
     private AlarmMessageType alarmMessageType;
 
     public abstract Map<String, String> getMessage();
 
-    public final List<String> getAlarmMembersFcmTokens() {
-        return members.stream()
-                .map(AlarmMemberInfo::getFirebaseToken)
-                .collect(Collectors.toList());
-    }
-
-    public final Optional<String> getMemberInfoJsonString(Long memberId) {
-        return members.stream()
-                .filter(m -> m.getMemberId().equals(memberId))
-                .map(AlarmMemberInfo::getAlarmMemberInfoJsonString)
-                .findFirst();
-    }
 }

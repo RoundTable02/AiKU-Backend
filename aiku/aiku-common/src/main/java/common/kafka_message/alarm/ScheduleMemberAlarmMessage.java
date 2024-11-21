@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // AlarmMessageType = SCHEDULE_ENTER, SCHEDULE_EXIT
 @Getter
@@ -22,12 +24,33 @@ public class ScheduleMemberAlarmMessage extends AlarmMessage{
     private LocalDateTime scheduleTime;
     private Location location;
 
-    public ScheduleMemberAlarmMessage(AlarmMemberInfo sourceMember, List<AlarmMemberInfo> alarmMembers, Schedule schedule, AlarmMessageType alarmType) {
-        super(alarmMembers, alarmType);
+    public ScheduleMemberAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, AlarmMemberInfo sourceMember, Long scheduleId, String scheduleName, LocalDateTime scheduleTime, Location location) {
+        super(alarmReceiverTokens, alarmMessageType);
         this.sourceMember = sourceMember;
-        this.scheduleId = schedule.getId();
-        this.scheduleName = schedule.getScheduleName();
-        this.scheduleTime = schedule.getScheduleTime();
-        this.location = schedule.getLocation();
+        this.scheduleId = scheduleId;
+        this.scheduleName = scheduleName;
+        this.scheduleTime = scheduleTime;
+        this.location = location;
+    }
+
+    @Override
+    public Map<String, String> getMessage() {
+        Map messageData = new HashMap();
+        messageData.put("title", this.getAlarmMessageType().name());
+        messageData.put("scheduleId", scheduleId);
+        messageData.put("scheduleName", scheduleName);
+        messageData.put("scheduleTime", scheduleTime);
+        messageData.put("sourceMember", sourceMember.getAlarmMemberInfoJsonString());
+        messageData.put("location", getLocationJson());
+
+        return messageData;
+    }
+
+    private String getLocationJson() {
+        return "{" +
+                "locationName" + ":" + location.getLocationName() + "," +
+                "latitude" + ":" + location.getLatitude() + "," +
+                "longitude" + ":" + location.getLongitude() + "," +
+                "}";
     }
 }

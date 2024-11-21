@@ -16,12 +16,16 @@ public class EmojiMessage extends AlarmMessage {
     private long scheduleId;
     private String scheduleName;
     private String emojiType;
+    private AlarmMemberInfo senderInfo;
+    private AlarmMemberInfo receiverInfo;
 
-    public EmojiMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, long scheduleId, String scheduleName, String emojiType) {
-        super(members, alarmMessageType);
+    public EmojiMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, long scheduleId, String scheduleName, String emojiType, AlarmMemberInfo senderInfo, AlarmMemberInfo receiverInfo) {
+        super(alarmReceiverTokens, alarmMessageType);
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.emojiType = emojiType;
+        this.senderInfo = senderInfo;
+        this.receiverInfo = receiverInfo;
     }
 
     @Override
@@ -30,7 +34,8 @@ public class EmojiMessage extends AlarmMessage {
         messageData.put("title", this.getAlarmMessageType().name());
         messageData.put("scheduleId", scheduleId);
         messageData.put("scheduleName", scheduleName);
-        messageData.put("sender", racingId);
+        messageData.put("sender", senderInfo.getAlarmMemberInfoJsonString());
+        messageData.put("receiver", receiverInfo.getAlarmMemberInfoJsonString());
 
         return messageData;
     }

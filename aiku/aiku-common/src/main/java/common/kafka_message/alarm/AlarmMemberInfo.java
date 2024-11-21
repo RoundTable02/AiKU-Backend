@@ -28,7 +28,18 @@ public class AlarmMemberInfo {
         String json = "{" +
                 "memberId" + ":" + memberId + "," +
                 "nickname" + ":" + nickname + "," +
-                "memberProfile" + ":" + memberProfile.getMemberProfileJson() +
+                "memberProfile" + ":" + getMemberProfileJson() +
+                "}";
+
+        return json;
+    }
+
+    private String getMemberProfileJson() {
+        String json = "{" +
+                "profileType" + ":" + memberProfile.getProfileType().name() + "," +
+                "profileImg" + ":" + memberProfile.getProfileImg() + "," +
+                "profileCharacter" + ":" + memberProfile.getProfileCharacter().name() + "," +
+                "profileBackground" + ":" + memberProfile.getProfileBackground().name() +
                 "}";
 
         return json;

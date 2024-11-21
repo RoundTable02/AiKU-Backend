@@ -19,8 +19,8 @@ public class ArrivalAlarmMessage extends AlarmMessage {
     private LocalDateTime arrivalTime;
     private AlarmMemberInfo arriveMemberInfo;
 
-    public ArrivalAlarmMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, long memberId, long scheduleId, String scheduleName, LocalDateTime arrivalTime, AlarmMemberInfo arriveMemberInfo) {
-        super(members, alarmMessageType);
+    public ArrivalAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, long memberId, long scheduleId, String scheduleName, LocalDateTime arrivalTime, AlarmMemberInfo arriveMemberInfo) {
+        super(alarmReceiverTokens, alarmMessageType);
         this.memberId = memberId;
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;

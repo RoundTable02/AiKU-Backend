@@ -45,4 +45,10 @@ public class RacingStartMessage extends AlarmMessage{
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "에서 멤버 " + firstRacerInfo.getNickname() + "와 " + secondRacerInfo.getNickname()
+                + "의 레이싱이 시작되었습니다.";
+    }
 }

@@ -17,14 +17,14 @@ public class RacingDeniedMessage extends AlarmMessage {
     private Long scheduleId;
     private String scheduleName;
     private Long racingId;
-    private AlarmMemberInfo memberInfo;
+    private AlarmMemberInfo secondRacerInfo;
 
-    public RacingDeniedMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId, AlarmMemberInfo memberInfo) {
+    public RacingDeniedMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, Long racingId, AlarmMemberInfo secondRacerInfo) {
         super(alarmReceiverTokens, alarmMessageType);
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.racingId = racingId;
-        this.memberInfo = memberInfo;
+        this.secondRacerInfo = secondRacerInfo;
     }
 
     @Override
@@ -34,8 +34,14 @@ public class RacingDeniedMessage extends AlarmMessage {
         messageData.put("scheduleId", scheduleId);
         messageData.put("scheduleName", scheduleName);
         messageData.put("racingId", racingId);
-        messageData.put("member", memberInfo.getAlarmMemberInfoJsonString());
+        messageData.put("member", secondRacerInfo.getAlarmMemberInfoJsonString());
 
         return messageData;
+    }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "에서 멤버 " + secondRacerInfo.getNickname() +
+                "에게 신청한 레이싱이 거절되었습니다.";
     }
 }

@@ -37,4 +37,9 @@ public class TitleGrantedMessage extends AlarmMessage {
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "칭호 : " + titleName + "을 획득하였습니다!";
+    }
 }

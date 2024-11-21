@@ -36,4 +36,10 @@ public class LocationAlarmMessage extends AlarmMessage {
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        // 실시간 좌표는 저장 x
+        return null;
+    }
 }

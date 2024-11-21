@@ -46,6 +46,12 @@ public class ScheduleMemberAlarmMessage extends AlarmMessage{
         return messageData;
     }
 
+    @Override
+    public String getSimpleAlarmInfo() {
+        // TODO
+        return null;
+    }
+
     private String getLocationJson() {
         return "{" +
                 "locationName" + ":" + location.getLocationName() + "," +

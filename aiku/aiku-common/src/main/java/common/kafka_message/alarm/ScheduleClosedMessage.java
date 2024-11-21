@@ -26,7 +26,6 @@ public class ScheduleClosedMessage extends AlarmMessage {
         this.scheduleTime = scheduleTime;
     }
 
-
     @Override
     public Map<String, String> getMessage() {
         Map messageData = new HashMap();
@@ -37,5 +36,10 @@ public class ScheduleClosedMessage extends AlarmMessage {
         messageData.put("locationName", locationName);
 
         return messageData;
+    }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "가 종료되었습니다.";
     }
 }

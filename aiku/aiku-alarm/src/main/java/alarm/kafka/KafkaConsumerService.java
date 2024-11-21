@@ -2,6 +2,7 @@ package alarm.kafka;
 
 import alarm.exception.MessagingException;
 import alarm.fcm.MessageSender;
+import alarm.service.MemberMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +24,7 @@ import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
 @Service
 public class KafkaConsumerService {
 
-    private final MessageSender messageSender;
+    private final MemberMessageService messageService;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = {"alarm"}, groupId = "aiku-alarm", concurrency = "1")
@@ -31,10 +32,7 @@ public class KafkaConsumerService {
         try {
             AlarmMessage message = objectMapper.readValue(data.value(), AlarmMessage.class);
 
-            List<String> fcmTokens = message.getAlarmReceiverTokens();
-            Map<String, String> messageData = message.getMessage();
-
-            messageSender.sendMessage(messageData, fcmTokens);
+            messageService.saveMessage(message);
         } catch (JsonProcessingException e) {
             throw new MessagingException(FAIL_TO_SEND_MESSAGE);
         }

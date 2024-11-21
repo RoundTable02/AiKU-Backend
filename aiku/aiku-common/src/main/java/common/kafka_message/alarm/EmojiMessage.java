@@ -39,4 +39,9 @@ public class EmojiMessage extends AlarmMessage {
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "에서 멤버 " + senderInfo.getNickname() + "가 " + emojiType + " 이모지를 전달했습니다.";
+    }
 }

@@ -38,4 +38,9 @@ public class ArrivalAlarmMessage extends AlarmMessage {
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "에서 멤버 " + arriveMemberInfo.getNickname() + "가 약속 장소에 도착하였습니다!";
+    }
 }

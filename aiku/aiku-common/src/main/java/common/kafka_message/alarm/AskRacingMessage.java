@@ -42,4 +42,9 @@ public class AskRacingMessage extends AlarmMessage{
 
         return messageData;
     }
+
+    @Override
+    public String getSimpleAlarmInfo() {
+        return "약속 : " + scheduleName + "에서 멤버 " + firstRacerInfo.getNickname() + "가 " + point + "아쿠의 레이싱을 신청하였습니다.";
+    }
 }

@@ -27,23 +27,6 @@ public class BettingHandler {
         bettingService.exitSchedule_deleteBettingForBetee(event.getMember().getId(), event.getScheduleMember().getId(), event.getSchedule().getId());
     }
 
-    @Order(3)
-    @Async
-    @EventListener
-    public void processBettingResult(ScheduleAutoCloseEvent event){
-        if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())) {
-            bettingService.processBettingResult(event.getSchedule().getId());
-        }
-    }
-
-    @Async
-    @EventListener
-    public void analyzeScheduleBettingResult(ScheduleAutoCloseEvent event){
-        if(scheduleService.isScheduleAutoClosed(event.getSchedule().getId())){
-            bettingService.analyzeScheduleBettingResult(event.getSchedule().getId());
-        }
-    }
-
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void processBettingResult(ScheduleCloseEvent event){

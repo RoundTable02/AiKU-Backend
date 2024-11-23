@@ -330,6 +330,8 @@ public class ScheduleService {
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
+
+        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
     }
 
     @Transactional
@@ -369,10 +371,6 @@ public class ScheduleService {
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         } ;
-    }
-
-    public boolean isScheduleAutoClosed(Long scheduleId){
-        return scheduleQueryRepository.existsByIdAndIsAutoClose(scheduleId, true);
     }
 
     private Member findMember(Long memberId){

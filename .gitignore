@@ -22,3 +22,4 @@
 .idea/modules/aiku-map/aiku.aiku-map.main.iml
 application-test.yml
 **/test/resources/application.yml
+aiku/aiku-alarm/src/main/java/alarm/fcm/aiku2024-firebase-adminsdk-9fjfc-df87d6f024.json

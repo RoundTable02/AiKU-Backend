@@ -66,6 +66,8 @@ public class LoginService {
         // JWT Token 발급
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
+        member.reissueRefreshToken(jwtToken.getRefreshToken());
+
         return SignInTokenResDto.toDto(jwtToken);
     }
 

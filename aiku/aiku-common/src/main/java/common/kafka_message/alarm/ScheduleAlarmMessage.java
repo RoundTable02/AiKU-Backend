@@ -23,12 +23,12 @@ public class ScheduleAlarmMessage extends AlarmMessage{
     private LocalDateTime scheduleTime;
     private Location location;
 
-    public ScheduleAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, LocalDateTime scheduleTime, Location location) {
+    public ScheduleAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Schedule schedule) {
         super(alarmReceiverTokens, alarmMessageType);
-        this.scheduleId = scheduleId;
-        this.scheduleName = scheduleName;
-        this.scheduleTime = scheduleTime;
-        this.location = location;
+        this.scheduleId = schedule.getId();
+        this.scheduleName = schedule.getScheduleName();
+        this.scheduleTime = schedule.getScheduleTime();
+        this.location = schedule.getLocation();
     }
 
     @Override

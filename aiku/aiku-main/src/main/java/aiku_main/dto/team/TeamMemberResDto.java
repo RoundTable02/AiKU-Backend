@@ -1,5 +1,6 @@
-package aiku_main.dto;
+package aiku_main.dto.team;
 
+import aiku_main.dto.MemberProfileResDto;
 import common.domain.member.Member;
 import common.domain.team.TeamMember;
 import lombok.Getter;

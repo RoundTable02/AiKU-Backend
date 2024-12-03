@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.team;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package aiku_main.repository;
 
-import aiku_main.application_event.domain.TeamResultMember;
-import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.team.TeamResultMember;
+import aiku_main.dto.team.TeamEachListResDto;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import org.springframework.data.repository.query.Param;

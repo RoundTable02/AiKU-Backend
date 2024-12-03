@@ -1,9 +1,9 @@
 package aiku_main.controller;
 
 import aiku_main.dto.DataResDto;
-import aiku_main.dto.TeamAddDto;
-import aiku_main.dto.TeamDetailResDto;
-import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.team.TeamAddDto;
+import aiku_main.dto.team.TeamDetailResDto;
+import aiku_main.dto.team.TeamEachListResDto;
 import aiku_main.service.TeamService;
 import common.response.BaseResponse;
 import jakarta.validation.Valid;
@@ -77,7 +77,7 @@ public class TeamController {
 
     @GetMapping("/{groupId}/analytics/racing")
     public BaseResponse getGroupRacingResult(@RequestHeader(name = "Access-Member-Id") Long memberId,
-                                              @PathVariable Long groupId){
+                                             @PathVariable Long groupId){
         String result = teamService.getTeamRacingResult(memberId, groupId);
 
         return new BaseResponse(result);

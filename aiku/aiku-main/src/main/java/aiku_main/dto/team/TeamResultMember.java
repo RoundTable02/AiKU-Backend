@@ -1,9 +1,8 @@
-package aiku_main.application_event.domain;
+package aiku_main.dto.team;
 
 import aiku_main.dto.MemberProfileResDto;
 import com.querydsl.core.annotations.QueryProjection;
 import common.domain.Status;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

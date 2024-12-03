@@ -1,8 +1,8 @@
 package aiku_main.repository;
 
-import aiku_main.application_event.domain.TeamResultMember;
+import aiku_main.dto.team.TeamResultMember;
 import aiku_main.dto.MemberProfileResDto;
-import aiku_main.dto.TeamEachListResDto;
+import aiku_main.dto.team.TeamEachListResDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;

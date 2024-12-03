@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.team;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

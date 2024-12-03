@@ -1,10 +1,14 @@
 package aiku_main.integration_test;
 
-import aiku_main.application_event.domain.TeamBettingResult;
-import aiku_main.application_event.domain.TeamLateTimeResult;
-import aiku_main.application_event.domain.TeamRacingResult;
-import aiku_main.application_event.domain.TeamResultMember;
+import aiku_main.dto.team.TeamBettingResult;
+import aiku_main.dto.team.TeamLateTimeResult;
+import aiku_main.dto.team.TeamRacingResult;
+import aiku_main.dto.team.TeamResultMember;
 import aiku_main.dto.*;
+import aiku_main.dto.team.TeamAddDto;
+import aiku_main.dto.team.TeamDetailResDto;
+import aiku_main.dto.team.TeamEachListResDto;
+import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamQueryRepository;

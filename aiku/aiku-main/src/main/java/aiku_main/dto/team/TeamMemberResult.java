@@ -11,7 +11,7 @@ import static common.domain.Status.ALIVE;
 
 @Getter @Setter
 @NoArgsConstructor
-public class TeamResultMember {
+public class TeamMemberResult {
 
     private Long memberId;
     private String nickname;
@@ -22,7 +22,7 @@ public class TeamResultMember {
     private boolean isTeamMember;
 
     @QueryProjection
-    public TeamResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, Status isTeamMember) {
+    public TeamMemberResult(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, Status isTeamMember) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;
@@ -30,7 +30,7 @@ public class TeamResultMember {
         this.isTeamMember = isTeamMember == ALIVE ? true : false;
     }
 
-    public TeamResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, int previousRank, Status isTeamMember) {
+    public TeamMemberResult(Long memberId, String nickname, MemberProfileResDto memberProfile, int analysis, int previousRank, Status isTeamMember) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;

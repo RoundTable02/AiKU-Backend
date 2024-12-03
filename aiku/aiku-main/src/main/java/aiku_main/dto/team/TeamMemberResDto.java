@@ -1,8 +1,7 @@
 package aiku_main.dto.team;
 
 import aiku_main.dto.MemberProfileResDto;
-import common.domain.member.Member;
-import common.domain.team.TeamMember;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
 @Getter
@@ -12,10 +11,10 @@ public class TeamMemberResDto {
     private String nickname;
     private MemberProfileResDto memberProfile;
 
-    public TeamMemberResDto(TeamMember teamMember) {
-        Member member = teamMember.getMember();
-        this.memberId = member.getId();
-        this.nickname = member.getNickname();
-        this.memberProfile = new MemberProfileResDto(member.getProfile());
+    @QueryProjection
+    public TeamMemberResDto(Long memberId, String nickname, MemberProfileResDto memberProfile) {
+        this.memberId = memberId;
+        this.nickname = nickname;
+        this.memberProfile = memberProfile;
     }
 }

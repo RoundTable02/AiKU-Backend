@@ -1,14 +1,8 @@
 package aiku_main.service;
 
-import aiku_main.dto.team.TeamBettingResult;
-import aiku_main.dto.team.TeamLateTimeResult;
-import aiku_main.dto.team.TeamRacingResult;
-import aiku_main.dto.team.TeamResultMember;
+import aiku_main.dto.team.*;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
-import aiku_main.dto.team.TeamAddDto;
-import aiku_main.dto.team.TeamDetailResDto;
-import aiku_main.dto.team.TeamEachListResDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
@@ -58,34 +52,28 @@ public class TeamService {
 
     @Transactional
     public Long enterTeam(Long memberId, Long teamId) {
-        //검증 로직
         Member member = findMember(memberId);
-        Team team = findTeamById(teamId);
+        Team team = findTeam(teamId);
         checkTeamMember(member.getId(), teamId, false);
 
-        //서비스 로직
         team.addTeamMember(member);
-
-        //TODO 푸시 알람
 
         return team.getId();
     }
 
     @Transactional
     public Long exitTeam(Long memberId, Long teamId) {
-        //검증 로직
         Member member = findMember(memberId);
-        Team team = findTeamById(teamId);
-        checkTeamMember(member.getId(), teamId, true);
-        checkHasRunSchedule(member.getId(), teamId);
+        Team team = findTeam(teamId);
+        checkTeamMember(memberId, teamId, true);
+        checkHasRunSchedule(memberId, teamId);
 
-        //서비스 로직
-        Long teamMemberCount = teamQueryRepository.countOfAliveTeamMember(teamId);
+        Long teamMemberCount = teamQueryRepository.countOfTeamMember(teamId);
         if (teamMemberCount <= 1){
             team.delete();
         }
 
-        TeamMember teamMember = teamQueryRepository.findAliveTeamMember(teamId, member.getId()).orElseThrow();
+        TeamMember teamMember = findTeamMember(memberId, teamId);
         team.removeTeamMember(teamMember);
 
         teamEventPublisher.publishTeamExitEvent(member, team);
@@ -93,65 +81,52 @@ public class TeamService {
         return team.getId();
     }
 
-    //==* 조회 서비스 *==
     public TeamDetailResDto getTeamDetail(Long memberId, Long teamId) {
-        //검증 로직
-        checkExistTeam(teamId);
+        Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        //서비스 로직
-        Team team = teamQueryRepository.findTeamWithMember(teamId).orElseThrow();
-        TeamDetailResDto resultDto = new TeamDetailResDto(team);
+        List<TeamMemberResDto> teamMemberList = teamQueryRepository.getTeamMemberList(teamId);
 
-        return resultDto;
+        return new TeamDetailResDto(teamId, team.getTeamName(), teamMemberList);
     }
 
-    public DataResDto<List<TeamEachListResDto>> getTeamList(Long memberId, int page) {
-        //서비스 로직
-        List<TeamEachListResDto> data = teamQueryRepository.getTeamList(memberId, page);
-        DataResDto<List<TeamEachListResDto>> resultDto = new DataResDto<>(page, data);
+    public DataResDto<List<TeamResDto>> getTeamList(Long memberId, int page) {
+        List<TeamResDto> data = teamQueryRepository.getTeamList(memberId, page);
 
-        return resultDto;
+        return new DataResDto<>(page, data);
     }
 
     public String getTeamLateTimeResult(Long memberId, Long teamId){
-        //검증 로직
-        Team team = findTeamById(teamId);
+        Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        //서비스 로직
         return team.getTeamResult() == null? null : team.getTeamResult().getLateTimeResult();
     }
 
     public String getTeamBettingResult(Long memberId, Long teamId){
-        //검증 로직
-        Team team = findTeamById(teamId);
+        Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        //서비스 로직
         return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
     }
 
     public String getTeamRacingResult(Long memberId, Long teamId) {
-        //검증 로직
-        Team team = findTeamById(teamId);
+        Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        //서비스 로직
         return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
     }
 
-    //==* 이벤트 핸들러 호출 메서드*==
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
 
-        List<TeamResultMember> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
+        List<TeamMemberResult> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
 
         Map<Long, Integer> previousResultMembers = getPreviousLateTimeResult(team);
         int rank = 1;
-        for (TeamResultMember resultMember : lateTeamMemberRanking) {
+        for (TeamMemberResult resultMember : lateTeamMemberRanking) {
             resultMember.setRank(rank++);
             resultMember.setPreviousRank(previousResultMembers.getOrDefault(resultMember.getMemberId(), -1));
         }
@@ -170,7 +145,7 @@ public class TeamService {
             try {
                 TeamLateTimeResult previousResult = objectMapper.readValue(team.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
                 return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamResultMember::getMemberId, teamMember -> teamMember.getRank()));
+                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
             } catch (JsonMappingException e) {
                 throw new TeamException(CAN_NOT_PROCESS_JSON);
             } catch (JsonProcessingException e) {
@@ -189,23 +164,23 @@ public class TeamService {
 
         Map<Long, Integer> previousResult = getPreviousBettingResult(team);
 
-        List<TeamResultMember> teamResultMembers = new ArrayList<>();
+        List<TeamMemberResult> teamMemberResults = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
             long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
             int analysis = (int) ((double)count/memberBettingList.size() * 100);
 
             TeamBettingResultMemberDto data = memberBettingList.get(0);
-            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
+            teamMemberResults.add(new TeamMemberResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
-        teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+        teamMemberResults.sort(Comparator.comparingInt(TeamMemberResult::getAnalysis).reversed());
 
         int rank = 1;
-        for (TeamResultMember resultMember : teamResultMembers) {
+        for (TeamMemberResult resultMember : teamMemberResults) {
             resultMember.setRank(rank++);
         }
 
-        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamResultMembers);
+        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamMemberResults);
         try {
             team.setTeamBettingResult(objectMapper.writeValueAsString(teamBettingResult));
         } catch (JsonProcessingException e) {
@@ -218,7 +193,7 @@ public class TeamService {
             try {
                 TeamBettingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamBettingResult(), TeamBettingResult.class);
                 return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamResultMember::getMemberId, teamMember -> teamMember.getRank()));
+                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
             } catch (JsonMappingException e) {
                 throw new TeamException(CAN_NOT_PROCESS_JSON);
             } catch (JsonProcessingException e) {
@@ -237,23 +212,23 @@ public class TeamService {
 
         Map<Long, Integer> previousResult = getPreviousRacingResult(team);
 
-        List<TeamResultMember> teamResultMembers = new ArrayList<>();
+        List<TeamMemberResult> teamMemberResults = new ArrayList<>();
         memberRacingsMap.forEach((memberId, memberRacingList) -> {
             long count = memberRacingList.stream().filter(TeamRacingResultMemberDto::isWinner).count();
             int analysis = (int) ((double) count / memberRacingList.size() * 100);
 
             TeamRacingResultMemberDto data = memberRacingList.get(0);
-            teamResultMembers.add(new TeamResultMember(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
+            teamMemberResults.add(new TeamMemberResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
-        teamResultMembers.sort(Comparator.comparingInt(TeamResultMember::getAnalysis).reversed());
+        teamMemberResults.sort(Comparator.comparingInt(TeamMemberResult::getAnalysis).reversed());
 
         int rank = 1;
-        for (TeamResultMember resultMember : teamResultMembers) {
+        for (TeamMemberResult resultMember : teamMemberResults) {
             resultMember.setRank(rank++);
         }
 
-        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamResultMembers);
+        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamMemberResults);
         try {
             team.setTeamRacingResult(objectMapper.writeValueAsString(teamRacingResult));
         } catch (JsonProcessingException e) {
@@ -266,7 +241,7 @@ public class TeamService {
             try {
                 TeamRacingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamRacingResult(), TeamRacingResult.class);
                 return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamResultMember::getMemberId, teamMember -> teamMember.getRank()));
+                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
             } catch (JsonMappingException e) {
                 throw new TeamException(CAN_NOT_PROCESS_JSON);
             } catch (JsonProcessingException e) {
@@ -298,13 +273,23 @@ public class TeamService {
     }
 
     private Member findMember(Long memberId){
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdAndStatus(memberId, ALIVE)
                 .orElseThrow(() -> new MemberNotFoundException());
     }
 
-    private Team findTeamById(Long teamId){
+    private Team findTeam(Long teamId){
         return teamQueryRepository.findByIdAndStatus(teamId, ALIVE)
                 .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
+    }
+
+    private Team findTeamWithResult(Long teamId){
+        return teamQueryRepository.findTeamWithResult(teamId)
+                .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
+    }
+
+    private TeamMember findTeamMember(Long memberId, Long teamId){
+        return teamQueryRepository.findAliveTeamMember(teamId, memberId)
+                .orElseThrow(() -> new TeamException(INTERNAL_SERVER_ERROR));
     }
 
     private void checkExistTeam(Long teamId){

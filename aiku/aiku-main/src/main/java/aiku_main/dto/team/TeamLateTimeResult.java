@@ -12,5 +12,5 @@ import java.util.List;
 public class TeamLateTimeResult {
 
     private Long groupId;
-    private List<TeamResultMember> members;
+    private List<TeamMemberResult> members;
 }

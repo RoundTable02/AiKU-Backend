@@ -1,8 +1,9 @@
 package aiku_main.repository;
 
-import aiku_main.dto.team.TeamResultMember;
+import aiku_main.dto.team.TeamMemberResDto;
+import aiku_main.dto.team.TeamMemberResult;
+import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.MemberProfileResDto;
-import aiku_main.dto.team.TeamEachListResDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +22,7 @@ import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
+import static common.domain.team.QTeamResult.teamResult;
 
 @RequiredArgsConstructor
 public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom {
@@ -35,6 +37,17 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
                         team.status.eq(ALIVE),
                         teamMember.status.eq(ALIVE))
                 .stream().findFirst();
+    }
+
+    @Override
+    public Optional<Team> findTeamWithResult(Long teamId) {
+        Team findTeam = query.selectFrom(team)
+                .leftJoin(team.teamResult, teamResult).fetchJoin()
+                .where(team.id.eq(teamId),
+                        team.status.eq(ALIVE))
+                .fetchOne();
+
+        return Optional.ofNullable(findTeam);
     }
 
     @Override
@@ -60,13 +73,27 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
-    public Long countOfAliveTeamMember(Long teamId) {
+    public Long countOfTeamMember(Long teamId) {
         return query
                 .select(teamMember.count())
                 .from(teamMember)
                 .where(teamMember.team.id.eq(teamId),
                         teamMember.status.eq(ALIVE))
                 .fetchOne();
+    }
+
+    @Override
+    public List<TeamMemberResDto> getTeamMemberList(Long teamId) {
+        return query
+                .select(Projections.constructor(TeamMemberResDto.class,
+                        member.id, member.nickname,
+                        Projections.constructor(MemberProfileResDto.class,
+                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground)))
+                .from(teamMember)
+                .innerJoin(teamMember.member, member)
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.status.eq(ALIVE))
+                .fetch();
     }
 
     @Override
@@ -91,7 +118,7 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
-    public List<TeamEachListResDto> getTeamList(Long memberId, int page) {
+    public List<TeamResDto> getTeamList(Long memberId, int page) {
         QSchedule subSchedule = new QSchedule("subSchedule");
 
         List<Long> teamIdList = query.select(teamMember.team.id)
@@ -101,7 +128,7 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
                 .limit(11)
                 .fetch();
 
-        return query.select(Projections.constructor(TeamEachListResDto.class,
+        return query.select(Projections.constructor(TeamResDto.class,
                         team.id, team.teamName, teamMember.count().intValue(),
                         schedule.scheduleTime))
                 .from(team)
@@ -126,9 +153,9 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
-    public List<TeamResultMember> getTeamLateTimeResult(Long teamId) {
+    public List<TeamMemberResult> getTeamLateTimeResult(Long teamId) {
         return query
-                .select(Projections.constructor(TeamResultMember.class,
+                .select(Projections.constructor(TeamMemberResult.class,
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileResDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),

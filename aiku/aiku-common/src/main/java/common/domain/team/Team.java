@@ -27,7 +27,7 @@ public class Team extends BaseTime {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private List<TeamMember> teamMembers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private TeamResult teamResult;
 
     @Enumerated(value = EnumType.STRING)

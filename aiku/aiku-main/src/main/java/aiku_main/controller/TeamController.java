@@ -3,7 +3,7 @@ package aiku_main.controller;
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.team.TeamAddDto;
 import aiku_main.dto.team.TeamDetailResDto;
-import aiku_main.dto.team.TeamEachListResDto;
+import aiku_main.dto.team.TeamResDto;
 import aiku_main.service.TeamService;
 import common.response.BaseResponse;
 import jakarta.validation.Valid;
@@ -54,7 +54,7 @@ public class TeamController {
     @GetMapping
     public BaseResponse getGroupList(@RequestHeader(name = "Access-Member-Id") Long memberId,
                                      @RequestParam(defaultValue = "1") int page){
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(memberId, page);
+        DataResDto<List<TeamResDto>> result = teamService.getTeamList(memberId, page);
 
         return new BaseResponse(result);
     }

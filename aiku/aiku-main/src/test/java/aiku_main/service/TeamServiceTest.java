@@ -4,7 +4,7 @@ import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.dto.team.TeamAddDto;
 import aiku_main.dto.team.TeamDetailResDto;
-import aiku_main.dto.team.TeamEachListResDto;
+import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.repository.BettingQueryRepository;
 import aiku_main.repository.MemberRepository;
@@ -96,12 +96,12 @@ class TeamServiceTest {
         //given
         Member member1 = new Member("member1");
 
-        List<TeamEachListResDto> data = new ArrayList<>();
+        List<TeamResDto> data = new ArrayList<>();
         when(teamQueryRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
 
         //when
         int page = 3;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), 3);
+        DataResDto<List<TeamResDto>> result = teamService.getTeamList(member1.getId(), 3);
 
         //then
         assertThat(result.getPage()).isEqualTo(3);

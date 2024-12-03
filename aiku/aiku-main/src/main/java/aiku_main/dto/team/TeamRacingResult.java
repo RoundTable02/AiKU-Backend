@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamRacingResult {
+
     private Long groupId;
-    private List<TeamResultMember> members;
+    private List<TeamMemberResult> members;
 }

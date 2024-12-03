@@ -1,14 +1,8 @@
 package aiku_main.integration_test;
 
-import aiku_main.dto.team.TeamBettingResult;
-import aiku_main.dto.team.TeamLateTimeResult;
-import aiku_main.dto.team.TeamRacingResult;
-import aiku_main.dto.team.TeamResultMember;
+import aiku_main.dto.team.*;
 import aiku_main.dto.*;
-import aiku_main.dto.team.TeamAddDto;
-import aiku_main.dto.team.TeamDetailResDto;
-import aiku_main.dto.team.TeamEachListResDto;
-import aiku_main.dto.team.TeamMemberResDto;
+import aiku_main.dto.team.TeamResDto;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamQueryRepository;
@@ -256,10 +250,10 @@ public class TeamServiceIntegrationTest {
 
         //when
         int page = 1;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), page);
+        DataResDto<List<TeamResDto>> result = teamService.getTeamList(member1.getId(), page);
 
         //then
-        List<TeamEachListResDto> data = result.getData();
+        List<TeamResDto> data = result.getData();
         assertThat(data.size()).isEqualTo(3);
         assertThat(data).extracting("groupId").containsExactly(teamC.getId(), teamA.getId(), teamB.getId());
         assertThat(data).extracting("memberSize").containsExactly(3, 1, 2);
@@ -303,7 +297,7 @@ public class TeamServiceIntegrationTest {
         assertThat(findTeam).isNotNull();
 
         TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
-        List<TeamResultMember> lateMemberRanking = result.getMembers();
+        List<TeamMemberResult> lateMemberRanking = result.getMembers();
         assertThat(lateMemberRanking).extracting("memberId").containsExactly(member1.getId(), member3.getId());
         assertThat(lateMemberRanking).extracting("analysis").containsExactly(-30, -15);
     }
@@ -348,7 +342,7 @@ public class TeamServiceIntegrationTest {
         assertThat(findTeam).isNotNull();
 
         TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
-        List<TeamResultMember> lateMemberRanking = result.getMembers();
+        List<TeamMemberResult> lateMemberRanking = result.getMembers();
         assertThat(lateMemberRanking).extracting("previousRank").containsExactly(3, 2, 1);
         assertThat(lateMemberRanking).extracting("rank").containsExactly(1, 2, 3);
     }
@@ -399,10 +393,10 @@ public class TeamServiceIntegrationTest {
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
                 .getMembers();
-        assertThat(teamResultMembers.size()).isEqualTo(3);
-        assertThat(teamResultMembers).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
+        assertThat(teamMemberResults.size()).isEqualTo(3);
+        assertThat(teamMemberResults).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
     @Test
@@ -449,10 +443,10 @@ public class TeamServiceIntegrationTest {
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
                 .getMembers();
-        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3);
-        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, -1, 2);
+        assertThat(teamMemberResults).extracting("rank").containsExactly(1, 2, 3);
+        assertThat(teamMemberResults).extracting("previousRank").containsExactly(1, -1, 2);
     }
 
     @Test
@@ -501,10 +495,10 @@ public class TeamServiceIntegrationTest {
         //then
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
                 .getMembers();
-        assertThat(teamResultMembers.size()).isEqualTo(3);
-        assertThat(teamResultMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+        assertThat(teamMemberResults.size()).isEqualTo(3);
+        assertThat(teamMemberResults).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
     }
 
     @Test
@@ -564,9 +558,9 @@ public class TeamServiceIntegrationTest {
         Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
         assertThat(findTeam).isNotNull();
         System.out.println(findTeam.getTeamResult().getTeamRacingResult());
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
                 .getMembers();
-        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3, 4);
-        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, 2, 3, -1);
+        assertThat(teamMemberResults).extracting("rank").containsExactly(1, 2, 3, 4);
+        assertThat(teamMemberResults).extracting("previousRank").containsExactly(1, 2, 3, -1);
     }
 }

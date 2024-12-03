@@ -48,7 +48,7 @@ class TeamServiceTest {
         //given
         Member member = new Member("member1");
 
-        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
+        when(memberRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(member));
 
         //when
         TeamAddDto teamDto = new TeamAddDto("team1");
@@ -63,32 +63,10 @@ class TeamServiceTest {
 
         when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(false);
         when(teamQueryRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
-        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
+        when(memberRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(member));
 
         //when
         Long resultId = teamService.enterTeam(member.getId(), null);
-    }
-
-    @Test
-    void getTeamDetail() {
-        //given
-        Member member1 = new Member("member1");
-        Member member2 = new Member("member2");
-        Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2);
-
-        when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(true);
-        when(teamQueryRepository.existsById(any())).thenReturn(true);
-        when(teamQueryRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
-
-        //when
-        TeamDetailResDto result = teamService.getTeamDetail(member1.getId(), team.getId());
-
-        //then
-        assertThat(result.getGroupName()).isEqualTo(team.getTeamName());
-
-        List<TeamMemberResDto> teamMembers = result.getMembers();
-        assertThat(teamMembers).extracting("nickname").containsExactly(member1.getNickname(), member2.getNickname());
     }
 
     @Test

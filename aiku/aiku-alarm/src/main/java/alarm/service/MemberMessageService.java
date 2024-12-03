@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,9 @@ public class MemberMessageService {
     }
 
     public List<MemberMessageDto> getMemberMessageByMemberId(Long memberId) {
-        return memberMessageRepository.findAllByMemberId(memberId).stream()
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startDate = now.minusDays(7);
+        return memberMessageRepository.findAllByMemberId(memberId, startDate, now).stream()
                 .map(MemberMessageDto::toDto)
                 .collect(Collectors.toList());
     }

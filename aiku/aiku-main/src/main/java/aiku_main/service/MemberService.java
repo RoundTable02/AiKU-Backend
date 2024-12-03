@@ -112,6 +112,14 @@ public class MemberService {
     }
 
     @Transactional
+    public Long muteAlarm(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+        member.muteAlarm();
+
+        return member.getId();
+    }
+
+    @Transactional
     public void updateMemberPoint(Long memberId, PointChangeType pointChangeType, int pointAmount) {
         Member member = memberRepository.findByMemberIdForUpdate(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());

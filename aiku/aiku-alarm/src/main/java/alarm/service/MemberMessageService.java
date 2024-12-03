@@ -26,7 +26,7 @@ public class MemberMessageService {
     private final MessageSender messageSender;
 
     @Transactional
-    public void saveMessage(AlarmMessage message) {
+    public void sendAndSaveMessage(AlarmMessage message) {
         List<String> fcmTokens = message.getAlarmReceiverTokens();
         Map<String, String> messageData = message.getMessage();
 

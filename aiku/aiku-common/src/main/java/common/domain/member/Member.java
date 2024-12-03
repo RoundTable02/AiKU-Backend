@@ -98,6 +98,10 @@ public class Member extends BaseTime {
         this.firebaseToken = firebaseToken;
     }
 
+    public void muteAlarm() {
+        this.firebaseToken = null;
+    }
+
     public void logout() {
         this.refreshToken = null;
     }

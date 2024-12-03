@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -19,10 +20,11 @@ import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
 public class MessageSender {
 
     public void sendMessage(Map<String, String> messageDataMap, List<String> receiverTokens) {
+        receiverTokens.removeAll(Collections.singletonList(null));
+
         if (receiverTokens.size() == 1) {
             sendMessageToUser(messageDataMap, receiverTokens.get(0));
-        }
-        else {
+        } else if (!receiverTokens.isEmpty()) {
             sendMessageToUsers(messageDataMap, receiverTokens);
         }
     }

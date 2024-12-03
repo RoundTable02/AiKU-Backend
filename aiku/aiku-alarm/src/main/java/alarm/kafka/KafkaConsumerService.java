@@ -1,10 +1,8 @@
 package alarm.kafka;
 
 import alarm.exception.MessagingException;
-import alarm.fcm.MessageSender;
 import alarm.service.MemberMessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.kafka_message.alarm.AlarmMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +11,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
 
@@ -32,7 +27,7 @@ public class KafkaConsumerService {
         try {
             AlarmMessage message = objectMapper.readValue(data.value(), AlarmMessage.class);
 
-            messageService.saveMessage(message);
+            messageService.sendAndSaveMessage(message);
         } catch (JsonProcessingException e) {
             throw new MessagingException(FAIL_TO_SEND_MESSAGE);
         }

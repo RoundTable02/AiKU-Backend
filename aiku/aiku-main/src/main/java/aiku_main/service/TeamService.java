@@ -9,6 +9,7 @@ import aiku_main.dto.*;
 import aiku_main.dto.team.TeamAddDto;
 import aiku_main.dto.team.TeamDetailResDto;
 import aiku_main.dto.team.TeamEachListResDto;
+import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
@@ -296,17 +297,14 @@ public class TeamService {
         }
     }
 
-    //==* 기타 메서드 *==
     private Member findMember(Long memberId){
-        return memberRepository.findById(memberId).orElseThrow();
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException());
     }
 
     private Team findTeamById(Long teamId){
-        Team team = teamQueryRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
-        if (team == null) {
-            throw new TeamException(NO_SUCH_TEAM);
-        }
-        return team;
+        return teamQueryRepository.findByIdAndStatus(teamId, ALIVE)
+                .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
     }
 
     private void checkExistTeam(Long teamId){

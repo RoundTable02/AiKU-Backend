@@ -120,7 +120,7 @@ public class TeamService {
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
-        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        Team team = findTeamWithResult(schedule.getTeam().getId());
 
         List<TeamMemberResult> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
 
@@ -158,7 +158,7 @@ public class TeamService {
     @Transactional
     public void analyzeBettingResult(Long scheduleId) {
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
-        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        Team team = findTeamWithResult(schedule.getTeam().getId());
 
         Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
 
@@ -206,7 +206,7 @@ public class TeamService {
     @Transactional
     public void analyzeRacingResult(Long scheduleId) {
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
-        Team team = teamQueryRepository.findById(schedule.getTeam().getId()).orElseThrow();
+        Team team = findTeamWithResult(schedule.getTeam().getId());
 
         Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingQueryRepository.findMemberWithTermRacingsInTeam(team.getId());
 
@@ -253,7 +253,7 @@ public class TeamService {
 
     @Transactional
     public void updateLateTimeResultOfExitMember(Long memberId, Long teamId) {
-        Team team = teamQueryRepository.findById(teamId).orElseThrow();
+        Team team = findTeamWithResult(teamId);
         if (team.getTeamResult() == null || team.getTeamResult().getLateTimeResult() == null) {
             return;
         }

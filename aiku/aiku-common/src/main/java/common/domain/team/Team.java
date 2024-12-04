@@ -8,11 +8,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static common.domain.Status.ALIVE;
+import static common.domain.Status.DELETE;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,64 +20,71 @@ import static common.domain.Status.ALIVE;
 public class Team extends BaseTime {
 
     @Column(name = "teamId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
     private String teamName;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamMember> teamMembers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private TeamResult teamResult;
 
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Status status = ALIVE;
 
-    private Team(String teamName) {
-        this.teamName = teamName;
-    }
-
     public static Team create(Member member, String teamName){
-        Team team = new Team(teamName);
+        Team team = new Team();
+        team.teamName = teamName;
         team.addTeamMember(member);
+
         return team;
     }
 
     public void delete(){
-        this.status = Status.DELETE;
+        status = DELETE;
     }
 
     public void addTeamMember(Member member){
-        this.teamMembers.add(new TeamMember(this, member));
+        teamMembers.add(new TeamMember(this, member));
     }
 
     public boolean removeTeamMember(TeamMember teamMember){
-        if (teamMember.getTeam().getId().equals(id)) {
-            teamMember.setStatus(Status.DELETE);
+        if (isValidTeamMember(teamMember)) {
+            teamMember.setStatus(DELETE);
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public void setTeamLateResult(String teamLateResult){
-        checkTeamResultExist();
+        getOrCreateTeamResult();
         teamResult.setLateTimeResult(teamLateResult);
     }
 
     public void setTeamBettingResult(String teamBettingResult){
-        checkTeamResultExist();
+        getOrCreateTeamResult();
         teamResult.setTeamBettingResult(teamBettingResult);
     }
 
     public void setTeamRacingResult(String teamRacingResult){
-        checkTeamResultExist();
+        getOrCreateTeamResult();
         teamResult.setTeamRacingResult(teamRacingResult);
     }
 
-    private void checkTeamResultExist(){
+    private void getOrCreateTeamResult(){
         if (teamResult == null) {
             teamResult = new TeamResult(this);
         }
+    }
+
+    private boolean isValidTeamMember(TeamMember teamMember){
+        return teamMember.getTeam().getId().equals(id);
+    }
+
+    public List<TeamMember> getTeamMembers() {
+        return List.copyOf(teamMembers);
     }
 }

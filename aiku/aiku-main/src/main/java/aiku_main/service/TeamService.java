@@ -292,12 +292,6 @@ public class TeamService {
                 .orElseThrow(() -> new TeamException(INTERNAL_SERVER_ERROR));
     }
 
-    private void checkExistTeam(Long teamId){
-        if(!teamQueryRepository.existsById(teamId)){
-            throw new TeamException(NO_SUCH_TEAM);
-        }
-    }
-
     private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
         if(teamQueryRepository.existTeamMember(memberId, teamId) != isMember){
             if(isMember){

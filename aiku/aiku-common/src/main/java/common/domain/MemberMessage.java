@@ -1,4 +1,4 @@
-package alarm.domain;
+package common.domain;
 
 import common.domain.BaseTime;
 import common.kafka_message.alarm.AlarmMessageType;

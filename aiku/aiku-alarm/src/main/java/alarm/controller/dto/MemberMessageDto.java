@@ -1,6 +1,6 @@
 package alarm.controller.dto;
 
-import alarm.domain.MemberMessage;
+import common.domain.MemberMessage;
 import common.kafka_message.alarm.AlarmMessageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

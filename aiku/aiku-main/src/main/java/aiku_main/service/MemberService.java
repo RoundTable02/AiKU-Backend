@@ -120,6 +120,14 @@ public class MemberService {
     }
 
     @Transactional
+    public Long turnAlarmOn(Long accessMemberId) {
+        Member member = getMemberById(accessMemberId);
+        member.turnAlarmOn();
+
+        return member.getId();
+    }
+
+    @Transactional
     public void updateMemberPoint(Long memberId, PointChangeType pointChangeType, int pointAmount) {
         Member member = memberRepository.findByMemberIdForUpdate(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());

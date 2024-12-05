@@ -72,6 +72,13 @@ public class MemberController {
         return BaseResponse.getSimpleRes(memberId);
     }
 
+    @PatchMapping("/setting/alarm")
+    public BaseResponse<BaseResultDto> turnAlarmOn(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+        Long memberId = memberService.turnAlarmOn(accessMemberId);
+
+        return BaseResponse.getSimpleRes(memberId);
+    }
+
     @GetMapping("/setting/authority")
     public BaseResponse<AuthorityResDto> getAuthDetail(@RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
         AuthorityResDto authorityResDto = memberService.getAuthDetail(accessMemberId);

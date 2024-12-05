@@ -30,32 +30,6 @@ public class MessageSender {
         }
     }
 
-    private void sendMessageToUsers(Map<String, String> messageDataMap, List<String> receiverTokens) {
-        log.info("Firebase sendMessageToUsers");
-        MulticastMessage message = MulticastMessage.builder()
-                .putAllData(messageDataMap)
-                .addAllTokens(receiverTokens)
-                .build();
-
-        ApiFuture<BatchResponse> future = FirebaseMessaging.getInstance().sendEachForMulticastAsync(message);
-
-        future.addListener(() -> {
-            try {
-                BatchResponse batchResponse = future.get();
-                log.info("Successfully sent messages: {}" + batchResponse.getSuccessCount());
-                log.info("Failed messages: {}" + batchResponse.getFailureCount());
-
-                batchResponse.getResponses().forEach(response -> {
-                    if (!response.isSuccessful()) {
-                        log.info("Error sending message: " + response.getException().getMessage());
-                    }
-                });
-            } catch (Exception e) {
-                throw new MessagingException(FAIL_TO_SEND_MESSAGE);
-            }
-        }, Executors.newSingleThreadExecutor());
-    }
-
     private void sendMessageToUser(Map<String, String> messageDataMap, String receiverToken) {
         log.info("Firebase sendMessageToUser");
         Message message = Message.builder()
@@ -72,7 +46,34 @@ public class MessageSender {
         }).thenAccept(response -> {
             log.info("Message sent successfully: {}", response);
         }).exceptionally(ex -> {
+            log.error("Message sending fails: {}", ex.getMessage());
             throw new MessagingException(FAIL_TO_SEND_MESSAGE);
         });
+    }
+
+    private void sendMessageToUsers(Map<String, String> messageDataMap, List<String> receiverTokens) {
+        log.info("Firebase sendMessageToUsers");
+        MulticastMessage message = MulticastMessage.builder()
+                .putAllData(messageDataMap)
+                .addAllTokens(receiverTokens)
+                .build();
+
+        ApiFuture<BatchResponse> future = FirebaseMessaging.getInstance().sendEachForMulticastAsync(message);
+
+        future.addListener(() -> {
+            try {
+                BatchResponse batchResponse = future.get();
+                log.info("Successfully sent messages: " + batchResponse.getSuccessCount());
+                log.info("Failed messages: " + batchResponse.getFailureCount());
+
+                batchResponse.getResponses().forEach(response -> {
+                    if (!response.isSuccessful()) {
+                        log.error("Error sending message: " + response.getException().getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                throw new MessagingException(FAIL_TO_SEND_MESSAGE);
+            }
+        }, Executors.newSingleThreadExecutor());
     }
 }

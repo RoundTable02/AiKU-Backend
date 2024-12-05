@@ -15,4 +15,11 @@ public class MessageExceptionHandler {
 
         return BaseErrorResponse.get(exception);
     }
+
+    @ExceptionHandler({MemberNotFoundException.class})
+    public ResponseEntity<BaseErrorResponse> handle_MemberNotFoundException(MemberNotFoundException exception){
+        log.error("MessagingExceptionHandler.handle_MemberNotFoundException <{}> {}", exception.getStatus().getMessage(), exception);
+
+        return BaseErrorResponse.get(exception);
+    }
 }

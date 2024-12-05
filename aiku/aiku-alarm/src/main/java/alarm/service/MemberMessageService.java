@@ -1,6 +1,7 @@
 package alarm.service;
 
 import alarm.controller.dto.MemberMessageDto;
+import alarm.exception.MemberNotFoundException;
 import alarm.fcm.MessageSender;
 import alarm.repository.MemberMessageRepository;
 import alarm.repository.MemberRepository;
@@ -40,6 +41,10 @@ public class MemberMessageService {
         if (!message.getAlarmMessageType().equals(AlarmMessageType.MEMBER_REAL_TIME_LOCATION)) {
             // 멤버 실시간 위치는 직접적인 알림이 아니기 때문에 제외
             List<Long> memberIds = memberRepository.findMemberIdsByFirebaseTokenList(fcmTokens);
+
+            if (memberIds.isEmpty()) {
+                throw new MemberNotFoundException();
+            }
 
             String simpleAlarmInfo = alarmMessageConverter.getSimpleAlarmInfo(message);
 

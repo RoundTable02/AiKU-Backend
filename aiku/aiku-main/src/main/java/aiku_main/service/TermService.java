@@ -18,26 +18,13 @@ import static common.response.status.BaseErrorCode.NO_SUCH_TERM;
 @Transactional(readOnly = true)
 @Service
 public class TermService {
+
     private final TermRepository termRepository;
 
-    public List<TermResDto> getTermsRes() {
-        List<Term> terms = getTerms();
-
-        return terms.stream()
-                .map(TermResDto::toDto)
-                .collect(Collectors.toList());
-    }
-
-    private List<Term> getTerms() {
-        Term serviceTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.SERVICE)
-                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
-        Term marketingTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.MARKETING)
-                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
-        Term personalInfoTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.PERSONALINFO)
-                .orElseThrow(() -> new TermException(NO_SUCH_TERM));
-        Term locationTerm = termRepository.findTopByTermTitleOrderByVersionDesc(TermTitle.LOCATION)
+    public TermResDto getTerm(TermTitle termTitle) {
+        Term term = termRepository.findTopByTermTitleOrderByVersionDesc(termTitle)
                 .orElseThrow(() -> new TermException(NO_SUCH_TERM));
 
-        return List.of(serviceTerm, marketingTerm, personalInfoTerm, locationTerm);
+        return TermResDto.toDto(term);
     }
 }

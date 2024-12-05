@@ -44,24 +44,16 @@ class TermServiceTest {
         termRepository.saveAll(termList);
 
         // when
-        List<TermResDto> termsRes = termService.getTermsRes();
+        TermResDto serviceTerm = termService.getTerm(TermTitle.SERVICE);
+        TermResDto marketingTerm = termService.getTerm(TermTitle.MARKETING);
 
         // then
-        TermResDto sTermRes = termsRes.stream()
-                .filter(t -> t.getTitle().equals(TermTitle.SERVICE))
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException());
 
-        assertThat(sTermRes.getAgreedType()).isEqualTo(AgreedType.MANDATORY);
-        assertThat(sTermRes.getContent()).isEqualTo("서비스");
+        assertThat(serviceTerm.getAgreedType()).isEqualTo(AgreedType.MANDATORY);
+        assertThat(serviceTerm.getContent()).isEqualTo("서비스");
 
-        TermResDto mTermRes = termsRes.stream()
-                .filter(t -> t.getTitle().equals(TermTitle.MARKETING))
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException());
-
-        assertThat(mTermRes.getAgreedType()).isEqualTo(AgreedType.OPTIONAL);
-        assertThat(mTermRes.getContent()).isEqualTo("마케팅");
+        assertThat(marketingTerm.getAgreedType()).isEqualTo(AgreedType.OPTIONAL);
+        assertThat(marketingTerm.getContent()).isEqualTo("마케팅");
     }
 
     @Test
@@ -78,16 +70,11 @@ class TermServiceTest {
         termRepository.saveAll(termList);
 
         // when
-        List<TermResDto> termsRes = termService.getTermsRes();
+        TermResDto marketingTerm = termService.getTerm(TermTitle.MARKETING);
 
         // then
-        TermResDto mTermRes = termsRes.stream()
-                .filter(t -> t.getTitle().equals(TermTitle.MARKETING))
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException());
-
-        assertThat(mTermRes.getAgreedType()).isEqualTo(AgreedType.OPTIONAL);
-        assertThat(mTermRes.getContent()).isEqualTo("마케팅2");
+        assertThat(marketingTerm.getAgreedType()).isEqualTo(AgreedType.OPTIONAL);
+        assertThat(marketingTerm.getContent()).isEqualTo("마케팅2");
     }
 
     @Test
@@ -103,7 +90,7 @@ class TermServiceTest {
 
         // when & then
         Assertions.assertThrows(TermException.class, () -> {
-            termService.getTermsRes();
+            termService.getTerm(TermTitle.MARKETING);
         });
     }
 }

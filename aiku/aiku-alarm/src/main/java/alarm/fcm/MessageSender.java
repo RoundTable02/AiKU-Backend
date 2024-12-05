@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
@@ -20,7 +21,7 @@ import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
 public class MessageSender {
 
     public void sendMessage(Map<String, String> messageDataMap, List<String> receiverTokens) {
-        receiverTokens.removeAll(Collections.singletonList(null));
+        receiverTokens.removeAll(Collections.singletonList("NOT_DEFINED"));
 
         if (receiverTokens.size() == 1) {
             sendMessageToUser(messageDataMap, receiverTokens.get(0));
@@ -62,15 +63,16 @@ public class MessageSender {
                 .setToken(receiverToken)
                 .build();
 
-        ApiFuture<String> future = FirebaseMessaging.getInstance().sendAsync(message);
-
-        future.addListener(() -> {
+        CompletableFuture.supplyAsync(() -> {
             try {
-                String response = future.get();
-                log.info("Message sent successfully: {}", response);
-            } catch (Exception e) {
-                throw new MessagingException(FAIL_TO_SEND_MESSAGE);
+                return FirebaseMessaging.getInstance().send(message);
+            } catch (FirebaseMessagingException e) {
+                throw new RuntimeException(e);
             }
-        }, Executors.newSingleThreadExecutor());
+        }).thenAccept(response -> {
+            log.info("Message sent successfully: {}", response);
+        }).exceptionally(ex -> {
+            throw new MessagingException(FAIL_TO_SEND_MESSAGE);
+        });
     }
 }

@@ -86,13 +86,12 @@ public class ScheduleService {
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Member excludeMember, AlarmMessageType messageType){
         List<TeamMember> teamMembers = teamQueryRepository.findTeamMembersWithMemberInTeam(teamId);
-        List<AlarmMemberInfo> alarmMembers = teamMembers.stream()
+        List<String> alarmReceiverTokens = teamMembers.stream()
                 .filter(teamMember -> !teamMember.getMember().getId().equals(excludeMember.getId()))
-                .map(TeamMember::getMember)
-                .map(AlarmMemberInfo::new)
+                .map((teamMember) -> teamMember.getMember().getFirebaseToken())
                 .toList();
 
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmReceiverTokens, messageType, schedule));
     }
 
     @Transactional
@@ -155,9 +154,8 @@ public class ScheduleService {
             ScheduleMember nextScheduleOwner = findNextScheduleOwnerWithMember(scheduleId, scheduleMember.getId());
             schedule.changeScheduleOwner(nextScheduleOwner);
 
-            Member nextMember = nextScheduleOwner.getMember();
-            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(
-                    List.of(new AlarmMemberInfo(nextMember)), schedule, AlarmMessageType.SCHEDULE_OWNER));
+            kafkaProducerService.sendMessage(alarm,
+                    new ScheduleAlarmMessage(List.of(nextScheduleOwner.getMember().getFirebaseToken()), AlarmMessageType.SCHEDULE_EXIT, schedule));
         }
 
         schedule.removeScheduleMember(scheduleMember);
@@ -184,17 +182,16 @@ public class ScheduleService {
 
     private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, Member sourceMember, AlarmMessageType messageType) {
         List<ScheduleMember> scheduleMembers = scheduleQueryRepository.findScheduleMembersWithMember(schedule.getId());
-        List<AlarmMemberInfo> alarmMembers = scheduleMembers.stream()
+        List<String> alarmReceiverTokens = scheduleMembers.stream()
                 .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
-                .map(ScheduleMember::getMember)
-                .map(AlarmMemberInfo::new)
+                .map((sm) -> sm.getMember().getFirebaseToken())
                 .toList();
 
         if(sourceMember == null) {
-            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmMembers, schedule, messageType));
+            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmReceiverTokens, messageType, schedule));
         } else {
-            AlarmMemberInfo sourceMemberInfo = new AlarmMemberInfo(sourceMember);
-            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(sourceMemberInfo, alarmMembers, schedule, messageType));
+            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(alarmReceiverTokens, messageType, new AlarmMemberInfo(sourceMember),
+                    schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
         }
     }
 

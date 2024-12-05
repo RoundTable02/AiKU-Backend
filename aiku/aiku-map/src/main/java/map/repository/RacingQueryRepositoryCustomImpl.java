@@ -193,4 +193,25 @@ public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCus
                 )
                 .fetch();
     }
+
+    @Override
+    public List<String> findRacersFcmTokensInRacing(Long racingId) {
+        QScheduleMember firstRacerMember = new QScheduleMember("firstRacerMember");
+        QScheduleMember secondRacerMember = new QScheduleMember("secondRacerMember");
+
+        QMember firstMember = new QMember("firstMember");
+        QMember secondMember = new QMember("secondMember");
+
+        Tuple tuple = query.select(firstMember.firebaseToken,
+                        secondMember.firebaseToken)
+                .from(racing)
+                .join(firstRacerMember).on(firstRacerMember.id.eq(racing.firstRacer.id))
+                .join(firstRacerMember.member, firstMember)
+                .join(secondRacerMember).on(secondRacerMember.id.eq(racing.secondRacer.id))
+                .join(secondRacerMember.member, secondMember)
+                .where(racing.id.eq(racingId))
+                .fetchOne();
+
+        return List.of(tuple.get(0, String.class), tuple.get(1, String.class));
+    }
 }

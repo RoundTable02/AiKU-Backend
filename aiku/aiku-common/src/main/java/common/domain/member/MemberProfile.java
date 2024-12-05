@@ -5,6 +5,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @Builder
 @AllArgsConstructor

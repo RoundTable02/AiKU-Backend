@@ -17,10 +17,6 @@ public class AlarmMessageConverter {
     }
 
     // DB 알림 저장 용
-    // SCHEDULE_ADD, SCHEDULE_ENTER, SCHEDULE_EXIT, SCHEDULE_UPDATE, SCHEDULE_OWNER, SCHEDULE_OPEN, SCHEDULE_AUTO_CLOSE,
-    //    MEMBER_REAL_TIME_LOCATION, MEMBER_ARRIVAL, SCHEDULE_MAP_CLOSE, EMOJI,
-    //    ASK_RACING, RACING_AUTO_DELETED, RACING_DENIED, RACING_TERM, RACING_START,
-    //    TITLE_GRANTED
     public String getSimpleAlarmInfo(AlarmMessage alarmMessage) {
         switch (alarmMessage.getAlarmMessageType()) {
             case SCHEDULE_ADD -> {

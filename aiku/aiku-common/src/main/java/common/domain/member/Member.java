@@ -106,6 +106,10 @@ public class Member extends BaseTime {
         this.isAlarmOn = false;
     }
 
+    public void turnAlarmOn() {
+        this.isAlarmOn = true;
+    }
+
     public void logout() {
         this.refreshToken = null;
     }

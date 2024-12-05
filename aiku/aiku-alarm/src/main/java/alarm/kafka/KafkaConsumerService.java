@@ -2,6 +2,7 @@ package alarm.kafka;
 
 import alarm.exception.MessagingException;
 import alarm.service.MemberMessageService;
+import alarm.util.AlarmMessageMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.kafka_message.alarm.AlarmMessage;
@@ -20,19 +21,13 @@ import static common.response.status.BaseErrorCode.FAIL_TO_SEND_MESSAGE;
 public class KafkaConsumerService {
 
     private final MemberMessageService messageService;
+    private final AlarmMessageMapper messageMapper;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = {"alarm"}, groupId = "aiku-alarm", concurrency = "1")
     public void consumeAlarmEvent(ConsumerRecord<String, String> data, Acknowledgment ack){
-        try {
-            AlarmMessage message = objectMapper.readValue(data.value(), AlarmMessage.class);
-
-            // TODO : 캐스팅 안되는 문제 발생,  getAlarmMessageType으로 타입 비교해 캐스팅할 것
-            messageService.sendAndSaveMessage(message);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new MessagingException(FAIL_TO_SEND_MESSAGE);
-        }
+        AlarmMessage message = messageMapper.mapToAlarmMessage(data);
+        messageService.sendAndSaveMessage(message);
 
         ack.acknowledge();
     }

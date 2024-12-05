@@ -26,20 +26,4 @@ public class ScheduleClosedMessage extends AlarmMessage {
         this.scheduleTime = scheduleTime;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleId", scheduleId);
-        messageData.put("scheduleName", scheduleName);
-        messageData.put("scheduleTime", scheduleTime);
-        messageData.put("locationName", locationName);
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "약속 : " + scheduleName + "가 종료되었습니다.";
-    }
 }

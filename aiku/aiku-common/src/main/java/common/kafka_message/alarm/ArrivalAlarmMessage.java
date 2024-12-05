@@ -28,19 +28,4 @@ public class ArrivalAlarmMessage extends AlarmMessage {
         this.arriveMemberInfo = arriveMemberInfo;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleName", scheduleName);
-        messageData.put("member", arriveMemberInfo.getAlarmMemberInfoJsonString());
-        messageData.put("arrivalTime", arrivalTime);
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "약속 : " + scheduleName + "에서 멤버 " + arriveMemberInfo.getNickname() + "가 약속 장소에 도착하였습니다!";
-    }
 }

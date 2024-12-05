@@ -28,20 +28,4 @@ public class EmojiMessage extends AlarmMessage {
         this.receiverInfo = receiverInfo;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleId", scheduleId);
-        messageData.put("scheduleName", scheduleName);
-        messageData.put("sender", senderInfo.getAlarmMemberInfoJsonString());
-        messageData.put("receiver", receiverInfo.getAlarmMemberInfoJsonString());
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "약속 : " + scheduleName + "에서 멤버 " + senderInfo.getNickname() + "가 " + emojiType + " 이모지를 전달했습니다.";
-    }
 }

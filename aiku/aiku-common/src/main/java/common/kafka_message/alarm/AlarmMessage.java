@@ -12,15 +12,9 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class AlarmMessage {
+public class AlarmMessage {
 
     private List<String> alarmReceiverTokens;
     private AlarmMessageType alarmMessageType;
-
-    // Firebase 알림 전달 용 메시지 생성
-    public abstract Map<String, String> getMessage();
-
-    // DB 알림 저장 용
-    public abstract String getSimpleAlarmInfo();
 
 }

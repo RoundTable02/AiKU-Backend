@@ -11,6 +11,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m.id from Member m where m.firebaseToken in :firebaseTokens")
     List<Long> findMemberIdsByFirebaseTokenList(List<String> firebaseTokens);
 
-    @Query("select m.firebaseToken from Member m where m.firebaseToken in :firebaseTokens and m.isAlarmOn")
+    @Query("select m.firebaseToken from Member m where m.firebaseToken in :fcmTokens and m.isAlarmOn")
     List<String> findFirebaseTokenOnlyAlarmOn(List<String> fcmTokens);
 }

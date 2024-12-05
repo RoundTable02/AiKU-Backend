@@ -1,6 +1,5 @@
 package aiku_main.kafka;
 
-import common.kafka_message.alarm.AlarmMemberInfo;
 import common.kafka_message.alarm.AlarmMessage;
 import common.kafka_message.alarm.AlarmMessageType;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class KafkaProducerServiceTest {
         //given
         AlarmMessage message = new AlarmMessage(null, null) {
             @Override
-            public List<AlarmMemberInfo> getAlarmReceiverTokens() {
+            public List<String> getAlarmReceiverTokens() {
                 return super.getAlarmReceiverTokens();
             }
 

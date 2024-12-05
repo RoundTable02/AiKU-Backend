@@ -27,21 +27,4 @@ public class RacingDeniedMessage extends AlarmMessage {
         this.secondRacerInfo = secondRacerInfo;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleId", scheduleId);
-        messageData.put("scheduleName", scheduleName);
-        messageData.put("racingId", racingId);
-        messageData.put("member", secondRacerInfo.getAlarmMemberInfoJsonString());
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "약속 : " + scheduleName + "에서 멤버 " + secondRacerInfo.getNickname() +
-                "에게 신청한 레이싱이 거절되었습니다.";
-    }
 }

@@ -25,21 +25,4 @@ public class TitleGrantedMessage extends AlarmMessage {
         this.titleCode = titleCode;
     }
 
-
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("titleId", titleId);
-        messageData.put("titleName", titleName);
-        messageData.put("titleDescription", titleDescription);
-        messageData.put("titleCode", titleCode.name());
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "칭호 : " + titleName + "을 획득하였습니다!";
-    }
 }

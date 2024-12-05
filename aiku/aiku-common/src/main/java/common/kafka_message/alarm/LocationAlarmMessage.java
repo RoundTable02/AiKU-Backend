@@ -25,21 +25,4 @@ public class LocationAlarmMessage extends AlarmMessage {
         this.longitude = longitude;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleId", scheduleId);
-        messageData.put("member", memberInfo.getAlarmMemberInfoJsonString());
-        messageData.put("latitude", latitude);
-        messageData.put("longitude", longitude);
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        // 실시간 좌표는 저장 x
-        return null;
-    }
 }

@@ -30,21 +30,4 @@ public class AskRacingMessage extends AlarmMessage{
         this.firstRacerInfo = firstRacerInfo;
     }
 
-    @Override
-    public Map<String, String> getMessage() {
-        Map messageData = new HashMap();
-        messageData.put("title", this.getAlarmMessageType().name());
-        messageData.put("scheduleId", scheduleId);
-        messageData.put("scheduleName", scheduleName);
-        messageData.put("racingId", racingId);
-        messageData.put("point", point);
-        messageData.put("member", firstRacerInfo.getAlarmMemberInfoJsonString());
-
-        return messageData;
-    }
-
-    @Override
-    public String getSimpleAlarmInfo() {
-        return "약속 : " + scheduleName + "에서 멤버 " + firstRacerInfo.getNickname() + "가 " + point + "아쿠의 레이싱을 신청하였습니다.";
-    }
 }

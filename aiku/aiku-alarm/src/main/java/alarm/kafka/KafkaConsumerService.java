@@ -27,8 +27,10 @@ public class KafkaConsumerService {
         try {
             AlarmMessage message = objectMapper.readValue(data.value(), AlarmMessage.class);
 
+            // TODO : 캐스팅 안되는 문제 발생,  getAlarmMessageType으로 타입 비교해 캐스팅할 것
             messageService.sendAndSaveMessage(message);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new MessagingException(FAIL_TO_SEND_MESSAGE);
         }
 

@@ -36,6 +36,6 @@ public class TeamHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void updateLateTimeResultOfExitMember(TeamExitEvent event) {
-        teamService.updateLateTimeResultOfExitMember(event.getMember().getId(), event.getTeam().getId());
+        teamService.updateTeamResultOfExitMember(event.getMember().getId(), event.getTeam().getId());
     }
 }

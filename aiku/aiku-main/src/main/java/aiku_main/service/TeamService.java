@@ -15,6 +15,7 @@ import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
+import common.domain.team.TeamResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -252,14 +253,25 @@ public class TeamService {
     }
 
     @Transactional
-    public void updateLateTimeResultOfExitMember(Long memberId, Long teamId) {
+    public void updateTeamResultOfExitMember(Long memberId, Long teamId) {
         Team team = findTeamWithResult(teamId);
-        if (team.getTeamResult() == null || team.getTeamResult().getLateTimeResult() == null) {
+        if (team.getTeamResult() == null) {
+            return;
+        }
+
+        updateLateTimeResultOfExitMember(memberId, team);
+        updateBettingTimeResultOfExitMember(memberId, team);
+        updateRacingTimeResultOfExitMember(memberId, team);
+    }
+
+    private void updateLateTimeResultOfExitMember(Long memberId, Team team){
+        TeamResult teamResult = team.getTeamResult();
+        if (teamResult.getLateTimeResult() == null) {
             return;
         }
 
         try {
-            TeamLateTimeResult result = objectMapper.readValue(team.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
+            TeamLateTimeResult result = objectMapper.readValue(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
             result.getMembers().forEach(resultMember -> {
                 if (resultMember.getMemberId().equals(memberId)) {
                     resultMember.setTeamMember(false);
@@ -267,6 +279,46 @@ public class TeamService {
             });
 
             team.setTeamLateResult(objectMapper.writeValueAsString(result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateBettingTimeResultOfExitMember(Long memberId, Team team){
+        TeamResult teamResult = team.getTeamResult();
+        if (teamResult.getTeamBettingResult() == null) {
+            return;
+        }
+
+        try {
+            TeamBettingResult result = objectMapper.readValue(teamResult.getTeamBettingResult(), TeamBettingResult.class);
+            result.getMembers().forEach(resultMember -> {
+                if (resultMember.getMemberId().equals(memberId)) {
+                    resultMember.setTeamMember(false);
+                }
+            });
+
+            team.setTeamBettingResult(objectMapper.writeValueAsString(result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateRacingTimeResultOfExitMember(Long memberId, Team team){
+        TeamResult teamResult = team.getTeamResult();
+        if (teamResult.getTeamRacingResult() == null) {
+            return;
+        }
+
+        try {
+            TeamRacingResult result = objectMapper.readValue(teamResult.getTeamRacingResult(), TeamRacingResult.class);
+            result.getMembers().forEach(resultMember -> {
+                if (resultMember.getMemberId().equals(memberId)) {
+                    resultMember.setTeamMember(false);
+                }
+            });
+
+            team.setTeamRacingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

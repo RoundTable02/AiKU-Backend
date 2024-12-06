@@ -1,5 +1,6 @@
 package aiku_main.repository;
 
+import common.domain.Status;
 import common.domain.member.Member;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+    Optional<Member> findByIdAndStatus(Long memberId, Status status);
     Optional<Member> findByNickname(String recommenderNickname);
 
     Optional<Member> findByKakaoId(Long aLong);

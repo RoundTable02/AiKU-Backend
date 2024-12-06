@@ -2,6 +2,7 @@ package aiku_main.repository;
 
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
+import aiku_main.dto.team.TeamScheduleListEachResDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;

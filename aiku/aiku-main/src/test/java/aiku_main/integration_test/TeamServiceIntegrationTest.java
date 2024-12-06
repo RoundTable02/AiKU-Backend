@@ -1,10 +1,7 @@
 package aiku_main.integration_test;
 
-import aiku_main.application_event.domain.TeamBettingResult;
-import aiku_main.application_event.domain.TeamLateTimeResult;
-import aiku_main.application_event.domain.TeamRacingResult;
-import aiku_main.application_event.domain.TeamResultMember;
-import aiku_main.dto.*;
+import aiku_main.dto.team.*;
+import aiku_main.dto.team.TeamResDto;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.TeamQueryRepository;
@@ -31,6 +28,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 @Transactional
 @SpringBootTest
 public class TeamServiceIntegrationTest {
@@ -67,18 +65,18 @@ public class TeamServiceIntegrationTest {
 
     @Test
     void 그룹_등록() {
-        //given
         //when
         TeamAddDto teamDto = new TeamAddDto("group1");
         Long teamId = teamService.addTeam(member1.getId(), teamDto);
 
         //then
-        Team team = teamQueryRepository.findById(teamId).get();
+        Team team = teamQueryRepository.findById(teamId).orElse(null);
+        assertThat(team).isNotNull();
         assertThat(team.getTeamName()).isEqualTo(teamDto.getGroupName());
-        assertThat(team.getTeamMembers().size()).isEqualTo(1);
+        assertThat(team.getTeamMembers()).hasSize(1);
 
         TeamMember teamMember = team.getTeamMembers().get(0);
-        assertThat(teamMember.getMember().getId()).isEqualTo(member1.getId());
+        assertThat(teamMember.getMember().getId()).isEqualTo(member1.getId()); //그룹을 등록한 멤버는 그룹 자동 참가됨
     }
 
     @Test
@@ -91,8 +89,12 @@ public class TeamServiceIntegrationTest {
         Long teamId = teamService.enterTeam(member2.getId(), team.getId());
 
         //then
-        TeamMember teamMember = teamQueryRepository.findAliveTeamMember(teamId, member2.getId()).orElse(null);
-        assertThat(teamMember).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(teamId).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getTeamMembers()).hasSize(2);
+        assertThat(resultTeam.getTeamMembers())
+                .extracting(teamMember -> teamMember.getMember().getId())
+                .containsExactlyInAnyOrder(member1.getId(), member2.getId());
     }
 
     @Test
@@ -103,7 +105,8 @@ public class TeamServiceIntegrationTest {
         em.persist(team);
 
         //when
-        assertThatThrownBy(() -> teamService.enterTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.enterTeam(member2.getId(), team.getId()))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -118,13 +121,12 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member2.getId(), team.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        assertThat(findTeam.getStatus()).isEqualTo(Status.ALIVE);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getStatus()).isEqualTo(Status.ALIVE);
 
-        TeamMember teamMember = teamQueryRepository.findTeamMember(team.getId(), member2.getId()).orElse(null);
+        TeamMember teamMember = teamQueryRepository.findDeletedTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
-        assertThat(teamMember.getStatus()).isEqualTo(Status.DELETE);
     }
 
     @Test
@@ -134,7 +136,8 @@ public class TeamServiceIntegrationTest {
         em.persist(team);
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId()))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -143,12 +146,14 @@ public class TeamServiceIntegrationTest {
         Team team = Team.create(member1, "team1");
         em.persist(team);
 
-        Schedule schedule = Schedule.create(member1, new TeamValue(team), "sche1", LocalDateTime.now().plusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule = Schedule.create(member1, new TeamValue(team), "sche1",
+                LocalDateTime.now().plusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule.setRun();
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member1.getId(), team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member1.getId(), team.getId()))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -162,7 +167,8 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member2.getId(), team.getId());
 
         //when
-        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.exitTeam(member2.getId(), team.getId()))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -175,9 +181,9 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member1.getId(), team.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        assertThat(findTeam.getStatus()).isEqualTo(Status.DELETE);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getStatus()).isEqualTo(Status.DELETE);
     }
 
     @Test
@@ -195,8 +201,10 @@ public class TeamServiceIntegrationTest {
         assertThat(result.getGroupName()).isEqualTo(team.getTeamName());
 
         List<TeamMemberResDto> teamMemberDtos = result.getMembers();
-        assertThat(teamMemberDtos.size()).isEqualTo(2);
-        assertThat(teamMemberDtos).extracting("memberId").containsExactly(member1.getId(), member2.getId());
+        assertThat(teamMemberDtos).hasSize(2);
+        assertThat(teamMemberDtos)
+                .extracting(TeamMemberResDto::getMemberId)
+                .containsExactly(member1.getId(), member2.getId());
     }
 
     @Test
@@ -206,7 +214,8 @@ public class TeamServiceIntegrationTest {
         em.persist(team);
 
         //when
-        assertThatThrownBy(() -> teamService.getTeamDetail(member2.getId(), team.getId())).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> teamService.getTeamDetail(member2.getId(), team.getId()))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -224,41 +233,32 @@ public class TeamServiceIntegrationTest {
         teamC.addTeamMember(member3);
         em.persist(teamC);
 
-        Schedule scheduleA1 = Schedule.create(member1, new TeamValue(teamA), "scheduleA1", LocalDateTime.now().minusDays(1),
-                new Location("loc1", 1.1, 1.1), 0);
-        scheduleA1.setTerm(LocalDateTime.now());
+        Schedule scheduleA1 = createSchedule(member1, teamA, LocalDateTime.now().minusDays(3));
+        scheduleA1.setTerm(LocalDateTime.now().minusDays(3));
         em.persist(scheduleA1);
 
-        Schedule scheduleB1 = Schedule.create(member2, new TeamValue(teamB), "scheduleB1", LocalDateTime.now().minusDays(2),
-                new Location("loc1", 1.1, 1.1), 0);
-        scheduleB1.setTerm(LocalDateTime.now());
+        Schedule scheduleB1 = createSchedule(member1, teamB, LocalDateTime.now().plusDays(1));
         em.persist(scheduleB1);
 
-        Schedule scheduleB2 = Schedule.create(member2, new TeamValue(teamB), "scheduleB2", LocalDateTime.now().minusDays(3),
-                new Location("loc1", 1.1, 1.1), 0);
-        scheduleB2.setTerm(LocalDateTime.now());
-        em.persist(scheduleB2);
-
-        Schedule scheduleB3 = Schedule.create(member2, new TeamValue(teamB), "scheduleB3", LocalDateTime.now().minusDays(4),
-                new Location("loc1", 1.1, 1.1), 0);
-        scheduleB3.setTerm(LocalDateTime.now());
-        em.persist(scheduleB3);
-
-
-        Schedule scheduleC1 = Schedule.create(member2, new TeamValue(teamC), "scheduleC1", LocalDateTime.now(),
-                new Location("loc1", 1.1, 1.1), 0);
-        scheduleC1.setTerm(LocalDateTime.now());
+        Schedule scheduleC1 = createSchedule(member1, teamC, LocalDateTime.now().minusDays(5));
+        scheduleC1.setTerm(LocalDateTime.now().minusDays(5));
         em.persist(scheduleC1);
 
+        Schedule scheduleC2 = createSchedule(member1, teamC, LocalDateTime.now().minusDays(1));
+        scheduleC2.setTerm(LocalDateTime.now().minusDays(1));
+        em.persist(scheduleC2);
+
         //when
-        int page = 1;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), page);
+        List<TeamResDto> data = teamService.getTeamList(member1.getId(), 1).getData();
 
         //then
-        List<TeamEachListResDto> data = result.getData();
-        assertThat(data.size()).isEqualTo(3);
-        assertThat(data).extracting("groupId").containsExactly(teamC.getId(), teamA.getId(), teamB.getId());
-        assertThat(data).extracting("memberSize").containsExactly(3, 1, 2);
+        assertThat(data).hasSize(3);
+        assertThat(data)
+                .extracting(TeamResDto::getGroupId)
+                .containsExactly(teamC.getId(), teamA.getId(), teamB.getId());
+        assertThat(data)
+                .extracting(TeamResDto::getMemberSize)
+                .containsExactly(3, 1, 2);
     }
 
     @Test
@@ -269,39 +269,45 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        LocalDateTime scheduleTime = LocalDateTime.now().minusDays(1);
+
+        Schedule schedule1 = createSchedule(member1, team, scheduleTime);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(15));
+        // member1: 10, member2: 0, member3: 15분 지각
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), scheduleTime.plusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), scheduleTime.minusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), scheduleTime.plusMinutes(15));
         schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, scheduleTime);
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
 
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).minusMinutes(10));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).minusMinutes(30));
+        // member1: 20, member2: 0, member3: 0분 지각
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), scheduleTime.plusMinutes(20));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), scheduleTime.minusMinutes(10));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), scheduleTime.minusMinutes(30));
         schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
 
         //when
         teamService.analyzeLateTimeResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
-        List<TeamResultMember> lateMemberRanking = result.getMembers();
-        assertThat(lateMemberRanking).extracting("memberId").containsExactly(member1.getId(), member3.getId());
-        assertThat(lateMemberRanking).extracting("analysis").containsExactly(-30, -15);
+        //누적 member1: 30, member2: 0, member3: 15분 지각
+        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
+        assertThat(lateMemberRanking)
+                .extracting(TeamMemberResult::getMemberId)
+                .containsExactly(member1.getId(), member3.getId());
+        assertThat(lateMemberRanking)
+                .extracting(TeamMemberResult::getAnalysis)
+                .containsExactly(-30, -15);
     }
 
     @Test
@@ -312,41 +318,47 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        LocalDateTime scheduleTime = LocalDateTime.now().minusDays(1);
+
+        Schedule schedule1 = createSchedule(member1, team, scheduleTime);
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(20));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).plusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(5));
+        //member1: 20, member2: 10, member3: 5분 지각
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), scheduleTime.plusMinutes(20));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), scheduleTime.plusMinutes(10));
+        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), scheduleTime.plusMinutes(5));
         schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
 
         teamService.analyzeLateTimeResult(schedule1.getId());
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
 
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), LocalDateTime.now().minusDays(1).plusMinutes(10));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), LocalDateTime.now().minusDays(1).plusMinutes(50));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), LocalDateTime.now().minusDays(1).plusMinutes(100));
+        //member1: 10, member2: 50, member3: 100분 지각
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), scheduleTime.plusMinutes(10));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), scheduleTime.plusMinutes(50));
+        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), scheduleTime.plusMinutes(100));
         schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
 
         //when
+        //member1: 30, member2: 60, member3: 105분 지각
         teamService.analyzeLateTimeResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        TeamLateTimeResult result = objectMapper.readValue(findTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
-        List<TeamResultMember> lateMemberRanking = result.getMembers();
-        assertThat(lateMemberRanking).extracting("previousRank").containsExactly(3, 2, 1);
-        assertThat(lateMemberRanking).extracting("rank").containsExactly(1, 2, 3);
+        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
+        assertThat(lateMemberRanking)
+                .extracting(TeamMemberResult::getPreviousRank)
+                .containsExactly(3, 2, 1);
+        assertThat(lateMemberRanking)
+                .extracting(TeamMemberResult::getRank)
+                .containsExactly(1, 2, 3);
     }
 
     @Test
@@ -357,34 +369,37 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule1 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
 
+        //member1==member2 >> 100아쿠
         Betting betting1 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), 100);
         betting1.setDraw();
         em.persist(betting1);
 
+        //member2>member1 >> 100아쿠
         Betting betting2 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
         betting2.setWin(100);
         em.persist(betting2);
 
+        //member3>member1 >> 100아쿠
         Betting betting3 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
         betting3.setWin(100);
         em.persist(betting3);
 
+        //member2==member3 >> 100아쿠
         Betting betting4 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)), 100);
         betting4.setDraw();
         em.persist(betting4);
 
+        //member3>member1 >> 100아쿠
         Betting betting5 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
         betting5.setWin(100);
         em.persist(betting5);
@@ -393,12 +408,15 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeBettingResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
-                .getMembers();
-        assertThat(teamResultMembers.size()).isEqualTo(3);
-        assertThat(teamResultMembers).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
+        //member1:0 member2:100 member3:200
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        assertThat(teamMemberResults).hasSize(3);
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getMemberId)
+                .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
     @Test
@@ -409,32 +427,34 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule1 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
 
+        //member1>member2 >> 100아쿠
         Betting betting1 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), 100);
         betting1.setWin(100);
         em.persist(betting1);
 
+        //member2<member3 >> 100아쿠
         Betting betting2 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), 100);
         betting2.setLose();
         em.persist(betting2);
 
         teamService.analyzeBettingResult(schedule1.getId());
 
+        //member1>member2 >> 100아쿠
         Betting betting4 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
         betting4.setWin(100);
         em.persist(betting4);
 
+        //member3>member2 >> 100아쿠
         Betting betting5 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
         betting5.setWin(100);
         em.persist(betting5);
@@ -443,12 +463,16 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeBettingResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class)
-                .getMembers();
-        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3);
-        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, -1, 2);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getRank)
+                .containsExactly(1, 2, 3);
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getPreviousRank)
+                .containsExactly(1, -1, 2);
     }
 
     @Test
@@ -459,34 +483,37 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule1 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
 
+        //member1 > member2 >> 20아쿠
         Racing racing1 = Racing.create(schedule1.getScheduleMembers().get(0).getId(), schedule1.getScheduleMembers().get(1).getId(), 20);
         racing1.termRacing(schedule1.getScheduleMembers().get(0).getId());
         em.persist(racing1);
 
+        //member2 > member3 >> 10아쿠
         Racing racing2 = Racing.create(schedule1.getScheduleMembers().get(1).getId(), schedule1.getScheduleMembers().get(2).getId(), 10);
         racing2.termRacing(schedule1.getScheduleMembers().get(1).getId());
         em.persist(racing2);
 
+        //member1 < member2 >> 20아쿠
         Racing racing3 = Racing.create(schedule2.getScheduleMembers().get(0).getId(), schedule2.getScheduleMembers().get(1).getId(), 20);
         racing3.termRacing(schedule2.getScheduleMembers().get(0).getId());
         em.persist(racing3);
 
+        //member2 > member3 >> 10아쿠
         Racing racing4 = Racing.create(schedule2.getScheduleMembers().get(1).getId(), schedule2.getScheduleMembers().get(2).getId(), 10);
         racing4.termRacing(schedule2.getScheduleMembers().get(1).getId());
         em.persist(racing4);
 
+        //member1 > member3 >> 10아쿠
         Racing racing5 = Racing.create(schedule2.getScheduleMembers().get(2).getId(), schedule2.getScheduleMembers().get(0).getId(), 10);
         racing5.termRacing(schedule2.getScheduleMembers().get(0).getId());
         em.persist(racing5);
@@ -495,12 +522,15 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeRacingResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
-                .getMembers();
-        assertThat(teamResultMembers.size()).isEqualTo(3);
-        assertThat(teamResultMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
+        //member1: 30, member2: 20, member3: 0
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        assertThat(teamMemberResults).hasSize(3);
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getMemberId)
+                .containsExactly(member1.getId(), member2.getId(), member3.getId());
     }
 
     @Test
@@ -511,14 +541,12 @@ public class TeamServiceIntegrationTest {
         team.addTeamMember(member3);
         em.persist(team);
 
-        Schedule schedule1 = Schedule.create(member1, new TeamValue(team), "schedule1",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule1 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule1.addScheduleMember(member2, false, 0);
         schedule1.addScheduleMember(member3, false, 0);
         em.persist(schedule1);
 
-        Schedule schedule2 = Schedule.create(member1, new TeamValue(team), "schedule2",
-                LocalDateTime.now().minusDays(1), new Location("loc", 1.0, 1.0), 0);
+        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
         schedule2.addScheduleMember(member2, false, 0);
         schedule2.addScheduleMember(member3, false, 0);
         em.persist(schedule2);
@@ -557,12 +585,21 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeRacingResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        System.out.println(findTeam.getTeamResult().getTeamRacingResult());
-        List<TeamResultMember> teamResultMembers = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class)
-                .getMembers();
-        assertThat(teamResultMembers).extracting("rank").containsExactly(1, 2, 3, 4);
-        assertThat(teamResultMembers).extracting("previousRank").containsExactly(1, 2, 3, -1);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        System.out.println(resultTeam.getTeamResult().getTeamRacingResult());
+
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getRank)
+                .containsExactly(1, 2, 3, 4);
+        assertThat(teamMemberResults)
+                .extracting(TeamMemberResult::getPreviousRank)
+                .containsExactly(1, 2, 3, -1);
+    }
+
+    Schedule createSchedule(Member member, Team team, LocalDateTime startTime) {
+        return Schedule.create(member, new TeamValue(team), "schedule", startTime,
+                new Location("loc1", 1.1, 1.1), 0);
     }
 }

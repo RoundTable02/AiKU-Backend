@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -219,7 +218,6 @@ public class TeamServiceIntegrationTest {
                 .isInstanceOf(TeamException.class);
     }
 
-    @Rollback(value = false)
     @Test
     void 그룹_목록_조회() {
         //given

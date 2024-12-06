@@ -22,4 +22,6 @@ public interface RacingQueryRepositoryCustom {
     List<RunningRacingDto> findRunningRacingsByScheduleMemberId(Long scheduleMemberId);
 
     List<TermRacingDto> findTermRacingIdsWithNoWinnerInSchedule(Long scheduleId);
+
+    List<String> findRacersFcmTokensInRacing(Long racingId);
 }

@@ -131,7 +131,7 @@ public class TitleService {
 
     private void sendMessage(Member member, Title title) {
         kafkaProducerService.sendMessage(alarm, new TitleGrantedMessage(
-                List.of(new AlarmMemberInfo(member)), AlarmMessageType.TITLE_GRANTED,
+                List.of(member.getFirebaseToken()), AlarmMessageType.TITLE_GRANTED,
                 title.getId(), title.getTitleName(), title.getTitleDescription(), title.getTitleCode()));
     }
 }

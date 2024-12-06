@@ -20,4 +20,6 @@ public interface ScheduleQueryRepository {
     Optional<Long> findScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId);
 
     List<ScheduleMemberResDto> getScheduleMembersInfo(Long scheduleId);
+
+    List<String> findAllFcmTokensInSchedule(Long scheduleId);
 }

@@ -1,4 +1,4 @@
-package common.kafka_message.alarm;
+package common.kafka_message;
 
 public enum PointChangeReason {
     SCHEDULE_ENTER, SCHEDULE_EXIT, SCHEDULE_REWARD,

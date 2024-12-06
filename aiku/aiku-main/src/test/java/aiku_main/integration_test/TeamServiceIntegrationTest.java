@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -218,6 +219,7 @@ public class TeamServiceIntegrationTest {
                 .isInstanceOf(TeamException.class);
     }
 
+    @Rollback(value = false)
     @Test
     void 그룹_목록_조회() {
         //given
@@ -233,20 +235,20 @@ public class TeamServiceIntegrationTest {
         teamC.addTeamMember(member3);
         em.persist(teamC);
 
-        Schedule scheduleA1 = createSchedule(member1, teamA, LocalDateTime.now().minusDays(1));
-        scheduleA1.setTerm(LocalDateTime.now());
+        Schedule scheduleA1 = createSchedule(member1, teamA, LocalDateTime.now().minusDays(3));
+        scheduleA1.setTerm(LocalDateTime.now().minusDays(3));
         em.persist(scheduleA1);
 
-        Schedule scheduleB1 = createSchedule(member1, teamA, LocalDateTime.now().minusDays(2));
-        scheduleB1.setTerm(LocalDateTime.now());
+        Schedule scheduleB1 = createSchedule(member1, teamB, LocalDateTime.now().plusDays(1));
         em.persist(scheduleB1);
 
-        Schedule scheduleB2 = createSchedule(member1, teamA, LocalDateTime.now().plusDays(1));
-        em.persist(scheduleB2);
-
-        Schedule scheduleC1 = createSchedule(member1, teamA, LocalDateTime.now());
-        scheduleC1.setTerm(LocalDateTime.now());
+        Schedule scheduleC1 = createSchedule(member1, teamC, LocalDateTime.now().minusDays(5));
+        scheduleC1.setTerm(LocalDateTime.now().minusDays(5));
         em.persist(scheduleC1);
+
+        Schedule scheduleC2 = createSchedule(member1, teamC, LocalDateTime.now().minusDays(1));
+        scheduleC2.setTerm(LocalDateTime.now().minusDays(1));
+        em.persist(scheduleC2);
 
         //when
         List<TeamResDto> data = teamService.getTeamList(member1.getId(), 1).getData();

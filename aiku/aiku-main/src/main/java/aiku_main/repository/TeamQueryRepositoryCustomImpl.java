@@ -31,16 +31,6 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     private final JPAQueryFactory query;
 
     @Override
-    public Optional<Team> findTeamWithMember(Long teamId) {
-        return query.selectFrom(team)
-                .leftJoin(team.teamMembers, teamMember).fetchJoin()
-                .where(team.id.eq(teamId),
-                        team.status.eq(ALIVE),
-                        teamMember.status.eq(ALIVE))
-                .stream().findFirst();
-    }
-
-    @Override
     public Optional<Team> findTeamWithResult(Long teamId) {
         Team findTeam = query.selectFrom(team)
                 .leftJoin(team.teamResult, teamResult).fetchJoin()

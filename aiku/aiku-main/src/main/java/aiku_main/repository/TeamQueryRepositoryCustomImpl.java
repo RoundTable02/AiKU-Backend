@@ -32,7 +32,8 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
 
     @Override
     public Optional<Team> findTeamWithResult(Long teamId) {
-        Team findTeam = query.selectFrom(team)
+        Team findTeam = query
+                .selectFrom(team)
                 .leftJoin(team.teamResult, teamResult).fetchJoin()
                 .where(team.id.eq(teamId),
                         team.status.eq(ALIVE))
@@ -45,7 +46,7 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     public List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId) {
         return query
                 .selectFrom(teamMember)
-                .join(teamMember.member, member).fetchJoin()
+                .innerJoin(teamMember.member, member).fetchJoin()
                 .where(teamMember.team.id.eq(teamId),
                         teamMember.status.eq(ALIVE))
                 .fetch();
@@ -53,7 +54,8 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
 
     @Override
     public boolean existTeamMember(Long memberId, Long teamId) {
-        Long count = query.select(teamMember.count())
+        Long count = query
+                .select(teamMember.count())
                 .from(teamMember)
                 .where(teamMember.member.id.eq(memberId),
                         teamMember.team.id.eq(teamId),
@@ -76,10 +78,16 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     @Override
     public List<TeamMemberResDto> getTeamMemberList(Long teamId) {
         return query
-                .select(Projections.constructor(TeamMemberResDto.class,
-                        member.id, member.nickname,
-                        Projections.constructor(MemberProfileResDto.class,
-                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground)))
+                .select(Projections.constructor(
+                        TeamMemberResDto.class,
+                        member.id,
+                        member.nickname,
+                        Projections.constructor(
+                                MemberProfileResDto.class,
+                                member.profile.profileType,
+                                member.profile.profileImg,
+                                member.profile.profileCharacter,
+                                member.profile.profileBackground)))
                 .from(teamMember)
                 .innerJoin(teamMember.member, member)
                 .where(teamMember.team.id.eq(teamId),
@@ -89,7 +97,8 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
 
     @Override
     public Optional<TeamMember> findTeamMember(Long teamId, Long memberId) {
-        TeamMember result = query.selectFrom(teamMember)
+        TeamMember result = query
+                .selectFrom(teamMember)
                 .where(teamMember.team.id.eq(teamId),
                         teamMember.member.id.eq(memberId),
                         teamMember.status.eq(ALIVE))
@@ -100,7 +109,8 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
 
     @Override
     public Optional<TeamMember> findDeletedTeamMember(Long teamId, Long memberId) {
-        TeamMember result = query.selectFrom(teamMember)
+        TeamMember result = query
+                .selectFrom(teamMember)
                 .where(teamMember.team.id.eq(teamId),
                         teamMember.member.id.eq(memberId),
                         teamMember.status.eq(DELETE))
@@ -113,20 +123,28 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     public List<TeamResDto> getTeamList(Long memberId, int page) {
         QSchedule subSchedule = new QSchedule("subSchedule");
 
-        List<Long> teamIdList = query.select(teamMember.team.id)
+        List<Long> teamIdList = query
+                .select(teamMember.team.id)
                 .from(teamMember)
-                .where(teamMember.member.id.eq(memberId))
+                .innerJoin(teamMember.team, team)
+                .where(teamMember.member.id.eq(memberId),
+                        teamMember.status.eq(ALIVE),
+                        team.status.eq(ALIVE))
                 .offset(getOffset(page))
                 .limit(11)
                 .fetch();
 
-        return query.select(Projections.constructor(TeamResDto.class,
-                        team.id, team.teamName, teamMember.count().intValue(),
+        return query.select(Projections.constructor(
+                        TeamResDto.class,
+                        team.id,
+                        team.teamName,
+                        teamMember.count().intValue(),
                         schedule.scheduleTime))
                 .from(team)
                 .leftJoin(schedule).on(
                         schedule.team.id.eq(team.id),
                         schedule.team.id.in(teamIdList),
+                        schedule.status.eq(ALIVE),
                         schedule.scheduleTime.eq(
                                 JPAExpressions.select(subSchedule.scheduleTime.max())
                                         .from(subSchedule)
@@ -139,26 +157,41 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
                         teamMember.team.id.in(teamIdList))
                 .where(team.id.in(teamIdList),
                         team.status.eq(ALIVE))
-                .groupBy(team.id, team.teamName, schedule.scheduleTime)
-                .orderBy(schedule.scheduleTime.desc())
+                .groupBy(team.id,
+                        team.teamName,
+                        schedule.scheduleTime)
+                .orderBy(schedule.scheduleTime.desc().nullsLast())
                 .fetch();
     }
 
     @Override
     public List<TeamMemberResult> getTeamLateTimeResult(Long teamId) {
         return query
-                .select(Projections.constructor(TeamMemberResult.class,
-                        member.id, member.nickname,
-                        Projections.constructor(MemberProfileResDto.class,
-                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        scheduleMember.arrivalTimeDiff.sum(), teamMember.status))
+                .select(Projections.constructor(
+                        TeamMemberResult.class,
+                        member.id,
+                        member.nickname,
+                        Projections.constructor(
+                                MemberProfileResDto.class,
+                                member.profile.profileType,
+                                member.profile.profileImg,
+                                member.profile.profileCharacter,
+                                member.profile.profileBackground),
+                        scheduleMember.arrivalTimeDiff.sum(),
+                        teamMember.status))
                 .from(teamMember)
                 .innerJoin(member).on(member.id.eq(teamMember.member.id))
-                .leftJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .rightJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
                 .where(scheduleMember.arrivalTime.isNotNull(),
                         scheduleMember.arrivalTimeDiff.lt(0),
                         scheduleMember.status.eq(ALIVE))
-                .groupBy(member.id, member.nickname, member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground, teamMember.status)
+                .groupBy(member.id,
+                        member.nickname,
+                        member.profile.profileType,
+                        member.profile.profileImg,
+                        member.profile.profileCharacter,
+                        member.profile.profileBackground,
+                        teamMember.status)
                 .orderBy(scheduleMember.arrivalTimeDiff.sum().asc())
                 .fetch();
     }

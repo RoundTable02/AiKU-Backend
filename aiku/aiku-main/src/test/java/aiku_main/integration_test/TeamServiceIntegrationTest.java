@@ -89,10 +89,10 @@ public class TeamServiceIntegrationTest {
         Long teamId = teamService.enterTeam(member2.getId(), team.getId());
 
         //then
-        Team testTeam = teamQueryRepository.findById(teamId).orElse(null);
-        assertThat(testTeam).isNotNull();
-        assertThat(testTeam.getTeamMembers()).hasSize(2);
-        assertThat(testTeam.getTeamMembers())
+        Team resultTeam = teamQueryRepository.findById(teamId).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getTeamMembers()).hasSize(2);
+        assertThat(resultTeam.getTeamMembers())
                 .extracting(teamMember -> teamMember.getMember().getId())
                 .containsExactlyInAnyOrder(member1.getId(), member2.getId());
     }
@@ -121,9 +121,9 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member2.getId(), team.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        assertThat(findTeam.getStatus()).isEqualTo(Status.ALIVE);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getStatus()).isEqualTo(Status.ALIVE);
 
         TeamMember teamMember = teamQueryRepository.findDeletedTeamMember(team.getId(), member2.getId()).orElse(null);
         assertThat(teamMember).isNotNull();
@@ -181,9 +181,9 @@ public class TeamServiceIntegrationTest {
         teamService.exitTeam(member1.getId(), team.getId());
 
         //then
-        Team testTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(testTeam).isNotNull();
-        assertThat(testTeam.getStatus()).isEqualTo(Status.DELETE);
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        assertThat(resultTeam.getStatus()).isEqualTo(Status.DELETE);
     }
 
     @Test
@@ -297,11 +297,11 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeLateTimeResult(schedule1.getId());
 
         //then
-        Team testTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(testTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
         //누적 member1: 30, member2: 0, member3: 15분 지각
-        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(testTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
+        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
         assertThat(lateMemberRanking)
                 .extracting(TeamMemberResult::getMemberId)
                 .containsExactly(member1.getId(), member3.getId());
@@ -349,10 +349,10 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeLateTimeResult(schedule1.getId());
 
         //then
-        Team testTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(testTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(testTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
+        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
         assertThat(lateMemberRanking)
                 .extracting(TeamMemberResult::getPreviousRank)
                 .containsExactly(3, 2, 1);
@@ -409,10 +409,10 @@ public class TeamServiceIntegrationTest {
 
         //then
         //member1:0 member2:100 member3:200
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
         assertThat(teamMemberResults).hasSize(3);
         assertThat(teamMemberResults)
                 .extracting(TeamMemberResult::getMemberId)
@@ -463,10 +463,10 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeBettingResult(schedule1.getId());
 
         //then
-        Team testTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(testTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(testTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
         assertThat(teamMemberResults)
                 .extracting(TeamMemberResult::getRank)
                 .containsExactly(1, 2, 3);
@@ -523,10 +523,10 @@ public class TeamServiceIntegrationTest {
 
         //then
         //member1: 30, member2: 20, member3: 0
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
         assertThat(teamMemberResults).hasSize(3);
         assertThat(teamMemberResults)
                 .extracting(TeamMemberResult::getMemberId)
@@ -585,11 +585,11 @@ public class TeamServiceIntegrationTest {
         teamService.analyzeRacingResult(schedule1.getId());
 
         //then
-        Team findTeam = teamQueryRepository.findById(team.getId()).orElse(null);
-        assertThat(findTeam).isNotNull();
-        System.out.println(findTeam.getTeamResult().getTeamRacingResult());
+        Team resultTeam = teamQueryRepository.findById(team.getId()).orElse(null);
+        assertThat(resultTeam).isNotNull();
+        System.out.println(resultTeam.getTeamResult().getTeamRacingResult());
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(findTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
         assertThat(teamMemberResults)
                 .extracting(TeamMemberResult::getRank)
                 .containsExactly(1, 2, 3, 4);

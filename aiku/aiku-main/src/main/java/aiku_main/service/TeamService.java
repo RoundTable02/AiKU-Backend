@@ -8,7 +8,7 @@ import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import aiku_main.repository.dto.TeamRacingResultMemberDto;
-import aiku_main.util.ObjectMapperUtil;
+import common.util.ObjectMapperUtil;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;

@@ -8,9 +8,7 @@ import aiku_main.exception.TeamException;
 import aiku_main.repository.*;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import aiku_main.repository.dto.TeamRacingResultMemberDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import aiku_main.util.ObjectMapperUtil;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
@@ -39,7 +37,7 @@ public class TeamService {
     private final RacingQueryRepository racingQueryRepository;
     private final MemberRepository memberRepository;
     private final TeamEventPublisher teamEventPublisher;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapperUtil objectMapperUtil;
 
     @Transactional
     public Long addTeam(Long memberId, TeamAddDto teamDto){
@@ -125,7 +123,7 @@ public class TeamService {
 
         List<TeamMemberResult> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
 
-        Map<Long, Integer> previousResultMembers = getPreviousLateTimeResult(team);
+        Map<Long, Integer> previousResultMembers = getPreviousLateTimeResultRank(team.getTeamResult());
         int rank = 1;
         for (TeamMemberResult resultMember : lateTeamMemberRanking) {
             resultMember.setRank(rank++);
@@ -133,26 +131,20 @@ public class TeamService {
         }
 
         TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
-
-        try {
-            team.setTeamLateResult(objectMapper.writeValueAsString(teamLateTimeResult));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamLateResult(objectMapperUtil.toJson(teamLateTimeResult));
     }
 
-    private Map<Long, Integer> getPreviousLateTimeResult(Team team) {
-        if(team.getTeamResult() != null && team.getTeamResult().getLateTimeResult() != null){
-            try {
-                TeamLateTimeResult previousResult = objectMapper.readValue(team.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class);
-                return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
-            } catch (JsonMappingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            } catch (JsonProcessingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            }
+    private Map<Long, Integer> getPreviousLateTimeResultRank(TeamResult teamResult) {
+        if (teamResult != null && teamResult.getLateTimeResult() != null) {
+            TeamLateTimeResult previousResult = objectMapperUtil.parseJson(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
+
+            return previousResult.getMembers().stream()
+                    .collect(Collectors.toMap(
+                            TeamMemberResult::getMemberId,
+                            teamMember -> teamMember.getRank())
+                    );
         }
+
         return new HashMap<>();
     }
 
@@ -163,7 +155,7 @@ public class TeamService {
 
         Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
 
-        Map<Long, Integer> previousResult = getPreviousBettingResult(team);
+        Map<Long, Integer> previousResult = getPreviousBettingResult(team.getTeamResult());
 
         List<TeamMemberResult> teamMemberResults = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
@@ -182,25 +174,20 @@ public class TeamService {
         }
 
         TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamMemberResults);
-        try {
-            team.setTeamBettingResult(objectMapper.writeValueAsString(teamBettingResult));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamBettingResult(objectMapperUtil.toJson(teamBettingResult));
     }
 
-    private Map<Long, Integer> getPreviousBettingResult(Team team) {
-        if(team.getTeamResult() != null && team.getTeamResult().getTeamBettingResult() != null){
-            try {
-                TeamBettingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamBettingResult(), TeamBettingResult.class);
-                return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
-            } catch (JsonMappingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            } catch (JsonProcessingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            }
+    private Map<Long, Integer> getPreviousBettingResult(TeamResult teamResult) {
+        if(teamResult != null && teamResult.getTeamBettingResult() != null){
+            TeamBettingResult previousResult = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResult.class);
+
+            return previousResult.getMembers().stream()
+                    .collect(Collectors.toMap(
+                            TeamMemberResult::getMemberId,
+                            teamMember -> teamMember.getRank())
+                    );
         }
+
         return new HashMap<>();
     }
 
@@ -211,7 +198,7 @@ public class TeamService {
 
         Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingQueryRepository.findMemberWithTermRacingsInTeam(team.getId());
 
-        Map<Long, Integer> previousResult = getPreviousRacingResult(team);
+        Map<Long, Integer> previousResult = getPreviousRacingResult(team.getTeamResult());
 
         List<TeamMemberResult> teamMemberResults = new ArrayList<>();
         memberRacingsMap.forEach((memberId, memberRacingList) -> {
@@ -230,25 +217,20 @@ public class TeamService {
         }
 
         TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamMemberResults);
-        try {
-            team.setTeamRacingResult(objectMapper.writeValueAsString(teamRacingResult));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamRacingResult(objectMapperUtil.toJson(teamRacingResult));
     }
 
-    private Map<Long, Integer> getPreviousRacingResult(Team team) {
-        if(team.getTeamResult() != null && team.getTeamResult().getTeamRacingResult() != null){
-            try {
-                TeamRacingResult previousResult = objectMapper.readValue(team.getTeamResult().getTeamRacingResult(), TeamRacingResult.class);
-                return previousResult.getMembers().stream()
-                        .collect(Collectors.toMap(TeamMemberResult::getMemberId, teamMember -> teamMember.getRank()));
-            } catch (JsonMappingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            } catch (JsonProcessingException e) {
-                throw new TeamException(CAN_NOT_PROCESS_JSON);
-            }
+    private Map<Long, Integer> getPreviousRacingResult(TeamResult teamResult) {
+        if(teamResult != null && teamResult.getTeamRacingResult() != null){
+            TeamRacingResult previousResult = objectMapperUtil.parseJson(teamResult.getTeamRacingResult(), TeamRacingResult.class);
+
+            return previousResult.getMembers().stream()
+                    .collect(Collectors.toMap(
+                            TeamMemberResult::getMemberId,
+                            teamMember -> teamMember.getRank())
+                    );
         }
+
         return new HashMap<>();
     }
 
@@ -270,18 +252,14 @@ public class TeamService {
             return;
         }
 
-        try {
-            TeamLateTimeResult result = objectMapper.readValue(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
-            result.getMembers().forEach(resultMember -> {
-                if (resultMember.getMemberId().equals(memberId)) {
-                    resultMember.setTeamMember(false);
-                }
-            });
+        TeamLateTimeResult result = objectMapperUtil.parseJson(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
+        result.getMembers().forEach(resultMember -> {
+            if (resultMember.getMemberId().equals(memberId)) {
+                resultMember.setTeamMember(false);
+            }
+        });
 
-            team.setTeamLateResult(objectMapper.writeValueAsString(result));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamLateResult(objectMapperUtil.toJson(result));
     }
 
     private void updateBettingTimeResultOfExitMember(Long memberId, Team team){
@@ -290,18 +268,14 @@ public class TeamService {
             return;
         }
 
-        try {
-            TeamBettingResult result = objectMapper.readValue(teamResult.getTeamBettingResult(), TeamBettingResult.class);
-            result.getMembers().forEach(resultMember -> {
-                if (resultMember.getMemberId().equals(memberId)) {
-                    resultMember.setTeamMember(false);
-                }
-            });
+        TeamBettingResult result = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResult.class);
+        result.getMembers().forEach(resultMember -> {
+            if (resultMember.getMemberId().equals(memberId)) {
+                resultMember.setTeamMember(false);
+            }
+        });
 
-            team.setTeamBettingResult(objectMapper.writeValueAsString(result));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamBettingResult(objectMapperUtil.toJson(result));
     }
 
     private void updateRacingTimeResultOfExitMember(Long memberId, Team team){
@@ -310,18 +284,14 @@ public class TeamService {
             return;
         }
 
-        try {
-            TeamRacingResult result = objectMapper.readValue(teamResult.getTeamRacingResult(), TeamRacingResult.class);
-            result.getMembers().forEach(resultMember -> {
-                if (resultMember.getMemberId().equals(memberId)) {
-                    resultMember.setTeamMember(false);
-                }
-            });
+        TeamRacingResult result = objectMapperUtil.parseJson(teamResult.getTeamRacingResult(), TeamRacingResult.class);
+        result.getMembers().forEach(resultMember -> {
+            if (resultMember.getMemberId().equals(memberId)) {
+                resultMember.setTeamMember(false);
+            }
+        });
 
-            team.setTeamRacingResult(objectMapper.writeValueAsString(result));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        team.setTeamRacingResult(objectMapperUtil.toJson(result));
     }
 
     private Member findMember(Long memberId){

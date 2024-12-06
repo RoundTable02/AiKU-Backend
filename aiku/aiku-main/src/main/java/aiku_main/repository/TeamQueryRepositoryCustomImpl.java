@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static common.domain.ExecStatus.TERM;
 import static common.domain.Status.ALIVE;
+import static common.domain.Status.DELETE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
@@ -97,7 +98,7 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
-    public Optional<TeamMember> findAliveTeamMember(Long teamId, Long memberId) {
+    public Optional<TeamMember> findTeamMember(Long teamId, Long memberId) {
         TeamMember result = query.selectFrom(teamMember)
                 .where(teamMember.team.id.eq(teamId),
                         teamMember.member.id.eq(memberId),
@@ -108,10 +109,11 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
-    public Optional<TeamMember> findTeamMember(Long teamId, Long memberId) {
+    public Optional<TeamMember> findDeletedTeamMember(Long teamId, Long memberId) {
         TeamMember result = query.selectFrom(teamMember)
                 .where(teamMember.team.id.eq(teamId),
-                        teamMember.member.id.eq(memberId))
+                        teamMember.member.id.eq(memberId),
+                        teamMember.status.eq(DELETE))
                 .fetchOne();
 
         return Optional.ofNullable(result);

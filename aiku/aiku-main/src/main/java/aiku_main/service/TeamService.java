@@ -288,7 +288,7 @@ public class TeamService {
     }
 
     private TeamMember findTeamMember(Long memberId, Long teamId){
-        return teamQueryRepository.findAliveTeamMember(teamId, memberId)
+        return teamQueryRepository.findTeamMember(teamId, memberId)
                 .orElseThrow(() -> new TeamException(INTERNAL_SERVER_ERROR));
     }
 

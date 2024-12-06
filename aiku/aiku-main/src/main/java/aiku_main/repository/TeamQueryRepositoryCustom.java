@@ -16,8 +16,8 @@ public interface TeamQueryRepositoryCustom {
     Optional<Team> findTeamWithResult(Long teamId);
 
     List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId);
-    Optional<TeamMember> findAliveTeamMember(Long teamId, Long memberId);
     Optional<TeamMember> findTeamMember(Long teamId, Long memberId);
+    Optional<TeamMember> findDeletedTeamMember(Long teamId, Long memberId);
 
     boolean existTeamMember(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
     Long countOfTeamMember(Long teamId);

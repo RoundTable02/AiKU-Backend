@@ -40,6 +40,7 @@ jobs:
       run: |
         mkdir -p aiku/aiku-main/src/test/resources
         echo "${{ secrets.AIKU_MAIN_TEST_CONFIG }}" > aiku/aiku-main/src/test/resources/application.yml
+        echo "${{ secrets.AIKU_MAP_TEST_CONFIG }}" > aiku/aiku-map/src/test/resources/application.yml
 
     - name: Build with Gradle Wrapper
       working-directory: aiku

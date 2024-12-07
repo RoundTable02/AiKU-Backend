@@ -104,7 +104,7 @@ jobs:
     steps:
     
     - name: excuting remote ssh commands to gateway
-      uses: appleboy/ssh-action@v0.1.9
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_AIKU_GATEWAY_HOST }}
         username: ${{ secrets.EC2_USERNAME }}

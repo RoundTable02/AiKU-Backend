@@ -173,7 +173,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_AIKU_MAP_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
-        key : ${{ secrets.EC2_SSH_KEY }}
+        key : ${{ secrets.EC2_AIKU_MAP_SSH_KEY }}
         port: 22
         script: |
          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest

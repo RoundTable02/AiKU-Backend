@@ -1,5 +1,6 @@
 package common.domain;
 
+import common.domain.member.Member;
 import common.domain.value_reference.MemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,8 +23,22 @@ public class Payment extends BaseTime{
     @Embedded
     private MemberValue memberValue;
 
+    // 실제 지불한 값
     private int price;
 
+    private String purchaseToken;
+
     @Enumerated(value = EnumType.STRING)
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.AWAIT;
+
+    public void updatePayment(PaymentStatus status) {
+        this.paymentStatus = status;
+    }
+
+    public Payment(PaymentProduct paymentProduct, MemberValue memberValue, int price, String purchaseToken) {
+        this.paymentProduct = paymentProduct;
+        this.memberValue = memberValue;
+        this.price = price;
+        this.purchaseToken = purchaseToken;
+    }
 }

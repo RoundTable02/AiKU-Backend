@@ -27,7 +27,7 @@ public class Member extends BaseTime {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private MemberRole role; //MANAGER, MEMBER
+    private MemberRole role = MemberRole.MEMBER; //MANAGER, MEMBER
 
     @Embedded
     private MemberProfile profile;
@@ -36,15 +36,17 @@ public class Member extends BaseTime {
     @Embedded
     private TitleMemberValue mainTitle;
 
-    private int point;
+    private int point = 0;
 
     @Embedded
     private ServiceAgreement serviceAgreement;
 
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private Status status = Status.ALIVE;
 
-    private String firebaseToken;
+    private String firebaseToken = "NOT_DEFINED";
+
+    private boolean isAlarmOn = true;
 
 
     public void reissueRefreshToken(String refreshToken) {
@@ -85,9 +87,11 @@ public class Member extends BaseTime {
         this.nickname = nickname;
         this.email = email;
         this.password = password;
+        this.status = Status.ALIVE;
         this.role = MemberRole.MEMBER;
         this.point = 0;
-        this.status = Status.ALIVE;
+        this.firebaseToken = "NOT_DEFINED";
+        this.isAlarmOn = true;
     }
 
     public void updateMainTitle(Long titleMemberId) {
@@ -96,6 +100,14 @@ public class Member extends BaseTime {
 
     public void updateFirebaseToken(String firebaseToken) {
         this.firebaseToken = firebaseToken;
+    }
+
+    public void muteAlarm() {
+        this.isAlarmOn = false;
+    }
+
+    public void turnAlarmOn() {
+        this.isAlarmOn = true;
     }
 
     public void logout() {

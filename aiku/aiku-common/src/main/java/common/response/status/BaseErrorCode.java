@@ -49,7 +49,9 @@ public enum BaseErrorCode implements StatusCode{
 
     CAN_NOT_FIND_NEXT_SCHEDULE_OWNER(50001, "다음 스케줄 장을 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     CAN_NOT_PROCESS_JSON(50002, "JSON에 관한 처리가 불가능합니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    PAYMENT_EXCEPTION(50003, "결제 검증에서 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    FAIL_TO_CONVERT_MESSAGE(50003, "Message를 Firebase Data로 변환 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_TO_SEND_MESSAGE(50004, "FCM 메시징 처리에 문제가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_EXCEPTION(50004, "결제 검증에서 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private int code; //서버 내부 오류 코드
     private String message; //서버 내부 오류 메세지

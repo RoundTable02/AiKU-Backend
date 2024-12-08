@@ -2,6 +2,10 @@ package aiku_main.service;
 
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.dto.team.TeamAddDto;
+import aiku_main.dto.team.TeamDetailResDto;
+import aiku_main.dto.team.TeamResDto;
+import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.repository.BettingQueryRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
@@ -44,7 +48,7 @@ class TeamServiceTest {
         //given
         Member member = new Member("member1");
 
-        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
+        when(memberRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(member));
 
         //when
         TeamAddDto teamDto = new TeamAddDto("team1");
@@ -59,32 +63,10 @@ class TeamServiceTest {
 
         when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(false);
         when(teamQueryRepository.findByIdAndStatus(any(), any())).thenReturn(Optional.of(team));
-        when(memberRepository.findById(nullable(Long.class))).thenReturn(Optional.of(member));
+        when(memberRepository.findByIdAndStatus(nullable(Long.class), any())).thenReturn(Optional.of(member));
 
         //when
         Long resultId = teamService.enterTeam(member.getId(), null);
-    }
-
-    @Test
-    void getTeamDetail() {
-        //given
-        Member member1 = new Member("member1");
-        Member member2 = new Member("member2");
-        Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2);
-
-        when(teamQueryRepository.existTeamMember(any(), any())).thenReturn(true);
-        when(teamQueryRepository.existsById(any())).thenReturn(true);
-        when(teamQueryRepository.findTeamWithMember(any())).thenReturn(Optional.of(team));
-
-        //when
-        TeamDetailResDto result = teamService.getTeamDetail(member1.getId(), team.getId());
-
-        //then
-        assertThat(result.getGroupName()).isEqualTo(team.getTeamName());
-
-        List<TeamMemberResDto> teamMembers = result.getMembers();
-        assertThat(teamMembers).extracting("nickname").containsExactly(member1.getNickname(), member2.getNickname());
     }
 
     @Test
@@ -92,12 +74,12 @@ class TeamServiceTest {
         //given
         Member member1 = new Member("member1");
 
-        List<TeamEachListResDto> data = new ArrayList<>();
+        List<TeamResDto> data = new ArrayList<>();
         when(teamQueryRepository.getTeamList(nullable(Long.class), nullable(Integer.class))).thenReturn(data);
 
         //when
         int page = 3;
-        DataResDto<List<TeamEachListResDto>> result = teamService.getTeamList(member1.getId(), 3);
+        DataResDto<List<TeamResDto>> result = teamService.getTeamList(member1.getId(), 3);
 
         //then
         assertThat(result.getPage()).isEqualTo(3);

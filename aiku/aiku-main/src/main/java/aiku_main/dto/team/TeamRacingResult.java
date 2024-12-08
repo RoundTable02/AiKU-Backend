@@ -1,4 +1,4 @@
-package aiku_main.application_event.domain;
+package aiku_main.dto.team;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class TeamLateTimeResult {
+@NoArgsConstructor
+public class TeamRacingResult {
 
     private Long groupId;
-    private List<TeamResultMember> members;
+    private List<TeamMemberResult> members;
 }

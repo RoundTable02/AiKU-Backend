@@ -2,6 +2,7 @@ package aiku_main.repository;
 
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
+import aiku_main.dto.team.TeamScheduleListEachResDto;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;

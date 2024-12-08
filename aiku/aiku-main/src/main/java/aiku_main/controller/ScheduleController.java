@@ -1,6 +1,7 @@
 package aiku_main.controller;
 
 import aiku_main.dto.*;
+import aiku_main.dto.team.TeamScheduleListResDto;
 import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;

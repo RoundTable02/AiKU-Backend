@@ -1,5 +1,6 @@
 package aiku_main.controller;
 
+import aiku_main.dto.RefreshTokenDto;
 import aiku_main.dto.RefreshTokenResDto;
 import aiku_main.dto.SignInDto;
 import aiku_main.dto.SignInTokenResDto;
@@ -28,8 +29,8 @@ public class LoginController {
     @PostMapping("/refresh")
     public BaseResponse<RefreshTokenResDto> refreshToken(
             @RequestHeader(name = "Access-Member-Id") Long accessMemberId,
-            @CookieValue("refreshToken") String refreshToken){
-        RefreshTokenResDto refreshTokenResDto = loginService.refreshToken(accessMemberId, refreshToken);
+            @RequestBody @Valid RefreshTokenDto refreshToken){
+        RefreshTokenResDto refreshTokenResDto = loginService.refreshToken(accessMemberId, refreshToken.getRefreshToken());
 
         return new BaseResponse<>(refreshTokenResDto);
     }

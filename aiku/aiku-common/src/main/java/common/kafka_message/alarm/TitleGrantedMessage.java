@@ -5,7 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -15,11 +17,12 @@ public class TitleGrantedMessage extends AlarmMessage {
     private String titleDescription;
     private TitleCode titleCode;
 
-    public TitleGrantedMessage(List<AlarmMemberInfo> members, AlarmMessageType alarmMessageType, Long titleId, String titleName, String titleDescription, TitleCode titleCode) {
-        super(members, alarmMessageType);
+    public TitleGrantedMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long titleId, String titleName, String titleDescription, TitleCode titleCode) {
+        super(alarmReceiverTokens, alarmMessageType);
         this.titleId = titleId;
         this.titleName = titleName;
         this.titleDescription = titleDescription;
         this.titleCode = titleCode;
     }
+
 }

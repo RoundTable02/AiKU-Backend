@@ -1,5 +1,6 @@
-package aiku_main.dto;
+package aiku_main.dto.team;
 
+import aiku_main.dto.LocationDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.QueryProjection;
 import common.domain.ExecStatus;

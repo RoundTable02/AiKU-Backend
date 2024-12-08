@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 public class TeamResult extends BaseTime {
 
     @Column(name = "teamResultId")
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
 
     @JoinColumn(name = "teamId")
@@ -35,7 +36,6 @@ public class TeamResult extends BaseTime {
         this.team = team;
     }
 
-    //==편의 메서드==
     protected void setLateTimeResult(String lateTimeResult) {
         this.lateTimeResult = lateTimeResult;
     }

@@ -6,13 +6,37 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
+      ddl-auto: create #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
 #        show_sql: true   # 하이버네이트 기본 SQL 출력 옵션
 #        format_sql: true # 하이버네이트 기본 SQL 포맷팅 옵션
+#    show-sql: true
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+    consumer:
+      auto-offset-reset: latest
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual
+
+firebase:
+  config:
+    type: ${FIREBASE_TYPE}
+    project-id: ${FIREBASE_PROJECT_ID}
+    private-key-id: ${FIREBASE_KEY_ID}
+    private-key: ${FIREBASE_KEY}
+    client-email: ${FIREBASE_EMAIL}
+    client-id: ${FIREBASE_CLIENT_ID}
+    auth-uri: ${FIREBASE_AUTH_URI}
+    token-uri: ${FIREBASE_TOKEN_URI}
+    auth-provider-x509-cert-url: ${FIREBASE_AUTH_PROVIDER}
+    client-x509-cert-url: ${FIREBASE_CERT_URL}
+    universe-domain: ${FIREBASE_UNIVERSE_DOMAIN}
+
 
 logging:
   level:

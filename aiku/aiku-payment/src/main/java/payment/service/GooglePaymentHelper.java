@@ -8,6 +8,7 @@ import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.model.ProductPurchase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import payment.exception.PaymentException;
 import payment.util.AccessTokenProvider;
 
 import java.io.IOException;
@@ -40,6 +41,10 @@ public class GooglePaymentHelper {
             return publisher.purchases().products()
                     .get(packageName, productId, purchaseToken)
                     .execute();
+        } catch (IOException e) {
+            throw new PaymentException();
+        }
+/*
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException: " + e.getDetails());
             throw new RuntimeException("Failed to verify purchase", e);
@@ -47,6 +52,7 @@ public class GooglePaymentHelper {
             System.err.println("IOException: " + e.getMessage());
             throw new RuntimeException("Error initializing Google Play Publisher", e);
         }
+*/
     }
 
     public void consumeProduct(String packageName, String productId, String purchaseToken) {
@@ -55,6 +61,10 @@ public class GooglePaymentHelper {
             publisher.purchases().products()
                     .consume(packageName, productId, purchaseToken)
                     .execute();
+        } catch (IOException e) {
+            throw new PaymentException();
+        }
+/*
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException: " + e.getDetails());
             throw new RuntimeException("Failed to consume purchase", e);
@@ -62,6 +72,7 @@ public class GooglePaymentHelper {
             System.err.println("IOException: " + e.getMessage());
             throw new RuntimeException("Error consuming purchase", e);
         }
+*/
     }
 
 }

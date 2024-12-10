@@ -1,19 +1,17 @@
 package payment.service;
 
-import common.domain.Payment;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.androidpublisher.AndroidPublisher;
+import com.google.api.services.androidpublisher.model.ProductPurchase;
 import common.domain.PaymentProduct;
 import common.domain.PaymentProductType;
 import common.domain.member.Member;
-import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import payment.controller.dto.PurchaseVerificationResponse;
 import payment.exception.MemberNotFoundException;
 import payment.exception.PaymentException;
 import payment.repository.MemberRepository;
@@ -30,63 +28,71 @@ public class PaymentService {
     private final AccessTokenProvider accessTokenProvider;
     private final PaymentProductRepository paymentProductRepository;
     private final MemberRepository memberRepository;
-    private static final String GOOGLE_API_URL = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{packageName}/purchases/products/{productId}/tokens/{token}";
+
+    private static final String APPLICATION_NAME = "com.example.myapp";
+
+    private AndroidPublisher initializePublisher() throws IOException {
+        String accessToken = accessTokenProvider.getAccessToken();
+
+        HttpRequestInitializer requestInitializer = request -> {
+            request.setConnectTimeout(60000);
+            request.setReadTimeout(60000);
+            request.getHeaders().setAuthorization("Bearer " + accessToken);
+        };
+
+        return new AndroidPublisher.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), requestInitializer)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+    }
 
     @Transactional
-    public Long purchase(Long memberId, String packageName, String productId, String purchaseToken) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        // 영수증 검증
-        String url = GOOGLE_API_URL.replace("{packageName}", packageName)
-                .replace("{productId}", productId)
-                .replace("{token}", purchaseToken);
-
-        String accessToken;
+    public ProductPurchase verifyProductPurchase(Long memberId, PaymentProductType type, String packageName, String productId, String purchaseToken) {
         try {
-            accessToken = accessTokenProvider.getAccessToken();
-        } catch (IOException e) {
-            throw new PaymentException(BaseErrorCode.PAYMENT_EXCEPTION);
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<PurchaseVerificationResponse> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, PurchaseVerificationResponse.class
-        );
-
-        PurchaseVerificationResponse responseBody = response.getBody();
-
-        PaymentProduct paymentProduct = getPaymentProduct(responseBody);
-
-        // DB에 기록
-        makePayment(memberId, purchaseToken, paymentProduct);
-
-        if (responseBody.getPurchaseState() == 0) {
-            // 소모 처리
-            String consumeUrl = url + ":consume";
-            restTemplate.exchange(consumeUrl, HttpMethod.POST, entity, Void.class);
-
-            // DB 내 검증
             validateDB(purchaseToken);
 
-            // 구매 처리
-            paymentProduct.acceptPayment(purchaseToken);
+            PaymentProduct paymentProduct = getPaymentProduct(type);
+
+            makePayment(memberId, purchaseToken, paymentProduct);
+
+            AndroidPublisher publisher = initializePublisher();
+            return publisher.purchases().products()
+                    .get(packageName, productId, purchaseToken)
+                    .execute();
+        } catch (GoogleJsonResponseException e) {
+            System.err.println("GoogleJsonResponseException: " + e.getDetails());
+            throw new RuntimeException("Failed to verify purchase", e);
+        } catch (IOException e) {
+            System.err.println("IOException: " + e.getMessage());
+            throw new RuntimeException("Error initializing Google Play Publisher", e);
+        }
+    }
+
+    @Transactional
+    public void consumeProduct(PaymentProductType type, String packageName, String productId, String purchaseToken) {
+        try {
+            AndroidPublisher publisher = initializePublisher();
+            publisher.purchases().products()
+                    .consume(packageName, productId, purchaseToken)
+                    .execute();
+        } catch (GoogleJsonResponseException e) {
+            System.err.println("GoogleJsonResponseException: " + e.getDetails());
+            throw new RuntimeException("Failed to consume purchase", e);
+        } catch (IOException e) {
+            System.err.println("IOException: " + e.getMessage());
+            throw new RuntimeException("Error consuming purchase", e);
         }
 
-        return memberId;
+        PaymentProduct paymentProduct = getPaymentProduct(type);
+        paymentProduct.acceptPayment(purchaseToken);
 
         // 아쿠 증가 이벤트
 
         // 아쿠 증가 실패 시 환불
 
         // 충전 완료 알림
-
     }
 
-    private PaymentProduct getPaymentProduct(PurchaseVerificationResponse responseBody) {
-        PaymentProductType type = PaymentProductType.valueOf(responseBody.getDeveloperPayload());
+    private PaymentProduct getPaymentProduct(PaymentProductType type) {
         PaymentProduct paymentProduct = paymentProductRepository.findByPaymentProductType(type)
                 .orElseThrow(PaymentException::new);
         return paymentProduct;
@@ -101,9 +107,11 @@ public class PaymentService {
         paymentProduct.makePayment(member, price, purchaseToken);
     }
 
-    private boolean validateDB(String purchaseToken) {
+    private void validateDB(String purchaseToken) {
         // DB 내 purchaseToken 중복되는지 확인, true면 유일 보장
-        return !paymentProductRepository.existsByPurchaseToken(purchaseToken);
+        if (paymentProductRepository.existsByPurchaseToken(purchaseToken)) {
+            throw new PaymentException();
+        }
     }
 
 }

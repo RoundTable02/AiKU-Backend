@@ -1,5 +1,6 @@
 package payment.controller;
 
+import com.google.api.services.androidpublisher.model.ProductPurchase;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import common.response.status.BaseErrorCode;
@@ -32,5 +33,20 @@ public class PaymentController {
                 request.getPurchaseToken());
 
         return BaseResponse.getSimpleRes(purchase);
+    }
+
+    @PostMapping("/verify-and-consume")
+    public ResponseEntity<String> verifyAndConsume(@RequestBody PurchaseRequest request) {
+        // 1. 구매 검증
+        ProductPurchase purchase = paymentService.verifyProductPurchase(request.getPackageName(), request.getProductId(), request.getPurchaseToken());
+
+        // 2. 구매 상태 확인
+        if (purchase.getPurchaseState() == 0 && purchase.getConsumptionState() == 0) {
+            // 3. 소비 처리
+            paymentService.consumeProduct(request.getPackageName(), request.getProductId(), request.getPurchaseToken());
+            return ResponseEntity.ok("Purchase verified and consumed successfully.");
+        }
+
+        return ResponseEntity.badRequest().body("Invalid or already consumed purchase.");
     }
 }

@@ -31,7 +31,7 @@ public class Payment extends BaseTime{
     @Enumerated(value = EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.AWAIT;
 
-    public void updatePayment(PaymentStatus status) {
+    protected void updatePayment(PaymentStatus status) {
         this.paymentStatus = status;
     }
 

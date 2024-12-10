@@ -6,17 +6,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.model.ProductPurchase;
-import common.domain.PaymentProduct;
-import common.domain.PaymentProductType;
-import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Helper;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import payment.exception.MemberNotFoundException;
-import payment.exception.PaymentException;
-import payment.repository.MemberRepository;
-import payment.repository.PaymentProductRepository;
 import payment.util.AccessTokenProvider;
 
 import java.io.IOException;

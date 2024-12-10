@@ -1,15 +1,18 @@
 package payment.service;
 
 import com.google.api.services.androidpublisher.model.ProductPurchase;
+import common.domain.Payment;
 import common.domain.PaymentProduct;
 import common.domain.PaymentProductType;
-import common.domain.member.Member;
+import common.kafka_message.KafkaTopic;
+import common.kafka_message.PointChangeReason;
+import common.kafka_message.PointChangedMessage;
+import common.kafka_message.PointChangedType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import payment.exception.MemberNotFoundException;
 import payment.exception.PaymentException;
-import payment.repository.MemberRepository;
+import payment.kafka.KafkaProducerService;
 import payment.repository.PaymentProductRepository;
 
 @RequiredArgsConstructor
@@ -18,17 +21,20 @@ import payment.repository.PaymentProductRepository;
 public class PaymentService {
 
     private final PaymentProductRepository paymentProductRepository;
-    private final MemberRepository memberRepository;
+    private final PaymentServiceHelper paymentServiceHelper;
     private final GooglePaymentHelper googlePaymentHelper;
+    private final KafkaProducerService kafkaProducerService;
 
     @Transactional
     public Long verifyProductPurchase(Long memberId, PaymentProductType type, String packageName, String productId, String purchaseToken) {
+        // purchaseToken 유일성 체크
         validateDB(purchaseToken);
 
+        // Payment 생성을 위한 내부 트랜잭션 생성
         PaymentProduct paymentProduct = getPaymentProduct(type);
+        paymentServiceHelper.makePayment(paymentProduct, memberId, purchaseToken);
 
-        makePayment(memberId, purchaseToken, paymentProduct);
-
+        // Google 인앱 결제 영수증 검증
         ProductPurchase purchase = googlePaymentHelper.verifyProductPurchase(packageName, productId, purchaseToken);
 
         if (purchase.getPurchaseState() == 0 && purchase.getConsumptionState() == 0) {
@@ -37,13 +43,32 @@ public class PaymentService {
             acceptPayment(paymentProduct, purchaseToken);
         }
 
-        // TODO : 아쿠 증가 이벤트
+        makePointEvent(memberId, type, purchaseToken);
 
         return memberId;
     }
 
+    private void makePointEvent(Long memberId, PaymentProductType type, String purchaseToken) {
+        Payment payment = getPaymentByPurchaseToken(purchaseToken);
+
+        // 아쿠 증가 이벤트
+        kafkaProducerService.sendMessage(KafkaTopic.alarm,
+                new PointChangedMessage(memberId,
+                        PointChangedType.PLUS,
+                        type.getPoint(),
+                        PointChangeReason.RACING,
+                        payment.getId()
+                )
+        );
+    }
+
+    private Payment getPaymentByPurchaseToken(String purchaseToken) {
+        return paymentProductRepository.findPaymentByPaymentPurchaseToken(purchaseToken)
+                .orElseThrow(() -> new PaymentException());
+    }
+
     private void acceptPayment(PaymentProduct paymentProduct, String purchaseToken) {
-        // DB Payment 상태 업데이트
+        // Payment 상태 업데이트
         paymentProduct.acceptPayment(purchaseToken);
     }
 
@@ -52,15 +77,6 @@ public class PaymentService {
                 .orElseThrow(PaymentException::new);
 
         return paymentProduct;
-    }
-
-    private void makePayment(Long memberId, String purchaseToken, PaymentProduct paymentProduct) {
-        int price = paymentProduct.getPaymentProductType().getPrice();
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
-
-        paymentProduct.makePayment(member, price, purchaseToken);
     }
 
     private void validateDB(String purchaseToken) {
@@ -77,7 +93,7 @@ public class PaymentService {
 
     // TODO : 보상 트랜잭션; 사용자 아쿠 증가 실패 시 환불 처리
     public void refund() {
-
+        pointChargeFailAlarm();
     }
 
     // TODO : 보상 트랜잭션; 사용자 아쿠 증가 실패 시 실패 알림

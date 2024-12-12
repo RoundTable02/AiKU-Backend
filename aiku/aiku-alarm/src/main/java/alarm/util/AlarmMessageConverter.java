@@ -80,6 +80,14 @@ public class AlarmMessageConverter {
                 TitleGrantedMessage titleGrantedMessage = (TitleGrantedMessage) alarmMessage;
                 return "칭호 : " + titleGrantedMessage.getTitleName() + "을 획득하였습니다!";
             }
+            case PAYMENT_SUCCESS -> {
+                PaymentSuccessMessage paymentSuccessMessage = (PaymentSuccessMessage) alarmMessage;
+                return "결제 : " + paymentSuccessMessage.getPoint() + "원이 충전되었습니다.";
+            }
+            case PAYMENT_FAILED -> {
+                PaymentFailedMessage paymentFailedMessage = (PaymentFailedMessage) alarmMessage;
+                return "결제 : " + paymentFailedMessage.getPrice() + "원의 결제가 실패하였습니다.";
+            }
             default -> {
                 return null;
             }

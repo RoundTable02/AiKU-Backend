@@ -23,14 +23,12 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping("/verify-and-consume")
+    @PostMapping("/verify")
     public BaseResponse<BaseResultDto> verifyAndConsume(@RequestHeader(name = "Access-Member-Id") Long memberId,
                                                    @RequestBody PurchaseRequest request) {
         Long dataMemberId = paymentService.verifyProductPurchase(
                 memberId,
                 request.getType(),
-                request.getPackageName(),
-                request.getProductId(),
                 request.getPurchaseToken()
         );
 

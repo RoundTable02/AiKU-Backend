@@ -1,5 +1,7 @@
 package common.kafka_message;
 
+import common.domain.member.Member;
+import common.domain.value_reference.MemberValue;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,13 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class PaymentPointChangedMessage {
 
-    private Long memberId;
+    private MemberValue member;
     private PointChangedType pointChangedType;
     private Integer pointAmount;
     private String purchaseToken;
 
-    public PaymentPointChangedMessage(Long memberId, PointChangedType pointChangedType, Integer pointAmount, String purchaseToken) {
-        this.memberId = memberId;
+    public PaymentPointChangedMessage(Member member, PointChangedType pointChangedType, Integer pointAmount, String purchaseToken) {
+        this.member = new MemberValue(member);
         this.pointChangedType = pointChangedType;
         this.pointAmount = pointAmount;
         this.purchaseToken = purchaseToken;

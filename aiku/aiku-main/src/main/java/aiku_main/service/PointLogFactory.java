@@ -6,8 +6,6 @@ import common.domain.log.*;
 import common.domain.value_reference.*;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class PointLogFactory {
 
@@ -57,7 +55,7 @@ public class PointLogFactory {
                     "레이싱 대결 : " + signedPointAmount + " 아쿠",
                     PointLogStatus.ACCEPT,
                     new RacingValue(reasonId));
-        } else if (reason.equals(PointChangeReason.RACING_CANCLE)) {
+        } else if (reason.equals(PointChangeReason.RACING_CANCEL)) {
             return new RacingPointLog(memberId,
                     signedPointAmount,
                     "레이싱 취소 : " + signedPointAmount + " 아쿠",
@@ -69,7 +67,7 @@ public class PointLogFactory {
                     "아쿠 상점 : " + signedPointAmount + " 아쿠",
                     PointLogStatus.ACCEPT,
                     new ShopProductValue(reasonId));
-        } else if (reason.equals(PointChangeReason.SHOP_CANCLE)) {
+        } else if (reason.equals(PointChangeReason.SHOP_CANCEL)) {
             return new ShopPointLog(memberId,
                     signedPointAmount,
                     "상점 취소 : " + signedPointAmount + " 아쿠",
@@ -81,10 +79,16 @@ public class PointLogFactory {
                     "이벤트 보상 : " + signedPointAmount + " 아쿠",
                     PointLogStatus.ACCEPT,
                     new EventValue(reasonId));
-        } else if (reason.equals(PointChangeReason.EVENT_CANCLE)) {
+        } else if (reason.equals(PointChangeReason.EVENT_CANCEL)) {
             return new EventLog(memberId,
                     signedPointAmount,
                     "이벤트 보상 : " + signedPointAmount + " 아쿠",
+                    PointLogStatus.ACCEPT,
+                    new EventValue(reasonId));
+        } else if (reason.equals(PointChangeReason.PAYMENT)) {
+            return new EventLog(memberId,
+                    signedPointAmount,
+                    "아쿠 결제 : " + signedPointAmount + " 아쿠",
                     PointLogStatus.ACCEPT,
                     new EventValue(reasonId));
         }

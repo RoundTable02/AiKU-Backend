@@ -5,9 +5,11 @@ import common.domain.Payment;
 import common.domain.PaymentProduct;
 import common.domain.PaymentProductType;
 import common.domain.member.Member;
+import common.domain.value_reference.MemberValue;
 import common.kafka_message.*;
 import common.kafka_message.alarm.AlarmMessageType;
 import common.kafka_message.alarm.PaymentFailedMessage;
+import common.kafka_message.alarm.PaymentSuccessMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -79,7 +81,8 @@ public class PaymentService {
         return false;
     }
 
-    // TODO : 보상 트랜잭션; 사용자 아쿠 증가 성공 시 소비 처리
+    // 보상 트랜잭션; 사용자 아쿠 증가 성공 시 소비 처리
+    @Transactional
     public void consumePurchase(String purchaseToken) {
         Payment payment = getPaymentByPurchaseToken(purchaseToken);
         PaymentProduct paymentProduct = payment.getPaymentProduct();
@@ -87,10 +90,15 @@ public class PaymentService {
         // 소비 처리
         googlePaymentHelper.consumeProduct(PACKAGE_NAME, paymentProduct.getProductId(), purchaseToken);
         paymentProduct.acceptPayment(payment);
+
+        // 성공 알림
+        Member member = getMember(payment.getMemberValue().getId());
+        makeSuccessMessage(purchaseToken, member, paymentProduct);
         log.info("{} purchase completed", purchaseToken);
     }
 
-    // TODO : 보상 트랜잭션; 사용자 아쿠 증가 실패 시 실패 알림
+    // 보상 트랜잭션; 사용자 아쿠 증가 실패 시 실패 알림
+    @Transactional
     public void pointChargeFailed(String purchaseToken) {
         log.info("{} point charge failed", purchaseToken);
 
@@ -117,6 +125,17 @@ public class PaymentService {
         );
     }
 
+    private void makeSuccessMessage(String purchaseToken, Member member, PaymentProduct paymentProduct) {
+        kafkaProducerService.sendMessage(KafkaTopic.alarm,
+                new PaymentSuccessMessage(List.of(member.getFirebaseToken()),
+                        AlarmMessageType.PAYMENT_FAILED,
+                        purchaseToken,
+                        paymentProduct.getPaymentProductType().getPrice(),
+                        paymentProduct.getPaymentProductType().getPoint()
+                )
+        );
+    }
+
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());
@@ -124,8 +143,10 @@ public class PaymentService {
 
     private void makePointEvent(Long memberId, PaymentProductType type, String purchaseToken) {
         // 아쿠 증가 이벤트
+        Member member = getMember(memberId);
+
         kafkaProducerService.sendMessage(KafkaTopic.alarm,
-                new PaymentPointChangedMessage(memberId,
+                new PaymentPointChangedMessage(member,
                         PointChangedType.PLUS,
                         type.getPoint(),
                         purchaseToken

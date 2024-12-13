@@ -11,10 +11,10 @@ import java.util.List;
 public class PaymentSuccessMessage extends AlarmMessage {
 
     private String purchaseToken;
-    private String price;
-    private String point;
+    private int price;
+    private int point;
 
-    public PaymentSuccessMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, String purchaseToken, String price, String point) {
+    public PaymentSuccessMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, String purchaseToken, int price, int point) {
         super(alarmReceiverTokens, alarmMessageType);
         this.purchaseToken = purchaseToken;
         this.price = price;

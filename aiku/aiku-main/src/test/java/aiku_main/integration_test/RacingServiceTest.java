@@ -165,5 +165,6 @@ public class RacingServiceTest {
 
         List<ScheduleRacing> data = scheduleRacingResultObj.getData();
         assertThat(data).extracting("firstRacer").extracting("memberId").containsExactly(member1.getId(), member2.getId());
+        assertThat(data.get(0).getWinnerId()).isEqualTo(member1.getId());
     }
 }

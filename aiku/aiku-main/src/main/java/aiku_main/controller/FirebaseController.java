@@ -25,11 +25,4 @@ public class FirebaseController {
         return BaseResponse.getSimpleRes(memberId);
     }
 
-    @PatchMapping
-    public BaseResponse<BaseResultDto> updateToken(@RequestHeader(name = "Access-Member-Id") Long accessMemberId,
-                                                   @RequestBody @Valid FirebaseTokenDto firebaseTokenDto) {
-        Long memberId = memberFirebaseService.updateToken(accessMemberId, firebaseTokenDto);
-
-        return BaseResponse.getSimpleRes(memberId);
-    }
 }

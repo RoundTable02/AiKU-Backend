@@ -31,24 +31,9 @@ public class MemberFirebaseService {
         Member member = memberRepository.findById(accessMemberId)
                 .orElseThrow(() -> new MemberNotFoundException());
 
-        if (!member.getFirebaseToken().equals("NOT_DEFINED")) {
-            throw new FcmException(DUPLICATED_FCM_TOKEN);
-        }
         member.updateFirebaseToken(firebaseTokenDto.getToken());
 
         return member.getId();
     }
 
-    @Transactional
-    public Long updateToken(Long accessMemberId, FirebaseTokenDto firebaseTokenDto) {
-        Member member = memberRepository.findById(accessMemberId)
-                .orElseThrow(() -> new MemberNotFoundException());
-
-        if (member.getFirebaseToken().equals("NOT_DEFINED")) {
-            throw new FcmException(NO_FCM_TOKEN);
-        }
-        member.updateFirebaseToken(firebaseTokenDto.getToken());
-
-        return member.getId();
-    }
 }

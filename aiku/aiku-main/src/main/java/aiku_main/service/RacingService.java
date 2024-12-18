@@ -48,7 +48,7 @@ public class RacingService {
                 .map(racing -> {
                     ScheduleRacingMember firstRacer = new ScheduleRacingMember(scheduleMembers.get(racing.getFirstRacer().getId()).getMember());
                     ScheduleRacingMember secondRacer = new ScheduleRacingMember(scheduleMembers.get(racing.getSecondRacer().getId()).getMember());
-                    return new ScheduleRacing(firstRacer, secondRacer, racing.getPointAmount());
+                    return new ScheduleRacing(firstRacer, secondRacer, racing.getPointAmount(), racing.getWinner().getId());
                 }).toList();
 
         ScheduleRacingResult result = new ScheduleRacingResult(scheduleId, racingDtoList);

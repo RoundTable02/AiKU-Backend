@@ -68,7 +68,7 @@ class MemberFirebaseServiceTest {
     void 멤버x_토큰수정_예외() {
         Long id = member.getId() + 1;
         Assertions.assertThrows(MemberNotFoundException.class, () -> {
-            memberFirebaseService.updateToken(id, originalFcm);
+            memberFirebaseService.saveToken(id, originalFcm);
         });
     }
 
@@ -79,27 +79,27 @@ class MemberFirebaseServiceTest {
         assertThat(member.getFirebaseToken()).isEqualTo("fcmToken1");
     }
 
-    @Test
-    void 토큰o_토큰저장_예외() {
-        memberFirebaseService.saveToken(member.getId(), originalFcm);
-
-        Assertions.assertThrows(FcmException.class, () -> {
-            memberFirebaseService.saveToken(member.getId(), newFcm);
-        });
-    }
+//    @Test
+//    void 토큰o_토큰저장_예외() {
+//        memberFirebaseService.saveToken(member.getId(), originalFcm);
+//
+//        Assertions.assertThrows(FcmException.class, () -> {
+//            memberFirebaseService.saveToken(member.getId(), newFcm);
+//        });
+//    }
 
     @Test
     void 토큰o_토큰수정_정상() {
         memberFirebaseService.saveToken(member.getId(), originalFcm);
-        memberFirebaseService.updateToken(member.getId(), newFcm);
+        memberFirebaseService.saveToken(member.getId(), newFcm);
 
         assertThat(member.getFirebaseToken()).isEqualTo("fcmToken2");
     }
 
-    @Test
-    void 토큰x_토큰수정_예() {
-        Assertions.assertThrows(FcmException.class, () -> {
-            memberFirebaseService.updateToken(member.getId(), newFcm);
-        });
-    }
+//    @Test
+//    void 토큰x_토큰수정_예() {
+//        Assertions.assertThrows(FcmException.class, () -> {
+//            memberFirebaseService.updateToken(member.getId(), newFcm);
+//        });
+//    }
 }

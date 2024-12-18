@@ -12,4 +12,5 @@ public class ScheduleRacing {
     private ScheduleRacingMember firstRacer;
     private ScheduleRacingMember secondRacer;
     private int pointAmount;
+    private Long winnerId;
 }

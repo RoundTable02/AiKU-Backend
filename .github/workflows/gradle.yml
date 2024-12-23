@@ -221,7 +221,7 @@ jobs:
           docker rm aiku-alarm || true
           
           docker run -d \
-            --name aiku-alarm \
+            --name aiku-gateway \
             --log-driver=awslogs \
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-alarm \
@@ -231,6 +231,7 @@ jobs:
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
             -e FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }} \
             -e FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             -e FIREBASE_KEY_ID=${{ secrets.FIREBASE_KEY_ID }} \
@@ -243,4 +244,3 @@ jobs:
             -e FIREBASE_CERT_URL=${{ secrets.FIREBASE_CERT_URL }} \
             -e FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
-    

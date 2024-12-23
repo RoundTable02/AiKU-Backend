@@ -132,7 +132,7 @@ jobs:
             -e AIKU_MAP_IP=${{ secrets.AIKU_MAP_IP }} \
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
-            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
           
     # - name: excuting remote ssh commands to main
     #   uses: appleboy/ssh-action@v0.1.9

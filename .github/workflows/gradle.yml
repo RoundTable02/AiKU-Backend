@@ -221,7 +221,7 @@ jobs:
           docker rm aiku-alarm || true
           
           docker run -d \
-            --name aiku-gateway \
+            --name aiku-alarm \
             --log-driver=awslogs \
             --log-opt awslogs-region=ap-northeast-2 \
             --log-opt awslogs-group=aiku-alarm \

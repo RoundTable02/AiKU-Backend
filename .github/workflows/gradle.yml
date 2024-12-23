@@ -62,6 +62,18 @@ jobs:
         KAFKA_SERVER_URL: ${{ secrets.KAFKA_SERVER_URL }}
         AIKU_MAIN_IP: ${{ secrets.AIKU_MAIN_IP }}
         AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}
+        FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        FIREBASE_KEY_ID: ${{ secrets.FIREBASE_KEY_ID }}
+        FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+        FIREBASE_EMAIL: ${{ secrets.FIREBASE_EMAIL }}
+        FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+        FIREBASE_AUTH_URI: ${{ secrets.FIREBASE_AUTH_URI }}
+        FIREBASE_TOKEN_URI: ${{ secrets.FIREBASE_TOKEN_URI }}
+        FIREBASE_AUTH_PROVIDER: ${{ secrets.FIREBASE_AUTH_PROVIDER }}
+        FIREBASE_CERT_URL: ${{ secrets.FIREBASE_CERT_URL }}
+        FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
+        
       run: |
           ./gradlew :aiku-gateway:build
           ./gradlew :aiku-main:build
@@ -83,9 +95,9 @@ jobs:
     - name: Build Docker image of aiku-main
       working-directory: aiku/aiku-main
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }} .
-    # - name: Build Docker image of aiku-alarm
-    #   working-directory: aiku/aiku-alarm
-    #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest .
+    - name: Build Docker image of aiku-alarm
+      working-directory: aiku/aiku-alarm
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }} .
     # - name: Build Docker image of aiku-map
     #   working-directory: aiku/aiku-map
     #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest .
@@ -97,7 +109,7 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
-        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
         # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
     
   deploy: 
@@ -196,28 +208,39 @@ jobs:
     #         -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
     #         ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
     
-    # - name: excuting remote ssh commands to alarm
-    #   uses: appleboy/ssh-action@v0.1.9
-    #   with:
-    #     host: ${{ secrets.EC2_AIKU_ALARM_HOST }}
-    #     username: ${{ secrets.EC2_USERNAME }}
-    #     key : ${{ secrets.EC2_SSH_KEY }}
-    #     port: 22
-    #     script: |
-    #      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
-    #       docker stop aiku-alarm || true
-    #       docker rm aiku-alarm || true
+    - name: excuting remote ssh commands to alarm
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_ALARM_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_AIKU_ALARM_SSH_KEY }}
+        port: 22
+        script: |
+         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
+          docker stop aiku-alarm || true
+          docker rm aiku-alarm || true
           
-    #       docker run -d \
-    #         --name aiku-alarm \
-    #         --log-driver=awslogs \
-    #         --log-opt awslogs-region=ap-northeast-2 \
-    #         --log-opt awslogs-group=aiku-alarm \
-    #         --log-opt awslogs-stream=${{ secrets.EC2_AIKU_ALARM_ID }} \
-    #         --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
-    #         --network="host" \
-    #         -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
-    #         -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
-    #         -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-    #         ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
+          docker run -d \
+            --name aiku-alarm \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-alarm \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_ALARM_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }} \
+            -e FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
+            -e FIREBASE_KEY_ID=${{ secrets.FIREBASE_KEY_ID }} \
+            -e FIREBASE_KEY=${{ secrets.FIREBASE_KEY }} \
+            -e FIREBASE_EMAIL=${{ secrets.FIREBASE_EMAIL }} \
+            -e FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }} \
+            -e FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }} \
+            -e FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }} \
+            -e FIREBASE_AUTH_PROVIDER=${{ secrets.FIREBASE_AUTH_PROVIDER }} \
+            -e FIREBASE_CERT_URL=${{ secrets.FIREBASE_CERT_URL }} \
+            -e FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
     

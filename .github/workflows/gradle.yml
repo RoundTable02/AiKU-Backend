@@ -64,7 +64,7 @@ jobs:
         AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}
       run: |
           ./gradlew :aiku-gateway:build
-          # ./gradlew :aiku-main:build
+          ./gradlew :aiku-main:build
           # ./gradlew :aiku-alarm:build
           # ./gradlew :aiku-map:build
 
@@ -80,9 +80,9 @@ jobs:
       working-directory: aiku/aiku-gateway
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }} .
 
-    # - name: Build Docker image of aiku-main
-    #   working-directory: aiku/aiku-main
-    #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest .
+    - name: Build Docker image of aiku-main
+      working-directory: aiku/aiku-main
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }} .
     # - name: Build Docker image of aiku-alarm
     #   working-directory: aiku/aiku-alarm
     #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest .
@@ -96,7 +96,7 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
-        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
         # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:latest
         # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
     
@@ -134,41 +134,41 @@ jobs:
             -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
           
-    # - name: excuting remote ssh commands to main
-    #   uses: appleboy/ssh-action@v0.1.9
-    #   with:
-    #     host: ${{ secrets.EC2_AIKU_MAIN_HOST }}
-    #     username: ${{ secrets.EC2_USERNAME }}
-    #     key : ${{ secrets.EC2_SSH_KEY }}
-    #     port: 22
-    #     script: |
-    #       docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
-    #       docker stop aiku-main || true
-    #       docker rm aiku-main || true
+    - name: excuting remote ssh commands to main
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_MAIN_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_AIKU_MAIN_SSH_KEY }}
+        port: 22
+        script: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
+          docker stop aiku-main || true
+          docker rm aiku-main || true
           
-    #       docker run -d \
-    #         --name aiku-main \
-    #         --log-driver=awslogs \
-    #         --log-opt awslogs-region=ap-northeast-2 \
-    #         --log-opt awslogs-group=aiku-main \
-    #         --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
-    #         --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
-    #         --network="host" \
-    #         -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
-    #         -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
-    #         -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-    #         -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
-    #         -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-    #         -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-    #         -e GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }} \
-    #         -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
-    #         -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-    #         -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
-    #         -e KAKAO_APP_ID=${{ secrets.KAKAO_APP_ID }} \
-    #         -e AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
-    #         -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
-    #         -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
-    #         ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:latest
+          docker run -d \
+            --name aiku-main \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-main \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAIN_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
+            -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+            -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+            -e GOOGLE_REFRESH_TOKEN=${{ secrets.GOOGLE_REFRESH_TOKEN }} \
+            -e GMAIL_ACCOUNT=${{ secrets.GMAIL_ACCOUNT }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
+            -e KAKAO_APP_ID=${{ secrets.KAKAO_APP_ID }} \
+            -e AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
+            -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
+            -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
             
     # - name: excuting remote ssh commands to map
     #   uses: appleboy/ssh-action@v0.1.9

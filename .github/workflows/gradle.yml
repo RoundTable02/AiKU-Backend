@@ -216,7 +216,7 @@ jobs:
         key : ${{ secrets.EC2_AIKU_ALARM_SSH_KEY }}
         port: 22
         script: |
-         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
           docker stop aiku-alarm || true
           docker rm aiku-alarm || true
           

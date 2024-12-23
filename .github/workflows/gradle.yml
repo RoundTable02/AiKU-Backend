@@ -242,4 +242,5 @@ jobs:
             -e FIREBASE_AUTH_PROVIDER=${{ secrets.FIREBASE_AUTH_PROVIDER }} \
             -e FIREBASE_CERT_URL=${{ secrets.FIREBASE_CERT_URL }} \
             -e FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }} \
+            -e FIREBASE_KEY=${{ secrets.FIREBASE_KEY }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}

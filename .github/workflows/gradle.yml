@@ -232,4 +232,14 @@ jobs:
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
             -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
+            -e FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }} \
+            -e FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
+            -e FIREBASE_KEY_ID=${{ secrets.FIREBASE_KEY_ID }} \
+            -e FIREBASE_EMAIL=${{ secrets.FIREBASE_EMAIL }} \
+            -e FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }} \
+            -e FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }} \
+            -e FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }} \
+            -e FIREBASE_AUTH_PROVIDER=${{ secrets.FIREBASE_AUTH_PROVIDER }} \
+            -e FIREBASE_CERT_URL=${{ secrets.FIREBASE_CERT_URL }} \
+            -e FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}

@@ -77,7 +77,7 @@ jobs:
       run: |
           ./gradlew :aiku-gateway:build
           ./gradlew :aiku-main:build
-          # ./gradlew :aiku-alarm:build
+          ./gradlew :aiku-alarm:build
           # ./gradlew :aiku-map:build
 
     - name: Stop MySQL

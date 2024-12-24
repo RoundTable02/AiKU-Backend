@@ -23,20 +23,6 @@ spring:
     listener:
       ack-mode: manual
 
-firebase:
-  config:
-    type: ${FIREBASE_TYPE}
-    project-id: ${FIREBASE_PROJECT_ID}
-    private-key-id: ${FIREBASE_KEY_ID}
-    private-key: ${FIREBASE_KEY}
-    client-email: ${FIREBASE_EMAIL}
-    client-id: ${FIREBASE_CLIENT_ID}
-    auth-uri: ${FIREBASE_AUTH_URI}
-    token-uri: ${FIREBASE_TOKEN_URI}
-    auth-provider-x509-cert-url: ${FIREBASE_AUTH_PROVIDER}
-    client-x509-cert-url: ${FIREBASE_CERT_URL}
-    universe-domain: ${FIREBASE_UNIVERSE_DOMAIN}
-
 
 logging:
   level:

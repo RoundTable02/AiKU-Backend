@@ -36,12 +36,13 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
 
-    - name: Create test/resources/application.yml
+    - name: Create resource file
       run: |
         mkdir -p aiku/aiku-main/src/test/resources
         mkdir -p aiku/aiku-map/src/test/resources
         echo "${{ secrets.AIKU_MAIN_TEST_CONFIG }}" > aiku/aiku-main/src/test/resources/application.yml
         echo "${{ secrets.AIKU_MAP_TEST_CONFIG }}" > aiku/aiku-map/src/test/resources/application.yml
+        echo "${{ secrets.FIREBASE_CONFIG }}" > aiku/aiku-alarm/src/main/resources/aiku2024-firebase-adminsdk-9fjfc-df87d6f024.json
 
     - name: Build with Gradle Wrapper
       working-directory: aiku
@@ -62,17 +63,6 @@ jobs:
         KAFKA_SERVER_URL: ${{ secrets.KAFKA_SERVER_URL }}
         AIKU_MAIN_IP: ${{ secrets.AIKU_MAIN_IP }}
         AIKU_MAP_IP: ${{ secrets.AIKU_MAP_IP }}
-        FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
-        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-        FIREBASE_KEY_ID: ${{ secrets.FIREBASE_KEY_ID }}
-        FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
-        FIREBASE_EMAIL: ${{ secrets.FIREBASE_EMAIL }}
-        FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
-        FIREBASE_AUTH_URI: ${{ secrets.FIREBASE_AUTH_URI }}
-        FIREBASE_TOKEN_URI: ${{ secrets.FIREBASE_TOKEN_URI }}
-        FIREBASE_AUTH_PROVIDER: ${{ secrets.FIREBASE_AUTH_PROVIDER }}
-        FIREBASE_CERT_URL: ${{ secrets.FIREBASE_CERT_URL }}
-        FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
         
       run: |
           ./gradlew :aiku-gateway:build
@@ -232,15 +222,4 @@ jobs:
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
             -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
-            -e FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }} \
-            -e FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
-            -e FIREBASE_KEY_ID=${{ secrets.FIREBASE_KEY_ID }} \
-            -e FIREBASE_EMAIL=${{ secrets.FIREBASE_EMAIL }} \
-            -e FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }} \
-            -e FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }} \
-            -e FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }} \
-            -e FIREBASE_AUTH_PROVIDER=${{ secrets.FIREBASE_AUTH_PROVIDER }} \
-            -e FIREBASE_CERT_URL=${{ secrets.FIREBASE_CERT_URL }} \
-            -e FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }} \
-            -e FIREBASE_KEY=${{ secrets.FIREBASE_KEY }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}

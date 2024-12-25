@@ -68,7 +68,7 @@ jobs:
           ./gradlew :aiku-gateway:build
           ./gradlew :aiku-main:build
           ./gradlew :aiku-alarm:build
-          # ./gradlew :aiku-map:build
+          ./gradlew :aiku-map:build
 
     - name: Stop MySQL
       if: always()
@@ -88,9 +88,9 @@ jobs:
     - name: Build Docker image of aiku-alarm
       working-directory: aiku/aiku-alarm
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }} .
-    # - name: Build Docker image of aiku-map
-    #   working-directory: aiku/aiku-map
-    #   run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest .
+    - name: Build Docker image of aiku-map
+      working-directory: aiku/aiku-map
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }} .
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
@@ -100,7 +100,7 @@ jobs:
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
-        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
     
   deploy: 
     runs-on: ubuntu-latest
@@ -172,31 +172,31 @@ jobs:
             -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
             
-    # - name: excuting remote ssh commands to map
-    #   uses: appleboy/ssh-action@v0.1.9
-    #   with:
-    #     host: ${{ secrets.EC2_AIKU_MAP_HOST }}
-    #     username: ${{ secrets.EC2_USERNAME }}
-    #     key : ${{ secrets.EC2_AIKU_MAP_SSH_KEY }}
-    #     port: 22
-    #     script: |
-    #      docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
-    #       docker stop aiku-map || true
-    #       docker rm aiku-map || true
+    - name: excuting remote ssh commands to map
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_AIKU_MAP_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key : ${{ secrets.EC2_AIKU_MAP_SSH_KEY }}
+        port: 22
+        script: |
+         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
+          docker stop aiku-map || true
+          docker rm aiku-map || true
           
-    #       docker run -d \
-    #         --name aiku-map \
-    #         --log-driver=awslogs \
-    #         --log-opt awslogs-region=ap-northeast-2 \
-    #         --log-opt awslogs-group=aiku-map \
-    #         --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAP_ID }} \
-    #         --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
-    #         --network="host" \
-    #         -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
-    #         -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
-    #         -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-    #         -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
-    #         ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:latest
+          docker run -d \
+            --name aiku-map \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-map \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_MAP_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
+            --network="host" \
+            -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e KAFKA_SERVER_URL=${{ secrets.KAFKA_SERVER_URL }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
     
     - name: excuting remote ssh commands to alarm
       uses: appleboy/ssh-action@v0.1.9

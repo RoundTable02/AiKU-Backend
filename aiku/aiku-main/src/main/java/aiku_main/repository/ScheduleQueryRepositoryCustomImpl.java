@@ -342,6 +342,18 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
+    public List<String> findAlarmTokenListOfScheduleMembers(Long scheduleId, Long excludeMemberId) {
+        return query
+                .select(member.firebaseToken)
+                .from(scheduleMember)
+                .innerJoin(scheduleMember.member, member)
+                .where(scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE),
+                        member.id.ne(excludeMemberId))
+                .fetch();
+    }
+
+    @Override
     public List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId) {
         return query
                 .select(Projections.constructor(ScheduleArrivalMember.class,

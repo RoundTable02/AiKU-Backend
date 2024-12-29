@@ -14,7 +14,6 @@ import java.util.Map;
 
 // AlarmMessageType = SCHEDULE_ADD, SCHEDULE_UPDATE, SCHEDULE_OWNER, SCHEDULE_OPEN, SCHEDULE_AUTO_CLOSE
 @Getter
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class ScheduleAlarmMessage extends AlarmMessage{
 
@@ -23,12 +22,11 @@ public class ScheduleAlarmMessage extends AlarmMessage{
     private LocalDateTime scheduleTime;
     private Location location;
 
-    public ScheduleAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Schedule schedule) {
+    public ScheduleAlarmMessage(List<String> alarmReceiverTokens, AlarmMessageType alarmMessageType, Long scheduleId, String scheduleName, LocalDateTime scheduleTime, Location location) {
         super(alarmReceiverTokens, alarmMessageType);
-        this.scheduleId = schedule.getId();
-        this.scheduleName = schedule.getScheduleName();
-        this.scheduleTime = schedule.getScheduleTime();
-        this.location = schedule.getLocation();
+        this.scheduleId = scheduleId;
+        this.scheduleName = scheduleName;
+        this.scheduleTime = scheduleTime;
+        this.location = location;
     }
-
 }

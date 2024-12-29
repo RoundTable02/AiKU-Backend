@@ -22,7 +22,6 @@ import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.Status;
 import common.domain.team.Team;
-import common.domain.team.TeamMember;
 import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
 import common.exception.JsonParseException;
@@ -89,24 +88,20 @@ public class ScheduleService {
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
         List<String> alarmTokens = teamQueryRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
     }
 
     @Transactional
     public Long updateSchedule(Long memberId, Long scheduleId, ScheduleUpdateDto scheduleDto){
-        //검증 로직
-        Member member = findMember(memberId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsWait(schedule);
         checkScheduleUpdateTime(schedule);
         checkIsOwner(memberId, scheduleId);
 
-        //서비스 로직
         schedule.update(scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.location.toDomain());
 
         scheduleScheduler.changeSchedule(schedule);
-
-        sendMessageToScheduleMembers(schedule, member, null, AlarmMessageType.SCHEDULE_UPDATE);
+        sendMessageToScheduleMembers(schedule, memberId, null, AlarmMessageType.SCHEDULE_UPDATE);
 
         return schedule.getId();
     }
@@ -129,7 +124,7 @@ public class ScheduleService {
             pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE_ENTER, scheduleId);
         }
 
-        sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_ENTER);
+        sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_ENTER);
 
         return schedule.getId();
     }
@@ -153,7 +148,7 @@ public class ScheduleService {
             schedule.changeScheduleOwner(nextScheduleOwner);
 
             kafkaProducerService.sendMessage(alarm,
-                    new ScheduleAlarmMessage(List.of(nextScheduleOwner.getMember().getFirebaseToken()), AlarmMessageType.SCHEDULE_EXIT, schedule));
+                    new ScheduleAlarmMessage(List.of(nextScheduleOwner.getMember().getFirebaseToken()), AlarmMessageType.SCHEDULE_EXIT, schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
         }
 
         schedule.removeScheduleMember(scheduleMember);
@@ -165,7 +160,7 @@ public class ScheduleService {
 
         scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-        sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_EXIT);
+        sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
 
         return schedule.getId();
     }
@@ -178,17 +173,21 @@ public class ScheduleService {
         return nextOwner;
     }
 
-    private void sendMessageToScheduleMembers(Schedule schedule, Member excludeMember, Member sourceMember, AlarmMessageType messageType) {
-        List<ScheduleMember> scheduleMembers = scheduleQueryRepository.findScheduleMembersWithMember(schedule.getId());
-        List<String> alarmReceiverTokens = scheduleMembers.stream()
-                .filter(scheduleMember -> excludeMember == null || !scheduleMember.getMember().getId().equals(excludeMember.getId()))
-                .map((sm) -> sm.getMember().getFirebaseToken())
-                .toList();
+    private void sendMessageToScheduleMembers(Schedule schedule, Long excludeMemberId, Member sourceMember, AlarmMessageType messageType) {
+        List<String> alarmTokens = scheduleQueryRepository.findAlarmTokenListOfScheduleMembers(schedule.getId(), excludeMemberId);
 
         if(sourceMember == null) {
-            kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmReceiverTokens, messageType, schedule));
+            kafkaProducerService.sendMessage(
+                    alarm,
+                    new ScheduleAlarmMessage(
+                            alarmTokens,
+                            messageType,
+                            schedule.getId(),
+                            schedule.getScheduleName(),
+                            schedule.getScheduleTime(),
+                            schedule.getLocation()));
         } else {
-            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(alarmReceiverTokens, messageType, new AlarmMemberInfo(sourceMember),
+            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember),
                     schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
         }
     }
@@ -300,7 +299,7 @@ public class ScheduleService {
 
             scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
 
-            sendMessageToScheduleMembers(schedule, member, member, AlarmMessageType.SCHEDULE_EXIT);
+            sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
 

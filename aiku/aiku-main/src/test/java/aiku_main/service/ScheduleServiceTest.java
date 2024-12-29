@@ -3,7 +3,7 @@ package aiku_main.service;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.LocationDto;
 import aiku_main.dto.ScheduleDetailResDto;
-import aiku_main.dto.ScheduleUpdateDto;
+import aiku_main.dto.schedule.ScheduleUpdateDto;
 import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;

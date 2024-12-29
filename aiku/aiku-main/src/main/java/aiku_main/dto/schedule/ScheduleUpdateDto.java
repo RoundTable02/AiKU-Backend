@@ -1,6 +1,7 @@
-package aiku_main.dto;
+package aiku_main.dto.schedule;
 
 import aiku_main.controller.validation.ValidScheduleTime;
+import aiku_main.dto.LocationDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

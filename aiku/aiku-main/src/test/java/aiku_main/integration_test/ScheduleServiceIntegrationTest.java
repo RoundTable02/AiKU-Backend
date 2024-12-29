@@ -3,6 +3,8 @@ package aiku_main.integration_test;
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.application_event.domain.ScheduleArrivalResult;
 import aiku_main.dto.*;
+import aiku_main.dto.schedule.ScheduleAddDto;
+import aiku_main.dto.schedule.ScheduleUpdateDto;
 import aiku_main.dto.team.TeamScheduleListEachResDto;
 import aiku_main.dto.team.TeamScheduleListResDto;
 import aiku_main.exception.ScheduleException;

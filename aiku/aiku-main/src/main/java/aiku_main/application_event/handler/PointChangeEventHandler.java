@@ -1,15 +1,11 @@
 package aiku_main.application_event.handler;
 
-import aiku_main.application_event.event.PaymentPointChangeEvent;
 import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.service.MemberService;
-import aiku_main.service.PaymentPointMessageHelper;
 import aiku_main.service.PointLogFactory;
 import aiku_main.service.PointLogService;
 import common.domain.log.PointLog;
-import common.kafka_message.PaymentPointStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -22,7 +18,6 @@ public class PointChangeEventHandler {
     private final MemberService memberService;
     private final PointLogService pointLogService;
     private final PointLogFactory pointLogFactory;
-    private final PaymentPointMessageHelper messageHelper;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -37,26 +32,5 @@ public class PointChangeEventHandler {
                 event.getPointAmount(),
                 event.getReasonId());
         pointLogService.savePointLog(pointLog);
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void paymentPointChangeEvent(PaymentPointChangeEvent event) {
-        // 멤버 포인트 변화
-        PaymentPointStatus paymentPointStatus = PaymentPointStatus.SUCCESS;
-        try {
-            memberService.updateMemberPoint(event.getMember().getId(), event.getSign(), event.getPointAmount());
-            // 로그 기록
-            PointLog pointLog = pointLogFactory.createPointLog(event.getReason(),
-                    event.getMember().getId(),
-                    event.getSign(),
-                    event.getPointAmount(),
-                    null);
-            pointLogService.savePointLog(pointLog);
-        } catch (Exception e) {
-            paymentPointStatus = PaymentPointStatus.FAIL;
-        } finally {
-            messageHelper.makePaymentPointChangeSagaMessage(paymentPointStatus, event.getPurchaseToken());
-        }
     }
 }

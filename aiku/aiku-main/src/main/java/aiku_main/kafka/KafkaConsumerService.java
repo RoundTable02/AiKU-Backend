@@ -80,23 +80,4 @@ public class KafkaConsumerService {
 
         ack.acknowledge();
     }
-
-    @KafkaListener(topics = {"payment"}, groupId = "aiku-main", concurrency = "1")
-    public void consumePaymentPointChangedMessage(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            PaymentPointChangedMessage message = objectMapper.readValue(data.value(), PaymentPointChangedMessage.class);
-            pointChangeEventPublisher.consumerPaymentPointPublish(message.getMember(),
-                    PointChangeType.valueOf(message.getPointChangedType().name()),
-                    message.getPointAmount(),
-                    PointChangeReason.PAYMENT,
-                    message.getPurchaseToken()
-            );
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
-
-        ack.acknowledge();
-    }
 }

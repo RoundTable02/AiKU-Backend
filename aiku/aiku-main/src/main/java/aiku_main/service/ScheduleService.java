@@ -31,6 +31,7 @@ import common.kafka_message.alarm.*;
 import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,39 +62,34 @@ public class ScheduleService {
     private final KafkaProducerService kafkaProducerService;
     private final ObjectMapper objectMapper;
 
+    @Value("${schedule.fee.participation}")
+    private int participationPoint;
+
     @Transactional
     public Long addSchedule(Long memberId, Long teamId, ScheduleAddDto scheduleDto){
-        //검증 로직
         Member member = findMember(memberId);
-        Team team = findTeamById(teamId);
         checkTeamMember(memberId, teamId);
-        checkEnoughPoint(member, scheduleDto.getPointAmount());
+        checkEnoughPoint(member, participationPoint);
 
-        //서비스 로직
-        Schedule schedule = Schedule.create(member, new TeamValue(team),
-                scheduleDto.getScheduleName(), scheduleDto.getScheduleTime(), scheduleDto.getLocation().toDomain(),
-                scheduleDto.getPointAmount());
+        Schedule schedule = Schedule.create(
+                member,
+                new TeamValue(teamId),
+                scheduleDto.getScheduleName(),
+                scheduleDto.getScheduleTime(),
+                scheduleDto.getLocation().toDomain(),
+                participationPoint);
         scheduleQueryRepository.save(schedule);
 
-        if(scheduleDto.getPointAmount() > 0) {
-            pointChangeEventPublisher.publish(member, MINUS, scheduleDto.getPointAmount(), SCHEDULE_ENTER, schedule.getId());
-        }
-
         scheduleScheduler.reserveSchedule(schedule);
-
-        sendMessageToTeamMembers(teamId, schedule, member, AlarmMessageType.SCHEDULE_ADD);
+        pointChangeEventPublisher.publish(member, MINUS, participationPoint, SCHEDULE_ENTER, schedule.getId());
+        sendMessageToTeamMembers(teamId, schedule, member.getId(), AlarmMessageType.SCHEDULE_ADD);
 
         return schedule.getId();
     }
 
-    private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Member excludeMember, AlarmMessageType messageType){
-        List<TeamMember> teamMembers = teamQueryRepository.findTeamMembersWithMemberInTeam(teamId);
-        List<String> alarmReceiverTokens = teamMembers.stream()
-                .filter(teamMember -> !teamMember.getMember().getId().equals(excludeMember.getId()))
-                .map((teamMember) -> teamMember.getMember().getFirebaseToken())
-                .toList();
-
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmReceiverTokens, messageType, schedule));
+    private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
+        List<String> alarmTokens = teamQueryRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
     }
 
     @Transactional

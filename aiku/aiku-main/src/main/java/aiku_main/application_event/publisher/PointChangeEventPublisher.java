@@ -1,6 +1,5 @@
 package aiku_main.application_event.publisher;
 
-import aiku_main.application_event.event.PaymentPointChangeEvent;
 import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
@@ -23,11 +22,6 @@ public class PointChangeEventPublisher {
 
     public void consumerPublish(MemberValue member, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
         PointChangeEvent event = new PointChangeEvent(member, changeType, pointAmount, reason, reasonId);
-        publisher.publishEvent(event);
-    }
-
-    public void consumerPaymentPointPublish(MemberValue member, PointChangeType changeType, int pointAmount, PointChangeReason reason, String purchaseToken){
-        PaymentPointChangeEvent event = new PaymentPointChangeEvent(member, changeType, pointAmount, reason, purchaseToken);
         publisher.publishEvent(event);
     }
 

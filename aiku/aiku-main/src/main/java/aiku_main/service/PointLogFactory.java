@@ -85,12 +85,6 @@ public class PointLogFactory {
                     "이벤트 보상 : " + signedPointAmount + " 아쿠",
                     PointLogStatus.ACCEPT,
                     new EventValue(reasonId));
-        } else if (reason.equals(PointChangeReason.PAYMENT)) {
-            return new EventLog(memberId,
-                    signedPointAmount,
-                    "아쿠 결제 : " + signedPointAmount + " 아쿠",
-                    PointLogStatus.ACCEPT,
-                    new EventValue(reasonId));
         }
 
         return null;

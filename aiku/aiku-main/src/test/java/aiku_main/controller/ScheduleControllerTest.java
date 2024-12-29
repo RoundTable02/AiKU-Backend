@@ -40,12 +40,15 @@ class ScheduleControllerTest {
 
     @Test
     void addSchedule() throws Exception {
-        ScheduleAddDto scheduleAddDto = new ScheduleAddDto("sche1",
-                new LocationDto("loc1", 1.1, 1.1), LocalDateTime.now().plusHours(1), 10);
+        ScheduleAddDto scheduleDto = new ScheduleAddDto(
+                "schedule",
+                new LocationDto("lo1", 1.0, 1.0),
+                LocalDateTime.now().plusHours(1));
+
         mockMvc.perform(post("/groups/1/schedules")
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(scheduleAddDto)))
+                        .content(objectMapper.writeValueAsString(scheduleDto)))
                 .andExpect(status().isOk());
     }
 
@@ -55,9 +58,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto(" ",
+                                new ScheduleAddDto(
+                                        " ",
                                         new LocationDto("loc1", 1.1, 1.1),
-                                        LocalDateTime.now().plusHours(1), 10)
+                                        LocalDateTime.now().plusHours(1))
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -65,9 +69,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("schedule name is too long",
+                                new ScheduleAddDto(
+                                        "schedule name is too long",
                                         new LocationDto("loc1", 1.1, 1.1),
-                                        LocalDateTime.now().plusHours(1), 10)
+                                        LocalDateTime.now().plusHours(1))
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -75,9 +80,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
+                                new ScheduleAddDto(
+                                        "name1",
                                         new LocationDto(" ", 1.1, 1.1),
-                                        LocalDateTime.now().plusHours(1), 10)
+                                        LocalDateTime.now().plusHours(1))
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -85,9 +91,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
+                                new ScheduleAddDto(
+                                        "name1",
                                         new LocationDto("lo1", 1.1, 1.1),
-                                        null, 10)
+                                        null)
                         )))
                 .andExpect(status().isBadRequest());
 
@@ -95,32 +102,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
+                                new ScheduleAddDto(
+                                        "name1",
                                         new LocationDto("lo1", null, 1.1),
-                                        LocalDateTime.now().plusHours(1), 10)
-                        )))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void addScheduleWithFaultPoint() throws Exception {
-        mockMvc.perform(post("/groups/1/schedules")
-                        .header("Access-Member-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
-                                        new LocationDto("lo1", null, 1.1),
-                                        LocalDateTime.now().plusHours(1), 101)
-                        )))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/groups/1/schedules")
-                        .header("Access-Member-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
-                                        new LocationDto("lo1", null, 1.1),
-                                        LocalDateTime.now().plusHours(1), -10)
+                                        LocalDateTime.now().plusHours(1))
                         )))
                 .andExpect(status().isBadRequest());
     }
@@ -131,9 +116,10 @@ class ScheduleControllerTest {
                         .header("Access-Member-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ScheduleAddDto("name1",
+                                new ScheduleAddDto(
+                                        "name1",
                                         new LocationDto("lo1", null, 1.1),
-                                        LocalDateTime.now(), 100)
+                                        LocalDateTime.now())
                         )))
                 .andExpect(status().isBadRequest());
     }

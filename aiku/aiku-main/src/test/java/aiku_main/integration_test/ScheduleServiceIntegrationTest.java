@@ -9,6 +9,7 @@ import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.TeamQueryRepository;
 import aiku_main.service.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,8 +24,6 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,71 +44,78 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 public class ScheduleServiceIntegrationTest {
 
-    private static final Logger log = LoggerFactory.getLogger(ScheduleServiceIntegrationTest.class);
-    @Autowired
-    EntityManager em;
     @Autowired
     ScheduleService scheduleService;
     @Autowired
+    EntityManager em;
+    @Autowired
     ScheduleQueryRepository scheduleQueryRepository;
+    @Autowired
+    TeamQueryRepository teamQueryRepository;
     @Autowired
     MemberRepository memberRepository;
     @Autowired
     ObjectMapper objectMapper;
 
+    Member teamOwner;
     Member member1;
     Member member2;
     Member member3;
     Member member4;
+    Team team;
 
     Random random = new Random();
 
     @BeforeEach
     void beforeEach(){
-        member1 = Member.create("member1");
-        member2 = Member.create("member2");
-        member3 = Member.create("member3");
-        member4 = Member.create("member4");
+        teamOwner = createMember();
+        member1 = createMember();
+        member2 = createMember();
+        member3 = createMember();
+        member4 = createMember();
+        em.persist(teamOwner);
         em.persist(member1);
         em.persist(member2);
         em.persist(member3);
         em.persist(member4);
+
+        team = Team.create(teamOwner, "team");
+        em.persist(team);
     }
 
     @AfterEach
     void afterEach(){
+        teamQueryRepository.deleteAll();
         memberRepository.deleteAll();
     }
 
     @Test
     void 스케줄_등록() {
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
         //when
-        ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
-                new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        Long scheduleId = scheduleService.addSchedule(member1.getId(), team.getId(), scheduleDto);
+        ScheduleAddDto scheduleDto = new ScheduleAddDto(
+                "schedule",
+                new LocationDto("lo1", 1.0, 1.0),
+                LocalDateTime.now().plusHours(1));
+        Long scheduleId = scheduleService.addSchedule(teamOwner.getId(), team.getId(), scheduleDto);
 
         //then
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
-        assertThat(schedule).isNotNull();
+        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
         assertThat(schedule.getScheduleStatus()).isEqualTo(ExecStatus.WAIT);
-        assertThat(schedule.getScheduleMembers().size()).isEqualTo(1);
-        assertThat(schedule.getScheduleMembers().get(0).getMember().getId()).isEqualTo(member1.getId());
+        assertThat(schedule.getScheduleMembers()).hasSize(1);
+        assertThat(schedule.getScheduleMembers())
+                .extracting((scheduleMember) -> scheduleMember.getMember().getId())
+                .contains(teamOwner.getId());
     }
 
     @Test
     void 스케줄_등록_팀멤버x() {
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
         //when
-        ScheduleAddDto scheduleDto = new ScheduleAddDto("sche1",
-                new LocationDto("lo1", 1.0, 1.0), LocalDateTime.now().plusHours(1), 0);
-        assertThatThrownBy(() -> scheduleService.addSchedule(member2.getId(), team.getId(), scheduleDto)).isInstanceOf(TeamException.class);
+        ScheduleAddDto scheduleDto = new ScheduleAddDto(
+                "schedule",
+                new LocationDto("lo1", 1.0, 1.0),
+                LocalDateTime.now().plusHours(1));
+        assertThatThrownBy(() -> scheduleService.addSchedule(member2.getId(), team.getId(), scheduleDto))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
@@ -709,9 +715,7 @@ public class ScheduleServiceIntegrationTest {
         em.flush();
         em.clear();
         //when
-        log.info("시작");
         scheduleService.closeScheduleAuto(schedule1.getId());
-        log.info("끝");
 
         //then
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
@@ -867,6 +871,15 @@ public class ScheduleServiceIntegrationTest {
         String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();
         List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getMembers();
         assertThat(data).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
+    }
+
+    Member createMember(){
+        Member member = Member.builder()
+                .nickname(UUID.randomUUID().toString())
+                .build();
+        member.updatePointAmount(100);
+
+        return member;
     }
 
     Schedule createSchedule(Member member, Team team, int pointAmount){

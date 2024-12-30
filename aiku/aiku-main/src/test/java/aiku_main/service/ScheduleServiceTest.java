@@ -468,6 +468,23 @@ public class ScheduleServiceTest {
     }
 
     @Test
+    void 스케줄_프리뷰_조회() {
+        //given
+        team.addTeamMember(member1);
+        em.flush();
+
+        Schedule schedule = createSchedule(member1, team);
+        em.persist(schedule);
+
+        //when
+        SchedulePreviewResDto result = scheduleService.getSchedulePreview(member1.getId(), team.getId(), schedule.getId());
+
+        //then
+        assertThat(result.getScheduleId()).isEqualTo(schedule.getId());
+        assertThat(result.getOwner().getMemberId()).isEqualTo(member1.getId());
+    }
+
+    @Test
     void 그룹_스케줄_목록_조회() {
         //given
         team.addTeamMember(member1);

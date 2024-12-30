@@ -73,7 +73,8 @@ public class ScheduleService {
                 scheduleDto.getScheduleName(),
                 scheduleDto.getScheduleTime(),
                 scheduleDto.getLocation().toDomain(),
-                scheduleEnterPoint);
+                scheduleEnterPoint
+        );
         scheduleQueryRepository.save(schedule);
 
         scheduleScheduler.reserveSchedule(schedule);

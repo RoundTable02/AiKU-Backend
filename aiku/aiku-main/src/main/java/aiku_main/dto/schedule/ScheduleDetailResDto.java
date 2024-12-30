@@ -1,5 +1,6 @@
-package aiku_main.dto;
+package aiku_main.dto.schedule;
 
+import aiku_main.dto.LocationDto;
 import common.domain.schedule.Schedule;
 import lombok.Getter;
 

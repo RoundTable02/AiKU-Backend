@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.schedule;
 
 import lombok.Getter;
 

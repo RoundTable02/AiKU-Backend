@@ -1,4 +1,4 @@
-package aiku_main.dto.team;
+package aiku_main.dto.schedule;
 
 import common.domain.team.Team;
 import lombok.Getter;

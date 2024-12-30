@@ -1,5 +1,6 @@
-package aiku_main.dto;
+package aiku_main.dto.schedule;
 
+import aiku_main.dto.MemberProfileResDto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 

@@ -38,7 +38,6 @@ public class Schedule extends BaseTime {
     private Location location;
 
     private LocalDateTime scheduleTermTime;
-    private boolean isAutoClose = false;
 
     @Enumerated(value = EnumType.STRING)
     private ExecStatus scheduleStatus = WAIT;
@@ -49,7 +48,7 @@ public class Schedule extends BaseTime {
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private ScheduleResult scheduleResult;
 
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
@@ -121,7 +120,6 @@ public class Schedule extends BaseTime {
         });
 
         setTerm(closeTime);
-        this.isAutoClose = true;
     }
 
     public void setTerm(LocalDateTime scheduleTermTime){

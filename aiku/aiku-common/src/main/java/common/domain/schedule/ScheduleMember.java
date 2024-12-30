@@ -31,7 +31,6 @@ public class ScheduleMember extends BaseTime {
 
     private boolean isOwner;
 
-    private boolean isPaid;
     private int pointAmount;
     private int rewardPointAmount;
 
@@ -45,7 +44,6 @@ public class ScheduleMember extends BaseTime {
         this.member = member;
         this.schedule = schedule;
         this.isOwner = isOwner;
-        this.isPaid = (pointAmount > 0) ? true : false;
         this.pointAmount = pointAmount;
     }
 

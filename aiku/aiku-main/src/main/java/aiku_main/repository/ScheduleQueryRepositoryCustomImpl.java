@@ -151,27 +151,27 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
-    public int findPointAmountOfLatePaidScheduleMember(Long scheduleId) {
-        return query
-                .select(scheduleMember.pointAmount.sum().coalesce(0))
+    public int findLateScheduleMemberCount(Long scheduleId) {
+        Long count = query
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.lt(0),
                         scheduleMember.status.eq(ALIVE)
                 )
                 .fetchOne();
+
+        return count == null ? 0 : count.intValue();
     }
 
     @Override
-    public List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId) {
+    public List<ScheduleMember> findEarlyScheduleMemberWithMember(Long scheduleId) {
         return query
                 .selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
                 .where(
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.goe(0),
                         scheduleMember.status.eq(ALIVE)
                 )
@@ -179,14 +179,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
-    public List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId) {
+    public List<ScheduleMember> findScheduleMemberListWithMember(Long scheduleId) {
         return query
                 .selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
                 .where(
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.isPaid.isTrue(),
-                        scheduleMember.arrivalTimeDiff.lt(0),
                         scheduleMember.status.eq(ALIVE)
                 )
                 .fetch();

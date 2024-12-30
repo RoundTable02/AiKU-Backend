@@ -22,7 +22,6 @@ import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
-import common.domain.Status;
 import common.domain.schedule.ScheduleResult;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
@@ -266,12 +265,8 @@ public class ScheduleService {
             Schedule schedule = scheduleMember.getSchedule();
             schedule.removeScheduleMember(scheduleMember);
 
-            if(scheduleMember.getPointAmount() > 0){
-                pointChangeEventPublisher.publish(member, PLUS, scheduleMember.getPointAmount(), SCHEDULE_EXIT, schedule.getId());
-            }
-
+            pointChangeEventPublisher.publish(member, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
             scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
-
             sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
@@ -286,18 +281,17 @@ public class ScheduleService {
 
     @Transactional
     public void closeScheduleAuto(Long scheduleId) {
-        if (scheduleQueryRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, ExecStatus.TERM, Status.ALIVE)){
+        Schedule schedule = findSchedule(scheduleId);
+        if (schedule.getScheduleStatus() == ExecStatus.TERM){
             return;
         }
 
-        Schedule schedule = findSchedule(scheduleId);
         List<ScheduleMember> notArriveScheduleMembers = scheduleQueryRepository.findNotArriveScheduleMember(scheduleId);
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-
         scheduleEventPublisher.publishScheduleCloseEvent(schedule);
     }
 
@@ -305,26 +299,29 @@ public class ScheduleService {
     public void processScheduleResultPoint(Long scheduleId) {
         Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
 
-        List<ScheduleMember> earlyMembers = scheduleQueryRepository.findPaidEarlyScheduleMemberWithMember(scheduleId);
+        List<ScheduleMember> earlyMembers = scheduleQueryRepository.findEarlyScheduleMemberWithMember(scheduleId);
 
-        if(earlyMembers.size() == 0) {
-            scheduleQueryRepository.findPaidLateScheduleMemberWithMember(scheduleId)
-                    .forEach((lateMember) -> {
-                        int rewardPointAmount = lateMember.getPointAmount();
-                        pointChangeEventPublisher.publish(lateMember.getMember(), PLUS, rewardPointAmount, SCHEDULE_REWARD, scheduleId);
-                        schedule.rewardMember(lateMember, rewardPointAmount);
-                    });
+        if(earlyMembers.isEmpty()) {
+            refundScheduleEnterPointToMembers(schedule);
             return;
         }
 
-        int pointAmountOfLateMembers = scheduleQueryRepository.findPointAmountOfLatePaidScheduleMember(scheduleId);
-        int rewardOfEarlyMember = pointAmountOfLateMembers / earlyMembers.size();
+        int lateScheduleMemberCount = scheduleQueryRepository.findLateScheduleMemberCount(scheduleId);
+        int rewardOfEarlyMember = lateScheduleMemberCount * scheduleEnterPoint / earlyMembers.size();
 
         earlyMembers.forEach((earlyScheduleMember) -> {
-            int rewardPointAmount = earlyScheduleMember.getPointAmount() + rewardOfEarlyMember;
-            pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE_REWARD, scheduleId);
+            int rewardPointAmount = scheduleEnterPoint + rewardOfEarlyMember;
             schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
+            pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE_REWARD, scheduleId);
         });
+    }
+
+    private void refundScheduleEnterPointToMembers(Schedule schedule){
+        scheduleQueryRepository.findScheduleMemberListWithMember(schedule.getId())
+                .forEach((scheduleMember) -> {
+                    schedule.rewardMember(scheduleMember, scheduleEnterPoint);
+                    pointChangeEventPublisher.publish(scheduleMember.getMember(), PLUS, scheduleEnterPoint, SCHEDULE_REWARD, schedule.getId());
+                });
     }
 
     @Transactional
@@ -337,7 +334,7 @@ public class ScheduleService {
             schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
-        } ;
+        }
     }
 
     private Member findMember(Long memberId){

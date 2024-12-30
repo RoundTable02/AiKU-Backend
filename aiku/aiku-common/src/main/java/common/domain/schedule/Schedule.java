@@ -100,12 +100,10 @@ public class Schedule extends BaseTime {
         return false;
     }
 
-    public boolean rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
+    public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
         if(isScheduleMember(scheduleMember)) {
             scheduleMember.setRewardPointAmount(rewardPointAmount);
-            return true;
         }
-        return false;
     }
 
     public void close(LocalDateTime scheduleCloseTime){
@@ -114,11 +112,10 @@ public class Schedule extends BaseTime {
 
     public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
         notArriveScheduleMembers.forEach(scheduleMember -> {
-            if(scheduleMember.getSchedule().getId().equals(id)){
+            if(isScheduleMember(scheduleMember)){
                 scheduleMember.arrive(closeTime, -30);
             }
         });
-
         setTerm(closeTime);
     }
 
@@ -162,5 +159,9 @@ public class Schedule extends BaseTime {
 
     private boolean isScheduleMember(ScheduleMember scheduleMember){
         return scheduleMember.getSchedule().getId().equals(this.id);
+    }
+
+    public List<ScheduleMember> getScheduleMembers() {
+        return List.copyOf(scheduleMembers);
     }
 }

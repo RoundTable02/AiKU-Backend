@@ -323,7 +323,7 @@ public class ScheduleService {
 
     @Transactional
     public void analyzeScheduleArrivalResult(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleQueryRepository.findScheduleWithResult(scheduleId).orElseThrow();
 
         List<ScheduleArrivalMember> arrivalMembers = scheduleQueryRepository.getScheduleArrivalResults(scheduleId);
         ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);

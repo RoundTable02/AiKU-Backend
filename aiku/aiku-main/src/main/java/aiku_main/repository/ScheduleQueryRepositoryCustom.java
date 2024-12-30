@@ -6,6 +6,7 @@ import aiku_main.dto.team.TeamScheduleListEachResDto;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
+import common.domain.schedule.ScheduleResult;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +17,7 @@ public interface ScheduleQueryRepositoryCustom {
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);
+    Optional<ScheduleResult> findScheduleResult(Long scheduleId);
     List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId);
     List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId);
     List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId);

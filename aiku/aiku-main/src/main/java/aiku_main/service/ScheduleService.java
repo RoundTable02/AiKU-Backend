@@ -23,6 +23,7 @@ import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.Status;
+import common.domain.schedule.ScheduleResult;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import common.exception.BaseExceptionImpl;
@@ -243,34 +244,24 @@ public class ScheduleService {
     }
 
     public String getScheduleArrivalResult(Long memberId, Long teamId, Long scheduleId) {
-        //검증 로직
-        checkExistTeam(teamId);
         checkTeamMember(memberId, teamId);
-        Schedule schedule = findScheduleById(scheduleId);
-        checkIsTerm(schedule);
+        ScheduleResult scheduleResult = findScheduleResult(scheduleId);
 
-        //서비스 로직
-        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleArrivalResult();
+        return scheduleResult.getScheduleArrivalResult();
     }
 
     public String getScheduleBettingResult(Long memberId, Long teamId, Long scheduleId) {
-        //검증 로직
-        checkExistTeam(teamId);
         checkTeamMember(memberId, teamId);
-        Schedule schedule = findScheduleById(scheduleId);
-        checkIsTerm(schedule);
+        ScheduleResult scheduleResult = findScheduleResult(scheduleId);
 
-        //서비스 로직
-        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleBettingResult();
+        return scheduleResult.getScheduleBettingResult();
     }
 
     public String getScheduleRacingResult(Long memberId, Long teamId, Long scheduleId) {
-        checkExistTeam(teamId);
         checkTeamMember(memberId, teamId);
-        Schedule schedule = findScheduleById(scheduleId);
-        checkIsTerm(schedule);
+        ScheduleResult scheduleResult = findScheduleResult(scheduleId);
 
-        return schedule.getScheduleResult() == null? null : schedule.getScheduleResult().getScheduleRacingResult();
+        return scheduleResult.getScheduleRacingResult();
     }
 
     public SimpleResDto<List<LocalDate>> getScheduleDatesInMonth(Long memberId, MonthDto monthDto) {
@@ -392,21 +383,14 @@ public class ScheduleService {
         return schedule;
     }
 
-    private void checkExistTeam(Long teamId){
-        if(!teamQueryRepository.existsById(teamId)){
-            throw new TeamException(NO_SUCH_TEAM);
-        }
+    private ScheduleResult findScheduleResult(Long scheduleId){
+        return scheduleQueryRepository.findScheduleResult(scheduleId)
+                .orElseThrow(() -> new ScheduleException(NO_SUCH_SCHEDULE_RESULT));
     }
 
     private void checkIsWait(Schedule schedule){
         if(schedule.getScheduleStatus() != ExecStatus.WAIT){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
-        }
-    }
-
-    private void checkIsTerm(Schedule schedule){
-        if(schedule.getScheduleStatus() != ExecStatus.TERM){
-            throw new BaseExceptionImpl(BaseErrorCode.NO_TERM_SCHEDULE);
         }
     }
 
@@ -444,5 +428,4 @@ public class ScheduleService {
             throw new ScheduleException(FORBIDDEN_SCHEDULE_UPDATE_TIME);
         }
     }
-
 }

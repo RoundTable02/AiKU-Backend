@@ -10,7 +10,9 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
 import common.domain.schedule.QScheduleMember;
+import common.domain.schedule.QScheduleResult;
 import common.domain.schedule.ScheduleMember;
+import common.domain.schedule.ScheduleResult;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -25,6 +27,7 @@ import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
+import static common.domain.schedule.QScheduleResult.scheduleResult;
 import static common.domain.team.QTeam.team;
 
 @RequiredArgsConstructor
@@ -226,6 +229,16 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .fetchFirst();
 
         return Optional.ofNullable(findScheduleMember);
+    }
+
+    @Override
+    public Optional<ScheduleResult> findScheduleResult(Long scheduleId) {
+        ScheduleResult fetchedScheduleResult = query
+                .selectFrom(scheduleResult)
+                .where(scheduleResult.schedule.id.eq(scheduleId))
+                .fetchOne();
+
+        return Optional.ofNullable(fetchedScheduleResult);
     }
 
     @Override

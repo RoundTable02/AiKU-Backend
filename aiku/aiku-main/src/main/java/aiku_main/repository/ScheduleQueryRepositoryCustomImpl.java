@@ -36,9 +36,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     public List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId) {
         return query
                 .selectFrom(scheduleMember)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.arrivalTime.isNull(),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
@@ -47,10 +49,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         Long count = query
                 .select(scheduleMember.count())
                 .from(scheduleMember)
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isOwner.isTrue(),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return count != null && count > 0;
@@ -61,9 +65,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         Long count = query
                 .select(scheduleMember.count())
                 .from(scheduleMember)
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return count != null && count > 0;
@@ -74,10 +80,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         Long count = query
                 .select(scheduleMember.count())
                 .from(scheduleMember)
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.pointAmount.isNotNull(),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return count != null && count > 0;
@@ -90,11 +98,13 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
                 .innerJoin(scheduleMember.schedule, schedule)
-                .where(member.id.eq(memberId),
+                .where(
+                        member.id.eq(memberId),
                         schedule.team.id.eq(teamId),
                         schedule.scheduleStatus.eq(RUN),
                         schedule.status.eq(ALIVE),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return count != null && count > 0;
@@ -105,8 +115,10 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .select(scheduleMember.count())
                 .from(scheduleMember)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchFirst();
     }
 
@@ -114,9 +126,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     public Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId) {
         ScheduleMember findScheduleMember = query
                 .selectFrom(scheduleMember)
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return Optional.ofNullable(findScheduleMember);
@@ -138,10 +152,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .select(scheduleMember.pointAmount.sum().coalesce(0))
                 .from(scheduleMember)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.lt(0),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetchOne();
     }
 
@@ -150,10 +166,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.goe(0),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
@@ -162,10 +180,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.lt(0),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
@@ -173,11 +193,13 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     public List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId) {
         return query.selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.schedule, schedule).fetchJoin()
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.status.eq(ALIVE),
                         schedule.team.id.eq(teamId),
                         schedule.scheduleStatus.eq(WAIT),
-                        schedule.status.eq(ALIVE))
+                        schedule.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
@@ -185,8 +207,10 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     public List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId) {
         return query.selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member).fetchJoin()
-                .where(scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
@@ -194,9 +218,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     public Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId) {
         ScheduleMember findScheduleMember = query
                 .selectFrom(scheduleMember)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
-                        scheduleMember.id.ne(prevOwnerScheduleMemberId))
+                        scheduleMember.id.ne(prevOwnerScheduleMemberId)
+                )
                 .fetchFirst();
 
         return Optional.ofNullable(findScheduleMember);
@@ -216,10 +242,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                                 member.profile.profileType,
                                 member.profile.profileImg,
                                 member.profile.profileCharacter,
-                                member.profile.profileBackground),
+                                member.profile.profileBackground
+                        ),
                         scheduleMember.isOwner,
                         member.point,
-                        betting.betee.id))
+                        betting.betee.id)
+                )
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
                 .leftJoin(betting).on(
@@ -228,9 +256,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                                 JPAExpressions.select(subScheduleMember.id)
                                         .from(subScheduleMember)
                                         .where(subScheduleMember.member.id.eq(memberId))
-                        ))
-                .where(scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
+                        )
+                )
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .orderBy(scheduleMember.createdAt.asc())
                 .fetch();
     }
@@ -240,10 +271,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(schedule)
-                .where(schedule.team.id.eq(teamId),
+                .where(
+                        schedule.team.id.eq(teamId),
                         schedule.status.eq(ALIVE),
                         scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
+                        scheduleTimeLoe(dateCond.getEndDate())
+                )
                 .offset(getOffset(page))
                 .limit(11)
                 .fetch();
@@ -257,23 +290,29 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                                 LocationDto.class,
                                 schedule.location.locationName,
                                 schedule.location.latitude,
-                                schedule.location.longitude),
+                                schedule.location.longitude
+                        ),
                         schedule.scheduleTime,
                         schedule.scheduleStatus,
-                        Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", scheduleMember.member.id)))
+                        Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", scheduleMember.member.id)
+                        )
+                )
                 .from(schedule)
                 .innerJoin(scheduleMember)
                 .on(
                         scheduleMember.schedule.id.eq(schedule.id),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .where(schedule.id.in(scheduleIdList))
-                .groupBy(schedule.id,
+                .groupBy(
+                        schedule.id,
                         schedule.scheduleName,
                         schedule.location.locationName,
                         schedule.location.latitude,
                         schedule.location.longitude,
                         schedule.scheduleTime,
-                        schedule.scheduleStatus)
+                        schedule.scheduleStatus
+                )
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }
@@ -284,11 +323,13 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .select(schedule.id)
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.schedule, schedule)
-                .where(scheduleMember.member.id.eq(memberId),
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.status.eq(ALIVE),
                         schedule.status.eq(ALIVE),
                         scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
+                        scheduleTimeLoe(dateCond.getEndDate())
+                )
                 .offset(getOffset(page))
                 .limit(11)
                 .fetch();
@@ -304,17 +345,27 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                                 LocationDto.class,
                                 schedule.location.locationName,
                                 schedule.location.latitude,
-                                schedule.location.longitude),
+                                schedule.location.longitude
+                        ),
                         schedule.scheduleTime,
                         schedule.scheduleStatus,
-                        scheduleMember.count().intValue()))
+                        scheduleMember.count().intValue()
+                        )
+                )
                 .from(schedule)
                 .innerJoin(team).on(schedule.team.id.eq(team.id))
-                .leftJoin(scheduleMember).on(
-                        scheduleMember.schedule.id.eq(schedule.id))
-                .where(schedule.id.in(scheduleIdList),
-                        scheduleMember.status.eq(ALIVE))
-                .groupBy(schedule.id, schedule.scheduleName, schedule.location, schedule.scheduleTime, schedule.scheduleStatus)
+                .leftJoin(scheduleMember).on(scheduleMember.schedule.id.eq(schedule.id))
+                .where(
+                        schedule.id.in(scheduleIdList),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .groupBy(
+                        schedule.id,
+                        schedule.scheduleName,
+                        schedule.location,
+                        schedule.scheduleTime,
+                        schedule.scheduleStatus
+                )
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }
@@ -324,11 +375,13 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .select(schedule.count())
                 .from(schedule)
-                .where(schedule.team.id.eq(teamId),
+                .where(
+                        schedule.team.id.eq(teamId),
                         schedule.scheduleStatus.eq(scheduleStatus),
                         schedule.status.eq(ALIVE),
                         scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
+                        scheduleTimeLoe(dateCond.getEndDate())
+                )
                 .fetchFirst()
                 .intValue();
     }
@@ -338,14 +391,15 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         return query
                 .select(scheduleMember.count())
                 .from(scheduleMember)
-                .innerJoin(schedule).on(
-                        schedule.id.eq(scheduleMember.schedule.id))
-                .where(scheduleMember.member.id.eq(memberId),
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
+                .where(
+                        scheduleMember.member.id.eq(memberId),
                         scheduleMember.status.eq(ALIVE),
                         schedule.scheduleStatus.eq(scheduleStatus),
                         schedule.status.eq(ALIVE),
                         scheduleTimeGoe(dateCond.getStartDate()),
-                        scheduleTimeLoe(dateCond.getEndDate()))
+                        scheduleTimeLoe(dateCond.getEndDate())
+                )
                 .fetchFirst()
                 .intValue();
     }
@@ -361,10 +415,12 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
                 .innerJoin(scheduleMember.schedule, schedule)
-                .where(member.id.eq(memberId),
+                .where(
+                        member.id.eq(memberId),
                         schedule.scheduleTime.between(startOfMonth, endOfMonth),
                         schedule.status.eq(ALIVE),
-                        scheduleMember.status.eq(ALIVE))
+                        scheduleMember.status.eq(ALIVE)
+                )
                 .orderBy(schedule.scheduleTime.asc())
                 .fetch();
     }
@@ -375,9 +431,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .select(member.firebaseToken)
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
-                        member.id.ne(excludeMemberId))
+                        member.id.ne(excludeMemberId)
+                )
                 .fetch();
     }
 
@@ -393,14 +451,21 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                                 member.profile.profileType,
                                 member.profile.profileImg,
                                 member.profile.profileCharacter,
-                                member.profile.profileBackground),
-                        scheduleMember.arrivalTimeDiff))
+                                member.profile.profileBackground
+                        ),
+                        scheduleMember.arrivalTimeDiff
+                        )
+                )
                 .from(scheduleMember)
                 .innerJoin(scheduleMember.member, member)
-                .where(scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE))
-                .orderBy(scheduleMember.arrivalTime.asc(),
-                        scheduleMember.id.asc())
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .orderBy(
+                        scheduleMember.arrivalTime.asc(),
+                        scheduleMember.id.asc()
+                )
                 .fetch();
     }
 

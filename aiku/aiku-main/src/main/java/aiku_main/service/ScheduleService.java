@@ -26,11 +26,9 @@ import common.domain.Status;
 import common.domain.schedule.ScheduleResult;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
-import common.exception.BaseExceptionImpl;
 import common.exception.JsonParseException;
 import common.exception.NotEnoughPoint;
 import common.kafka_message.alarm.*;
-import common.response.status.BaseErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,7 +94,7 @@ public class ScheduleService {
 
     @Transactional
     public Long updateSchedule(Long memberId, Long scheduleId, ScheduleUpdateDto scheduleDto){
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         checkIsWait(schedule);
         checkScheduleUpdateTime(schedule);
         checkIsOwner(memberId, scheduleId);
@@ -116,7 +114,7 @@ public class ScheduleService {
         Member member = findMember(memberId);
         checkEnoughPoint(member, scheduleEnterPoint);
 
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         checkScheduleMember(memberId, scheduleId, false);
         checkIsWait(schedule);
 
@@ -132,7 +130,7 @@ public class ScheduleService {
     public Long exitSchedule(Long memberId, Long teamId, Long scheduleId) {
         Member member = findMember(memberId);
         ScheduleMember scheduleMember = findScheduleMember(memberId, scheduleId);
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         checkIsWait(schedule);
 
         Long scheduleMemberCount = scheduleQueryRepository.countOfScheduleMembers(scheduleId);
@@ -198,7 +196,7 @@ public class ScheduleService {
 
     @Transactional
     public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
 
         schedule.arriveScheduleMember(scheduleMember, arrivalTime);
@@ -206,7 +204,7 @@ public class ScheduleService {
 
     @Transactional
     public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         schedule.close(scheduleCloseTime);
 
         scheduleEventPublisher.publishScheduleCloseEvent(schedule);
@@ -214,7 +212,7 @@ public class ScheduleService {
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long teamId, Long scheduleId) {
         //검증 메서드
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         checkScheduleMember(memberId, scheduleId, true);
 
         //서비스 로직
@@ -224,7 +222,7 @@ public class ScheduleService {
     }
 
     public TeamScheduleListResDto getTeamScheduleList(Long memberId, Long teamId, SearchDateCond dateCond, int page) {
-        Team team = findTeamById(teamId);
+        Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId);
 
         List<TeamScheduleListEachResDto> scheduleList = scheduleQueryRepository.getTeamSchedules(teamId, memberId, dateCond, page);
@@ -308,7 +306,7 @@ public class ScheduleService {
             return;
         }
 
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = findSchedule(scheduleId);
         List<ScheduleMember> notArriveScheduleMembers = scheduleQueryRepository.findNotArriveScheduleMember(scheduleId);
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
@@ -362,25 +360,19 @@ public class ScheduleService {
         return memberRepository.findById(memberId).orElseThrow();
     }
 
-    private Team findTeamById(Long teamId){
-        Team team = teamQueryRepository.findByIdAndStatus(teamId, ALIVE).orElse(null);
-        if (team == null) {
-            throw new TeamException(NO_SUCH_TEAM);
-        }
-        return team;
+    private Team findTeam(Long teamId){
+        return teamQueryRepository.findByIdAndStatus(teamId, ALIVE)
+                .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
+    }
+
+    private Schedule findSchedule(Long scheduleId){
+        return scheduleQueryRepository.findByIdAndStatus(scheduleId, ALIVE)
+                .orElseThrow(() -> new ScheduleException(NO_SUCH_SCHEDULE));
     }
 
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId){
         return scheduleQueryRepository.findScheduleMember(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
-    }
-
-    private Schedule findScheduleById(Long scheduleId){
-        Schedule schedule = scheduleQueryRepository.findByIdAndStatus(scheduleId, ALIVE).orElse(null);
-        if (schedule == null) {
-            throw new ScheduleException(NO_SUCH_SCHEDULE);
-        }
-        return schedule;
     }
 
     private ScheduleResult findScheduleResult(Long scheduleId){

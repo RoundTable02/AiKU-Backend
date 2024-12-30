@@ -4,6 +4,7 @@ import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.MemberScheduleListEachResDto;
 import aiku_main.dto.schedule.ScheduleMemberResDto;
+import aiku_main.dto.schedule.SchedulePreviewResDto;
 import aiku_main.dto.schedule.TeamScheduleListEachResDto;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
@@ -38,6 +39,7 @@ public interface ScheduleQueryRepositoryCustom {
     List<LocalDateTime> findScheduleDatesInMonth(Long memberId, int year, int month);
     List<String> findAlarmTokenListOfScheduleMembers(Long scheduleId, Long excludeMemberId);
 
+    SchedulePreviewResDto getSchedulePreview(Long scheduleId);
     List<ScheduleMemberResDto> getScheduleMembersWithBettingInfo(Long memberId, Long scheduleId);
     List<TeamScheduleListEachResDto> getTeamSchedules(Long teamId, Long memberId, SearchDateCond dateCond, int page);
     List<MemberScheduleListEachResDto> getMemberSchedules(Long memberId, SearchDateCond dateCond, int page);

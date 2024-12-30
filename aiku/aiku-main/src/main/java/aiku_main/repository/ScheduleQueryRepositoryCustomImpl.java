@@ -2,9 +2,7 @@ package aiku_main.repository;
 
 import aiku_main.application_event.domain.ScheduleArrivalMember;
 import aiku_main.dto.*;
-import aiku_main.dto.schedule.MemberScheduleListEachResDto;
-import aiku_main.dto.schedule.ScheduleMemberResDto;
-import aiku_main.dto.schedule.TeamScheduleListEachResDto;
+import aiku_main.dto.schedule.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -457,6 +455,45 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         memberNotEqual(excludeMemberId)
                 )
                 .fetch();
+    }
+
+    @Override
+    public SchedulePreviewResDto getSchedulePreview(Long scheduleId) {
+        return query
+                .select(Projections.constructor(
+                        SchedulePreviewResDto.class,
+                        schedule.id,
+                        schedule.scheduleName,
+                        schedule.scheduleTime,
+                        Projections.constructor(
+                                LocationDto.class,
+                                schedule.location.locationName,
+                                schedule.location.latitude,
+                                schedule.location.longitude
+                        ),
+                        Projections.constructor(
+                                ScheduleOwnerResDto.class,
+                                member.id,
+                                member.nickname,
+                                Projections.constructor(
+                                        MemberProfileResDto.class,
+                                        member.profile.profileType,
+                                        member.profile.profileImg,
+                                        member.profile.profileCharacter,
+                                        member.profile.profileBackground
+                                )
+                        )
+                ))
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .leftJoin(scheduleMember.member, member)
+                .where(
+                        schedule.id.eq(scheduleId),
+                        schedule.status.eq(ALIVE),
+                        scheduleMember.isOwner.isTrue(),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .fetchOne();
     }
 
     @Override

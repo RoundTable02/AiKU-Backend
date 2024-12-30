@@ -202,6 +202,14 @@ public class ScheduleService {
         return new ScheduleDetailResDto(schedule, membersDtoList);
     }
 
+    public SchedulePreviewResDto getSchedulePreview(Long memberId, Long groupId, Long scheduleId) {
+        checkTeamMember(memberId, groupId);
+
+        SchedulePreviewResDto schedulePreview = scheduleQueryRepository.getSchedulePreview(scheduleId);
+
+        return schedulePreview;
+    }
+
     public TeamScheduleListResDto getTeamScheduleList(Long memberId, Long teamId, SearchDateCond dateCond, int page) {
         Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId);

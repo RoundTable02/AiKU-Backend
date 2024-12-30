@@ -444,7 +444,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .where(
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
-                        member.id.ne(excludeMemberId)
+                        memberNotEqual(excludeMemberId)
                 )
                 .fetch();
     }
@@ -485,6 +485,10 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     private BooleanExpression scheduleTimeLoe(LocalDateTime endDate){
         return  (endDate != null) ? schedule.scheduleTime.loe(endDate) : null;
+    }
+
+    private BooleanExpression memberNotEqual(Long id){
+        return id != null ? member.id.ne(id) : null;
     }
 
     private int getOffset(int page){

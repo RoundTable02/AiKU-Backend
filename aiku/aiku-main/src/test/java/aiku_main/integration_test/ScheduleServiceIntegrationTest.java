@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +68,9 @@ public class ScheduleServiceIntegrationTest {
     Team team;
 
     Random random = new Random();
+
+    @Value("${schedule.fee.participation}")
+    private int scheduleEnterPoint;
 
     @BeforeEach
     void beforeEach(){
@@ -250,8 +254,8 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 10);
-        schedule.addScheduleMember(member3, false, 10);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule);
 
         //when
@@ -290,7 +294,7 @@ public class ScheduleServiceIntegrationTest {
         em.flush();
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule);
 
         scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
@@ -304,7 +308,7 @@ public class ScheduleServiceIntegrationTest {
     void 스케줄_퇴장_남은멤버x_자동삭제() {
         //given
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule);
 
         //when
@@ -320,7 +324,7 @@ public class ScheduleServiceIntegrationTest {
     void 스케줄_퇴장_방장퇴장_방장변경() {
         //given
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule);
 
         //when
@@ -338,7 +342,7 @@ public class ScheduleServiceIntegrationTest {
     void 스케줄_퇴장_대기스케줄x() {
         //given
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
         schedule.setTerm(LocalDateTime.now());
         em.persist(schedule);
 
@@ -394,8 +398,8 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
-        schedule.addScheduleMember(member3, false, 100);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule);
 
         //when
@@ -420,8 +424,8 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
-        schedule.addScheduleMember(member3, false, 100);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule);
 
         ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElseThrow();
@@ -450,8 +454,8 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
-        schedule.addScheduleMember(member3, false, 100);
+        schedule.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule);
 
         //when
@@ -467,13 +471,13 @@ public class ScheduleServiceIntegrationTest {
         em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 100);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         schedule1.setRun();
         em.persist(schedule1);
 
         Schedule schedule2 = createSchedule(member2, team);
-        schedule2.addScheduleMember(member3, false, 100);
+        schedule2.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule2);
 
         Schedule schedule3 = createSchedule(member3, team);
@@ -558,7 +562,7 @@ public class ScheduleServiceIntegrationTest {
 
         Schedule scheduleA1 = createSchedule(member1, teamA);
         scheduleA1.setRun();
-        scheduleA1.addScheduleMember(member2, false, 0);
+        scheduleA1.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(scheduleA1);
 
         Schedule scheduleA2 = createSchedule(member2, teamA);
@@ -643,26 +647,26 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team1);
         em.persist(team2);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().plusDays(3);
         Schedule schedule1 = Schedule.create(
                 member1,
                 new TeamValue(team1),
                 "sche1",
-                now.plusDays(1),
+                now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
                 10);
         Schedule schedule2 = Schedule.create(
                 member1,
                 new TeamValue(team2),
                 "sche1",
-                now.plusDays(1),
+                now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
                 10);
         Schedule schedule3 = Schedule.create(
                 member1,
                 new TeamValue(team2),
                 "sche1",
-                now.plusDays(2),
+                now.plusDays(4),
                 new Location("loc", 1.0, 1.0),
                 10);
         em.persist(schedule1);
@@ -675,28 +679,28 @@ public class ScheduleServiceIntegrationTest {
         //then
         assertThat(result).hasSize(2);
         assertThat(result).contains(
-                LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 1),
-                LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 2)
+                LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 3),
+                LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth() + 4)
         );
     }
 
     @Test
     void 이벤트핸들러_팀퇴장_참여중인_대기스케줄_퇴장() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         Schedule schedule2 = createSchedule(member1, team);
-        schedule2.addScheduleMember(member2, false, 0);
+        schedule2.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule2);
 
         Schedule schedule3 = createSchedule(member1, team);
-        schedule3.addScheduleMember(member2, false, 0);
+        schedule3.addScheduleMember(member2, false, scheduleEnterPoint);
         schedule3.setTerm(LocalDateTime.now());
         em.persist(schedule3);
 
@@ -719,42 +723,40 @@ public class ScheduleServiceIntegrationTest {
     @Test
     void 이벤트핸들러_스케줄_자동종료() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1,  team);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 0);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
         schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
         em.flush();
-        em.clear();
+
         //when
         scheduleService.closeScheduleAuto(schedule1.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-        assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
-
-        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
-        assertThat(scheduleMembers).extracting("arrivalTimeDiff")
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule1.getId()).get();
+        assertThat(testSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
+        assertThat(testSchedule.getScheduleMembers())
+                .extracting(ScheduleMember::getArrivalTimeDiff)
                 .contains(-30, -30, (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes());
     }
 
     @Test
     void 이벤트핸들러_스케줄_자동종료_이미종료된스케줄() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 0);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
@@ -766,25 +768,25 @@ public class ScheduleServiceIntegrationTest {
         scheduleService.closeScheduleAuto(schedule1.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
-
-        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
 
         int timeDiff = (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes();
-        assertThat(scheduleMembers).extracting("arrivalTimeDiff").contains(timeDiff, timeDiff);
+        assertThat(testSchedule.getScheduleMembers())
+                .extracting(ScheduleMember::getArrivalTimeDiff)
+                .contains(timeDiff, timeDiff);
     }
 
     @Test
     void 이벤트핸들러_스케줄_결과_정산_지각자x(){
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 200);
-        schedule1.addScheduleMember(member3, false, 300);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
@@ -800,20 +802,22 @@ public class ScheduleServiceIntegrationTest {
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
-        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
+        assertThat(findSchedule.getScheduleMembers())
+                .extracting(ScheduleMember::getRewardPointAmount)
+                .containsExactly(scheduleEnterPoint, scheduleEnterPoint, scheduleEnterPoint);
     }
 
     @Test
     void 이벤트핸들러_스케줄_결과_정산_모두지각자(){
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 200);
-        schedule1.addScheduleMember(member3, false, 300);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now().plusHours(4);
@@ -829,20 +833,22 @@ public class ScheduleServiceIntegrationTest {
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
-        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(100, 200, 300);
+        assertThat(findSchedule.getScheduleMembers())
+                .extracting(ScheduleMember::getRewardPointAmount)
+                .containsExactly(scheduleEnterPoint, scheduleEnterPoint, scheduleEnterPoint);
     }
 
     @Test
     void 이벤트핸들러_스케줄_결과_정산(){
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 200);
-        schedule1.addScheduleMember(member3, false, 300);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
@@ -855,23 +861,24 @@ public class ScheduleServiceIntegrationTest {
         scheduleService.processScheduleResultPoint(schedule1.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-
-        assertThat(findSchedule.getScheduleMembers()).extracting("rewardPointAmount").contains(0, 250, 350);
+        int rewardPoint = scheduleEnterPoint + scheduleEnterPoint / 2;
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule1.getId()).get();
+        assertThat(testSchedule.getScheduleMembers())
+                .extracting(ScheduleMember::getRewardPointAmount)
+                .contains(0, rewardPoint, rewardPoint);
     }
 
     @Test
     void 이벤트핸들러_스케줄_도착순서_분석() throws JsonProcessingException {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 0);
+        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
+        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
@@ -884,12 +891,15 @@ public class ScheduleServiceIntegrationTest {
         scheduleService.analyzeScheduleArrivalResult(schedule1.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule1.getId()).get();
+        String scheduleArrivalResultStr = testSchedule.getScheduleResult().getScheduleArrivalResult();
+        List<ScheduleArrivalMember> data = objectMapper
+                .readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class)
+                .getMembers();
 
-        String scheduleArrivalResultStr = findSchedule.getScheduleResult().getScheduleArrivalResult();
-        List<ScheduleArrivalMember> data = objectMapper.readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class).getMembers();
-        assertThat(data).extracting("memberId").containsExactly(member3.getId(), member2.getId(), member1.getId());
+        assertThat(data)
+                .extracting(ScheduleArrivalMember::getMemberId)
+                .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
     Member createMember(){
@@ -907,7 +917,7 @@ public class ScheduleServiceIntegrationTest {
                 new TeamValue(team), 
                 UUID.randomUUID().toString(), 
                 LocalDateTime.now().plusHours(3),
-                new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()), 
-                10);
+                new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()),
+                scheduleEnterPoint);
     }
 }

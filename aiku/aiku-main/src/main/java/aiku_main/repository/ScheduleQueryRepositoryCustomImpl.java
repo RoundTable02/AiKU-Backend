@@ -10,7 +10,6 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
 import common.domain.schedule.QScheduleMember;
-import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +34,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId) {
-        return query.selectFrom(scheduleMember)
+        return query
+                .selectFrom(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.arrivalTime.isNull(),
                         scheduleMember.status.eq(ALIVE))
@@ -43,18 +43,9 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
-    public List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId) {
-        return query.selectFrom(schedule)
-                .innerJoin(schedule.scheduleMembers, scheduleMember).fetchJoin()
-                .where(schedule.team.id.eq(teamId),
-                        scheduleMember.status.eq(ALIVE),
-                        schedule.status.eq(ALIVE))
-                .fetch();
-    }
-
-    @Override
     public boolean isScheduleOwner(Long memberId, Long scheduleId) {
-        Long count = query.select(scheduleMember.count())
+        Long count = query
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
@@ -67,7 +58,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public boolean existScheduleMember(Long memberId, Long scheduleId) {
-        Long count = query.select(scheduleMember.count())
+        Long count = query
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
@@ -79,7 +71,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public boolean existPaidScheduleMember(Long memberId, Long scheduleId) {
-        Long count = query.select(scheduleMember.count())
+        Long count = query
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
@@ -109,7 +102,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public Long countOfScheduleMembers(Long scheduleId) {
-        return query.select(scheduleMember.count())
+        return query
+                .select(scheduleMember.count())
                 .from(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
@@ -118,7 +112,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId) {
-        ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
+        ScheduleMember findScheduleMember = query
+                .selectFrom(scheduleMember)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
@@ -129,7 +124,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId) {
-        ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
+        ScheduleMember findScheduleMember = query
+                .selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.member, member).fetchJoin()
                 .where(scheduleMember.id.eq(scheduleMemberId))
                 .fetchOne();
@@ -139,7 +135,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public int findPointAmountOfLatePaidScheduleMember(Long scheduleId) {
-        return query.select(scheduleMember.pointAmount.sum().coalesce(0))
+        return query
+                .select(scheduleMember.pointAmount.sum().coalesce(0))
                 .from(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
@@ -150,8 +147,9 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public List<ScheduleMember> findPaidEarlyScheduleMemberWithMember(Long scheduleId) {
-        return query.selectFrom(scheduleMember)
-                .join(scheduleMember.member, member)
+        return query
+                .selectFrom(scheduleMember)
+                .innerJoin(scheduleMember.member, member)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.goe(0),
@@ -161,8 +159,9 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public List<ScheduleMember> findPaidLateScheduleMemberWithMember(Long scheduleId) {
-        return query.selectFrom(scheduleMember)
-                .join(scheduleMember.member, member)
+        return query
+                .selectFrom(scheduleMember)
+                .innerJoin(scheduleMember.member, member)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.isPaid.isTrue(),
                         scheduleMember.arrivalTimeDiff.lt(0),
@@ -185,7 +184,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     @Override
     public List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId) {
         return query.selectFrom(scheduleMember)
-                .join(scheduleMember.member, member).fetchJoin()
+                .innerJoin(scheduleMember.member, member).fetchJoin()
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
                 .fetch();
@@ -208,14 +207,23 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         QScheduleMember subScheduleMember = new QScheduleMember("subScheduleMember");
 
         return query
-                .select(Projections.constructor(ScheduleMemberResDto.class,
-                        member.id, member.nickname,
-                        Projections.constructor(MemberProfileResDto.class,
-                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        scheduleMember.isOwner, member.point, betting.betee.id))
+                .select(Projections.constructor(
+                        ScheduleMemberResDto.class,
+                        member.id,
+                        member.nickname,
+                        Projections.constructor(
+                                MemberProfileResDto.class,
+                                member.profile.profileType,
+                                member.profile.profileImg,
+                                member.profile.profileCharacter,
+                                member.profile.profileBackground),
+                        scheduleMember.isOwner,
+                        member.point,
+                        betting.betee.id))
                 .from(scheduleMember)
-                .innerJoin(member).on(member.id.eq(scheduleMember.member.id))
-                .leftJoin(betting).on(betting.betee.id.eq(scheduleMember.id),
+                .innerJoin(scheduleMember.member, member)
+                .leftJoin(betting).on(
+                        betting.betee.id.eq(scheduleMember.id),
                         betting.bettor.id.eq(
                                 JPAExpressions.select(subScheduleMember.id)
                                         .from(subScheduleMember)
@@ -241,20 +249,31 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .fetch();
 
         return query
-                .select(Projections.constructor(TeamScheduleListEachResDto.class,
-                        schedule.id, schedule.scheduleName,
-                        Projections.constructor(LocationDto.class,
-                                schedule.location.locationName, schedule.location.latitude, schedule.location.longitude),
-                        schedule.scheduleTime, schedule.scheduleStatus,
+                .select(Projections.constructor(
+                        TeamScheduleListEachResDto.class,
+                        schedule.id,
+                        schedule.scheduleName,
+                        Projections.constructor(
+                                LocationDto.class,
+                                schedule.location.locationName,
+                                schedule.location.latitude,
+                                schedule.location.longitude),
+                        schedule.scheduleTime,
+                        schedule.scheduleStatus,
                         Expressions.stringTemplate("GROUP_CONCAT(DISTINCT {0})", scheduleMember.member.id)))
                 .from(schedule)
-                .innerJoin(scheduleMember).on(
+                .innerJoin(scheduleMember)
+                .on(
                         scheduleMember.schedule.id.eq(schedule.id),
                         scheduleMember.status.eq(ALIVE))
                 .where(schedule.id.in(scheduleIdList))
-                .groupBy(schedule.id, schedule.scheduleName, schedule.location.locationName,
-                        schedule.location.latitude, schedule.location.longitude,
-                        schedule.scheduleTime, schedule.scheduleStatus)
+                .groupBy(schedule.id,
+                        schedule.scheduleName,
+                        schedule.location.locationName,
+                        schedule.location.latitude,
+                        schedule.location.longitude,
+                        schedule.scheduleTime,
+                        schedule.scheduleStatus)
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();
     }
@@ -365,16 +384,23 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     @Override
     public List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId) {
         return query
-                .select(Projections.constructor(ScheduleArrivalMember.class,
-                        member.id, member.nickname,
-                        Projections.constructor(MemberProfileResDto.class,
-                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
+                .select(Projections.constructor(
+                        ScheduleArrivalMember.class,
+                        member.id,
+                        member.nickname,
+                        Projections.constructor(
+                                MemberProfileResDto.class,
+                                member.profile.profileType,
+                                member.profile.profileImg,
+                                member.profile.profileCharacter,
+                                member.profile.profileBackground),
                         scheduleMember.arrivalTimeDiff))
                 .from(scheduleMember)
-                .join(member).on(member.id.eq(scheduleMember.member.id))
+                .innerJoin(scheduleMember.member, member)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE))
-                .orderBy(scheduleMember.arrivalTime.asc(), scheduleMember.id.asc())
+                .orderBy(scheduleMember.arrivalTime.asc(),
+                        scheduleMember.id.asc())
                 .fetch();
     }
 

@@ -13,8 +13,6 @@ import java.util.Optional;
 
 public interface ScheduleQueryRepositoryCustom {
 
-    List<Schedule> findMemberScheduleInTeamWithMember(Long memberId, Long teamId);
-
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);

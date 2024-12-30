@@ -566,9 +566,15 @@ public class ScheduleServiceIntegrationTest {
         assertThat(result.getRunSchedule()).isEqualTo(2);
 
         List<MemberScheduleListEachResDto> schedules = result.getData();
-        assertThat(schedules).extracting("groupId").containsExactly(teamB.getId(), teamA.getId());
-        assertThat(schedules).extracting("scheduleId").containsExactly(scheduleB1.getId(), scheduleA1.getId());
-        assertThat(schedules).extracting("memberSize").containsExactly(1, 2);
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getGroupId)
+                .containsExactly(teamB.getId(), teamA.getId());
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getScheduleId)
+                .containsExactly(scheduleB1.getId(), scheduleA1.getId());
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getMemberSize)
+                .containsExactly(1, 2);
     }
 
     @Test
@@ -608,9 +614,15 @@ public class ScheduleServiceIntegrationTest {
         assertThat(result.getRunSchedule()).isEqualTo(1);
 
         List<MemberScheduleListEachResDto> schedules = result.getData();
-        assertThat(schedules).extracting("groupId").containsExactly(teamB.getId(), teamB.getId());
-        assertThat(schedules).extracting("scheduleId").containsExactly(scheduleB2.getId(), scheduleB1.getId());
-        assertThat(schedules).extracting("memberSize").containsExactly(1, 1);
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getGroupId)
+                .containsExactly(teamB.getId(), teamB.getId());
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getScheduleId)
+                .containsExactly(scheduleB2.getId(), scheduleB1.getId());
+        assertThat(schedules)
+                .extracting(MemberScheduleListEachResDto::getMemberSize)
+                .containsExactly(1, 1);
     }
     
     @Test

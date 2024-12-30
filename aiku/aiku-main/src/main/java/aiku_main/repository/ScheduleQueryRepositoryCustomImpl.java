@@ -264,7 +264,7 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
         List<Long> scheduleIdList = query
                 .select(schedule.id)
                 .from(scheduleMember)
-                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
+                .innerJoin(scheduleMember.schedule, schedule)
                 .where(scheduleMember.member.id.eq(memberId),
                         scheduleMember.status.eq(ALIVE),
                         schedule.status.eq(ALIVE),
@@ -275,17 +275,26 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                 .fetch();
 
         return query
-                .select(Projections.constructor(MemberScheduleListEachResDto.class,
-                        team.id, team.teamName, schedule.id, schedule.scheduleName,
-                        Projections.constructor(LocationDto.class,
-                                schedule.location.locationName, schedule.location.latitude, schedule.location.longitude),
-                        schedule.scheduleTime, schedule.scheduleStatus, scheduleMember.count().intValue()))
+                .select(Projections.constructor(
+                        MemberScheduleListEachResDto.class,
+                        team.id,
+                        team.teamName,
+                        schedule.id,
+                        schedule.scheduleName,
+                        Projections.constructor(
+                                LocationDto.class,
+                                schedule.location.locationName,
+                                schedule.location.latitude,
+                                schedule.location.longitude),
+                        schedule.scheduleTime,
+                        schedule.scheduleStatus,
+                        scheduleMember.count().intValue()))
                 .from(schedule)
                 .innerJoin(team).on(schedule.team.id.eq(team.id))
                 .leftJoin(scheduleMember).on(
-                        scheduleMember.schedule.id.eq(schedule.id),
+                        scheduleMember.schedule.id.eq(schedule.id))
+                .where(schedule.id.in(scheduleIdList),
                         scheduleMember.status.eq(ALIVE))
-                .where(schedule.id.in(scheduleIdList))
                 .groupBy(schedule.id, schedule.scheduleName, schedule.location, schedule.scheduleTime, schedule.scheduleStatus)
                 .orderBy(schedule.scheduleTime.desc())
                 .fetch();

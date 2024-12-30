@@ -189,34 +189,29 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        Long scheduleId = scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId(), enterDto);
+        Long scheduleId = scheduleService.enterSchedule(member2.getId(), team.getId(), schedule.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(scheduleId).orElse(null);
-        assertThat(findSchedule).isNotNull();
+        Schedule testSchedule = scheduleQueryRepository.findById(scheduleId).get();
 
-        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
-        assertThat(scheduleMembers.size()).isEqualTo(2);
-        assertThat(scheduleMembers).extracting("isOwner").contains(true, false);
-        assertThat(scheduleMembers).extracting("isPaid").contains(true, false);
-        assertThat(scheduleMembers).extracting("pointAmount").contains(100, 0);
-        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
+        List<ScheduleMember> scheduleMembers = testSchedule.getScheduleMembers();
+        assertThat(scheduleMembers).hasSize(2);
+        assertThat(scheduleMembers)
+                .extracting((scheduleMember) -> scheduleMember.getMember().getId())
+                .contains(member1.getId(), member2.getId());
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMember::isOwner)
+                .contains(true, false);
     }
 
     @Test
     void 스케줄_입장_중복() {
         //given
-        team.addTeamMember(member1);
-        em.flush();
-
         Schedule schedule = createSchedule(teamOwner, team);
-        schedule.addScheduleMember(member1, false, 0);
         em.persist(schedule);
 
         //when
-        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member1.getId(), team.getId(), schedule.getId(), enterDto))
+        assertThatThrownBy(() -> scheduleService.enterSchedule(teamOwner.getId(), team.getId(), schedule.getId()))
                 .isInstanceOf(ScheduleException.class);
     }
 
@@ -227,8 +222,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member1.getId(), team.getId(), schedule.getId(), enterDto))
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member1.getId(), team.getId(), schedule.getId()))
                 .isInstanceOf(TeamException.class);
     }
 
@@ -243,8 +237,7 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        ScheduleEnterDto enterDto = new ScheduleEnterDto(0);
-        assertThatThrownBy(() -> scheduleService.enterSchedule(member1.getId(), team.getId(), schedule.getId(), enterDto))
+        assertThatThrownBy(() -> scheduleService.enterSchedule(member1.getId(), team.getId(), schedule.getId()))
                 .isInstanceOf(ScheduleException.class);
     }
 

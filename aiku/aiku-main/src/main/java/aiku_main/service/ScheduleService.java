@@ -64,13 +64,13 @@ public class ScheduleService {
     private final ObjectMapper objectMapper;
 
     @Value("${schedule.fee.participation}")
-    private int participationPoint;
+    private int scheduleEnterPoint;
 
     @Transactional
     public Long addSchedule(Long memberId, Long teamId, ScheduleAddDto scheduleDto){
         Member member = findMember(memberId);
         checkTeamMember(memberId, teamId);
-        checkEnoughPoint(member, participationPoint);
+        checkEnoughPoint(member, scheduleEnterPoint);
 
         Schedule schedule = Schedule.create(
                 member,
@@ -78,11 +78,11 @@ public class ScheduleService {
                 scheduleDto.getScheduleName(),
                 scheduleDto.getScheduleTime(),
                 scheduleDto.getLocation().toDomain(),
-                participationPoint);
+                scheduleEnterPoint);
         scheduleQueryRepository.save(schedule);
 
         scheduleScheduler.reserveSchedule(schedule);
-        pointChangeEventPublisher.publish(member, MINUS, participationPoint, SCHEDULE_ENTER, schedule.getId());
+        pointChangeEventPublisher.publish(member, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, schedule.getId());
         sendMessageToTeamMembers(teamId, schedule, member.getId(), AlarmMessageType.SCHEDULE_ADD);
 
         return schedule.getId();
@@ -109,24 +109,20 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Long enterSchedule(Long memberId, Long teamId, Long scheduleId, ScheduleEnterDto enterDto) {
-        //검증 로직
+    public Long enterSchedule(Long memberId, Long teamId, Long scheduleId) {
+        checkTeamMember(memberId, teamId);
+
         Member member = findMember(memberId);
-        checkExistTeam(teamId);
-        checkTeamMember(member.getId(), teamId);
+        checkEnoughPoint(member, scheduleEnterPoint);
+
         Schedule schedule = findScheduleById(scheduleId);
+        checkScheduleMember(memberId, scheduleId, false);
         checkIsWait(schedule);
-        checkEnoughPoint(member, enterDto.getPointAmount());
-        checkScheduleMember(member.getId(), scheduleId, false);
 
-        //서비스 로직
-        schedule.addScheduleMember(member, false, enterDto.getPointAmount());
+        schedule.addScheduleMember(member, false, scheduleEnterPoint);
 
-        if(enterDto.getPointAmount() > 0) {
-            pointChangeEventPublisher.publish(member, MINUS, enterDto.getPointAmount(), SCHEDULE_ENTER, scheduleId);
-        }
-
-        sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_ENTER);
+        sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_ENTER);
+        pointChangeEventPublisher.publish(member, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, scheduleId);
 
         return schedule.getId();
     }
@@ -189,8 +185,15 @@ public class ScheduleService {
                             schedule.getScheduleTime(),
                             schedule.getLocation()));
         } else {
-            kafkaProducerService.sendMessage(alarm, new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember),
-                    schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
+            kafkaProducerService.sendMessage(
+                    alarm,
+                    new ScheduleMemberAlarmMessage(
+                            alarmTokens, messageType,
+                            new AlarmMemberInfo(sourceMember),
+                            schedule.getId(),
+                            schedule.getScheduleName(),
+                            schedule.getScheduleTime(),
+                            schedule.getLocation()));
         }
     }
 

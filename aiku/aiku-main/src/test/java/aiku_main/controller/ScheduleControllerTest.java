@@ -160,24 +160,6 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void enterSchedule() throws Exception {
-        mockMvc.perform(post("/groups/1/schedules/1/enter")
-                        .header("Access-Member-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ScheduleEnterDto(0))))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void enterScheduleWithFaultPoint() throws Exception {
-        mockMvc.perform(post("/groups/1/schedules/1/enter")
-                        .header("Access-Member-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ScheduleEnterDto(3))))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void getScheduleDates() throws Exception {
         mockMvc.perform(get("/member/schedules/dates")
                         .header("Access-Member-Id", 1L)

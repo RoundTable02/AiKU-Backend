@@ -308,9 +308,9 @@ public class ScheduleService {
 
         int lateScheduleMemberCount = scheduleQueryRepository.findLateScheduleMemberCount(scheduleId);
         int rewardOfEarlyMember = lateScheduleMemberCount * scheduleEnterPoint / earlyMembers.size();
+        int rewardPointAmount = scheduleEnterPoint + rewardOfEarlyMember;
 
         earlyMembers.forEach((earlyScheduleMember) -> {
-            int rewardPointAmount = scheduleEnterPoint + rewardOfEarlyMember;
             schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
             pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE_REWARD, scheduleId);
         });

@@ -1,10 +1,8 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.application_event.domain.ScheduleRacing;
 import aiku_main.application_event.domain.ScheduleRacingResult;
 import aiku_main.repository.RacingQueryRepository;
-import aiku_main.service.RacingService;
-import aiku_main.service.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Location;

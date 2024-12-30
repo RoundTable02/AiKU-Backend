@@ -1,7 +1,5 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
-import aiku_main.service.ScheduleService;
-import aiku_main.service.TitleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
 import common.domain.Location;

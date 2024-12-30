@@ -166,14 +166,18 @@ public class ScheduleService {
                     new ScheduleAlarmMessage(alarmTokens, messageType, schedule)
             );
         } else {
-            kafkaProducerService.sendMessage(alarm,
+            kafkaProducerService.sendMessage(
+                    alarm,
                     new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember), schedule)
             );
         }
     }
 
     private void sendMessageToScheduleMember(Schedule schedule, String alarmToken, AlarmMessageType messageType){
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule));
+        kafkaProducerService.sendMessage(
+                alarm,
+                new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule)
+        );
     }
 
     @Transactional

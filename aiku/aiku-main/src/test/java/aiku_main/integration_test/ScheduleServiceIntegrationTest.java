@@ -461,10 +461,10 @@ public class ScheduleServiceIntegrationTest {
     @Test
     void 그룹_스케줄_목록_조회() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
         schedule1.addScheduleMember(member2, false, 0);
@@ -487,32 +487,37 @@ public class ScheduleServiceIntegrationTest {
         assertThat(result.getWaitSchedule()).isEqualTo(2);
 
         List<TeamScheduleListEachResDto> schedules = result.getData();
-        assertThat(schedules).extracting("scheduleId").containsExactly(schedule3.getId(), schedule2.getId(), schedule1.getId());
-        assertThat(schedules).extracting("memberSize").containsExactly(1, 2, 3);
-        assertThat(schedules).extracting("accept").containsExactly(false, false, true);
+        assertThat(schedules)
+                .extracting(TeamScheduleListEachResDto::getScheduleId)
+                .containsExactly(schedule3.getId(), schedule2.getId(), schedule1.getId());
+        assertThat(schedules)
+                .extracting(TeamScheduleListEachResDto::getMemberSize)
+                .containsExactly(1, 2, 3);
+        assertThat(schedules).
+                extracting(TeamScheduleListEachResDto::isAccept)
+                .containsExactly(false, false, true);
     }
 
     @Test
     void 그룹_스케줄_목록_조회_그룹멤버x() {
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
         //when
-        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member4.getId(), team.getId(), new SearchDateCond(), 1)).isInstanceOf(TeamException.class);
+        assertThatThrownBy(() -> scheduleService.getTeamScheduleList(member1.getId(), team.getId(), new SearchDateCond(), 1))
+                .isInstanceOf(TeamException.class);
     }
 
     @Test
     void 그룹_스케줄_목록_조회_필터링() {
         //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
+        team.addTeamMember(member1);
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        em.flush();
 
         Schedule schedule1 = createSchedule(member1, team);
         schedule1.setRun();
-        em.persist(schedule1);
 
         LocalDateTime startDate = LocalDateTime.now().plusHours(3);
+        em.persist(schedule1);
 
         Schedule schedule2 = createSchedule(member2, team);
         em.persist(schedule2);
@@ -530,8 +535,13 @@ public class ScheduleServiceIntegrationTest {
         assertThat(result.getWaitSchedule()).isEqualTo(1);
 
         List<TeamScheduleListEachResDto> schedules = result.getData();
-        assertThat(schedules).extracting("scheduleId").containsExactly(schedule2.getId());
-        assertThat(schedules).extracting("accept").containsExactly(false);
+        assertThat(schedules).hasSize(1);
+        assertThat(schedules)
+                .extracting(TeamScheduleListEachResDto::getScheduleId)
+                .containsExactly(schedule2.getId());
+        assertThat(schedules)
+                .extracting(TeamScheduleListEachResDto::isAccept)
+                .containsExactly(false);
     }
 
     @Test

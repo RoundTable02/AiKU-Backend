@@ -223,11 +223,9 @@ public class ScheduleService {
     }
 
     public TeamScheduleListResDto getTeamScheduleList(Long memberId, Long teamId, SearchDateCond dateCond, int page) {
-        //검증 메서드
         Team team = findTeamById(teamId);
         checkTeamMember(memberId, teamId);
 
-        //서비스 로직
         List<TeamScheduleListEachResDto> scheduleList = scheduleQueryRepository.getTeamSchedules(teamId, memberId, dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(memberId));
         int runSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);

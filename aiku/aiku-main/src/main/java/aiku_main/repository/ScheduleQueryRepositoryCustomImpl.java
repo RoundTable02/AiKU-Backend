@@ -298,12 +298,11 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
                         )
                 )
                 .from(schedule)
-                .innerJoin(scheduleMember)
-                .on(
-                        scheduleMember.schedule.id.eq(schedule.id),
+                .leftJoin(scheduleMember).on(scheduleMember.schedule.id.eq(schedule.id))
+                .where(
+                        schedule.id.in(scheduleIdList),
                         scheduleMember.status.eq(ALIVE)
                 )
-                .where(schedule.id.in(scheduleIdList))
                 .groupBy(
                         schedule.id,
                         schedule.scheduleName,

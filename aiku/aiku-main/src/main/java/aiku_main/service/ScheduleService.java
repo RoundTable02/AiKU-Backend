@@ -89,7 +89,7 @@ public class ScheduleService {
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
         List<String> alarmTokens = teamQueryRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
     }
 
     @Transactional
@@ -163,35 +163,17 @@ public class ScheduleService {
         if(sourceMember == null) {
             kafkaProducerService.sendMessage(
                     alarm,
-                    new ScheduleAlarmMessage(
-                            alarmTokens,
-                            messageType,
-                            schedule.getId(),
-                            schedule.getScheduleName(),
-                            schedule.getScheduleTime(),
-                            schedule.getLocation()));
+                    new ScheduleAlarmMessage(alarmTokens, messageType, schedule)
+            );
         } else {
-            kafkaProducerService.sendMessage(
-                    alarm,
-                    new ScheduleMemberAlarmMessage(
-                            alarmTokens, messageType,
-                            new AlarmMemberInfo(sourceMember),
-                            schedule.getId(),
-                            schedule.getScheduleName(),
-                            schedule.getScheduleTime(),
-                            schedule.getLocation()));
+            kafkaProducerService.sendMessage(alarm,
+                    new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember), schedule)
+            );
         }
     }
 
     private void sendMessageToScheduleMember(Schedule schedule, String alarmToken, AlarmMessageType messageType){
-        kafkaProducerService.sendMessage(alarm,
-                new ScheduleAlarmMessage(
-                        List.of(alarmToken),
-                        messageType,
-                        schedule.getId(),
-                        schedule.getScheduleName(),
-                        schedule.getScheduleTime(),
-                        schedule.getLocation()));
+        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule));
     }
 
     @Transactional
@@ -211,11 +193,9 @@ public class ScheduleService {
     }
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long teamId, Long scheduleId) {
-        //검증 메서드
         Schedule schedule = findSchedule(scheduleId);
         checkScheduleMember(memberId, scheduleId, true);
 
-        //서비스 로직
         List<ScheduleMemberResDto> membersDtoList = scheduleQueryRepository.getScheduleMembersWithBettingInfo(memberId, scheduleId);
 
         return new ScheduleDetailResDto(schedule, membersDtoList);

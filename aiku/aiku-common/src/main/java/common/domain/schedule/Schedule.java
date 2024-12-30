@@ -81,24 +81,20 @@ public class Schedule extends BaseTime {
         this.scheduleMembers.add(scheduleMember);
     }
 
-    public boolean removeScheduleMember(ScheduleMember scheduleMember) {
-        if(scheduleMember.getSchedule().getId().equals(id)){
+    public void removeScheduleMember(ScheduleMember scheduleMember) {
+        if(isScheduleMember(scheduleMember)){
             scheduleMember.setStatus(DELETE);
-            return true;
         }
-        return false;
     }
 
-    public boolean changeScheduleOwner(ScheduleMember nextOwner){
-        if(nextOwner.getSchedule().getId().equals(id)){
+    public void changeScheduleOwner(ScheduleMember nextOwner){
+        if(isScheduleMember(nextOwner)){
             nextOwner.setOwner();
-            return true;
         }
-        return false;
     }
 
     public boolean arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
-        if(scheduleMember.getSchedule().id.equals(id)){
+        if(isScheduleMember(scheduleMember)){
             scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
             return true;
         }
@@ -106,7 +102,7 @@ public class Schedule extends BaseTime {
     }
 
     public boolean rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
-        if(scheduleMember.getSchedule().id.equals(id)) {
+        if(isScheduleMember(scheduleMember)) {
             scheduleMember.setRewardPointAmount(rewardPointAmount);
             return true;
         }
@@ -164,5 +160,9 @@ public class Schedule extends BaseTime {
         if(scheduleResult == null){
             scheduleResult = new ScheduleResult(this);
         }
+    }
+
+    private boolean isScheduleMember(ScheduleMember scheduleMember){
+        return scheduleMember.getSchedule().getId().equals(this.id);
     }
 }

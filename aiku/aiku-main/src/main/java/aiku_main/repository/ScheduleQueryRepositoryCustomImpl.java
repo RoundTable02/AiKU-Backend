@@ -193,8 +193,8 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
 
     @Override
     public Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId) {
-        ScheduleMember findScheduleMember = query.selectFrom(scheduleMember)
-                .join(scheduleMember.member, member).fetchJoin()
+        ScheduleMember findScheduleMember = query
+                .selectFrom(scheduleMember)
                 .where(scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
                         scheduleMember.id.ne(prevOwnerScheduleMemberId))

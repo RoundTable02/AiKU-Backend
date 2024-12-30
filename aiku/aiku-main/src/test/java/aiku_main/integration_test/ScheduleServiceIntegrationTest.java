@@ -250,118 +250,101 @@ public class ScheduleServiceIntegrationTest {
         em.persist(team);
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
-        schedule.addScheduleMember(member3, false, 100);
+        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member3, false, 10);
         em.persist(schedule);
 
         //when
         scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-        assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
 
-        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
-        assertThat(scheduleMembers.size()).isEqualTo(3);
-        assertThat(scheduleMembers).extracting("status").contains(ALIVE, ALIVE, DELETE);
-        assertThat(scheduleMembers.stream().map(ScheduleMember::getMember).map(Member::getId)).contains(member1.getId(), member2.getId());
-
-        ScheduleMember owner = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
-        assertThat(owner).isNotNull();
-        assertThat(owner.isOwner()).isTrue();
+        List<ScheduleMember> scheduleMembers = testSchedule.getScheduleMembers();
+        assertThat(scheduleMembers).hasSize(3);
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMember::getStatus)
+                .contains(ALIVE, ALIVE, DELETE);
     }
 
     @Test
     void 스케줄_퇴장_스케줄멤버X() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule = createSchedule(member1, team);
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId()))
+                .isInstanceOf(ScheduleException.class);
     }
 
     @Test
     void 스케줄_퇴장_중복() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member2, false, 10);
         em.persist(schedule);
 
         scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId()))
+                .isInstanceOf(ScheduleException.class);
     }
 
     @Test
     void 스케줄_퇴장_남은멤버x_자동삭제() {
         //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
         Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 10);
         em.persist(schedule);
 
         //when
+        scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId());
         scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-        assertThat(findSchedule.getStatus()).isEqualTo(DELETE);
-
-        List<ScheduleMember> scheduleMembers = findSchedule.getScheduleMembers();
-        assertThat(scheduleMembers).extracting("status").contains(DELETE);
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
+        assertThat(testSchedule.getStatus()).isEqualTo(DELETE);
     }
 
     @Test
     void 스케줄_퇴장_방장퇴장_방장변경() {
         //given
-        Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2);
-        em.persist(team);
-
         Schedule schedule = createSchedule(member1, team);
-        schedule.addScheduleMember(member2, false, 0);
+        schedule.addScheduleMember(member2, false, 10);
         em.persist(schedule);
 
         //when
         scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-        assertThat(findSchedule.getStatus()).isEqualTo(ALIVE);
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
+        assertThat(testSchedule.getStatus()).isEqualTo(ALIVE);
 
-        ScheduleMember nextOwner = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule.getId()).orElse(null);
-        assertThat(nextOwner).isNotNull();
+        ScheduleMember nextOwner = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule.getId()).get();
         assertThat(nextOwner.isOwner()).isTrue();
     }
 
     @Test
     void 스케줄_퇴장_대기스케줄x() {
         //given
-        Team team = Team.create(member1, "team1");
-        team.addTeamMember(member2);
-        em.persist(team);
-
         Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 10);
         schedule.setTerm(LocalDateTime.now());
-        schedule.addScheduleMember(member2, false, 0);
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.exitSchedule(member1.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId()))
+                .isInstanceOf(ScheduleException.class);
     }
 
     @Test

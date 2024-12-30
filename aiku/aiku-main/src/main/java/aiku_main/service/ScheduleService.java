@@ -129,14 +129,10 @@ public class ScheduleService {
 
     @Transactional
     public Long exitSchedule(Long memberId, Long teamId, Long scheduleId) {
-        //검증 로직
         Member member = findMember(memberId);
+        ScheduleMember scheduleMember = findScheduleMember(memberId, scheduleId);
         Schedule schedule = findScheduleById(scheduleId);
         checkIsWait(schedule);
-        checkScheduleMember(memberId, scheduleId, true);
-
-        //서비스 로직
-        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
 
         Long scheduleMemberCount = scheduleQueryRepository.countOfScheduleMembers(scheduleId);
         if(scheduleMemberCount <= 1){
@@ -145,30 +141,21 @@ public class ScheduleService {
             ScheduleMember nextScheduleOwner = findNextScheduleOwnerWithMember(scheduleId, scheduleMember.getId());
             schedule.changeScheduleOwner(nextScheduleOwner);
 
-            kafkaProducerService.sendMessage(alarm,
-                    new ScheduleAlarmMessage(List.of(nextScheduleOwner.getMember().getFirebaseToken()), AlarmMessageType.SCHEDULE_EXIT, schedule.getId(), schedule.getScheduleName(), schedule.getScheduleTime(), schedule.getLocation()));
+            sendMessageToScheduleMember(schedule, nextScheduleOwner.getMember().getFirebaseToken(), AlarmMessageType.SCHEDULE_OWNER);
         }
 
         schedule.removeScheduleMember(scheduleMember);
 
-        int schedulePoint = scheduleMember.getPointAmount();
-        if(schedulePoint > 0){
-            pointChangeEventPublisher.publish(member, PLUS, schedulePoint, SCHEDULE_EXIT, schedule.getId());
-        }
-
+        sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_EXIT);
+        pointChangeEventPublisher.publish(member, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
         scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
-
-        sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
 
         return schedule.getId();
     }
 
-    private ScheduleMember findNextScheduleOwnerWithMember(Long scheduleId, Long scheduleMemberId){
-        ScheduleMember nextOwner = scheduleQueryRepository.findNextScheduleOwnerWithMember(scheduleId, scheduleMemberId).orElse(null);
-        if (nextOwner == null) {
-            throw new ScheduleException(CAN_NOT_FIND_NEXT_SCHEDULE_OWNER);
-        }
-        return nextOwner;
+    private ScheduleMember findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleId){
+        return scheduleQueryRepository.findNextScheduleOwnerWithMember(scheduleId, prevOwnerScheduleId)
+                .orElseThrow(() -> new ScheduleException(CAN_NOT_FIND_NEXT_SCHEDULE_OWNER));
     }
 
     private void sendMessageToScheduleMembers(Schedule schedule, Long excludeMemberId, Member sourceMember, AlarmMessageType messageType) {
@@ -195,6 +182,17 @@ public class ScheduleService {
                             schedule.getScheduleTime(),
                             schedule.getLocation()));
         }
+    }
+
+    private void sendMessageToScheduleMember(Schedule schedule, String alarmToken, AlarmMessageType messageType){
+        kafkaProducerService.sendMessage(alarm,
+                new ScheduleAlarmMessage(
+                        List.of(alarmToken),
+                        messageType,
+                        schedule.getId(),
+                        schedule.getScheduleName(),
+                        schedule.getScheduleTime(),
+                        schedule.getLocation()));
     }
 
     @Transactional
@@ -382,6 +380,11 @@ public class ScheduleService {
             throw new TeamException(NO_SUCH_TEAM);
         }
         return team;
+    }
+
+    private ScheduleMember findScheduleMember(Long memberId, Long scheduleId){
+        return scheduleQueryRepository.findScheduleMember(memberId, scheduleId)
+                .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private Schedule findScheduleById(Long scheduleId){

@@ -101,7 +101,8 @@ public class ScheduleServiceIntegrationTest {
         ScheduleAddDto scheduleDto = new ScheduleAddDto(
                 "schedule",
                 new LocationDto("lo1", 1.0, 1.0),
-                LocalDateTime.now().plusHours(1));
+                LocalDateTime.now().plusHours(1)
+        );
         Long scheduleId = scheduleService.addSchedule(teamOwner.getId(), team.getId(), scheduleDto);
 
         //then
@@ -119,7 +120,8 @@ public class ScheduleServiceIntegrationTest {
         ScheduleAddDto scheduleDto = new ScheduleAddDto(
                 "schedule",
                 new LocationDto("lo1", 1.0, 1.0),
-                LocalDateTime.now().plusHours(1));
+                LocalDateTime.now().plusHours(1)
+        );
         assertThatThrownBy(() -> scheduleService.addSchedule(member2.getId(), team.getId(), scheduleDto))
                 .isInstanceOf(TeamException.class);
     }
@@ -134,7 +136,8 @@ public class ScheduleServiceIntegrationTest {
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto(
                 "new schedule",
                 new LocationDto("new location", 2.0, 2.0),
-                LocalDateTime.now().plusHours(2));
+                LocalDateTime.now().plusHours(2)
+        );
         scheduleService.updateSchedule(teamOwner.getId(), schedule.getId(), scheduleDto);
 
         //then
@@ -157,7 +160,8 @@ public class ScheduleServiceIntegrationTest {
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto(
                 "new schedule",
                 new LocationDto("new location", 2.0, 2.0),
-                LocalDateTime.now().plusHours(2));
+                LocalDateTime.now().plusHours(2)
+        );
         assertThatThrownBy(() -> scheduleService.updateSchedule(member1.getId(), schedule.getId(), scheduleDto))
                 .isInstanceOf(ScheduleException.class);
     }
@@ -170,14 +174,17 @@ public class ScheduleServiceIntegrationTest {
                 new TeamValue(team.getId()),
                 "schedule",
                 LocalDateTime.now().plusMinutes(30),
-                new Location("loc1", 1.0, 1.0), 0);
+                new Location("loc1", 1.0, 1.0),
+                scheduleEnterPoint
+        );
         em.persist(schedule);
 
         //when
         ScheduleUpdateDto scheduleDto = new ScheduleUpdateDto(
                 "new schedule",
                 new LocationDto("new location", 2.0, 2.0),
-                LocalDateTime.now().plusHours(2));
+                LocalDateTime.now().plusHours(2)
+        );
         assertThatThrownBy(() -> scheduleService.updateSchedule(teamOwner.getId(), schedule.getId(), scheduleDto))
                 .isInstanceOf(ScheduleException.class);
     }
@@ -364,9 +371,8 @@ public class ScheduleServiceIntegrationTest {
         schedule.close(LocalDateTime.now());
 
         //then
-        Schedule findSchedule = scheduleQueryRepository.findById(schedule.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-        assertThat(findSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
+        Schedule testSchedule = scheduleQueryRepository.findById(schedule.getId()).get();
+        assertThat(testSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
     }
 
     @Test
@@ -383,19 +389,18 @@ public class ScheduleServiceIntegrationTest {
         scheduleService.arriveSchedule(schedule.getId(), member1.getId(), arrivalTime);
 
         //then
-        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElse(null);
-        assertThat(scheduleMember).isNotNull();
+        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).get();
         assertThat(scheduleMember.getArrivalTimeDiff()).isEqualTo(Duration.between(arrivalTime, schedule.getScheduleTime()).toMinutes());
     }
 
     @Test
     void 스케줄_상세_조회() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
         team.addTeamMember(member4);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule = createSchedule(member1, team);
         schedule.addScheduleMember(member2, false, scheduleEnterPoint);
@@ -409,19 +414,23 @@ public class ScheduleServiceIntegrationTest {
         assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
 
         List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
-        assertThat(scheduleMembers.size()).isEqualTo(3);
-        assertThat(scheduleMembers).extracting("memberId").containsExactly(member1.getId(), member2.getId(), member3.getId());
-        assertThat(scheduleMembers).extracting("isOwner").containsExactly(true, false, false);
+        assertThat(scheduleMembers).hasSize(3);
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMemberResDto::getMemberId)
+                .containsExactly(member1.getId(), member2.getId(), member3.getId());
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMemberResDto::isOwner)
+                .containsExactly(true, false, false);
     }
 
     @Test
     void 스케줄_상세_조회_꼴찌_멤버_선택() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
         team.addTeamMember(member4);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule = createSchedule(member1, team);
         schedule.addScheduleMember(member2, false, scheduleEnterPoint);
@@ -438,20 +447,19 @@ public class ScheduleServiceIntegrationTest {
 
         //then
         assertThat(resultDto.getScheduleId()).isEqualTo(schedule.getId());
-
-        List<ScheduleMemberResDto> scheduleMembers = resultDto.getMembers();
-        assertThat(scheduleMembers).extracting("isBetee").containsExactly(false, true, false);
-
+        assertThat(resultDto.getMembers())
+                .extracting(ScheduleMemberResDto::isBetee)
+                .containsExactly(false, true, false);
     }
 
     @Test
     void 스케줄_상세_조회_스케줄멤버x() {
         //given
-        Team team = Team.create(member1, "team1");
+        team.addTeamMember(member1);
         team.addTeamMember(member2);
         team.addTeamMember(member3);
         team.addTeamMember(member4);
-        em.persist(team);
+        em.flush();
 
         Schedule schedule = createSchedule(member1, team);
         schedule.addScheduleMember(member2, false, scheduleEnterPoint);
@@ -459,7 +467,8 @@ public class ScheduleServiceIntegrationTest {
         em.persist(schedule);
 
         //when
-        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4.getId(), team.getId(), schedule.getId())).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> scheduleService.getScheduleDetail(member4.getId(), team.getId(), schedule.getId()))
+                .isInstanceOf(ScheduleException.class);
     }
 
     @Test
@@ -654,21 +663,24 @@ public class ScheduleServiceIntegrationTest {
                 "sche1",
                 now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
-                10);
+                scheduleEnterPoint
+        );
         Schedule schedule2 = Schedule.create(
                 member1,
                 new TeamValue(team2),
                 "sche1",
                 now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
-                10);
+                scheduleEnterPoint
+        );
         Schedule schedule3 = Schedule.create(
                 member1,
                 new TeamValue(team2),
                 "sche1",
                 now.plusDays(4),
                 new Location("loc", 1.0, 1.0),
-                10);
+                scheduleEnterPoint
+        );
         em.persist(schedule1);
         em.persist(schedule2);
         em.persist(schedule3);

@@ -18,6 +18,7 @@ public interface TeamQueryRepositoryCustom {
 
     boolean existTeamMember(Long memberId, Long teamId);
     Long countOfTeamMember(Long teamId);
+    List<String> findAlarmTokenListOfTeamMembers(Long teamId, Long excludeMemberId);
 
     List<TeamMemberResDto> getTeamMemberList(Long teamId);
     List<TeamResDto> getTeamList(Long memberId, int page);

@@ -1,7 +1,7 @@
 package aiku_main.controller;
 
 import aiku_main.dto.*;
-import aiku_main.dto.team.TeamScheduleListResDto;
+import aiku_main.dto.schedule.*;
 import aiku_main.service.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
@@ -43,9 +43,8 @@ public class ScheduleController {
     @PostMapping("/{scheduleId}/enter")
     public BaseResponse<BaseResultDto> enterSchedule(@RequestHeader(name = "Access-Member-Id") Long memberId,
                                                      @PathVariable Long groupId,
-                                                     @PathVariable Long scheduleId,
-                                                     @RequestBody @Valid ScheduleEnterDto enterDto){
-        Long enterId = scheduleService.enterSchedule(memberId, groupId, scheduleId, enterDto);
+                                                     @PathVariable Long scheduleId){
+        Long enterId = scheduleService.enterSchedule(memberId, groupId, scheduleId);
 
         return BaseResponse.getSimpleRes(enterId);
     }

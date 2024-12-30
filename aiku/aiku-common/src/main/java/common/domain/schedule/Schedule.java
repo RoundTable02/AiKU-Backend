@@ -38,7 +38,6 @@ public class Schedule extends BaseTime {
     private Location location;
 
     private LocalDateTime scheduleTermTime;
-    private boolean isAutoClose = false;
 
     @Enumerated(value = EnumType.STRING)
     private ExecStatus scheduleStatus = WAIT;
@@ -49,7 +48,7 @@ public class Schedule extends BaseTime {
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<ScheduleMember> scheduleMembers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private ScheduleResult scheduleResult;
 
     protected Schedule(TeamValue team, String scheduleName, LocalDateTime scheduleTime, Location location) {
@@ -81,36 +80,30 @@ public class Schedule extends BaseTime {
         this.scheduleMembers.add(scheduleMember);
     }
 
-    public boolean removeScheduleMember(ScheduleMember scheduleMember) {
-        if(scheduleMember.getSchedule().getId().equals(id)){
+    public void removeScheduleMember(ScheduleMember scheduleMember) {
+        if(isScheduleMember(scheduleMember)){
             scheduleMember.setStatus(DELETE);
-            return true;
         }
-        return false;
     }
 
-    public boolean changeScheduleOwner(ScheduleMember nextOwner){
-        if(nextOwner.getSchedule().getId().equals(id)){
+    public void changeScheduleOwner(ScheduleMember nextOwner){
+        if(isScheduleMember(nextOwner)){
             nextOwner.setOwner();
-            return true;
         }
-        return false;
     }
 
     public boolean arriveScheduleMember(ScheduleMember scheduleMember, LocalDateTime arrivalTime){
-        if(scheduleMember.getSchedule().id.equals(id)){
+        if(isScheduleMember(scheduleMember)){
             scheduleMember.arrive(arrivalTime, (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes());
             return true;
         }
         return false;
     }
 
-    public boolean rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
-        if(scheduleMember.getSchedule().id.equals(id)) {
+    public void rewardMember(ScheduleMember scheduleMember, int rewardPointAmount){
+        if(isScheduleMember(scheduleMember)) {
             scheduleMember.setRewardPointAmount(rewardPointAmount);
-            return true;
         }
-        return false;
     }
 
     public void close(LocalDateTime scheduleCloseTime){
@@ -119,13 +112,11 @@ public class Schedule extends BaseTime {
 
     public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
         notArriveScheduleMembers.forEach(scheduleMember -> {
-            if(scheduleMember.getSchedule().getId().equals(id)){
+            if(isScheduleMember(scheduleMember)){
                 scheduleMember.arrive(closeTime, -30);
             }
         });
-
         setTerm(closeTime);
-        this.isAutoClose = true;
     }
 
     public void setTerm(LocalDateTime scheduleTermTime){
@@ -164,5 +155,13 @@ public class Schedule extends BaseTime {
         if(scheduleResult == null){
             scheduleResult = new ScheduleResult(this);
         }
+    }
+
+    private boolean isScheduleMember(ScheduleMember scheduleMember){
+        return scheduleMember.getSchedule().getId().equals(this.id);
+    }
+
+    public List<ScheduleMember> getScheduleMembers() {
+        return List.copyOf(scheduleMembers);
     }
 }

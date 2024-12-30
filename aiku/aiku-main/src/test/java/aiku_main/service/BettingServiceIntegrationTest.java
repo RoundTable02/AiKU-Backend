@@ -1,4 +1,4 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.application_event.domain.ScheduleBetting;
 import aiku_main.application_event.domain.ScheduleBettingResult;
@@ -8,7 +8,6 @@ import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingQueryRepository;
 import aiku_main.repository.MemberRepository;
 import aiku_main.repository.ScheduleQueryRepository;
-import aiku_main.service.BettingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;

@@ -1,9 +1,8 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.dto.*;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.TitleQueryRepository;
-import aiku_main.service.MemberService;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;

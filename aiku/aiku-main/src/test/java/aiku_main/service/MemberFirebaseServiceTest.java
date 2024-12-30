@@ -1,10 +1,8 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.dto.FirebaseTokenDto;
-import aiku_main.exception.FcmException;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.repository.MemberRepository;
-import aiku_main.service.MemberFirebaseService;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;

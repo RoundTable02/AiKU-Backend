@@ -5,8 +5,8 @@ import aiku_main.application_event.event.PointChangeType;
 import common.domain.value_reference.MemberValue;
 import org.springframework.stereotype.Component;
 
-@Component
 @PointChangeReasonMapping(PointChangeReason.SCHEDULE_ENTER)
+@Component
 public class ScheduleEnterRollbackStrategy implements RollbackStrategy {
 
     @Override

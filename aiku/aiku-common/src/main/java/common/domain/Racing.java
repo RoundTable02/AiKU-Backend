@@ -56,4 +56,8 @@ public class Racing extends BaseTime{
         this.winner = new ScheduleMemberValue(winnerId);
     }
 
+    public void specifyError() {
+        this.status = Status.ERROR;
+    }
+
 }

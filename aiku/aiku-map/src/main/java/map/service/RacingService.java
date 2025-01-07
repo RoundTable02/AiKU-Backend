@@ -190,8 +190,8 @@ public class RacingService {
                         )
         );
 
-        //  대기 중 레이싱 DB 삭제
-        racingCommandRepository.deleteById(racingId);
+        //  대기 중 레이싱 싱테 DELETE로 변경
+        racingCommandRepository.cancelRacing(racingId);
 
         return racingId;
     }
@@ -266,7 +266,7 @@ public class RacingService {
                             firstInfo.getMemberId(),
                             PointChangedType.PLUS,
                             r.getPointAmount(),
-                            PointChangeReason.RACING,
+                            PointChangeReason.RACING_DRAW,
                             r.getRacingId()
                     )
             );
@@ -276,7 +276,7 @@ public class RacingService {
                             secondInfo.getMemberId(),
                             PointChangedType.PLUS,
                             r.getPointAmount(),
-                            PointChangeReason.RACING,
+                            PointChangeReason.RACING_DRAW,
                             r.getRacingId())
             );
         });

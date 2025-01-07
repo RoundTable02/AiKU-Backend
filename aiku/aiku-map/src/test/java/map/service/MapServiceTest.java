@@ -212,7 +212,6 @@ public class MapServiceTest {
         assertThat(scheduleMembers.size()).isEqualTo(2);
         assertThat(scheduleMembers).extracting("memberId").contains(memb1.getId(), memb2.getId());
         assertThat(scheduleMembers).extracting("isArrive").contains(false, false);
-        assertThat(scheduleMembers).extracting("isPaidMember").contains(true, false);
     }
 
 }

@@ -2,12 +2,7 @@ package aiku_main.service;
 
 import aiku_main.application_event.domain.ScheduleRacing;
 import aiku_main.application_event.domain.ScheduleRacingResult;
-import aiku_main.application_event.event.PointChangeReason;
-import aiku_main.application_event.event.PointChangeType;
 import aiku_main.repository.RacingQueryRepository;
-import aiku_main.service.RacingService;
-import aiku_main.service.ScheduleService;
-import aiku_main.service.strategy.RollbackProcessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Location;

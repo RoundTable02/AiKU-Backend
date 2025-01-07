@@ -1,9 +1,8 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.dto.TermResDto;
 import aiku_main.exception.TermException;
 import aiku_main.repository.TermRepository;
-import aiku_main.service.TermService;
 import common.domain.AgreedType;
 import common.domain.Term;
 import common.domain.TermTitle;

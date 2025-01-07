@@ -1,4 +1,4 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.application_event.domain.ScheduleRacing;
 import aiku_main.application_event.domain.ScheduleRacingResult;

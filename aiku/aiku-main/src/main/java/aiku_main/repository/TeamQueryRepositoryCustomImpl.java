@@ -76,6 +76,18 @@ public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom 
     }
 
     @Override
+    public List<String> findAlarmTokenListOfTeamMembers(Long teamId, Long excludeMemberId) {
+        return query
+                .select(member.firebaseToken)
+                .from(teamMember)
+                .innerJoin(teamMember.member, member)
+                .where(teamMember.team.id.eq(teamId),
+                        teamMember.status.eq(ALIVE),
+                        member.id.ne(excludeMemberId))
+                .fetch();
+    }
+
+    @Override
     public List<TeamMemberResDto> getTeamMemberList(Long teamId) {
         return query
                 .select(Projections.constructor(

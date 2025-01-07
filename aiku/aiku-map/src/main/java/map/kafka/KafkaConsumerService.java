@@ -1,7 +1,5 @@
 package map.kafka;
 
-import alarm.service.MemberMessageService;
-import alarm.util.AlarmMessageMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

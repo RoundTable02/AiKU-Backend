@@ -1,10 +1,9 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.handler.PointChangeEventHandler;
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.repository.PointLogRepository;
 import common.domain.log.EventLog;
 import common.domain.log.PointLog;
@@ -14,7 +13,6 @@ import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
 import common.domain.member.MemberProfileType;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

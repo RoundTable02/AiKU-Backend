@@ -1,4 +1,4 @@
-package aiku_main.dto.team;
+package aiku_main.dto.schedule;
 
 import aiku_main.dto.LocationDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;

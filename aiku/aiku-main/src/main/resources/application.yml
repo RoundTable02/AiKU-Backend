@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:service-info.yml
   datasource:
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}

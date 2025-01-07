@@ -34,6 +34,7 @@ public enum BaseErrorCode implements StatusCode{
     NO_FCM_TOKEN(40020, "파이어베이스 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_RACING(40021, "레이싱에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_RACING(40022, "중복된 레이싱입니다.", HttpStatus.BAD_REQUEST),
+    NO_SUCH_SCHEDULE_RESULT(40023, "스케줄 결과가 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     NO_SCHEDULE_OWNER(40301, "스케줄장이 아닙니다.", HttpStatus.FORBIDDEN),
     NOT_AVAILABLE_SCHEDULE(40302, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),

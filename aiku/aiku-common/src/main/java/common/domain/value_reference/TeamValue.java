@@ -15,7 +15,12 @@ public class TeamValue {
     @Column(name = "teamId")
     private Long id;
 
+    //TODO 도메인으로 생성하는 로직 제거
     public TeamValue(Team team) {
         this.id = team.getId();
+    }
+
+    public TeamValue(Long id) {
+        this.id = id;
     }
 }

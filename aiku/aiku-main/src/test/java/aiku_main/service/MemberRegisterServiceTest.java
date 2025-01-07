@@ -1,11 +1,10 @@
-package aiku_main.integration_test;
+package aiku_main.service;
 
 import aiku_main.dto.MemberProfileDto;
 import aiku_main.dto.MemberRegisterDto;
 import aiku_main.dto.NicknameExistResDto;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
-import aiku_main.service.MemberRegisterService;
 import common.domain.Status;
 import common.domain.event.RecommendEvent;
 import common.domain.member.*;

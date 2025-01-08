@@ -4,6 +4,7 @@ import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeFailEventPublisher;
 import aiku_main.exception.MemberNotFoundException;
+import aiku_main.exception.PointChangeFailException;
 import aiku_main.repository.MemberRepository;
 import common.domain.log.PointLog;
 import common.domain.member.Member;
@@ -24,6 +25,7 @@ public class MemberPointChangeFacade {
     private final PointLogService pointLogService;
     private final PointChangeFailEventPublisher pointChangeFailEventPublisher;
 
+    @Transactional
     public void makePointChange(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         try {
             // 멤버 포인트 변화
@@ -33,6 +35,8 @@ public class MemberPointChangeFacade {
         } catch (Exception e) {
             // 실패 이벤트 publish
             pointChangeFailEventPublisher.publish(member, pointChangeType, pointAmount, pointChangeReason, reasonId);
+
+            throw new PointChangeFailException();
         }
 
     }

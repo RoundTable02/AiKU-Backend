@@ -3,6 +3,7 @@ package map.repository;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
+import common.domain.Status;
 import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +40,14 @@ public class RacingCommandRepositoryCustomImpl implements RacingCommandRepositor
                                 .from(scheduleMember)
                                 .where(scheduleMember.schedule.id.eq(scheduleId))
                 )))
+                .execute();
+    }
+
+    @Override
+    public void cancelRacing(Long racingId) {
+        query.update(racing)
+                .set(racing.status, Status.DELETE)
+                .where(racing.id.eq(racingId))
                 .execute();
     }
 }

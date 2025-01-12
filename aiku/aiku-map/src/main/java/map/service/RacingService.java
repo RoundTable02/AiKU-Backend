@@ -60,10 +60,7 @@ public class RacingService {
         Long secondScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(racingAddDto.getTargetMemberId(), scheduleId);
         checkScheduleInRun(scheduleId);
 
-        //  두 유저 모두 깍두기 멤버가 아닌지, 이미 중복된 레이싱이 존재하는지 검증,
-        checkPaidScheduleMember(memberId, scheduleId);
-        checkPaidScheduleMember(racingAddDto.getTargetMemberId(), scheduleId);
-
+        //  이미 중복된 레이싱이 존재하는지 검증,
         checkDuplicateRacing(scheduleId, memberId, racingAddDto.getTargetMemberId());
 
         //  두 유저 모두 충분한 포인트를 가졌는지 확인
@@ -190,8 +187,8 @@ public class RacingService {
                         )
         );
 
-        //  대기 중 레이싱 DB 삭제
-        racingCommandRepository.deleteById(racingId);
+        //  대기 중 레이싱 싱테 DELETE로 변경
+        racingCommandRepository.cancelRacing(racingId);
 
         return racingId;
     }
@@ -266,7 +263,7 @@ public class RacingService {
                             firstInfo.getMemberId(),
                             PointChangedType.PLUS,
                             r.getPointAmount(),
-                            PointChangeReason.RACING,
+                            PointChangeReason.RACING_DRAW,
                             r.getRacingId()
                     )
             );
@@ -276,7 +273,7 @@ public class RacingService {
                             secondInfo.getMemberId(),
                             PointChangedType.PLUS,
                             r.getPointAmount(),
-                            PointChangeReason.RACING,
+                            PointChangeReason.RACING_DRAW,
                             r.getRacingId())
             );
         });
@@ -341,12 +338,6 @@ public class RacingService {
     private void checkRacingInWait(Long racingId) {
         if (!racingQueryRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
-        }
-    }
-
-    private void checkPaidScheduleMember(Long memberId, Long scheduleId){
-        if(!scheduleRepository.existPaidScheduleMember(memberId, scheduleId)){
-            throw new PaidMemberLimitException();
         }
     }
 

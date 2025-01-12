@@ -20,6 +20,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByNickname(String nickname);
 
+    @Query("SELECT m.firebaseToken FROM Member m WHERE m.id = :memberId")
+    Optional<String> findFirebaseTokenByMemberId(Long memberId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
     @Query("SELECT m FROM Member m WHERE m.id = :memberId")

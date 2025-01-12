@@ -14,6 +14,7 @@ import common.domain.member.MemberProfileType;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
+import common.domain.value_reference.MemberValue;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;

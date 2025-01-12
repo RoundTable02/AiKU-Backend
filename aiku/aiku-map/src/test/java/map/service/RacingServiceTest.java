@@ -3,6 +3,7 @@ package map.service;
 import common.domain.ExecStatus;
 import common.domain.Location;
 import common.domain.Racing;
+import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
@@ -210,30 +211,30 @@ class RacingServiceTest {
         });
     }
 
-    @Test
-    void 레이싱_생성_깍두기_예외() {
-        Member member4 = Member.builder()
-                .kakaoId(4L)
-                .nickname("member4")
-                .email("member4@sample.com")
-                .password("4")
-                .build();
-
-        em.persist(member4);
-
-        schedule1 = em.find(Schedule.class, schedule1.getId()); // 트랜잭션 종료 후 다시 영속
-
-        schedule1.addScheduleMember(member4, false, 0);
-
-        em.flush();
-        em.clear();
-
-        RacingAddDto racingAddDto = new RacingAddDto(member3.getId(), 0);
-
-        org.junit.jupiter.api.Assertions.assertThrows(PaidMemberLimitException.class, () -> {
-            racingService.makeRacing(member4.getId(), schedule1.getId(), racingAddDto);
-        });
-    }
+//    @Test
+//    void 레이싱_생성_깍두기_예외() {
+//        Member member4 = Member.builder()
+//                .kakaoId(4L)
+//                .nickname("member4")
+//                .email("member4@sample.com")
+//                .password("4")
+//                .build();
+//
+//        em.persist(member4);
+//
+//        schedule1 = em.find(Schedule.class, schedule1.getId()); // 트랜잭션 종료 후 다시 영속
+//
+//        schedule1.addScheduleMember(member4, false, 0);
+//
+//        em.flush();
+//        em.clear();
+//
+//        RacingAddDto racingAddDto = new RacingAddDto(member3.getId(), 0);
+//
+//        org.junit.jupiter.api.Assertions.assertThrows(PaidMemberLimitException.class, () -> {
+//            racingService.makeRacing(member4.getId(), schedule1.getId(), racingAddDto);
+//        });
+//    }
 
     @Test
     void 레이싱_생성_중복_예외() {
@@ -310,7 +311,7 @@ class RacingServiceTest {
 
         Racing findRacing = em.find(Racing.class, newRacing.getId());
 
-        assertThat(findRacing).isNull();
+        assertThat(findRacing.getStatus()).isEqualTo(Status.DELETE);
     }
 
     @Test

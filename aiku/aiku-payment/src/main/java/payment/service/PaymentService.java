@@ -68,9 +68,8 @@ public class PaymentService {
 
     private void makePayment(PaymentProduct paymentProduct, Long memberId, String purchaseToken) {
         int price = paymentProduct.getPaymentProductType().getPrice();
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
-        paymentProduct.makePayment(member, price, purchaseToken);
+        paymentProduct.makePayment(memberId, price, purchaseToken);
         paymentProductRepository.save(paymentProduct);
     }
 
@@ -143,10 +142,8 @@ public class PaymentService {
 
     private void makePointEvent(Long memberId, PaymentProductType type, String purchaseToken) {
         // 아쿠 증가 이벤트
-        Member member = getMember(memberId);
-
         kafkaProducerService.sendMessage(KafkaTopic.alarm,
-                new PaymentPointChangedMessage(member,
+                new PaymentPointChangedMessage(memberId,
                         PointChangedType.PLUS,
                         type.getPoint(),
                         purchaseToken

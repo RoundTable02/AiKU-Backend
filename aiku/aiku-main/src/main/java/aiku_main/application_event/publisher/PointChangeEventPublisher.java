@@ -15,7 +15,7 @@ public class PointChangeEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    public void publish(Member member, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
+    public void publish(MemberValue member, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
         PointChangeEvent event = new PointChangeEvent(member, changeType, pointAmount, reason, reasonId);
         publisher.publishEvent(event);
     }

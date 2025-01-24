@@ -20,9 +20,8 @@ public class PaymentServiceHelper {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void makePayment(PaymentProduct paymentProduct, Long memberId, String purchaseToken) {
         int price = paymentProduct.getPaymentProductType().getPrice();
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
-        paymentProduct.makePayment(member, price, purchaseToken);
+        paymentProduct.makePayment(memberId, price, purchaseToken);
 
         paymentProductRepository.save(paymentProduct);
     }

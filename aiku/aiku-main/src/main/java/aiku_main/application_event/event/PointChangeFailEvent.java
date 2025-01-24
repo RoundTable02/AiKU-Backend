@@ -14,14 +14,6 @@ public class PointChangeFailEvent {
     private PointChangeReason reason;
     private Long reasonId;
 
-    public PointChangeFailEvent(Member member, PointChangeType sign, int pointAmount, PointChangeReason reason, Long reasonId) {
-        this.member = new MemberValue(member);
-        this.sign = sign;
-        this.pointAmount = pointAmount;
-        this.reason = reason;
-        this.reasonId = reasonId;
-    }
-
     public PointChangeFailEvent(MemberValue member, PointChangeType sign, int pointAmount, PointChangeReason reason, Long reasonId) {
         this.member = member;
         this.sign = sign;

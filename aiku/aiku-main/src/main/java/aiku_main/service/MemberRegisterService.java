@@ -14,6 +14,7 @@ import aiku_main.s3.S3ImageProvider;
 import common.domain.event.RecommendEvent;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileType;
+import common.domain.value_reference.MemberValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,8 +81,8 @@ public class MemberRegisterService {
 
         eventRepository.save(recommendEvent);
 
-        pointChangeEventPublisher.publish(member, PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
-        pointChangeEventPublisher.publish(recommender, PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
+        pointChangeEventPublisher.publish(new MemberValue(member.getId()), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
+        pointChangeEventPublisher.publish(new MemberValue(recommender.getId()), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
     }
 
 

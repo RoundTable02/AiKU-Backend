@@ -33,8 +33,8 @@ public class PaymentProduct extends BaseTime{
         this.productId = productId;
     }
 
-    public void makePayment(Member member, int price, String purchaseToken) {
-        Payment payment = new Payment(this, new MemberValue(member), price, purchaseToken);
+    public void makePayment(Long memberId, int price, String purchaseToken) {
+        Payment payment = new Payment(this, new MemberValue(memberId), price, purchaseToken);
         this.payments.add(payment);
     }
 

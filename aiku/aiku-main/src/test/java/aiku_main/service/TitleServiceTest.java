@@ -92,7 +92,7 @@ public class TitleServiceTest {
 
         em.persist(team1);
 
-        schedule1 = Schedule.create(member1, new TeamValue(team1), "schedule1",
+        schedule1 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule1",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location1", 1.0, 1.0), 30);
 
@@ -103,7 +103,7 @@ public class TitleServiceTest {
 
         em.flush();
 
-        schedule2 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule2 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -114,7 +114,7 @@ public class TitleServiceTest {
 
         em.flush();
 
-        schedule3 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule3 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -123,7 +123,7 @@ public class TitleServiceTest {
 
         em.persist(schedule3);
 
-        schedule4 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule4 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -132,7 +132,7 @@ public class TitleServiceTest {
 
         em.persist(schedule4);
 
-        schedule5 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule5 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -141,7 +141,7 @@ public class TitleServiceTest {
 
         em.persist(schedule5);
 
-        schedule6 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule6 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -150,7 +150,7 @@ public class TitleServiceTest {
 
         em.persist(schedule6);
 
-        schedule7 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule7 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -159,7 +159,7 @@ public class TitleServiceTest {
 
         em.persist(schedule7);
 
-        schedule8 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule8 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -168,7 +168,7 @@ public class TitleServiceTest {
 
         em.persist(schedule8);
 
-        schedule9 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule9 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -177,7 +177,7 @@ public class TitleServiceTest {
 
         em.persist(schedule9);
 
-        schedule10 = Schedule.create(member1, new TeamValue(team1), "schedule2",
+        schedule10 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location2", 1.0, 1.0), 30);
 
@@ -338,36 +338,36 @@ public class TitleServiceTest {
     @Test
     void 베팅_승리_5회_칭호_부여() {
         Betting betting1 = Betting.create(
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
                 10);
 
         betting1.setWin(10);
 
         Betting betting2 = Betting.create(
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
                 10);
 
         betting2.setWin(10);
 
         Betting betting3 = Betting.create(
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1).getId()),
                 10);
 
         betting3.setWin(10);
 
         Betting betting4 = Betting.create(
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1).getId()),
                 10);
 
         betting4.setWin(10);
 
         Betting betting5 = Betting.create(
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1).getId()),
                 10);
 
         betting5.setWin(10);
@@ -394,71 +394,71 @@ public class TitleServiceTest {
     @Test
     void 베팅_승리_5회_칭호_부여_여러명() {
         Betting betting1 = Betting.create(
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
                 10);
 
         betting1.setWin(10);
 
         Betting betting2 = Betting.create(
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
                 10);
 
         betting2.setWin(10);
 
         Betting betting3 = Betting.create(
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1).getId()),
                 10);
 
         betting3.setWin(10);
 
         Betting betting4 = Betting.create(
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1).getId()),
                 10);
 
         betting4.setWin(10);
 
         Betting betting5 = Betting.create(
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1).getId()),
                 10);
 
         betting5.setWin(10);
 
         Betting betting6 = Betting.create(
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)),
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
                 10);
 
         betting6.setWin(10);
 
         Betting betting7 = Betting.create(
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)),
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(2).getId()),
                 10);
 
         betting7.setWin(10);
 
         Betting betting8 = Betting.create(
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1)),
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(2)),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(2).getId()),
                 10);
 
         betting8.setWin(10);
 
         Betting betting9 = Betting.create(
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1)),
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(2)),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(2).getId()),
                 10);
 
         betting9.setWin(10);
 
         Betting betting10 = Betting.create(
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1)),
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(2)),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(2).getId()),
                 10);
 
         betting10.setWin(10);
@@ -488,71 +488,71 @@ public class TitleServiceTest {
     @Test
     void 베팅_승리_10회_칭호_부여() {
         Betting betting1 = Betting.create(
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
                 10);
 
         betting1.setLose();
 
         Betting betting2 = Betting.create(
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
                 10);
 
         betting2.setLose();
 
         Betting betting3 = Betting.create(
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule3.getScheduleMembers().get(1).getId()),
                 10);
 
         betting3.setLose();
 
         Betting betting4 = Betting.create(
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule4.getScheduleMembers().get(1).getId()),
                 10);
 
         betting4.setLose();
 
         Betting betting5 = Betting.create(
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule5.getScheduleMembers().get(1).getId()),
                 10);
 
         betting5.setLose();
 
         Betting betting6 = Betting.create(
-                new ScheduleMemberValue(schedule6.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule6.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule6.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule6.getScheduleMembers().get(1).getId()),
                 10);
 
         betting6.setLose();
 
         Betting betting7 = Betting.create(
-                new ScheduleMemberValue(schedule7.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule7.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule7.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule7.getScheduleMembers().get(1).getId()),
                 10);
 
         betting7.setLose();
 
         Betting betting8 = Betting.create(
-                new ScheduleMemberValue(schedule8.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule8.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule8.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule8.getScheduleMembers().get(1).getId()),
                 10);
 
         betting8.setLose();
 
         Betting betting9 = Betting.create(
-                new ScheduleMemberValue(schedule9.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule9.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule9.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule9.getScheduleMembers().get(1).getId()),
                 10);
 
         betting9.setLose();
 
         Betting betting10 = Betting.create(
-                new ScheduleMemberValue(schedule10.getScheduleMembers().get(0)),
-                new ScheduleMemberValue(schedule10.getScheduleMembers().get(1)),
+                new ScheduleMemberValue(schedule10.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule10.getScheduleMembers().get(1).getId()),
                 10);
 
         betting10.setLose();

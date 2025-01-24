@@ -1,21 +1,18 @@
 package common.domain.value_reference;
 
-import common.domain.ShopProduct;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Embeddable
 public class ShopProductValue {
 
     @Column(name = "shopProductId")
     private Long id;
-
-    public ShopProductValue(Long id) {
-        this.id = id;
-    }
 }

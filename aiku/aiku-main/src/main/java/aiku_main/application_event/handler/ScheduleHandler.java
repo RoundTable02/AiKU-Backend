@@ -7,7 +7,6 @@ import aiku_main.application_event.event.TeamExitEvent;
 import aiku_main.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -19,31 +18,33 @@ public class ScheduleHandler {
 
     private final ScheduleService scheduleService;
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTeamExitEvent(TeamExitEvent event){
-        scheduleService.exitAllScheduleInTeam(event.getMember().getId(), event.getTeam().getId());
+        scheduleService.exitAllScheduleInTeam(event.getMemberId(), event.getTeamId());
     }
 
+    @Async
     @EventListener
     public void handleScheduleOpenEvent(ScheduleOpenEvent event){
-        scheduleService.openSchedule(event.getSchedule().getId());
+        scheduleService.openSchedule(event.getScheduleId());
     }
 
     @Async
     @EventListener
     public void closeScheduleAuto(ScheduleAutoCloseEvent event){
-        scheduleService.closeScheduleAuto(event.getSchedule().getId());
+        scheduleService.closeScheduleAuto(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void processSchedulePoint(ScheduleCloseEvent event){
-        scheduleService.processScheduleResultPoint(event.getSchedule().getId());
+        scheduleService.processScheduleResultPoint(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeScheduleArrivalResult(ScheduleCloseEvent event) {
-        scheduleService.analyzeScheduleArrivalResult(event.getSchedule().getId());
+        scheduleService.analyzeScheduleArrivalResult(event.getScheduleId());
     }
 }

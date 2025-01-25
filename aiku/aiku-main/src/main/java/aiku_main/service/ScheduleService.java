@@ -78,7 +78,7 @@ public class ScheduleService {
         scheduleQueryRepository.save(schedule);
 
         scheduleScheduler.reserveSchedule(schedule);
-        pointChangeEventPublisher.publish(member, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, schedule.getId());
+        pointChangeEventPublisher.publish(memberId, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, schedule.getId());
         sendMessageToTeamMembers(teamId, schedule, member.getId(), AlarmMessageType.SCHEDULE_ADD);
 
         return schedule.getId();
@@ -118,7 +118,7 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, scheduleEnterPoint);
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_ENTER);
-        pointChangeEventPublisher.publish(member, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, scheduleId);
+        pointChangeEventPublisher.publish(memberId, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, scheduleId);
 
         return schedule.getId();
     }
@@ -143,8 +143,8 @@ public class ScheduleService {
         schedule.removeScheduleMember(scheduleMember);
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_EXIT);
-        pointChangeEventPublisher.publish(member, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
-        scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
+        pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
+        scheduleEventPublisher.publishScheduleExitEvent(memberId, scheduleMember.getId(), scheduleId);
 
         return schedule.getId();
     }
@@ -190,7 +190,7 @@ public class ScheduleService {
         Schedule schedule = findSchedule(scheduleId);
         schedule.close(scheduleCloseTime);
 
-        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
+        scheduleEventPublisher.publishScheduleCloseEvent(scheduleId);
     }
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long teamId, Long scheduleId) {
@@ -271,8 +271,8 @@ public class ScheduleService {
             Schedule schedule = scheduleMember.getSchedule();
             schedule.removeScheduleMember(scheduleMember);
 
-            pointChangeEventPublisher.publish(member, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
-            scheduleEventPublisher.publishScheduleExitEvent(member, scheduleMember, schedule);
+            pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
+            scheduleEventPublisher.publishScheduleExitEvent(memberId, scheduleMember.getId(), schedule.getId());
             sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }
@@ -298,7 +298,7 @@ public class ScheduleService {
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-        scheduleEventPublisher.publishScheduleCloseEvent(schedule);
+        scheduleEventPublisher.publishScheduleCloseEvent(scheduleId);
     }
 
     @Transactional
@@ -318,7 +318,13 @@ public class ScheduleService {
 
         earlyMembers.forEach((earlyScheduleMember) -> {
             schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
-            pointChangeEventPublisher.publish(earlyScheduleMember.getMember(), PLUS, rewardPointAmount, SCHEDULE_REWARD, scheduleId);
+            pointChangeEventPublisher.publish(
+                    earlyScheduleMember.getMember().getId(),
+                    PLUS,
+                    rewardPointAmount,
+                    SCHEDULE_REWARD,
+                    scheduleId
+            );
         });
     }
 
@@ -326,7 +332,13 @@ public class ScheduleService {
         scheduleQueryRepository.findScheduleMemberListWithMember(schedule.getId())
                 .forEach((scheduleMember) -> {
                     schedule.rewardMember(scheduleMember, scheduleEnterPoint);
-                    pointChangeEventPublisher.publish(scheduleMember.getMember(), PLUS, scheduleEnterPoint, SCHEDULE_REWARD, schedule.getId());
+                    pointChangeEventPublisher.publish(
+                            scheduleMember.getMember().getId(),
+                            PLUS,
+                            scheduleEnterPoint,
+                            SCHEDULE_REWARD,
+                            schedule.getId()
+                    );
                 });
     }
 

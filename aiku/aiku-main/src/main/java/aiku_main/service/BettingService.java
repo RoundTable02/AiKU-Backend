@@ -67,7 +67,7 @@ public class BettingService {
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
         bettingQueryRepository.save(betting);
 
-        pointChangeEventPublisher.publish(member, MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());
+        pointChangeEventPublisher.publish(memberId, MINUS, bettingDto.getPointAmount(), BETTING, betting.getId());
 
         return betting.getId();
     }
@@ -83,7 +83,7 @@ public class BettingService {
         //서비스 로직
         betting.setStatus(DELETE);
 
-        pointChangeEventPublisher.publish(member, PLUS, betting.getPointAmount(), BETTING, bettingId);
+        pointChangeEventPublisher.publish(memberId, PLUS, betting.getPointAmount(), BETTING, bettingId);
 
         return betting.getId();
     }
@@ -96,7 +96,7 @@ public class BettingService {
 
         int pointAmount = bettingForBettor.getPointAmount();
         Member member = memberRepository.findById(memberId).orElseThrow();
-        pointChangeEventPublisher.publish(member, PLUS, pointAmount, BETTING_CANCLE, bettingForBettor.getId());
+        pointChangeEventPublisher.publish(memberId, PLUS, pointAmount, BETTING_CANCLE, bettingForBettor.getId());
     }
 
     @Transactional
@@ -130,8 +130,13 @@ public class BettingService {
         if(winBettingCount == 0) {
             for (Betting betting : bettings) {
                 betting.setDraw();
-                pointChangeEventPublisher.publish(scheduleMembers.get(betting.getBettor().getId()).getMember(),
-                        PLUS, betting.getPointAmount(), BETTING, betting.getId());
+                pointChangeEventPublisher.publish(
+                        scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
+                        PLUS,
+                        betting.getPointAmount(),
+                        BETTING,
+                        betting.getId()
+                );
             }
             return;
         }
@@ -143,8 +148,13 @@ public class BettingService {
             if(scheduleMembers.get(betting.getBetee().getId()).getArrivalTime().equals(latestTime)){
                 int rewardPoint = getBettingRewardPoint(betting.getPointAmount(), winnerPointAmount, bettingPointAmount);
                 betting.setWin(rewardPoint);
-                pointChangeEventPublisher.publish(scheduleMembers.get(betting.getBettor().getId()).getMember(),
-                        PLUS, rewardPoint, BETTING, betting.getId());
+                pointChangeEventPublisher.publish(
+                        scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
+                        PLUS,
+                        rewardPoint,
+                        BETTING,
+                        betting.getId()
+                );
             }else {
                 betting.setLose();
             }

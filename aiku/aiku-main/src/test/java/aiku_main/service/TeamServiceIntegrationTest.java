@@ -598,7 +598,7 @@ public class TeamServiceIntegrationTest {
     }
 
     Schedule createSchedule(Member member, Team team, LocalDateTime startTime) {
-        return Schedule.create(member, new TeamValue(team), "schedule", startTime,
+        return Schedule.create(member, new TeamValue(team.getId()), "schedule", startTime,
                 new Location("loc1", 1.1, 1.1), 0);
     }
 }

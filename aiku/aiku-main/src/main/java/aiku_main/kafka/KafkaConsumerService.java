@@ -66,7 +66,7 @@ public class KafkaConsumerService {
     public void consumePointChangeEvent(ConsumerRecord<String, String> data, Acknowledgment ack) {
         try {
             PointChangeEvent message = objectMapper.readValue(data.value(), PointChangeEvent.class);
-            pointChangeEventPublisher.consumerPublish(message.getMember(),
+            pointChangeEventPublisher.consumerPublish(message.getMemberId(),
                     message.getSign(),
                     message.getPointAmount(),
                     message.getReason(),

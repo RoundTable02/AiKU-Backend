@@ -28,6 +28,8 @@ public interface ScheduleQueryRepositoryCustom {
     List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId);
     List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId);
 
+    Optional<Long> findScheduleMemberId(Long memberId, Long scheduleId);
+    Optional<Long> findMemberIdOfScheduleMember(Long scheduleMemberId);
     boolean isScheduleOwner(Long memberId, Long scheduleId);
     boolean existScheduleMember(Long memberId, Long scheduleId);
     boolean existPaidScheduleMember(Long memberId, Long scheduleId);

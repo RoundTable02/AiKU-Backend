@@ -72,8 +72,14 @@ class BettingServiceIntegrationTest {
         em.persist(freeMember);
         em.persist(noScheduleMember);
 
-        schedule1 = Schedule.create(member1, null, "schedule1", LocalDateTime.now(),
-                new Location("loc1", 1.0, 1.0), 1000);
+        schedule1 = Schedule.create(
+                member1,
+                null,
+                "schedule1",
+                LocalDateTime.now(),
+                new Location("loc1", 1.0, 1.0),
+                1000
+        );
         schedule1.addScheduleMember(member2, false, 1000);
         schedule1.addScheduleMember(member3, false, 1000);
         schedule1.addScheduleMember(freeMember, false, 0);
@@ -109,35 +115,39 @@ class BettingServiceIntegrationTest {
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(ScheduleException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto))
+                .isInstanceOf(ScheduleException.class);
     }
 
     @Test
     void 베팅_등록_스케줄멤버x() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto)).isInstanceOf(BaseException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto))
+                .isInstanceOf(BaseException.class);
     }
 
     @Test
     void 베팅_등록_깍두기멤버() {
         //when
         BettingAddDto bettingDto = new BettingAddDto(freeMember.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto)).isInstanceOf(PaidMemberLimitException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto))
+                .isInstanceOf(PaidMemberLimitException.class);
     }
 
     @Test
     void 베팅_등록_중복() {
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElse(null);
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElse(null);
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 0);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 0);
         em.persist(betting);
 
         //when
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(BettingException.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto))
+                .isInstanceOf(BettingException.class);
     }
 
     @Test
@@ -146,16 +156,17 @@ class BettingServiceIntegrationTest {
         BettingAddDto bettingDto = new BettingAddDto(member2.getId(), 1000);
 
         //then
-        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto)).isInstanceOf(NotEnoughPoint.class);
+        assertThatThrownBy(() -> bettingService.addBetting(member1.getId(), schedule1.getId(), bettingDto))
+                .isInstanceOf(NotEnoughPoint.class);
     }
 
     @Test
     void 베팅_취소() {
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
@@ -170,37 +181,39 @@ class BettingServiceIntegrationTest {
     @Test
     void 베팅_취소_중복() {
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
         bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId());
-        assertThatThrownBy(() -> bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(member1.getId(), schedule1.getId(), betting.getId()))
+                .isInstanceOf(BettingException.class);
     }
 
     @Test
     void 베팅_취소_베터x() {
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
-        assertThatThrownBy(() -> bettingService.cancelBetting(member2.getId(), schedule1.getId(), betting.getId())).isInstanceOf(BettingException.class);
+        assertThatThrownBy(() -> bettingService.cancelBetting(member2.getId(), schedule1.getId(), betting.getId()))
+                .isInstanceOf(BettingException.class);
     }
 
     @Test
     void 베팅_취소_스케줄멤버x() {
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
@@ -210,14 +223,14 @@ class BettingServiceIntegrationTest {
     @Test
     void 이벤트핸들러_스케줄퇴장_퇴장멤버가_베터인_베팅제거(){
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), bettor.getId(), schedule1.getId());
+        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElse(null);
@@ -228,14 +241,14 @@ class BettingServiceIntegrationTest {
     @Test
     void 이벤트핸들러_스케줄퇴장_퇴장멤버가_베티인_베팅제거(){
         //given
-        ScheduleMember bettor = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember betee = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long ScheduleMemberIdOfBetee = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting = Betting.create(new ScheduleMemberValue(bettor), new ScheduleMemberValue(betee), 100);
+        Betting betting = Betting.create(new ScheduleMemberValue(ScheduleMemberIdOfBettor), new ScheduleMemberValue(ScheduleMemberIdOfBetee), 100);
         em.persist(betting);
 
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member2.getId(), bettor.getId(), schedule1.getId());
+        bettingService.exitSchedule_deleteBettingForBettor(member2.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
 
         //then
         Betting findBetting = bettingQueryRepository.findById(betting.getId()).orElse(null);
@@ -246,12 +259,12 @@ class BettingServiceIntegrationTest {
     @Test
     void 이벤트핸들러_베팅_결과_계산_지각자x_전원환급(){
         //given
-        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember3 = scheduleQueryRepository.findScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId1 = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId2 = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId3 = scheduleQueryRepository.findScheduleMemberId(member3.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
-        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember3), 200);
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMemberId2), new ScheduleMemberValue(scheduleMemberId3), 200);
         em.persist(betting1);
         em.persist(betting2);
 
@@ -265,20 +278,24 @@ class BettingServiceIntegrationTest {
 
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
-        assertThat(bettings).extracting("rewardPointAmount").contains(100, 200);
-        assertThat(bettings).extracting("isWinner").contains(false, false);
+        assertThat(bettings)
+                .extracting(Betting::getRewardPointAmount)
+                .contains(100, 200);
+        assertThat(bettings)
+                .extracting(Betting::isWinner)
+                .contains(false, false);
     }
 
     @Test
     void 이벤트핸들러_베팅_결과_계산(){
         //given
-        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember3 = scheduleQueryRepository.findScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId1 = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId2 = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId3 = scheduleQueryRepository.findScheduleMemberId(member3.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
-        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember3), 200);
-        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMember3), new ScheduleMemberValue(scheduleMember1), 300);
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMemberId2), new ScheduleMemberValue(scheduleMemberId3), 200);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMemberId3), new ScheduleMemberValue(scheduleMemberId1), 300);
         em.persist(betting1);
         em.persist(betting2);
         em.persist(betting3);
@@ -294,20 +311,24 @@ class BettingServiceIntegrationTest {
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
         assertThat(bettings.size()).isEqualTo(3);
-        assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
-        assertThat(bettings).extracting("isWinner").containsExactly(true, true, false);
+        assertThat(bettings)
+                .extracting(Betting::getRewardPointAmount)
+                .contains(200, 400, 0);
+        assertThat(bettings)
+                .extracting(Betting::isWinner)
+                .containsExactly(true, true, false);
     }
 
     @Test
     void 이벤트핸들러_베팅_결과_계산_꼴찌_여러명(){
         //given
-        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember3 = scheduleQueryRepository.findScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId1 = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId2 = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId3 = scheduleQueryRepository.findScheduleMemberId(member3.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
-        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember2), 300);
-        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMember3), new ScheduleMemberValue(scheduleMember1), 200);
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMemberId2), new ScheduleMemberValue(scheduleMemberId2), 300);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMemberId3), new ScheduleMemberValue(scheduleMemberId1), 200);
         em.persist(betting1);
         em.persist(betting2);
         em.persist(betting3);
@@ -322,20 +343,24 @@ class BettingServiceIntegrationTest {
 
         //then
         List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(schedule1.getId(), TERM);
-        assertThat(bettings).extracting("rewardPointAmount").contains(200, 400, 0);
-        assertThat(bettings).extracting("isWinner").containsExactly(true, false, true);
+        assertThat(bettings)
+                .extracting(Betting::getRewardPointAmount)
+                .contains(200, 400, 0);
+        assertThat(bettings)
+                .extracting(Betting::isWinner)
+                .containsExactly(true, false, true);
     }
 
     @Test
     void 이벤트핸들러_베팅_결과_분석() throws JsonProcessingException {
         //given
-        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule1.getId()).orElseThrow();
-        ScheduleMember scheduleMember3 = scheduleQueryRepository.findScheduleMember(member3.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId1 = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId2 = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
+        Long scheduleMemberId3 = scheduleQueryRepository.findScheduleMemberId(member3.getId(), schedule1.getId()).orElseThrow();
 
-        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember3), 100);
-        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMember2), new ScheduleMemberValue(scheduleMember3), 200);
-        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMember3), new ScheduleMemberValue(scheduleMember1), 300);
+        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId3), 100);
+        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMemberId2), new ScheduleMemberValue(scheduleMemberId3), 200);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMemberId3), new ScheduleMemberValue(scheduleMemberId1), 300);
         betting1.setWin(1000);
         betting2.setDraw();
         betting3.setLose();
@@ -350,9 +375,12 @@ class BettingServiceIntegrationTest {
         Schedule findSchedule = scheduleQueryRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
-        List<ScheduleBetting> bettingResults = objectMapper.readValue(findSchedule.getScheduleResult().getScheduleBettingResult(), ScheduleBettingResult.class)
-                .getData();
-        assertThat(bettingResults).extracting("bettor").extracting("memberId").contains(member1.getId(), member2.getId(), member3.getId());
-        assertThat(bettingResults).extracting("pointAmount").contains(100, 200, 300);
+        List<ScheduleBetting> bettingResults = objectMapper.readValue(findSchedule.getScheduleResult().getScheduleBettingResult(), ScheduleBettingResult.class).getData();
+        assertThat(bettingResults)
+                .extracting((scheduleBetting) -> scheduleBetting.getBettor().getMemberId())
+                .contains(member1.getId(), member2.getId(), member3.getId());
+        assertThat(bettingResults)
+                .extracting(ScheduleBetting::getPointAmount)
+                .contains(100, 200, 300);
     }
 }

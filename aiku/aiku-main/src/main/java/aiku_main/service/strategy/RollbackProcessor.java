@@ -27,10 +27,10 @@ public class RollbackProcessor {
         }
     }
 
-    public void process(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
+    public void process(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         RollbackStrategy strategy = strategies.get(pointChangeReason);
         if (strategy != null) {
-            strategy.execute(member, pointChangeType, pointAmount, pointChangeReason, reasonId);
+            strategy.execute(memberId, pointChangeType, pointAmount, pointChangeReason, reasonId);
         } else {
             throw new IllegalArgumentException("Unsupported PointChangeReason: " + pointChangeReason);
         }

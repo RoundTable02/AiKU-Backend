@@ -21,6 +21,6 @@ public class PointChangeEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void pointChangeEvent(PointChangeEvent event) {
-        pointChangeFacade.makePointChange(event.getMember(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
+        pointChangeFacade.makePointChange(event.getMemberId(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
     }
 }

@@ -81,8 +81,8 @@ public class MemberRegisterService {
 
         eventRepository.save(recommendEvent);
 
-        pointChangeEventPublisher.publish(new MemberValue(member.getId()), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
-        pointChangeEventPublisher.publish(new MemberValue(recommender.getId()), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
+        pointChangeEventPublisher.publish(member.getId(), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
+        pointChangeEventPublisher.publish(recommender.getId(), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
     }
 
 

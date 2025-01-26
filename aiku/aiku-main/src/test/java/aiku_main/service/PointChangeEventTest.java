@@ -58,7 +58,7 @@ public class PointChangeEventTest {
     @Test
     void 포인트_변화_처리() {
         handler.pointChangeEvent(
-                new PointChangeEvent(new MemberValue(member.getId()), PointChangeType.PLUS, 100, PointChangeReason.EVENT, 11L)
+                new PointChangeEvent(member.getId(), PointChangeType.PLUS, 100, PointChangeReason.EVENT, 11L)
         );
 
         List<PointLog> pointLogs = pointLogRepository.findAll();

@@ -6,5 +6,5 @@ import common.domain.value_reference.MemberValue;
 
 public interface RollbackStrategy {
 
-    void execute(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId);
+    void execute(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId);
 }

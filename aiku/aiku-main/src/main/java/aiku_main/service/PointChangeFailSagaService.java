@@ -23,12 +23,12 @@ public class PointChangeFailSagaService {
     private final MemberRepository memberRepository;
     private final KafkaProducerService kafkaProducerService;
 
-    public void notifyAndRollbackPointChange(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
+    public void notifyAndRollbackPointChange(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         // 각 전략의 로직 실행
-        rollbackProcessor.process(member, pointChangeType, pointAmount, pointChangeReason, reasonId);
+        rollbackProcessor.process(memberId, pointChangeType, pointAmount, pointChangeReason, reasonId);
 
         // 알림 발송
-        String firebaseToken = memberRepository.findFirebaseTokenByMemberId(member.getId())
+        String firebaseToken = memberRepository.findFirebaseTokenByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());
 
         kafkaProducerService.sendMessage(KafkaTopic.alarm,

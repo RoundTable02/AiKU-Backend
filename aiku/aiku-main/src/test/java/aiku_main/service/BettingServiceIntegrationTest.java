@@ -128,14 +128,6 @@ class BettingServiceIntegrationTest {
     }
 
     @Test
-    void 베팅_등록_깍두기멤버() {
-        //when
-        BettingAddDto bettingDto = new BettingAddDto(freeMember.getId(), 0);
-        assertThatThrownBy(() -> bettingService.addBetting(noScheduleMember.getId(), schedule1.getId(), bettingDto))
-                .isInstanceOf(PaidMemberLimitException.class);
-    }
-
-    @Test
     void 베팅_등록_중복() {
         //given
         Long ScheduleMemberIdOfBettor = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();

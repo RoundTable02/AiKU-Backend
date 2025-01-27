@@ -1,6 +1,7 @@
 package aiku_main.service;
 
 import aiku_main.application_event.domain.ScheduleRacing;
+import aiku_main.application_event.domain.ScheduleRacingMember;
 import aiku_main.application_event.domain.ScheduleRacingResult;
 import aiku_main.repository.RacingQueryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -163,7 +164,7 @@ public class RacingServiceTest {
         }
 
         List<ScheduleRacing> data = scheduleRacingResultObj.getData();
-        assertThat(data).extracting("firstRacer").extracting("memberId").containsExactly(member1.getId(), member2.getId());
-        assertThat(data.get(0).getWinnerId()).isEqualTo(member1.getId());
+        assertThat(data).extracting(ScheduleRacing::getFirstRacer).extracting(ScheduleRacingMember::getMemberId).containsExactly(member1.getId(), member2.getId());
+        assertThat(data.get(0).getWinnerId()).isEqualTo(scheduleMember1.getId());
     }
 }

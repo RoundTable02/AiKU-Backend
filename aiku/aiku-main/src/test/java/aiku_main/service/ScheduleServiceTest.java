@@ -669,7 +669,7 @@ public class ScheduleServiceTest {
         em.persist(team1);
         em.persist(team2);
 
-        LocalDateTime now = LocalDateTime.now().plusDays(3);
+        LocalDateTime now = LocalDateTime.of(2024, 4, 1, 1, 1);
         Schedule schedule1 = Schedule.create(
                 member1,
                 new TeamValue(team1.getId()),

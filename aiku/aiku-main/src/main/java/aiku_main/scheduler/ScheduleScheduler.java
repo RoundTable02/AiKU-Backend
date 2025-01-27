@@ -59,7 +59,7 @@ public class ScheduleScheduler {
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()-> {
-            scheduleEventPublisher.publishScheduleOpenEvent(schedule);
+            scheduleEventPublisher.publishScheduleOpenEvent(schedule.getId());
             }, delayTime);
         scheduleOpenTasks.put(schedule.getId(), future);
     }
@@ -69,7 +69,7 @@ public class ScheduleScheduler {
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{
-            scheduleEventPublisher.publishScheduleAutoCloseEvent(schedule);
+            scheduleEventPublisher.publishScheduleAutoCloseEvent(schedule.getId());
         }, delayTime);
         scheduleAutoCloseTasks.put(schedule.getId(), future);
     }

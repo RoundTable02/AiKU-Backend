@@ -16,8 +16,8 @@ public class PaymentPointChangedMessage {
     private Integer pointAmount;
     private String purchaseToken;
 
-    public PaymentPointChangedMessage(Member member, PointChangedType pointChangedType, Integer pointAmount, String purchaseToken) {
-        this.member = new MemberValue(member);
+    public PaymentPointChangedMessage(Long memberId, PointChangedType pointChangedType, Integer pointAmount, String purchaseToken) {
+        this.member = new MemberValue(memberId);
         this.pointChangedType = pointChangedType;
         this.pointAmount = pointAmount;
         this.purchaseToken = purchaseToken;

@@ -47,7 +47,7 @@ public class PaymentServiceTest {
         PaymentProduct paymentProduct = repository.findByPaymentProductType(PaymentProductType.PRODUCT01)
                 .orElseThrow();
 
-        paymentProduct.makePayment(member, paymentProduct.getPaymentProductType().getPrice(), "1234");
+        paymentProduct.makePayment(member.getId(), paymentProduct.getPaymentProductType().getPrice(), "1234");
 
         repository.save(paymentProduct);
 

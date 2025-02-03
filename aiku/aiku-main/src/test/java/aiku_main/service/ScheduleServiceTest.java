@@ -433,9 +433,9 @@ public class ScheduleServiceTest {
         schedule.addScheduleMember(member3, false, scheduleEnterPoint);
         em.persist(schedule);
 
-        ScheduleMember scheduleMember1 = scheduleQueryRepository.findScheduleMember(member1.getId(), schedule.getId()).orElseThrow();
-        ScheduleMember scheduleMember2 = scheduleQueryRepository.findScheduleMember(member2.getId(), schedule.getId()).orElseThrow();
-        Betting betting = Betting.create(new ScheduleMemberValue(scheduleMember1), new ScheduleMemberValue(scheduleMember2), 100);
+        Long scheduleMemberId1 = scheduleQueryRepository.findScheduleMemberId(member1.getId(), schedule.getId()).orElseThrow();
+        Long scheduleMemberId2 = scheduleQueryRepository.findScheduleMemberId(member2.getId(), schedule.getId()).orElseThrow();
+        Betting betting = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId2), 100);
         em.persist(betting);
 
         //when
@@ -669,10 +669,10 @@ public class ScheduleServiceTest {
         em.persist(team1);
         em.persist(team2);
 
-        LocalDateTime now = LocalDateTime.now().plusDays(3);
+        LocalDateTime now = LocalDateTime.of(2024, 4, 1, 1, 1);
         Schedule schedule1 = Schedule.create(
                 member1,
-                new TeamValue(team1),
+                new TeamValue(team1.getId()),
                 "sche1",
                 now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
@@ -680,7 +680,7 @@ public class ScheduleServiceTest {
         );
         Schedule schedule2 = Schedule.create(
                 member1,
-                new TeamValue(team2),
+                new TeamValue(team2.getId()),
                 "sche1",
                 now.plusDays(3),
                 new Location("loc", 1.0, 1.0),
@@ -688,7 +688,7 @@ public class ScheduleServiceTest {
         );
         Schedule schedule3 = Schedule.create(
                 member1,
-                new TeamValue(team2),
+                new TeamValue(team2.getId()),
                 "sche1",
                 now.plusDays(4),
                 new Location("loc", 1.0, 1.0),
@@ -939,7 +939,7 @@ public class ScheduleServiceTest {
     Schedule createSchedule(Member member, Team team){
         return Schedule.create(
                 member, 
-                new TeamValue(team), 
+                new TeamValue(team.getId()),
                 UUID.randomUUID().toString(), 
                 LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()),

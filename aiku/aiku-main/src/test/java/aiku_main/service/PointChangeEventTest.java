@@ -12,6 +12,7 @@ import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
 import common.domain.member.MemberProfileType;
+import common.domain.value_reference.MemberValue;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ public class PointChangeEventTest {
     @Test
     void 포인트_변화_처리() {
         handler.pointChangeEvent(
-                new PointChangeEvent(member, PointChangeType.PLUS, 100, PointChangeReason.EVENT, 11L)
+                new PointChangeEvent(member.getId(), PointChangeType.PLUS, 100, PointChangeReason.EVENT, 11L)
         );
 
         List<PointLog> pointLogs = pointLogRepository.findAll();

@@ -145,7 +145,7 @@ public class TeamServiceIntegrationTest {
         Team team = Team.create(member1, "team1");
         em.persist(team);
 
-        Schedule schedule = Schedule.create(member1, new TeamValue(team), "sche1",
+        Schedule schedule = Schedule.create(member1, new TeamValue(team.getId()), "sche1",
                 LocalDateTime.now().plusDays(1), new Location("loc", 1.0, 1.0), 0);
         schedule.setRun();
         em.persist(schedule);
@@ -379,27 +379,46 @@ public class TeamServiceIntegrationTest {
         em.persist(schedule2);
 
         //member1==member2 >> 100아쿠
-        Betting betting1 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), 100);
+        Betting betting1 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                100
+        );
         betting1.setDraw();
         em.persist(betting1);
 
         //member2>member1 >> 100아쿠
-        Betting betting2 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
+        Betting betting2 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                100
+        );
         betting2.setWin(100);
         em.persist(betting2);
 
         //member3>member1 >> 100아쿠
-        Betting betting3 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
+        Betting betting3 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                100
+        );
         betting3.setWin(100);
         em.persist(betting3);
 
         //member2==member3 >> 100아쿠
-        Betting betting4 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)), 100);
+        Betting betting4 = Betting.create(
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(2).getId()),
+                100
+        );
         betting4.setDraw();
         em.persist(betting4);
 
         //member3>member1 >> 100아쿠
-        Betting betting5 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), 100);
+        Betting betting5 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                100
+        );
         betting5.setWin(100);
         em.persist(betting5);
 
@@ -437,24 +456,40 @@ public class TeamServiceIntegrationTest {
         em.persist(schedule2);
 
         //member1>member2 >> 100아쿠
-        Betting betting1 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), 100);
+        Betting betting1 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                100
+        );
         betting1.setWin(100);
         em.persist(betting1);
 
         //member2<member3 >> 100아쿠
-        Betting betting2 = Betting.create(new ScheduleMemberValue(schedule1.getScheduleMembers().get(1)), new ScheduleMemberValue(schedule1.getScheduleMembers().get(2)), 100);
+        Betting betting2 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
+                100
+        );
         betting2.setLose();
         em.persist(betting2);
 
         teamService.analyzeBettingResult(schedule1.getId());
 
         //member1>member2 >> 100아쿠
-        Betting betting4 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(0)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
+        Betting betting4 = Betting.create(
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                100
+        );
         betting4.setWin(100);
         em.persist(betting4);
 
         //member3>member2 >> 100아쿠
-        Betting betting5 = Betting.create(new ScheduleMemberValue(schedule2.getScheduleMembers().get(2)), new ScheduleMemberValue(schedule2.getScheduleMembers().get(1)), 100);
+        Betting betting5 = Betting.create(
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(2).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                100
+        );
         betting5.setWin(100);
         em.persist(betting5);
 
@@ -598,7 +633,7 @@ public class TeamServiceIntegrationTest {
     }
 
     Schedule createSchedule(Member member, Team team, LocalDateTime startTime) {
-        return Schedule.create(member, new TeamValue(team), "schedule", startTime,
+        return Schedule.create(member, new TeamValue(team.getId()), "schedule", startTime,
                 new Location("loc1", 1.1, 1.1), 0);
     }
 }

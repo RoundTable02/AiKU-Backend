@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class ScheduleEnterRollbackStrategy implements RollbackStrategy {
 
     @Override
-    public void execute(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
+    public void execute(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         System.out.println("Processing SCHEDULE_ENTER rollback");
     }
 }

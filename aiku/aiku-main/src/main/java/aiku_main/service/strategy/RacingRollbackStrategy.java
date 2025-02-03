@@ -18,10 +18,10 @@ public class RacingRollbackStrategy implements RollbackStrategy {
     private final KafkaProducerService kafkaProducerService;
 
     @Override
-    public void execute(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
+    public void execute(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         kafkaProducerService.sendMessage(KafkaTopic.alarm,
                 new RacingPointChangedFailedMessage(
-                        member.getId(),
+                        memberId,
                         PointChangedType.valueOf(pointChangeType.name()),
                         pointAmount,
                         common.kafka_message.PointChangeReason.valueOf(pointChangeReason.name()),

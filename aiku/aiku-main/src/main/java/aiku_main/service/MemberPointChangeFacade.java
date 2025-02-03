@@ -26,15 +26,15 @@ public class MemberPointChangeFacade {
     private final PointChangeFailEventPublisher pointChangeFailEventPublisher;
 
     @Transactional
-    public void makePointChange(MemberValue member, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
+    public void makePointChange(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
         try {
             // 멤버 포인트 변화
-            memberService.updateMemberPoint(member.getId(), pointChangeType, pointAmount);
+            memberService.updateMemberPoint(memberId, pointChangeType, pointAmount);
             // 로그 기록
-            pointLogService.savePointLog(pointChangeReason, member.getId(), pointChangeType, pointAmount, reasonId);
+            pointLogService.savePointLog(pointChangeReason, memberId, pointChangeType, pointAmount, reasonId);
         } catch (Exception e) {
             // 실패 이벤트 publish
-            pointChangeFailEventPublisher.publish(member, pointChangeType, pointAmount, pointChangeReason, reasonId);
+            pointChangeFailEventPublisher.publish(memberId, pointChangeType, pointAmount, pointChangeReason, reasonId);
 
             throw new PointChangeFailException();
         }

@@ -17,6 +17,6 @@ public class PointChangeFailEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void pointChangeFailEvent(PointChangeFailEvent event) {
-        pointChangeFailSagaService.notifyAndRollbackPointChange(event.getMember(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
+        pointChangeFailSagaService.notifyAndRollbackPointChange(event.getMemberId(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
     }
 }

@@ -18,24 +18,24 @@ public class TeamHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeLateTimeResult(ScheduleCloseEvent event){
-        teamService.analyzeLateTimeResult(event.getSchedule().getId());
+        teamService.analyzeLateTimeResult(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeBettingResult(ScheduleCloseEvent event){
-        teamService.analyzeBettingResult(event.getSchedule().getId());
+        teamService.analyzeBettingResult(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeRacingResult(ScheduleCloseEvent event){
-        teamService.analyzeRacingResult(event.getSchedule().getId());
+        teamService.analyzeRacingResult(event.getScheduleId());
     }
 
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void updateLateTimeResultOfExitMember(TeamExitEvent event) {
-        teamService.updateTeamResultOfExitMember(event.getMember().getId(), event.getTeam().getId());
+        teamService.updateTeamResultOfExitMember(event.getMemberId(), event.getTeamId());
     }
 }

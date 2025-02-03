@@ -89,7 +89,7 @@ class RacingServiceTest {
 
         em.persist(team1);
 
-        schedule1 = Schedule.create(member1, new TeamValue(team1), "schedule1",
+        schedule1 = Schedule.create(member1, new TeamValue(team1.getId()), "schedule1",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location1", 1.0, 1.0), 30);
 
@@ -193,7 +193,7 @@ class RacingServiceTest {
         em.persist(member4);
         em.persist(member5);
 
-        Schedule schedule2 = Schedule.create(member4, new TeamValue(team1), "schedule2",
+        Schedule schedule2 = Schedule.create(member4, new TeamValue(team1.getId()), "schedule2",
                 LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00),
                 new Location("location1", 1.0, 1.0), 30);
 

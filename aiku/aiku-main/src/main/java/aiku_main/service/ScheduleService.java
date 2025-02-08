@@ -1,7 +1,7 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.ScheduleArrivalMember;
-import aiku_main.application_event.domain.ScheduleArrivalResult;
+import aiku_main.dto.schedule.ScheduleArrivalMember;
+import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -219,7 +219,7 @@ public class ScheduleService {
         int runSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
         int waitSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
-        return new TeamScheduleListResDto(team, page, runSchedule, waitSchedule, scheduleList);
+        return new TeamScheduleListResDto(page, teamId, runSchedule, waitSchedule, scheduleList);
     }
 
     public MemberScheduleListResDto getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {

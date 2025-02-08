@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.betting;
 
 import aiku_main.controller.validation.ValidPointAmount;
 import jakarta.validation.constraints.Min;

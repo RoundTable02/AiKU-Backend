@@ -1,6 +1,6 @@
 package aiku_main.repository;
 
-import aiku_main.application_event.domain.ScheduleArrivalMember;
+import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import com.querydsl.core.types.Projections;

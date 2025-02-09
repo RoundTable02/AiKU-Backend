@@ -1,8 +1,8 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.ScheduleBetting;
-import aiku_main.application_event.domain.ScheduleBettingResult;
-import aiku_main.dto.BettingAddDto;
+import aiku_main.dto.betting.ScheduleBetting;
+import aiku_main.dto.betting.ScheduleBettingResult;
+import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingQueryRepository;
@@ -17,7 +17,6 @@ import common.domain.schedule.ScheduleMember;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.BaseException;
 import common.exception.NotEnoughPoint;
-import common.exception.PaidMemberLimitException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

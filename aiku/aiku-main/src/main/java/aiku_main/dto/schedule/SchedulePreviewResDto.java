@@ -16,8 +16,11 @@ public class SchedulePreviewResDto {
     private ScheduleOwnerResDto owner;
 
     @QueryProjection
-
-    public SchedulePreviewResDto(Long scheduleId, String scheduleName, LocalDateTime scheduleTime, LocationDto location, ScheduleOwnerResDto owner) {
+    public SchedulePreviewResDto(Long scheduleId,
+                                 String scheduleName,
+                                 LocalDateTime scheduleTime,
+                                 LocationDto location,
+                                 ScheduleOwnerResDto owner) {
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.scheduleTime = scheduleTime;

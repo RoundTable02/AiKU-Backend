@@ -1,9 +1,8 @@
 package aiku_main.repository;
 
-import aiku_main.dto.TitleMemberResDto;
+import aiku_main.dto.member.TitleMemberResDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.ExecStatus;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +13,6 @@ import static common.domain.QBetting.betting;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
-import static common.domain.title.QTitle.title;
 import static common.domain.title.QTitleMember.titleMember;
 
 @RequiredArgsConstructor

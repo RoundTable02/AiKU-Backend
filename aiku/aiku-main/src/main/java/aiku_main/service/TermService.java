@@ -1,6 +1,6 @@
 package aiku_main.service;
 
-import aiku_main.dto.TermResDto;
+import aiku_main.dto.member.TermResDto;
 import aiku_main.exception.TermException;
 import aiku_main.repository.TermRepository;
 import common.domain.Term;
@@ -8,9 +8,6 @@ import common.domain.TermTitle;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static common.response.status.BaseErrorCode.NO_SUCH_TERM;
 

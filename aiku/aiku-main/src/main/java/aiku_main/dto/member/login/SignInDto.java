@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.member.login;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package aiku_main.controller;
 
-import aiku_main.dto.MemberRegisterDto;
-import aiku_main.dto.NicknameExistResDto;
+import aiku_main.dto.member.MemberRegisterDto;
+import aiku_main.dto.member.NicknameExistResDto;
 import aiku_main.service.MemberRegisterService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;

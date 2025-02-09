@@ -1,6 +1,6 @@
 package aiku_main.service;
 
-import aiku_main.dto.TermResDto;
+import aiku_main.dto.member.TermResDto;
 import aiku_main.exception.TermException;
 import aiku_main.repository.TermRepository;
 import common.domain.AgreedType;

@@ -1,5 +1,6 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
+import aiku_main.dto.MemberProfileResDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

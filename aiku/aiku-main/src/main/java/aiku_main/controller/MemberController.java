@@ -1,14 +1,12 @@
 package aiku_main.controller;
 
 import aiku_main.dto.*;
-import aiku_main.service.EmailService;
+import aiku_main.dto.member.*;
 import aiku_main.service.MemberService;
-import common.domain.member.Member;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

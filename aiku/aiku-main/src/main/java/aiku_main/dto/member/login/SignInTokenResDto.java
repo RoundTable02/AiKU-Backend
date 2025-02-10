@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.member.login;
 
 import aiku_main.filter.security.JwtToken;
 import lombok.AllArgsConstructor;

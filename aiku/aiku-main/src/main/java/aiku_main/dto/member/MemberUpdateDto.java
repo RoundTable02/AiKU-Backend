@@ -1,14 +1,11 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
-import aiku_main.controller.validation.ValidScheduleTime;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor

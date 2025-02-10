@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
 import common.domain.AgreedType;
 import common.domain.Term;

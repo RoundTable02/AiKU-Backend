@@ -1,9 +1,8 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
 import common.domain.member.MemberProfileType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

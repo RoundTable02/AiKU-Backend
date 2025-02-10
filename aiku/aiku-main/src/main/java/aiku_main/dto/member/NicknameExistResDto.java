@@ -1,4 +1,4 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,10 @@
 package aiku_main.service;
 
 import aiku_main.dto.*;
+import aiku_main.dto.member.AuthorityResDto;
+import aiku_main.dto.member.AuthorityUpdateDto;
+import aiku_main.dto.member.MemberResDto;
+import aiku_main.dto.member.TitleMemberResDto;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.TitleQueryRepository;
 import common.domain.member.Member;

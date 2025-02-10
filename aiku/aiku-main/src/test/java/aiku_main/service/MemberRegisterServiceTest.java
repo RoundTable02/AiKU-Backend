@@ -1,8 +1,8 @@
 package aiku_main.service;
 
-import aiku_main.dto.MemberProfileDto;
-import aiku_main.dto.MemberRegisterDto;
-import aiku_main.dto.NicknameExistResDto;
+import aiku_main.dto.member.MemberProfileDto;
+import aiku_main.dto.member.MemberRegisterDto;
+import aiku_main.dto.member.NicknameExistResDto;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
 import common.domain.Status;

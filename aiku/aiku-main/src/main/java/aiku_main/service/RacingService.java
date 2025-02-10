@@ -1,6 +1,8 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.*;
+import aiku_main.dto.racing.ScheduleRacing;
+import aiku_main.dto.racing.ScheduleRacingMember;
+import aiku_main.dto.racing.ScheduleRacingResult;
 import aiku_main.exception.BettingException;
 import aiku_main.repository.RacingQueryRepository;
 import aiku_main.repository.ScheduleQueryRepository;

@@ -1,6 +1,6 @@
 package aiku_main.repository;
 
-import aiku_main.dto.TitleMemberResDto;
+import aiku_main.dto.member.TitleMemberResDto;
 import common.domain.member.Member;
 
 import java.util.List;

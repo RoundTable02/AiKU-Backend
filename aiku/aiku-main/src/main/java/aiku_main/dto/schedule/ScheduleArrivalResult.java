@@ -1,4 +1,4 @@
-package aiku_main.application_event.domain;
+package aiku_main.dto.schedule;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

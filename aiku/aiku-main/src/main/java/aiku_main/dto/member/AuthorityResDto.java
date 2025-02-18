@@ -1,6 +1,5 @@
-package aiku_main.dto;
+package aiku_main.dto.member;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

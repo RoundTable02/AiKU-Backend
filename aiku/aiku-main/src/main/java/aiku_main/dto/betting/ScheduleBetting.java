@@ -1,4 +1,4 @@
-package aiku_main.application_event.domain;
+package aiku_main.dto.betting;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

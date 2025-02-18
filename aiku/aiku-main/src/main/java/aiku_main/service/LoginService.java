@@ -1,7 +1,7 @@
 package aiku_main.service;
 
-import aiku_main.dto.RefreshTokenResDto;
-import aiku_main.dto.SignInTokenResDto;
+import aiku_main.dto.member.login.RefreshTokenResDto;
+import aiku_main.dto.member.login.SignInTokenResDto;
 import aiku_main.exception.JwtAccessDeniedException;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.oauth.KakaoOauthHelper;

@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ScheduleUpdateDto {
 
-    @NotBlank @Size(max = 15)
+    @Size(max = 15)
+    @NotBlank
     public String scheduleName;
     @Valid
     public LocationDto location;

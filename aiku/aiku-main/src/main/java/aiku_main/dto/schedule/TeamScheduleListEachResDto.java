@@ -25,8 +25,12 @@ public class TeamScheduleListEachResDto {
     List<Long> membersIdList;
 
     @QueryProjection
-    public TeamScheduleListEachResDto(Long scheduleId, String scheduleName, LocationDto location, LocalDateTime scheduleTime,
-                                      ExecStatus scheduleStatus, String membersIdStringList) {
+    public TeamScheduleListEachResDto(Long scheduleId,
+                                      String scheduleName,
+                                      LocationDto location,
+                                      LocalDateTime scheduleTime,
+                                      ExecStatus scheduleStatus,
+                                      String membersIdStringList) {
         this.scheduleId = scheduleId;
         this.scheduleName = scheduleName;
         this.location = location;

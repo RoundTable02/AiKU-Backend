@@ -1,10 +1,10 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.ScheduleBetting;
-import aiku_main.application_event.domain.ScheduleBettingMember;
-import aiku_main.application_event.domain.ScheduleBettingResult;
+import aiku_main.dto.betting.ScheduleBetting;
+import aiku_main.dto.betting.ScheduleBettingMember;
+import aiku_main.dto.betting.ScheduleBettingResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
-import aiku_main.dto.BettingAddDto;
+import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
 import aiku_main.repository.BettingQueryRepository;

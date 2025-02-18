@@ -20,9 +20,14 @@ public class MemberScheduleListEachResDto {
     private ExecStatus scheduleStatus;
 
     @QueryProjection
-    public MemberScheduleListEachResDto(Long groupId, String groupName, Long scheduleId, String scheduleName,
-                                        LocationDto location, LocalDateTime scheduleTime,
-                                      ExecStatus scheduleStatus, int memberCount) {
+    public MemberScheduleListEachResDto(Long groupId,
+                                        String groupName,
+                                        Long scheduleId,
+                                        String scheduleName,
+                                        LocationDto location,
+                                        LocalDateTime scheduleTime,
+                                        ExecStatus scheduleStatus,
+                                        int memberCount) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.scheduleId = scheduleId;

@@ -1,6 +1,6 @@
 package aiku_main.controller;
 
-import aiku_main.dto.BettingAddDto;
+import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.service.BettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

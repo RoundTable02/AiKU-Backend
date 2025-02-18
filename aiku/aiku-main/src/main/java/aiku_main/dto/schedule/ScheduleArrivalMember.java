@@ -1,11 +1,9 @@
-package aiku_main.application_event.domain;
+package aiku_main.dto.schedule;
 
 import aiku_main.dto.MemberProfileResDto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor

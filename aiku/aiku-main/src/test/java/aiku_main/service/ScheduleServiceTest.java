@@ -1,7 +1,7 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.ScheduleArrivalMember;
-import aiku_main.application_event.domain.ScheduleArrivalResult;
+import aiku_main.dto.schedule.ScheduleArrivalMember;
+import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;

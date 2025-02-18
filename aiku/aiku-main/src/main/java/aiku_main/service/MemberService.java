@@ -2,6 +2,7 @@ package aiku_main.service;
 
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.dto.*;
+import aiku_main.dto.member.*;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.MemberRepository;

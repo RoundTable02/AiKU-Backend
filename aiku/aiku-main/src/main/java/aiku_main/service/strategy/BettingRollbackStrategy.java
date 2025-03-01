@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@PointChangeReasonMapping(PointChangeReason.BETTING)
+import static aiku_main.application_event.event.PointChangeReason.*;
+
+@PointChangeReasonMapping({BETTING, BETTING_CANCLE, BETTING_REWARD})
 @RequiredArgsConstructor
 @Transactional
 @Service

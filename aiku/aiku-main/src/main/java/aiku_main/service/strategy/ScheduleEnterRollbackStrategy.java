@@ -21,8 +21,8 @@ public class ScheduleEnterRollbackStrategy implements RollbackStrategy {
 
     @Override
     public void execute(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
-        Schedule schedule = scheduleRepository.findById(reasonId).orElseThrow();
-        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, schedule.getId()).orElseThrow();
+        ScheduleMember scheduleMember = scheduleRepository.findScheduleMemberWithSchedule(memberId, reasonId).orElseThrow();
+        Schedule schedule = scheduleMember.getSchedule();
 
         schedule.errorScheduleMember(scheduleMember);
 

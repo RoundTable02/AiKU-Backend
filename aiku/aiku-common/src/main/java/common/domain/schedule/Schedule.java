@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static common.domain.ExecStatus.*;
-import static common.domain.Status.ALIVE;
-import static common.domain.Status.DELETE;
+import static common.domain.Status.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -75,9 +74,19 @@ public class Schedule extends BaseTime {
         this.status = DELETE;
     }
 
+    public void error(){
+        this.status = ERROR;
+    }
+
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
+    }
+
+    public void errorScheduleMember(ScheduleMember scheduleMember) {
+        if(isScheduleMember(scheduleMember)){
+            scheduleMember.setStatus(ERROR);
+        }
     }
 
     public void removeScheduleMember(ScheduleMember scheduleMember) {

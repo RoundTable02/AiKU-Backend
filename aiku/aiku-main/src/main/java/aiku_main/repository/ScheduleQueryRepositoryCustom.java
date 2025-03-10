@@ -19,6 +19,7 @@ public interface ScheduleQueryRepositoryCustom {
 
     Optional<Schedule> findScheduleWithResult(Long scheduleId);
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
+    Optional<ScheduleMember> findScheduleMemberWithSchedule(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);
     Optional<ScheduleResult> findScheduleResult(Long scheduleId);

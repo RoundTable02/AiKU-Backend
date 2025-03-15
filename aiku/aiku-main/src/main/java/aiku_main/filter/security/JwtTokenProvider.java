@@ -1,6 +1,7 @@
 package aiku_main.filter.security;
 
 import aiku_main.exception.JwtAccessDeniedException;
+import common.domain.member.OauthProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -26,7 +27,7 @@ public class JwtTokenProvider {
     }
 
     // 유저 정보 -> Token 생성
-    public JwtToken generateToken(Authentication authentication) {
+    public JwtToken generateToken(Authentication authentication, OauthProvider provider) {
         if (authentication == null)
             throw new JwtAccessDeniedException("자격 증명에 실패하였습니다.");
 
@@ -34,7 +35,7 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        String accessToken = generateAccessToken(authentication, authorities);
+        String accessToken = generateAccessToken(authentication, authorities, provider);
         String refreshToken = generateRefreshToken();
 
         return JwtToken.builder()
@@ -44,7 +45,7 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public String generateAccessToken(Authentication authentication, String authorities) {
+    public String generateAccessToken(Authentication authentication, String authorities, OauthProvider provider) {
         Calendar accessTokenCal = Calendar.getInstance();
         accessTokenCal.setTime(new Date());
 //        accessTokenCal.add(Calendar.DATE, 1);
@@ -54,7 +55,7 @@ public class JwtTokenProvider {
         Date accessTokenExpiresIn = accessTokenCal.getTime();
         
         return Jwts.builder()
-                .setSubject(authentication.getName()) // email
+                .setSubject(authentication.getName()) // memberId
                 .claim("auth", authorities)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)

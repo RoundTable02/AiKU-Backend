@@ -53,7 +53,7 @@ class MemberRegisterServiceTest {
 
         assertThat(member.getNickname()).isEqualTo("nickname1");
         assertThat(member.getEmail()).isEqualTo("asd@gmail.com");
-        assertThat(member.getKakaoId()).isEqualTo(123L);
+        assertThat(member.getOauthId()).isEqualTo(123L);
         assertThat(member.getRole()).isEqualTo(MemberRole.MEMBER);
         assertThat(member.getPoint()).isEqualTo(0);
         assertThat(member.getStatus()).isEqualTo(Status.ALIVE);

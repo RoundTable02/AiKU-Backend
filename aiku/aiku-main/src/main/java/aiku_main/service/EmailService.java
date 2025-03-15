@@ -28,7 +28,7 @@ public class EmailService {
 
         String title = "<QA> " + inquiryDto.getTitle();
         String sender = "Sender : " + inquiryDto.getEmail() + "\n"
-                + member.getId() + "&&" + member.getKakaoId() + " p" + member.getPoint() + "\n";
+                + member.getId() + "&&" + member.getOauthId() + " p" + member.getPoint() + "\n";
         String content = sender + inquiryDto.getContent();
         try {
             gmailAPIProvider.sendMessage(

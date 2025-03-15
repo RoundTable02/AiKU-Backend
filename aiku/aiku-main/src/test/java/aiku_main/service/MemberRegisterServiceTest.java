@@ -41,7 +41,7 @@ class MemberRegisterServiceTest {
         MemberProfileDto memberProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
                 MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto memberRegisterDto = new MemberRegisterDto(
-                "nickname1", "asd@gmail.com", "idToken", memberProfileDto,
+                "nickname1", "asd@gmail.com", OauthProvider.KAKAO, "idToken", memberProfileDto,
                 true, true, true, true, ""
         );
 
@@ -74,7 +74,7 @@ class MemberRegisterServiceTest {
         MemberProfileDto recommenderProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
                 MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto recommenderRegisterDto = new MemberRegisterDto(
-                "recommender", "asd@gmail.com", "rIdToken", recommenderProfileDto,
+                "recommender", "asd@gmail.com", OauthProvider.KAKAO, "rIdToken", recommenderProfileDto,
                 true, true, true, true, ""
         );
         Long recommenderId = memberRegisterService.register(recommenderRegisterDto);
@@ -82,7 +82,7 @@ class MemberRegisterServiceTest {
         MemberProfileDto memberProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
                 null, null);
         MemberRegisterDto memberRegisterDto = new MemberRegisterDto(
-                "nickname1", "asd@gmail.com", "mIdToken", memberProfileDto,
+                "nickname1", "asd@gmail.com", OauthProvider.KAKAO, "mIdToken", memberProfileDto,
                 true, true, true, true,
                 "recommender"
         );
@@ -108,7 +108,7 @@ class MemberRegisterServiceTest {
         MemberProfileDto member1ProfileDto = new MemberProfileDto(MemberProfileType.CHAR, null,
                 MemberProfileCharacter.C01, MemberProfileBackground.PURPLE);
         MemberRegisterDto member1RegisterDto = new MemberRegisterDto(
-                "member1", "asd@gmail.com", "rIdToken", member1ProfileDto,
+                "member1", "asd@gmail.com", OauthProvider.KAKAO, "rIdToken", member1ProfileDto,
                 true, true, true, true, ""
         );
         memberRegisterService.register(member1RegisterDto);

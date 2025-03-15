@@ -17,8 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByIdAndStatus(Long memberId, Status status);
     Optional<Member> findByNickname(String recommenderNickname);
 
-    Optional<Member> findByKakaoId(Long aLong);
-
     Optional<Member> findByProviderAndOauthId(OauthProvider provider, Long oauthId);
 
     boolean existsByNickname(String nickname);

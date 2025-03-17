@@ -83,7 +83,7 @@ public class LoginService {
                 .orElseThrow(() -> new MemberNotFoundException());
 
         UsernamePasswordAuthenticationToken authenticationFilter
-                = new UsernamePasswordAuthenticationToken(member.getOauthId(), appleId);
+                = new UsernamePasswordAuthenticationToken(member.getId(), appleId);
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 

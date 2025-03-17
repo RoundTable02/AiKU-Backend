@@ -121,7 +121,7 @@ jobs:
           
           docker run -d \
             --name aiku-gateway \
-            --network="host" \
+            --network="my_network" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \

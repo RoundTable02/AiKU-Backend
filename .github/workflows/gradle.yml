@@ -57,6 +57,7 @@ jobs:
         GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         KAKAO_APP_ID: ${{ secrets.KAKAO_APP_ID }}
+        APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }}
         MYSQL_PASSWORD: 1234
         MYSQL_URL: jdbc:mysql://localhost:3306/aiku
         MYSQL_USERNAME: root
@@ -162,6 +163,7 @@ jobs:
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
             -e KAKAO_APP_ID=${{ secrets.KAKAO_APP_ID }} \
+            -e APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }} \
             -e AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
             -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
             -e AWS_SECRET=${{ secrets.AWS_SECRET }} \

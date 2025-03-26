@@ -13,11 +13,13 @@ import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
+import map.repository.ScheduleLocationRepository;
 import map.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static common.domain.ExecStatus.RUN;
 import static common.response.status.BaseErrorCode.NOT_IN_SCHEDULE;
@@ -32,6 +34,7 @@ public class MapService {
     private final KafkaProducerService kafkaService;
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ScheduleLocationRepository scheduleLocationRepository;
     private final RacingEventPublisher racingEventPublisher;
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long scheduleId) {
@@ -42,22 +45,37 @@ public class MapService {
         return new ScheduleDetailResDto(schedule, scheduleMembers);
     }
 
-    public Long sendLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
-        // 카프카로 위도, 경도 데이터를 스케줄 상의 다른 유저에게 전송하는 로직
-        AlarmMemberInfo memberInfo = getMemberInfo(memberId);
-        List<String> fcmTokensInSchedule = findAllFcmTokensInSchedule(scheduleId);
+    @Transactional
+    public LocationsResponseDto saveAndSendAllLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
+        // Redis에 해당 위치 저장
+        scheduleLocationRepository.saveLocation(scheduleId, memberId, realTimeLocationDto.getLatitude(), realTimeLocationDto.getLongitude());
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
-                new LocationAlarmMessage(fcmTokensInSchedule, AlarmMessageType.MEMBER_REAL_TIME_LOCATION,
-                        scheduleId,
-                        memberInfo,
-                        realTimeLocationDto.getLatitude(),
-                        realTimeLocationDto.getLongitude()
-                )
-        );
+        // Redis에 담긴 scheduleId에 해당하는 모든 위치 Load
+        Map<Long, RealTimeLocationResDto> scheduleLocations = scheduleLocationRepository.getScheduleLocations(scheduleId);
 
-        return scheduleId;
+        // Response로 전달
+        return new LocationsResponseDto(scheduleLocations.size(), scheduleLocations);
     }
+    // TODO : 도착하면? TTL 변경
+    // TODO : 도착한 사람은 위치 정보 보낼 필요 없이 GET 할 수 있도록
+    // TODO : 약속 종료되면 전체 삭제
+
+//    public Long sendLocation(Long memberId, Long scheduleId, RealTimeLocationDto realTimeLocationDto) {
+//        // 카프카로 위도, 경도 데이터를 스케줄 상의 다른 유저에게 전송하는 로직
+//        AlarmMemberInfo memberInfo = getMemberInfo(memberId);
+//        List<String> fcmTokensInSchedule = findAllFcmTokensInSchedule(scheduleId);
+//
+//        kafkaService.sendMessage(KafkaTopic.alarm,
+//                new LocationAlarmMessage(fcmTokensInSchedule, AlarmMessageType.MEMBER_REAL_TIME_LOCATION,
+//                        scheduleId,
+//                        memberInfo,
+//                        realTimeLocationDto.getLatitude(),
+//                        realTimeLocationDto.getLongitude()
+//                )
+//        );
+//
+//        return scheduleId;
+//    }
 
 
     @Transactional

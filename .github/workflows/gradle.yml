@@ -145,11 +145,6 @@ jobs:
         script: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
           
-          if [ "$(docker ps -q -f name=aiku-main)" ]; then
-            docker stop aiku-main
-            docker rm aiku-main
-          fi
-          
           docker run -d \
             --name aiku-main \
             --log-driver=awslogs \

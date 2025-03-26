@@ -143,7 +143,6 @@ jobs:
         key : ${{ secrets.EC2_AIKU_MAIN_SSH_KEY }}
         port: 22
         script: |
-          docker login
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
 
           if [ "$(docker ps -q -f name=aiku-main)" ]; then
@@ -170,7 +169,7 @@ jobs:
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -e CUSTOM_PASSWORD=${{ secrets.CUSTOM_PASSWORD }} \
             -e KAKAO_APP_ID=${{ secrets.KAKAO_APP_ID }} \
-            -e APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }} \
+            -e APPLE_APP_ID=${{ secrets.APPLE_APP_ID }} \
             -e AWS_BUCKET=${{ secrets.AWS_BUCKET }} \
             -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
             -e AWS_SECRET=${{ secrets.AWS_SECRET }} \

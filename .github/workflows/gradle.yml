@@ -143,6 +143,7 @@ jobs:
         key : ${{ secrets.EC2_AIKU_MAIN_SSH_KEY }}
         port: 22
         script: |
+          docker login
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
 
           if [ "$(docker ps -q -f name=aiku-main)" ]; then

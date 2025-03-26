@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable()) // CORS 비활성화
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // 상태 비저장
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/login/sign-in", "/login/refresh", "/error").permitAll() // 공개 경로 설정
+                        .pathMatchers("/login/sign-in/**", "/login/refresh", "/error").permitAll() // 공개 경로 설정
                         .pathMatchers(HttpMethod.POST, "/users").permitAll()
                         .pathMatchers("/users/nickname").permitAll()
                         .anyExchange().authenticated() // 이외의 모든 요청 인증 필요

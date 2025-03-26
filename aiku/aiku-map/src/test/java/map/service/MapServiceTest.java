@@ -47,21 +47,21 @@ public class MapServiceTest {
     @BeforeEach
     void setUp() {
         member1 = Member.builder()
-                .kakaoId(1L)
+                .oauthId(1L)
                 .nickname("member1")
                 .email("member1@sample.com")
                 .password("1")
                 .build();
 
         member2 = Member.builder()
-                .kakaoId(2L)
+                .oauthId(2L)
                 .nickname("member2")
                 .email("member2@sample.com")
                 .password("2")
                 .build();
 
         member3 = Member.builder()
-                .kakaoId(3L)
+                .oauthId(3L)
                 .nickname("member3")
                 .email("member3@sample.com")
                 .password("3")
@@ -121,7 +121,7 @@ public class MapServiceTest {
     @Test
     void 멤버_도착_외부멤버_예외() {
         Member member4 = Member.builder()
-                .kakaoId(4L)
+                .oauthId(4L)
                 .nickname("member4")
                 .email("member4@sample.com")
                 .password("4")
@@ -140,14 +140,14 @@ public class MapServiceTest {
     @Test
     void 멤버_도착_스케줄_대기_예외() {
         Member member4 = Member.builder()
-                .kakaoId(4L)
+                .oauthId(4L)
                 .nickname("member4")
                 .email("member4@sample.com")
                 .password("4")
                 .build();
 
         Member member5 = Member.builder()
-                .kakaoId(5L)
+                .oauthId(5L)
                 .nickname("member5")
                 .email("member5@sample.com")
                 .password("5")
@@ -178,7 +178,7 @@ public class MapServiceTest {
     void 맵_스케줄_상세_조회() {
         //given
         Member memb1 = Member.builder()
-                .kakaoId(1L)
+                .oauthId(1L)
                 .nickname("member1")
                 .email("member1@sample.com")
                 .password("1")
@@ -186,7 +186,7 @@ public class MapServiceTest {
         em.persist(memb1);
 
         Member memb2 = Member.builder()
-                .kakaoId(2L)
+                .oauthId(2L)
                 .nickname("member2")
                 .email("member2@sample.com")
                 .password("2")
@@ -197,7 +197,7 @@ public class MapServiceTest {
         team.addTeamMember(memb2);
         em.persist(team);
 
-        Schedule schedule = Schedule.create(memb1, new TeamValue(team), "sche", LocalDateTime.now(),
+        Schedule schedule = Schedule.create(memb1, new TeamValue(team.getId()), "sche", LocalDateTime.now(),
                 new Location("loc", 1.0, 1.0), 100);
         schedule.addScheduleMember(memb2, false, 0);
         em.persist(schedule);

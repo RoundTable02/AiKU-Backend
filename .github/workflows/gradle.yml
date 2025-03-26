@@ -117,8 +117,11 @@ jobs:
         port: 22
         script: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
-          docker stop aiku-gateway || true
-          docker rm aiku-gateway || true
+          
+          if [ "$(docker ps -q -f name=aiku-gateway)" ]; then
+            docker stop aiku-gateway
+            docker rm aiku-gateway
+          fi
           
           docker run -d \
             --name aiku-gateway \
@@ -141,8 +144,11 @@ jobs:
         port: 22
         script: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
-          docker stop aiku-main || true
-          docker rm aiku-main || true
+          
+          if [ "$(docker ps -q -f name=aiku-main)" ]; then
+            docker stop aiku-main
+            docker rm aiku-main
+          fi
           
           docker run -d \
             --name aiku-main \
@@ -177,9 +183,12 @@ jobs:
         key : ${{ secrets.EC2_AIKU_MAP_SSH_KEY }}
         port: 22
         script: |
-         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
-          docker stop aiku-map || true
-          docker rm aiku-map || true
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
+          
+          if [ "$(docker ps -q -f name=aiku-map)" ]; then
+            docker stop aiku-map
+            docker rm aiku-map
+          fi
           
           docker run -d \
             --name aiku-map \
@@ -204,8 +213,11 @@ jobs:
         port: 22
         script: |
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
-          docker stop aiku-alarm || true
-          docker rm aiku-alarm || true
+          
+          if [ "$(docker ps -q -f name=aiku-alarm)" ]; then
+            docker stop aiku-alarm
+            docker rm aiku-alarm
+          fi
           
           docker run -d \
             --name aiku-alarm \

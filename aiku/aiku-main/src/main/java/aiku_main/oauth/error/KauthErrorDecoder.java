@@ -7,16 +7,16 @@ import feign.codec.ErrorDecoder;
 public class KauthErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
-        KakaoKauthErrorResponse body = KakaoKauthErrorResponse.from(response);
+        OauthErrorResponse body = OauthErrorResponse.from(response);
 
         try {
-            KakaoKauthErrorCode kakaoKauthErrorCode =
-                    KakaoKauthErrorCode.valueOf(body.getErrorCode());
-            KauthErrorReason errorReason = kakaoKauthErrorCode.getErrorReason();
+            KakaoOauthErrorCode kakaoKauthErrorCode =
+                    KakaoOauthErrorCode.valueOf(body.getErrorCode());
+            OauthErrorReason errorReason = kakaoKauthErrorCode.getErrorReason();
             throw new InvalidIdTokenException(errorReason.getReason());
         } catch (IllegalArgumentException e) {
-            KakaoKauthErrorCode koeInvalidRequest = KakaoKauthErrorCode.KOE_INVALID_REQUEST;
-            KauthErrorReason errorReason = koeInvalidRequest.getErrorReason();
+            KakaoOauthErrorCode koeInvalidRequest = KakaoOauthErrorCode.KOE_INVALID_REQUEST;
+            OauthErrorReason errorReason = koeInvalidRequest.getErrorReason();
             throw new InvalidIdTokenException(errorReason.getReason());
         }
     }

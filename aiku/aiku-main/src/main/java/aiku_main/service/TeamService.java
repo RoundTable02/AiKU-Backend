@@ -75,7 +75,7 @@ public class TeamService {
         TeamMember teamMember = findTeamMember(memberId, teamId);
         team.removeTeamMember(teamMember);
 
-        teamEventPublisher.publishTeamExitEvent(member, team);
+        teamEventPublisher.publishTeamExitEvent(memberId, teamId);
 
         return team.getId();
     }

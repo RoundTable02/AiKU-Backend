@@ -67,19 +67,6 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
     }
 
     @Override
-    public boolean existPaidScheduleMember(Long memberId, Long scheduleId) {
-        Long count = query.select(scheduleMember.count())
-                .from(schedule)
-                .leftJoin(schedule.scheduleMembers, scheduleMember)
-                .where(schedule.id.eq(scheduleId),
-                        scheduleMember.member.id.eq(memberId),
-                        scheduleMember.isPaid)
-                .fetchOne();
-
-        return count != null && count > 0;
-    }
-
-    @Override
     public Optional<Long> findScheduleMemberIdByMemberAndScheduleId(Long memberId, Long scheduleId) {
         Long scheduleMemberId = query.select(scheduleMember.id)
                 .from(schedule)
@@ -97,7 +84,7 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
                         member.id, member.nickname,
                         Projections.constructor(MemberProfileDto.class,
                                 member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        scheduleMember.arrivalTime, scheduleMember.isPaid))
+                        scheduleMember.arrivalTime))
                 .from(scheduleMember)
                 .innerJoin(member).on(member.id.eq(scheduleMember.member.id))
                 .where(scheduleMember.schedule.id.eq(scheduleId),

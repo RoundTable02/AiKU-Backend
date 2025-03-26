@@ -18,7 +18,11 @@ public class Member extends BaseTime {
     @Column(name = "memberId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long kakaoId;
+    private Long oauthId;
+
+    @Enumerated(value = EnumType.STRING)
+    private OauthProvider provider;
+
     private String refreshToken;
 
     private String nickname;
@@ -82,8 +86,9 @@ public class Member extends BaseTime {
     }
 
     @Builder
-    public Member(Long kakaoId, String nickname, String password, String email) {
-        this.kakaoId = kakaoId;
+    public Member(Long oauthId, OauthProvider provider, String nickname, String password, String email) {
+        this.oauthId = oauthId;
+        this.provider = provider;
         this.nickname = nickname;
         this.email = email;
         this.password = password;
@@ -119,7 +124,7 @@ public class Member extends BaseTime {
     }
 
     public void deleteMember() {
-        this.kakaoId = null;
+        this.oauthId = null;
         this.email = null;
         this.refreshToken = null;
         this.firebaseToken = null;

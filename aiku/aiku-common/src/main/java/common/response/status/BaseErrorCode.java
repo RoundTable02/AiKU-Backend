@@ -34,6 +34,7 @@ public enum BaseErrorCode implements StatusCode{
     NO_FCM_TOKEN(40020, "파이어베이스 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_RACING(40021, "레이싱에 소속된 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_RACING(40022, "중복된 레이싱입니다.", HttpStatus.BAD_REQUEST),
+    NO_SUCH_SCHEDULE_RESULT(40023, "스케줄 결과가 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     NO_SCHEDULE_OWNER(40301, "스케줄장이 아닙니다.", HttpStatus.FORBIDDEN),
     NOT_AVAILABLE_SCHEDULE(40302, "이용 불가능한 스케줄입니다.", HttpStatus.FORBIDDEN),
@@ -50,7 +51,8 @@ public enum BaseErrorCode implements StatusCode{
     CAN_NOT_FIND_NEXT_SCHEDULE_OWNER(50001, "다음 스케줄 장을 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     CAN_NOT_PROCESS_JSON(50002, "JSON에 관한 처리가 불가능합니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FAIL_TO_CONVERT_MESSAGE(50003, "Message를 Firebase Data로 변환 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    FAIL_TO_SEND_MESSAGE(50004, "FCM 메시징 처리에 문제가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    FAIL_TO_SEND_MESSAGE(50004, "FCM 메시징 처리에 문제가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_EXCEPTION(50004, "결제 검증에서 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private int code; //서버 내부 오류 코드
     private String message; //서버 내부 오류 메세지

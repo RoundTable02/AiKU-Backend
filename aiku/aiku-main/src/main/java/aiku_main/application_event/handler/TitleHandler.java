@@ -19,7 +19,7 @@ public class TitleHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void checkAllAvailableMemberTitleInSchedule(ScheduleCloseEvent event) {
-        checkAllAvailableMemberTitleInSchedule(event.getSchedule().getId());
+        checkAllAvailableMemberTitleInSchedule(event.getScheduleId());
     }
 
     private void checkAllAvailableMemberTitleInSchedule(Long scheduleId) {

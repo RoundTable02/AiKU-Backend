@@ -1,15 +1,13 @@
 package aiku_main.controller;
 
-import aiku_main.dto.RefreshTokenDto;
-import aiku_main.dto.RefreshTokenResDto;
-import aiku_main.dto.SignInDto;
-import aiku_main.dto.SignInTokenResDto;
+import aiku_main.dto.member.login.RefreshTokenDto;
+import aiku_main.dto.member.login.RefreshTokenResDto;
+import aiku_main.dto.member.login.SignInDto;
+import aiku_main.dto.member.login.SignInTokenResDto;
 import aiku_main.service.LoginService;
-import common.domain.member.Member;
 import common.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/login")
@@ -19,9 +17,16 @@ public class LoginController {
 
     private final LoginService loginService;
 
-    @PostMapping("/sign-in")
-    public BaseResponse<SignInTokenResDto> signIn(@RequestBody @Valid SignInDto signInDto){
-        SignInTokenResDto signInTokenResDto = loginService.signIn(signInDto.getIdToken());
+    @PostMapping("/sign-in/kakao")
+    public BaseResponse<SignInTokenResDto> signInKakao(@RequestBody @Valid SignInDto signInDto){
+        SignInTokenResDto signInTokenResDto = loginService.signInKakao(signInDto.getIdToken());
+
+        return new BaseResponse<>(signInTokenResDto);
+    }
+
+    @PostMapping("/sign-in/apple")
+    public BaseResponse<SignInTokenResDto> signInApple(@RequestBody @Valid SignInDto signInDto){
+        SignInTokenResDto signInTokenResDto = loginService.signInApple(signInDto.getIdToken());
 
         return new BaseResponse<>(signInTokenResDto);
     }

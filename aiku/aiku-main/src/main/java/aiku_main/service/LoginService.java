@@ -1,15 +1,17 @@
 package aiku_main.service;
 
-import aiku_main.dto.RefreshTokenResDto;
-import aiku_main.dto.SignInTokenResDto;
+import aiku_main.dto.member.login.RefreshTokenResDto;
+import aiku_main.dto.member.login.SignInTokenResDto;
 import aiku_main.exception.JwtAccessDeniedException;
 import aiku_main.exception.MemberNotFoundException;
+import aiku_main.oauth.AppleOauthHelper;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
 import aiku_main.repository.MemberRepository;
 import aiku_main.filter.security.JwtToken;
 import aiku_main.filter.security.JwtTokenProvider;
 import common.domain.member.Member;
+import common.domain.member.OauthProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +29,7 @@ public class LoginService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final KakaoOauthHelper kakaoOauthHelper;
+    private final AppleOauthHelper appleOauthHelper;
     private final MemberRepository memberRepository;
 
     /**
@@ -52,24 +55,46 @@ public class LoginService {
      * idToken 검증 후 DB 상 멤버 존재 여부 확인
      */
     @Transactional
-    public SignInTokenResDto signIn(String idToken) {
+    public SignInTokenResDto signInKakao(String idToken) {
         OauthInfo info = kakaoOauthHelper.getOauthInfoByIdToken(idToken);
         String kakaoId = info.getOid();
-        Member member = memberRepository.findByKakaoId(Long.valueOf(kakaoId))
-                .orElseThrow(() -> new MemberNotFoundException());
+
+        Member member = memberRepository.findByProviderAndOauthId(OauthProvider.KAKAO, Long.valueOf(kakaoId))
+                .orElseThrow(MemberNotFoundException::new);
 
         UsernamePasswordAuthenticationToken authenticationFilter
-                = new UsernamePasswordAuthenticationToken(member.getKakaoId(), kakaoId);
+                = new UsernamePasswordAuthenticationToken(member.getId(), kakaoId);
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
         // JWT Token 발급
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.KAKAO);
 
         member.reissueRefreshToken(jwtToken.getRefreshToken());
 
         return SignInTokenResDto.toDto(jwtToken);
     }
+
+    @Transactional
+    public SignInTokenResDto signInApple(String idToken) {
+        OauthInfo info = appleOauthHelper.getOauthInfoByIdToken(idToken);
+        String appleId = info.getOid();
+        Member member = memberRepository.findByProviderAndOauthId(OauthProvider.APPLE, Long.valueOf(appleId))
+                .orElseThrow(() -> new MemberNotFoundException());
+
+        UsernamePasswordAuthenticationToken authenticationFilter
+                = new UsernamePasswordAuthenticationToken(member.getId(), appleId);
+
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
+
+        // JWT Token 발급
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.APPLE);
+
+        member.reissueRefreshToken(jwtToken.getRefreshToken());
+
+        return SignInTokenResDto.toDto(jwtToken);
+    }
+
 
     /**
      * Refresh Token을 통한 Access Token 및 Refresh Token 재발급 로직
@@ -82,14 +107,14 @@ public class LoginService {
                 .orElseThrow(() -> new MemberNotFoundException());
 
         if (member.getRefreshToken().equals(refreshToken)) {
-            Long kakaoId = member.getKakaoId();
+            Long oid = member.getOauthId();
             UsernamePasswordAuthenticationToken authenticationFilter
-                    = new UsernamePasswordAuthenticationToken(kakaoId, kakaoId);
+                    = new UsernamePasswordAuthenticationToken(oid, oid);
 
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
             // 토큰 생성
-            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, member.getProvider());
 
             // 바뀐 Refresh Token 저장 (RTR)
             member.reissueRefreshToken(jwtToken.getRefreshToken());

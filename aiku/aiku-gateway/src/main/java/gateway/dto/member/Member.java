@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class Member{
 
     private Long id;
-    private Long kakaoId;
+    private Long oauthId;
     private String refreshToken;
 
     private String nickname;

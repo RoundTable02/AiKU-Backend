@@ -79,4 +79,11 @@ public class MainExceptionHandler {
 
         return BaseErrorResponse.get(exception);
     }
+
+    @ExceptionHandler({PointChangeFailException.class})
+    public ResponseEntity<BaseErrorResponse> handle_PointChangeFailException(PointChangeFailException exception){
+        log.error("MainExceptionHandler.handle_PointChangeFailException <{}> {}", exception.getStatus().getMessage(), exception);
+
+        return BaseErrorResponse.get(exception);
+    }
 }

@@ -1,5 +1,6 @@
 package alarm.service;
 
+import alarm.controller.dto.DataResDto;
 import alarm.controller.dto.MemberMessageDto;
 import alarm.exception.MemberNotFoundException;
 import alarm.fcm.MessageSender;
@@ -10,6 +11,7 @@ import common.domain.MemberMessage;
 import common.kafka_message.alarm.AlarmMessage;
 import common.kafka_message.alarm.AlarmMessageType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,11 +63,14 @@ public class MemberMessageService {
         }
     }
 
-    public List<MemberMessageDto> getMemberMessageByMemberId(Long memberId) {
+    public DataResDto<List<MemberMessageDto>> getMemberMessageByMemberId(Long memberId, int page) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDate = now.minusDays(7);
-        return memberMessageRepository.findAllByMemberId(memberId, startDate, now).stream()
+        List<MemberMessageDto> memberMessageDtoList = memberMessageRepository
+                .findAllByMemberId(memberId, startDate, now, PageRequest.of(page, 10)).stream()
                 .map(MemberMessageDto::toDto)
                 .collect(Collectors.toList());
+
+        return new DataResDto<>(page, memberMessageDtoList);
     }
 }

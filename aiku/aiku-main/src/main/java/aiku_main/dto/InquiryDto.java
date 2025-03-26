@@ -12,14 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InquiryDto {
+
     @NotBlank
     private String title;
-
     @NotBlank
     private String content;
-
     private MultipartFile file;
-
     @Email
     private String email;
 }

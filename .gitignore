@@ -23,3 +23,5 @@
 application-test.yml
 **/test/resources/application.yml
 aiku/aiku-alarm/src/main/java/alarm/fcm/aiku2024-firebase-adminsdk-9fjfc-df87d6f024.json
+aiku/aiku-alarm/src/main/resources/aiku2024-firebase-adminsdk-9fjfc-df87d6f024.json
+aiku/aiku-main/src/test/resources/service-info.yml

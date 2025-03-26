@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:service-info.yml
   datasource:
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
@@ -49,9 +51,14 @@ jwt:
 custom:
   password: ${CUSTOM_PASSWORD}
 
-kakao:
-  base_url: https://kauth.kakao.com
-  app_id: ${KAKAO_APP_ID}
+oidc:
+  kakao:
+    base_url: https://kauth.kakao.com
+    app_id: ${KAKAO_APP_ID}
+  apple:
+    base_url: https://appleid.apple.com
+    app_id: ${APPLE_APP_ID}
+
 
 cloud:
   aws:

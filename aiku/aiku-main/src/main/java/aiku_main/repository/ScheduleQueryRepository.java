@@ -14,6 +14,5 @@ public interface ScheduleQueryRepository extends JpaRepository<Schedule, Long>, 
     List<Schedule> findByScheduleStatus(ExecStatus scheduleStatus);
     
     boolean existsByIdAndStatus(Long scheduleId, Status status);
-    boolean existsByIdAndIsAutoClose(Long scheduleId, boolean isAutoClose);
     boolean existsByIdAndScheduleStatusAndStatus(Long scheduleId, ExecStatus scheduleStatus, Status status);
 }

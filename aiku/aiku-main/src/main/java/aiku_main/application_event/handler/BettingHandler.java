@@ -18,19 +18,19 @@ public class BettingHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleScheduleExitEvent(ScheduleExitEvent event){
-        bettingService.exitSchedule_deleteBettingForBettor(event.getMember().getId(), event.getScheduleMember().getId(), event.getSchedule().getId());
-        bettingService.exitSchedule_deleteBettingForBetee(event.getMember().getId(), event.getScheduleMember().getId(), event.getSchedule().getId());
+        bettingService.exitSchedule_deleteBettingForBettor(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
+        bettingService.exitSchedule_deleteBettingForBetee(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void processBettingResult(ScheduleCloseEvent event){
-        bettingService.processBettingResult(event.getSchedule().getId());
+        bettingService.processBettingResult(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeScheduleBettingResult(ScheduleCloseEvent event){
-        bettingService.analyzeScheduleBettingResult(event.getSchedule().getId());
+        bettingService.analyzeScheduleBettingResult(event.getScheduleId());
     }
 }

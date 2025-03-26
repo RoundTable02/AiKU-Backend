@@ -7,7 +7,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.Betting;
 import common.domain.ExecStatus;
-import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -28,13 +27,13 @@ public class BettingQueryRepositoryCustomImpl implements BettingQueryRepositoryC
     private final JPAQueryFactory query;
 
     @Override
-    public boolean existBettorInSchedule(ScheduleMemberValue bettor, Long scheduleId) {
+    public boolean existBettorInSchedule(Long scheduleMemberIdOfBettor, Long scheduleId) {
         Long count = query
                 .select(betting.count())
                 .from(betting)
-                .join(scheduleMember).on(scheduleMember.id.eq(bettor.getId()))
+                .join(scheduleMember).on(scheduleMember.id.eq(scheduleMemberIdOfBettor))
                 .where(scheduleMember.schedule.id.eq(scheduleId),
-                        betting.bettor.id.eq(bettor.getId()),
+                        betting.bettor.id.eq(scheduleMemberIdOfBettor),
                         betting.status.eq(ALIVE))
                 .fetchOne();
 

@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class KakaoOauthHelper {
-    @Value("${kakao.base_url}")
+    @Value("${oidc.kakao.base_url}")
     private String baseUrl;
 
-    @Value("${kakao.app_id}")
+    @Value("${oidc.kakao.app_id}")
     private String appId;
 
     private final KakaoOauthClient kakaoOauthClient;

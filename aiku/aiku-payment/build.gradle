@@ -12,9 +12,14 @@ repositories {
 dependencies {
     implementation project(':aiku-common')
 
-
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    // Google API Client
+    implementation 'com.google.api-client:google-api-client:1.34.1'
+    // Android Publisher API
+    implementation 'com.google.apis:google-api-services-androidpublisher:v3-rev20241125-2.0.0'
+    // Google Auth Library
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
 }
 
 test {

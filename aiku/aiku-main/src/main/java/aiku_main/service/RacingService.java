@@ -1,6 +1,8 @@
 package aiku_main.service;
 
-import aiku_main.application_event.domain.*;
+import aiku_main.dto.racing.ScheduleRacing;
+import aiku_main.dto.racing.ScheduleRacingMember;
+import aiku_main.dto.racing.ScheduleRacingResult;
 import aiku_main.exception.BettingException;
 import aiku_main.repository.RacingQueryRepository;
 import aiku_main.repository.ScheduleQueryRepository;
@@ -48,7 +50,7 @@ public class RacingService {
                 .map(racing -> {
                     ScheduleRacingMember firstRacer = new ScheduleRacingMember(scheduleMembers.get(racing.getFirstRacer().getId()).getMember());
                     ScheduleRacingMember secondRacer = new ScheduleRacingMember(scheduleMembers.get(racing.getSecondRacer().getId()).getMember());
-                    return new ScheduleRacing(firstRacer, secondRacer, racing.getPointAmount());
+                    return new ScheduleRacing(firstRacer, secondRacer, racing.getPointAmount(), racing.getWinner().getId());
                 }).toList();
 
         ScheduleRacingResult result = new ScheduleRacingResult(scheduleId, racingDtoList);

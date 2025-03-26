@@ -38,10 +38,6 @@ jobs:
 
     - name: Create resource file
       run: |
-        # mkdir -p aiku/aiku-main/src/test/resources
-        # mkdir -p aiku/aiku-map/src/test/resources
-        # echo "${{ secrets.AIKU_MAIN_TEST_CONFIG }}" > aiku/aiku-main/src/test/resources/application.yml
-        # echo "${{ secrets.AIKU_MAP_TEST_CONFIG }}" > aiku/aiku-map/src/test/resources/application.yml
         echo "${{ secrets.FIREBASE_CONFIG }}" > aiku/aiku-alarm/src/main/resources/aiku2024-firebase-adminsdk-9fjfc-df87d6f024.json
 
     - name: Build with Gradle Wrapper

@@ -51,7 +51,7 @@ public class MemberService {
         }
 
         return new MemberResDto(
-                member.getId(), member.getNickname(), member.getKakaoId(),
+                member.getId(), member.getNickname(), member.getOauthId(),
                 memberProfileResDto, mainTitle, member.getPoint());
     }
 

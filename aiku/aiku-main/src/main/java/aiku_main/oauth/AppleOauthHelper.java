@@ -10,19 +10,19 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class KakaoOauthHelper {
-    @Value("${oidc.kakao.base_url}")
+public class AppleOauthHelper {
+    @Value("${oidc.apple.base_url}")
     private String baseUrl;
 
-    @Value("${oidc.kakao.app_id}")
+    @Value("${oidc.apple.app_id}")
     private String appId;
 
-    private final KakaoOauthClient kakaoOauthClient;
+    private final AppleOauthClient appleOauthClient;
     private final OauthOIDCHelper oauthOIDCHelper;
 
     public OIDCDecodePayload getOIDCDecodePayload(String token) {
         // 공개키 목록을 조회한다. 캐싱이 되어있다.
-        OIDCPublicKeysResponse oidcPublicKeysResponse = kakaoOauthClient.getKakaoOIDCOpenKeys();
+        OIDCPublicKeysResponse oidcPublicKeysResponse = appleOauthClient.getAppleOIDCOpenKeys();
 
         return oauthOIDCHelper.getPayloadFromIdToken(
                 //idToken

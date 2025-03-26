@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
-public enum KakaoKauthErrorCode implements KauthBaseErrorCode {
+public enum KakaoOauthErrorCode implements OauthBaseErrorCode {
     KOE101(400, "KAKAO_KOE101", "invalid_client", "잘못된 앱 키 타입을 사용하거나 앱 키에 오타가 있을 경우"),
     KOE009(400, "KAKAO_KOE009", "misconfigured", "등록되지 않은 플랫폼에서 액세스 토큰을 요청 하는 경우"),
     KOE010(
@@ -46,8 +46,8 @@ public enum KakaoKauthErrorCode implements KauthBaseErrorCode {
     private String reason;
 
     @Override
-    public KauthErrorReason getErrorReason() {
-        return KauthErrorReason.builder().status(status).code(errorCode).reason(reason).build();
+    public OauthErrorReason getErrorReason() {
+        return OauthErrorReason.builder().status(status).code(errorCode).reason(reason).build();
     }
 
     @Override

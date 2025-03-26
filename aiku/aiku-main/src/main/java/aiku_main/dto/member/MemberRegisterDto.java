@@ -1,5 +1,6 @@
 package aiku_main.dto.member;
 
+import common.domain.member.OauthProvider;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,8 @@ public class MemberRegisterDto {
     private String nickname;
     @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
     private String email;
+    @NotNull
+    private OauthProvider provider;
     @NotBlank
     private String idToken;
     @Valid

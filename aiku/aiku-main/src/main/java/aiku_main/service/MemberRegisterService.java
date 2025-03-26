@@ -39,9 +39,9 @@ public class MemberRegisterService {
         MemberProfileDto memberProfile = memberRegisterDto.getMemberProfile();
 
         String idToken = memberRegisterDto.getIdToken();
-        String kakaoId = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
+        String oauthId = kakaoOauthHelper.getOauthInfoByIdToken(idToken).getOid();
 
-        String password = passwordEncoder.encode(kakaoId);
+        String password = passwordEncoder.encode(oauthId);
 
         String imgUrl = ""; // S3 이미지 URL
         if (memberProfile.getProfileType().equals(MemberProfileType.IMG)) {
@@ -53,7 +53,7 @@ public class MemberRegisterService {
         Member member = Member.builder()
                 .email(memberRegisterDto.getEmail())
                 .nickname(memberRegisterDto.getNickname())
-                .kakaoId(Long.valueOf(kakaoId))
+                .oauthId(Long.valueOf(oauthId))
                 .password(password)
                 .build();
 
@@ -74,7 +74,7 @@ public class MemberRegisterService {
 
     private void addRecommender(Member member, String recommenderNickname) {
         Member recommender = memberRepository.findByNickname(recommenderNickname)
-                .orElseThrow(() -> new MemberNotFoundException());
+                .orElseThrow(MemberNotFoundException::new);
 
         RecommendEvent recommendEvent = new RecommendEvent(member, recommender);
 

@@ -2,6 +2,7 @@ package aiku_main.repository;
 
 import common.domain.Status;
 import common.domain.member.Member;
+import common.domain.member.OauthProvider;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByIdAndStatus(Long memberId, Status status);
     Optional<Member> findByNickname(String recommenderNickname);
 
-    Optional<Member> findByKakaoId(Long aLong);
+    Optional<Member> findByProviderAndOauthId(OauthProvider provider, Long oauthId);
 
     boolean existsByNickname(String nickname);
 

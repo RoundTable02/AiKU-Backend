@@ -23,9 +23,9 @@ public class CustomMemberDetailsService implements UserDetailsService {
     private final MemberQueryRepository memberQueryRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
-        Member member = memberQueryRepository.findMemberByKakaoId(Long.parseLong(kakaoId))
-                .orElseThrow(() -> new MemberNotFoundException());
+    public UserDetails loadUserByUsername(String memberId) throws UsernameNotFoundException {
+        Member member = memberQueryRepository.findByMemberId(Long.parseLong(memberId))
+                .orElseThrow(MemberNotFoundException::new);
 
         MDC.put("accessMemberId", String.valueOf(member.getId()));
 

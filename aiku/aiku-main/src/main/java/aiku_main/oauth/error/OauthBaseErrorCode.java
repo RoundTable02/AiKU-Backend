@@ -1,7 +1,7 @@
 package aiku_main.oauth.error;
 
-public interface KauthBaseErrorCode {
-    public KauthErrorReason getErrorReason();
+public interface OauthBaseErrorCode {
+    public OauthErrorReason getErrorReason();
 
     String getExplainError() throws NoSuchFieldException;
 

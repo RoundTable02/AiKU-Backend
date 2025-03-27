@@ -119,8 +119,8 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
           
           if [ "$(docker ps -q -f name=aiku-gateway)" ]; then
-            docker stop aiku-gateway
-            docker rm aiku-gateway
+            docker container stop aiku-gateway
+            docker container rm aiku-gateway
           fi
           
           docker run -d \
@@ -146,8 +146,8 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
 
           if [ "$(docker ps -q -f name=aiku-main)" ]; then
-            docker stop aiku-main
-            docker rm aiku-main
+            docker container stop aiku-main
+            docker container rm aiku-main
           fi
           
           docker run -d \
@@ -186,8 +186,8 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
           
           if [ "$(docker ps -q -f name=aiku-map)" ]; then
-            docker stop aiku-map
-            docker rm aiku-map
+            docker container stop aiku-map
+            docker container rm aiku-map
           fi
           
           docker run -d \
@@ -215,8 +215,8 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
           
           if [ "$(docker ps -q -f name=aiku-alarm)" ]; then
-            docker stop aiku-alarm
-            docker rm aiku-alarm
+            docker container stop aiku-alarm
+            docker container rm aiku-alarm
           fi
           
           docker run -d \

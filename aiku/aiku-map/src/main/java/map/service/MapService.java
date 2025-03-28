@@ -1,5 +1,6 @@
 package map.service;
 
+import common.domain.Location;
 import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
@@ -86,6 +87,8 @@ public class MapService {
         schedule.arriveScheduleMember(scheduleMember, arrivalDto.getArrivalTime());
 
         // 도착하면? TTL 삭제 후 도착 상태로 저장
+        Location location = schedule.getLocation();
+        scheduleLocationRepository.saveLocation(scheduleId, memberId, location.getLatitude(), location.getLongitude());
         scheduleLocationRepository.updateArrivalStatus(scheduleId, memberId, true);
 
         //  해당 약속의 멤버들에게 멤버 도착 카프카로 전달

@@ -39,6 +39,13 @@ public class MapController {
         return locationsResponseDto;
     }
 
+    @GetMapping("/location")
+    public LocationsResponseDto getLocation(@PathVariable Long scheduleId,
+                                             @RequestHeader(name = "Access-Member-Id") Long accessMemberId) {
+
+        return mapService.getAllLocation(accessMemberId, scheduleId);
+    }
+
     @PostMapping("/arrival")
     public BaseResponse<BaseResultDto> makeMemberArrive(@PathVariable Long scheduleId,
                                                         @RequestHeader(name = "Access-Member-Id") Long accessMemberId,

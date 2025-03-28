@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class ScheduleLocationRepository {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private static final int TTL_SECONDS = 60 * 5; // 1분
+    private static final int TTL_SECONDS = 60 * 5; // 5분
 
     // 멤버 위치, 도착여부 저장
     public void saveLocation(Long scheduleId, Long userId, double latitude, double longitude) {

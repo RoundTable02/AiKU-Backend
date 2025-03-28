@@ -112,7 +112,7 @@ public class MapServiceTest {
         assertThat(locationsResponseDto.getCount()).isEqualTo(1);
 
         RealTimeLocationResDto realTimeLocationResDto = locationsResponseDto.getLocations().stream()
-                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .filter(r -> r.getMemberId().equals(member3.getId()))
                 .findAny().orElseThrow();
         assertThat(realTimeLocationResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
         assertThat(realTimeLocationResDto.getLongitude()).isEqualTo(member1Location.getLongitude());

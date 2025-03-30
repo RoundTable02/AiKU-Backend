@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -12,5 +13,5 @@ import java.util.Map;
 public class LocationsResponseDto {
 
     private int count;
-    private Map<Long, RealTimeLocationResDto> locations;
+    private List<RealTimeLocationResDto> locations;
 }

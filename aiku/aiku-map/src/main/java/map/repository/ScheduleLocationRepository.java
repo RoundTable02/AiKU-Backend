@@ -5,10 +5,7 @@ import map.dto.RealTimeLocationResDto;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Repository
@@ -19,8 +16,8 @@ public class ScheduleLocationRepository {
     private static final int TTL_SECONDS = 60 * 5; // 5분
 
     // 멤버 위치, 도착여부 저장
-    public void saveLocation(Long scheduleId, Long userId, double latitude, double longitude) {
-        String key = "schedule:" + scheduleId + ":" + userId;
+    public void saveLocation(Long scheduleId, Long memberId, double latitude, double longitude) {
+        String key = "schedule:" + scheduleId + ":" + memberId;
 
         // 위치 정보 및 도착 여부 저장
         redisTemplate.opsForHash().put(key, "latitude", String.valueOf(latitude));
@@ -32,11 +29,11 @@ public class ScheduleLocationRepository {
     }
 
     // 해당 스케줄에 해당하는 모든 멤버 위치 조회
-    public Map<Long, RealTimeLocationResDto> getScheduleLocations(Long scheduleId) {
+    public List<RealTimeLocationResDto> getScheduleLocations(Long scheduleId) {
         Set<String> keys = redisTemplate.keys("schedule:" + scheduleId + ":*");
-        if (keys == null || keys.isEmpty()) return Collections.emptyMap();
+        if (keys == null || keys.isEmpty()) return Collections.EMPTY_LIST;
 
-        Map<Long, RealTimeLocationResDto> locations = new HashMap<>();
+        List<RealTimeLocationResDto> locations = new ArrayList<>();
         for (String key : keys) {
             Long userId = Long.parseLong(key.split(":")[2]);
             String latitude = (String) redisTemplate.opsForHash().get(key, "latitude");
@@ -45,15 +42,15 @@ public class ScheduleLocationRepository {
 
             if (latitude != null && longitude != null) {
                 boolean arrived = Boolean.parseBoolean(arrivedStr);
-                locations.put(userId, new RealTimeLocationResDto(Double.parseDouble(latitude), Double.parseDouble(longitude), arrived));
+                locations.add(new RealTimeLocationResDto(userId, Double.parseDouble(latitude), Double.parseDouble(longitude), arrived));
             }
         }
         return locations;
     }
 
     // 멤버 도착 여부 업데이트
-    public void updateArrivalStatus(Long scheduleId, Long userId, boolean arrived) {
-        String key = "schedule:" + scheduleId + ":" + userId;
+    public void updateArrivalStatus(Long scheduleId, Long memberId, boolean arrived) {
+        String key = "schedule:" + scheduleId + ":" + memberId;
         redisTemplate.opsForHash().put(key, "arrived", String.valueOf(arrived));
 
         // TTL 제거, 위치 정보 고정

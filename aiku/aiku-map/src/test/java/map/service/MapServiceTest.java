@@ -111,7 +111,9 @@ public class MapServiceTest {
 
         assertThat(locationsResponseDto.getCount()).isEqualTo(1);
 
-        RealTimeLocationResDto realTimeLocationResDto = locationsResponseDto.getLocations().get(member1.getId());
+        RealTimeLocationResDto realTimeLocationResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocationResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
         assertThat(realTimeLocationResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
         assertThat(realTimeLocationResDto.getIsArrived()).isFalse();
@@ -126,12 +128,16 @@ public class MapServiceTest {
 
         assertThat(locationsResponseDto.getCount()).isEqualTo(2);
 
-        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().get(member1.getId());
+        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocation1ResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
         assertThat(realTimeLocation1ResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
         assertThat(realTimeLocation1ResDto.getIsArrived()).isFalse();
 
-        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().get(member2.getId());
+        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member2.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocation2ResDto.getLatitude()).isEqualTo(member2Location.getLatitude());
         assertThat(realTimeLocation2ResDto.getLongitude()).isEqualTo(member2Location.getLongitude());
         assertThat(realTimeLocation2ResDto.getIsArrived()).isFalse();
@@ -148,17 +154,23 @@ public class MapServiceTest {
 
         assertThat(locationsResponseDto.getCount()).isEqualTo(3);
 
-        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().get(member1.getId());
+        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocation1ResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
         assertThat(realTimeLocation1ResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
         assertThat(realTimeLocation1ResDto.getIsArrived()).isFalse();
 
-        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().get(member2.getId());
+        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member2.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocation2ResDto.getLatitude()).isEqualTo(member2Location.getLatitude());
         assertThat(realTimeLocation2ResDto.getLongitude()).isEqualTo(member2Location.getLongitude());
         assertThat(realTimeLocation2ResDto.getIsArrived()).isFalse();
 
-        RealTimeLocationResDto realTimeLocation3ResDto = locationsResponseDto.getLocations().get(member3.getId());
+        RealTimeLocationResDto realTimeLocation3ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member3.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocation3ResDto.getLatitude()).isEqualTo(member3Location.getLatitude());
         assertThat(realTimeLocation3ResDto.getLongitude()).isEqualTo(member3Location.getLongitude());
         assertThat(realTimeLocation3ResDto.getIsArrived()).isFalse();
@@ -175,7 +187,9 @@ public class MapServiceTest {
         assertThat(scheduleMember.getArrivalTime()).isEqualTo(arrivalTime);
 
         LocationsResponseDto locations = mapService.getAllLocation(member1.getId(), schedule1.getId());
-        RealTimeLocationResDto realTimeLocationResDto = locations.getLocations().get(member1.getId());
+        RealTimeLocationResDto realTimeLocationResDto = locations.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
         assertThat(realTimeLocationResDto.getIsArrived()).isTrue();
     }
 

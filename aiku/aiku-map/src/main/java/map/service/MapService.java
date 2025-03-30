@@ -57,7 +57,7 @@ public class MapService {
         scheduleLocationRepository.saveLocation(scheduleId, memberId, realTimeLocationDto.getLatitude(), realTimeLocationDto.getLongitude());
 
         // Redis에 담긴 scheduleId에 해당하는 모든 위치 Load
-        Map<Long, RealTimeLocationResDto> scheduleLocations = scheduleLocationRepository.getScheduleLocations(scheduleId);
+        List<RealTimeLocationResDto> scheduleLocations = scheduleLocationRepository.getScheduleLocations(scheduleId);
 
         // Response로 전달
         return new LocationsResponseDto(scheduleLocations.size(), scheduleLocations);
@@ -69,7 +69,7 @@ public class MapService {
         checkMemberInSchedule(memberId, scheduleId);
 
         // Redis에 담긴 scheduleId에 해당하는 모든 위치 Load
-        Map<Long, RealTimeLocationResDto> scheduleLocations = scheduleLocationRepository.getScheduleLocations(scheduleId);
+        List<RealTimeLocationResDto> scheduleLocations = scheduleLocationRepository.getScheduleLocations(scheduleId);
 
         // Response로 전달
         return new LocationsResponseDto(scheduleLocations.size(), scheduleLocations);

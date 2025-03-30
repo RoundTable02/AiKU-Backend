@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RealTimeLocationResDto {
+    private Long memberId;
     private Double latitude;
     private Double longitude;
     private Boolean isArrived;

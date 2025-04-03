@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface MemberQueryRepository {
 
-    Optional<Member> findByMemberId(Long kakaoId);
+    Optional<Member> findByMemberId(Long memberId);
     boolean existsByNickname(String nickname);
 }

@@ -148,6 +148,21 @@ public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositor
     }
 
     @Override
+    public Optional<ScheduleMember> findScheduleMemberWithSchedule(Long memberId, Long scheduleId) {
+        ScheduleMember findScheduleMember = query
+                .selectFrom(scheduleMember)
+                .innerJoin(scheduleMember.schedule, schedule).fetchJoin()
+                .where(
+                        scheduleMember.member.id.eq(memberId),
+                        scheduleMember.schedule.id.eq(scheduleId),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(findScheduleMember);
+    }
+
+    @Override
     public Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId) {
         ScheduleMember findScheduleMember = query
                 .selectFrom(scheduleMember)

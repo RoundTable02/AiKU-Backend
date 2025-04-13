@@ -26,8 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static aiku_main.application_event.event.PointChangeReason.BETTING;
-import static aiku_main.application_event.event.PointChangeReason.BETTING_CANCLE;
+import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.ExecStatus.TERM;
@@ -84,7 +83,7 @@ public class BettingService {
                 memberId,
                 PLUS,
                 betting.getPointAmount(),
-                BETTING,
+                BETTING_CANCLE,
                 bettingId
         );
 
@@ -148,7 +147,7 @@ public class BettingService {
                         scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
                         PLUS,
                         betting.getPointAmount(),
-                        BETTING,
+                        BETTING_REWARD,
                         betting.getId()
                 );
             }
@@ -166,7 +165,7 @@ public class BettingService {
                         scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
                         PLUS,
                         rewardPoint,
-                        BETTING,
+                        BETTING_REWARD,
                         betting.getId()
                 );
             }else {

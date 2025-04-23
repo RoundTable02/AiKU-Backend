@@ -2,7 +2,7 @@ package aiku_main.service.strategy;
 
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ScheduleEnterRollbackStrategy implements RollbackStrategy {
 
-    private final ScheduleQueryRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
     private final ScheduleScheduler scheduleScheduler;
 
     @Override

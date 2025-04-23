@@ -3,7 +3,7 @@ package aiku_main.service;
 import aiku_main.dto.racing.ScheduleRacing;
 import aiku_main.dto.racing.ScheduleRacingMember;
 import aiku_main.dto.racing.ScheduleRacingResult;
-import aiku_main.repository.RacingQueryRepository;
+import aiku_main.repository.RacingRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Location;
@@ -60,7 +60,7 @@ public class RacingServiceTest {
     Racing racing2;
 
     @Autowired
-    private RacingQueryRepository racingRepository;
+    private RacingRepository racingRepository;
 
     @BeforeEach
     void setUp() {

@@ -9,7 +9,7 @@ import common.domain.team.TeamMember;
 import java.util.List;
 import java.util.Optional;
 
-public interface TeamQueryRepositoryCustom {
+public interface TeamRepositoryCustom {
 
     Optional<Team> findTeamWithResult(Long teamId);
     List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId);

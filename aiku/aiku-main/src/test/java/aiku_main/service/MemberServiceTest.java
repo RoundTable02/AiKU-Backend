@@ -6,7 +6,7 @@ import aiku_main.dto.member.AuthorityUpdateDto;
 import aiku_main.dto.member.MemberResDto;
 import aiku_main.dto.member.TitleMemberResDto;
 import aiku_main.exception.TitleException;
-import aiku_main.repository.TitleQueryRepository;
+import aiku_main.repository.TitleRepository;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;
@@ -35,7 +35,7 @@ class MemberServiceTest {
     MemberService memberService;
 
     @Autowired
-    TitleQueryRepository titleQueryRepository;
+    TitleRepository titleRepository;
 
     Member member;
 
@@ -98,7 +98,7 @@ class MemberServiceTest {
         title.giveTitleToMember(member);
         em.persist(title);
 
-        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+        Long titleMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
                 .orElseThrow();
 
         member.updateMainTitle(titleMemberId);
@@ -132,10 +132,10 @@ class MemberServiceTest {
         titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 
-        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+        Long titleMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
                 .orElseThrow();
 
-        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
+        Long titleNewMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
                 .orElseThrow();
 
         member.updateMainTitle(titleMemberId);
@@ -163,10 +163,10 @@ class MemberServiceTest {
         titleNew.giveTitleToMember(member2);
         em.persist(titleNew);
 
-        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+        Long titleMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
                 .orElseThrow();
 
-        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member2.getId(), titleNew.getId())
+        Long titleNewMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member2.getId(), titleNew.getId())
                 .orElseThrow();
 
         member.updateMainTitle(titleMemberId);
@@ -192,10 +192,10 @@ class MemberServiceTest {
         titleNew.giveTitleToMember(member);
         em.persist(titleNew);
 
-        Long titleMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
+        Long titleMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), title.getId())
                 .orElseThrow();
 
-        Long titleNewMemberId = titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
+        Long titleNewMemberId = titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleNew.getId())
                 .orElseThrow();
 
         member.updateMainTitle(titleMemberId);

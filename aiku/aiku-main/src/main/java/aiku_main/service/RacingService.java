@@ -4,8 +4,8 @@ import aiku_main.dto.racing.ScheduleRacing;
 import aiku_main.dto.racing.ScheduleRacingMember;
 import aiku_main.dto.racing.ScheduleRacingResult;
 import aiku_main.exception.BettingException;
-import aiku_main.repository.RacingQueryRepository;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.RacingRepository;
+import aiku_main.repository.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Racing;
@@ -26,21 +26,21 @@ import static common.response.status.BaseErrorCode.INTERNAL_SERVER_ERROR;
 @Service
 public class RacingService {
 
-    private final RacingQueryRepository racingQueryRepository;
-    private final ScheduleQueryRepository scheduleQueryRepository;
+    private final RacingRepository racingRepository;
+    private final ScheduleRepository scheduleRepository;
 
     private final ObjectMapper objectMapper;
 
     @Transactional
     public void analyzeScheduleRacingResult(Long scheduleId) {
-        List<Racing> racings = racingQueryRepository.findTermRacingsInSchedule(scheduleId);
+        List<Racing> racings = racingRepository.findTermRacingsInSchedule(scheduleId);
 
         if (racings.isEmpty()) {
             return;
         }
 
         Map<Long, ScheduleMember> scheduleMembers =
-                scheduleQueryRepository.findScheduleMembersWithMember(scheduleId).stream()
+                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
                         .collect(Collectors.toMap(
                                 sm -> sm.getId(),
                                 sm -> sm
@@ -55,7 +55,7 @@ public class RacingService {
 
         ScheduleRacingResult result = new ScheduleRacingResult(scheduleId, racingDtoList);
 
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         try {
             schedule.setScheduleRacingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {

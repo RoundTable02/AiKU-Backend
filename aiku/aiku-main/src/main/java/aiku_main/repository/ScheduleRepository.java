@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScheduleQueryRepository extends JpaRepository<Schedule, Long>, ScheduleQueryRepositoryCustom {
+public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
 
     Optional<Schedule> findByIdAndStatus(Long scheduleId, Status status);
     List<Schedule> findByScheduleStatus(ExecStatus scheduleStatus);

@@ -22,7 +22,7 @@ import static common.domain.team.QTeam.team;
 import static common.domain.team.QTeamMember.teamMember;
 
 @RequiredArgsConstructor
-public class BettingQueryRepositoryCustomImpl implements BettingQueryRepositoryCustom {
+public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
 
     private final JPAQueryFactory query;
 

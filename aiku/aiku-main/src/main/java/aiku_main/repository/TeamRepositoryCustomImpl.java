@@ -26,7 +26,7 @@ import static common.domain.team.QTeamMember.teamMember;
 import static common.domain.team.QTeamResult.teamResult;
 
 @RequiredArgsConstructor
-public class TeamQueryRepositoryCustomImpl implements TeamQueryRepositoryCustom {
+public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
 
     private final JPAQueryFactory query;
 

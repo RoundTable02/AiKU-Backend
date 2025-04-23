@@ -6,7 +6,7 @@ import aiku_main.dto.member.*;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.TitleQueryRepository;
+import aiku_main.repository.TitleRepository;
 import aiku_main.s3.S3ImageProvider;
 import common.domain.ServiceAgreement;
 import common.domain.member.Member;
@@ -30,7 +30,7 @@ import static common.response.status.BaseErrorCode.MEMBER_NOT_WITH_TITLE;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final TitleQueryRepository titleQueryRepository;
+    private final TitleRepository titleRepository;
     private final S3ImageProvider s3ImageProvider;
 
     public MemberResDto getMemberDetail(Long accessMemberId) {
@@ -47,7 +47,7 @@ public class MemberService {
         TitleMemberResDto mainTitle = null;
         // 장착된 칭호가 존재하는 경우에만 조회
         if (!Objects.isNull(titleMemberValue)) {
-            mainTitle = titleQueryRepository.getTitleMemberResDtoByTitleId(titleMemberValue.getId());
+            mainTitle = titleRepository.getTitleMemberResDtoByTitleId(titleMemberValue.getId());
         }
 
         return new MemberResDto(
@@ -146,12 +146,12 @@ public class MemberService {
     }
 
     private Long getTitleMemberId(Long titleId, Member member) {
-        return titleQueryRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleId)
+        return titleRepository.findTitleMemberIdByMemberIdAndTitleId(member.getId(), titleId)
                 .orElseThrow(() -> new TitleException(MEMBER_NOT_WITH_TITLE));
     }
 
     private void validateTitleMember(Long memberId, Long titleId) {
-        if (!titleQueryRepository.existTitleMember(memberId, titleId)) {
+        if (!titleRepository.existTitleMember(memberId, titleId)) {
             throw new TitleException(MEMBER_NOT_WITH_TITLE);
         }
     }
@@ -196,7 +196,7 @@ public class MemberService {
     public DataResDto<List<TitleMemberResDto>> getMemberTitles(Long accessMemberId) {
         Member member = getMemberById(accessMemberId);
 
-        List<TitleMemberResDto> titleMembers = titleQueryRepository.getTitleMembers(member.getId());
+        List<TitleMemberResDto> titleMembers = titleRepository.getTitleMembers(member.getId());
 
         return new DataResDto(1, titleMembers);
     }

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScheduleQueryRepositoryCustom {
+public interface ScheduleRepositoryCustom {
 
     Optional<Schedule> findScheduleWithResult(Long scheduleId);
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);

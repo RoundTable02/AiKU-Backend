@@ -2,11 +2,10 @@ package aiku_main.service;
 
 import aiku_main.exception.TitleException;
 import aiku_main.kafka.KafkaProducerService;
-import aiku_main.repository.TitleQueryRepository;
+import aiku_main.repository.TitleRepository;
 import common.domain.member.Member;
 import common.domain.title.Title;
 import common.domain.title.TitleCode;
-import common.kafka_message.alarm.AlarmMemberInfo;
 import common.kafka_message.alarm.AlarmMessageType;
 import common.kafka_message.alarm.TitleGrantedMessage;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +22,11 @@ import static common.kafka_message.KafkaTopic.alarm;
 @Service
 public class TitleService {
 
-    private final TitleQueryRepository titleQueryRepository;
+    private final TitleRepository titleRepository;
     private final KafkaProducerService kafkaProducerService;
 
     public List<Long> getMemberIdsInSchedule(Long scheduleId) {
-        return titleQueryRepository.findMemberIdsInSchedule(scheduleId);
+        return titleRepository.findMemberIdsInSchedule(scheduleId);
     }
 
     @Transactional
@@ -35,7 +34,7 @@ public class TitleService {
         // ** 1만 포인트 달성 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.find10kPointsMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.find10kPointsMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(POINTS_MORE_THAN_10K);
@@ -49,7 +48,7 @@ public class TitleService {
         // ** 누적 일찍 도착 10회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.findEarlyArrival10TimesMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.findEarlyArrival10TimesMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(EARLY_ARRIVAL_10_TIMES);
@@ -63,7 +62,7 @@ public class TitleService {
         // ** 누적 지각 도착 5회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.findLateArrival5TimesMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.findLateArrival5TimesMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(LATE_ARRIVAL_5_TIMES);
@@ -77,7 +76,7 @@ public class TitleService {
         // ** 누적 지각 도착 5회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.findLateArrival10TimesMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.findLateArrival10TimesMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(LATE_ARRIVAL_10_TIMES);
@@ -91,7 +90,7 @@ public class TitleService {
         // ** 누적 베팅 승리 5회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.findBettingWinning5TimesMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.findBettingWinning5TimesMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(BETTING_WINNING_5_TIMES);
@@ -105,7 +104,7 @@ public class TitleService {
         // ** 누적 베팅 승리 10회 이상 칭호 **
 
         // 해당 스케줄 조건 만족 멤버 불러오기
-        List<Member> members = titleQueryRepository.findBettingLosing10TimesMembersByMemberIds(memberIds);
+        List<Member> members = titleRepository.findBettingLosing10TimesMembersByMemberIds(memberIds);
 
         // 타이틀 조회
         Title title = getTitle(BETTING_LOSING_10_TIMES);
@@ -115,14 +114,14 @@ public class TitleService {
     }
 
     private Title getTitle(TitleCode titleCode) {
-        return titleQueryRepository.findByTitleCode(titleCode)
+        return titleRepository.findByTitleCode(titleCode)
                 .orElseThrow(() -> new TitleException());
     }
 
     private void giveTitleToMembers(Title title, List<Member> members) {
         members.forEach(m -> {
             // 이미 해당 타이틀을 보유하고 있는지 확인
-            if(!titleQueryRepository.existTitleMember(m.getId(), title.getId())) {
+            if(!titleRepository.existTitleMember(m.getId(), title.getId())) {
                 title.giveTitleToMember(m);
                 sendMessage(m, title);
             }

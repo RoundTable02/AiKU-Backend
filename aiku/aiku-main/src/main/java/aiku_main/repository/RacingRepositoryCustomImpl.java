@@ -1,7 +1,6 @@
 package aiku_main.repository;
 
 import aiku_main.dto.MemberProfileResDto;
-import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import aiku_main.repository.dto.TeamRacingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
@@ -27,7 +26,7 @@ import static common.domain.team.QTeamMember.teamMember;
 
 @RequiredArgsConstructor
 @Repository
-public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCustom {
+public class RacingRepositoryCustomImpl implements RacingRepositoryCustom {
 
     private final JPAQueryFactory query;
 

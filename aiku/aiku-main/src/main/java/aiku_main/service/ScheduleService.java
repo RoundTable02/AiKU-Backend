@@ -10,8 +10,8 @@ import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
 import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.ScheduleQueryRepository;
-import aiku_main.repository.TeamQueryRepository;
+import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,8 +50,8 @@ import static common.response.status.BaseErrorCode.*;
 public class ScheduleService {
 
     private final MemberRepository memberRepository;
-    private final ScheduleQueryRepository scheduleQueryRepository;
-    private final TeamQueryRepository teamQueryRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TeamRepository teamRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
@@ -75,7 +75,7 @@ public class ScheduleService {
                 scheduleDto.getLocation().toDomain(),
                 scheduleEnterPoint
         );
-        scheduleQueryRepository.save(schedule);
+        scheduleRepository.save(schedule);
 
         scheduleScheduler.reserveSchedule(schedule);
         pointChangeEventPublisher.publish(memberId, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, schedule.getId());
@@ -85,7 +85,7 @@ public class ScheduleService {
     }
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
-        List<String> alarmTokens = teamQueryRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
+        List<String> alarmTokens = teamRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
         kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
     }
 
@@ -130,7 +130,7 @@ public class ScheduleService {
         Schedule schedule = findSchedule(scheduleId);
         checkIsWait(schedule);
 
-        Long scheduleMemberCount = scheduleQueryRepository.countOfScheduleMembers(scheduleId);
+        Long scheduleMemberCount = scheduleRepository.countOfScheduleMembers(scheduleId);
         if(scheduleMemberCount <= 1){
             schedule.delete();
         }else if(scheduleMember.isOwner()){
@@ -150,12 +150,12 @@ public class ScheduleService {
     }
 
     private ScheduleMember findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleId){
-        return scheduleQueryRepository.findNextScheduleOwnerWithMember(scheduleId, prevOwnerScheduleId)
+        return scheduleRepository.findNextScheduleOwnerWithMember(scheduleId, prevOwnerScheduleId)
                 .orElseThrow(() -> new ScheduleException(CAN_NOT_FIND_NEXT_SCHEDULE_OWNER));
     }
 
     private void sendMessageToScheduleMembers(Schedule schedule, Long excludeMemberId, Member sourceMember, AlarmMessageType messageType) {
-        List<String> alarmTokens = scheduleQueryRepository.findAlarmTokenListOfScheduleMembers(schedule.getId(), excludeMemberId);
+        List<String> alarmTokens = scheduleRepository.findAlarmTokenListOfScheduleMembers(schedule.getId(), excludeMemberId);
 
         if(sourceMember == null) {
             kafkaProducerService.sendMessage(
@@ -180,7 +180,7 @@ public class ScheduleService {
     @Transactional
     public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
         Schedule schedule = findSchedule(scheduleId);
-        ScheduleMember scheduleMember = scheduleQueryRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
+        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
 
         schedule.arriveScheduleMember(scheduleMember, arrivalTime);
     }
@@ -197,7 +197,7 @@ public class ScheduleService {
         Schedule schedule = findSchedule(scheduleId);
         checkScheduleMember(memberId, scheduleId, true);
 
-        List<ScheduleMemberResDto> membersDtoList = scheduleQueryRepository.getScheduleMembersWithBettingInfo(memberId, scheduleId);
+        List<ScheduleMemberResDto> membersDtoList = scheduleRepository.getScheduleMembersWithBettingInfo(memberId, scheduleId);
 
         return new ScheduleDetailResDto(schedule, membersDtoList);
     }
@@ -205,7 +205,7 @@ public class ScheduleService {
     public SchedulePreviewResDto getSchedulePreview(Long memberId, Long groupId, Long scheduleId) {
         checkTeamMember(memberId, groupId);
 
-        SchedulePreviewResDto schedulePreview = scheduleQueryRepository.getSchedulePreview(scheduleId);
+        SchedulePreviewResDto schedulePreview = scheduleRepository.getSchedulePreview(scheduleId);
 
         return schedulePreview;
     }
@@ -214,18 +214,18 @@ public class ScheduleService {
         Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId);
 
-        List<TeamScheduleListEachResDto> scheduleList = scheduleQueryRepository.getTeamSchedules(teamId, memberId, dateCond, page);
+        List<TeamScheduleListEachResDto> scheduleList = scheduleRepository.getTeamSchedules(teamId, memberId, dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(memberId));
-        int runSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
-        int waitSchedule = scheduleQueryRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
+        int runSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
+        int waitSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
 
         return new TeamScheduleListResDto(page, teamId, runSchedule, waitSchedule, scheduleList);
     }
 
     public MemberScheduleListResDto getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
-        List<MemberScheduleListEachResDto> scheduleList = scheduleQueryRepository.getMemberSchedules(memberId, dateCond, page);
-        int runSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.RUN, dateCond);
-        int waitSchedule = scheduleQueryRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.WAIT, dateCond);
+        List<MemberScheduleListEachResDto> scheduleList = scheduleRepository.getMemberSchedules(memberId, dateCond, page);
+        int runSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.RUN, dateCond);
+        int waitSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.WAIT, dateCond);
 
         return new MemberScheduleListResDto(page, runSchedule, waitSchedule, scheduleList);
     }
@@ -252,7 +252,7 @@ public class ScheduleService {
     }
 
     public SimpleResDto<List<LocalDate>> getScheduleDatesInMonth(Long memberId, MonthDto monthDto) {
-        List<LocalDate> scheduleTimeList = scheduleQueryRepository.findScheduleDatesInMonth(memberId, monthDto.getYear(), monthDto.getMonth())
+        List<LocalDate> scheduleTimeList = scheduleRepository.findScheduleDatesInMonth(memberId, monthDto.getYear(), monthDto.getMonth())
                 .stream()
                 .map(dateTime -> dateTime.toLocalDate())
                 .distinct()
@@ -266,7 +266,7 @@ public class ScheduleService {
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
         Member member = memberRepository.findById(memberId).orElseThrow();
 
-        List<ScheduleMember> scheduleMembers = scheduleQueryRepository.findWaitScheduleMemberWithScheduleInTeam(memberId, teamId);
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findWaitScheduleMemberWithScheduleInTeam(memberId, teamId);
         scheduleMembers.forEach((scheduleMember) ->{
             Schedule schedule = scheduleMember.getSchedule();
             schedule.removeScheduleMember(scheduleMember);
@@ -279,7 +279,7 @@ public class ScheduleService {
 
     @Transactional
     public void openSchedule(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         schedule.setRun();
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_OPEN);
@@ -292,7 +292,7 @@ public class ScheduleService {
             return;
         }
 
-        List<ScheduleMember> notArriveScheduleMembers = scheduleQueryRepository.findNotArriveScheduleMember(scheduleId);
+        List<ScheduleMember> notArriveScheduleMembers = scheduleRepository.findNotArriveScheduleMember(scheduleId);
 
         LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
@@ -303,16 +303,16 @@ public class ScheduleService {
 
     @Transactional
     public void processScheduleResultPoint(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
 
-        List<ScheduleMember> earlyMembers = scheduleQueryRepository.findEarlyScheduleMemberWithMember(scheduleId);
+        List<ScheduleMember> earlyMembers = scheduleRepository.findEarlyScheduleMemberWithMember(scheduleId);
 
         if(earlyMembers.isEmpty()) {
             refundScheduleEnterPointToMembers(schedule);
             return;
         }
 
-        int lateScheduleMemberCount = scheduleQueryRepository.findLateScheduleMemberCount(scheduleId);
+        int lateScheduleMemberCount = scheduleRepository.findLateScheduleMemberCount(scheduleId);
         int rewardOfEarlyMember = lateScheduleMemberCount * scheduleEnterPoint / earlyMembers.size();
         int rewardPointAmount = scheduleEnterPoint + rewardOfEarlyMember;
 
@@ -329,7 +329,7 @@ public class ScheduleService {
     }
 
     private void refundScheduleEnterPointToMembers(Schedule schedule){
-        scheduleQueryRepository.findScheduleMemberListWithMember(schedule.getId())
+        scheduleRepository.findScheduleMemberListWithMember(schedule.getId())
                 .forEach((scheduleMember) -> {
                     schedule.rewardMember(scheduleMember, scheduleEnterPoint);
                     pointChangeEventPublisher.publish(
@@ -344,9 +344,9 @@ public class ScheduleService {
 
     @Transactional
     public void analyzeScheduleArrivalResult(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findScheduleWithResult(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findScheduleWithResult(scheduleId).orElseThrow();
 
-        List<ScheduleArrivalMember> arrivalMembers = scheduleQueryRepository.getScheduleArrivalResults(scheduleId);
+        List<ScheduleArrivalMember> arrivalMembers = scheduleRepository.getScheduleArrivalResults(scheduleId);
         ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
         try {
             schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
@@ -360,22 +360,22 @@ public class ScheduleService {
     }
 
     private Team findTeam(Long teamId){
-        return teamQueryRepository.findByIdAndStatus(teamId, ALIVE)
+        return teamRepository.findByIdAndStatus(teamId, ALIVE)
                 .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
     }
 
     private Schedule findSchedule(Long scheduleId){
-        return scheduleQueryRepository.findByIdAndStatus(scheduleId, ALIVE)
+        return scheduleRepository.findByIdAndStatus(scheduleId, ALIVE)
                 .orElseThrow(() -> new ScheduleException(NO_SUCH_SCHEDULE));
     }
 
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId){
-        return scheduleQueryRepository.findScheduleMember(memberId, scheduleId)
+        return scheduleRepository.findScheduleMember(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private ScheduleResult findScheduleResult(Long scheduleId){
-        return scheduleQueryRepository.findScheduleResult(scheduleId)
+        return scheduleRepository.findScheduleResult(scheduleId)
                 .orElseThrow(() -> new ScheduleException(NO_SUCH_SCHEDULE_RESULT));
     }
 
@@ -386,13 +386,13 @@ public class ScheduleService {
     }
 
     private void checkTeamMember(Long memberId, Long teamId){
-        if(!teamQueryRepository.existTeamMember(memberId, teamId)){
+        if(!teamRepository.existTeamMember(memberId, teamId)){
             throw new TeamException(NOT_IN_TEAM);
         }
     }
 
     private void checkScheduleMember(Long memberId, Long scheduleId, boolean isMember){
-        if(scheduleQueryRepository.existScheduleMember(memberId, scheduleId) != isMember){
+        if(scheduleRepository.existScheduleMember(memberId, scheduleId) != isMember){
             if(isMember){
                 throw new ScheduleException(NOT_IN_SCHEDULE);
             }else{
@@ -402,7 +402,7 @@ public class ScheduleService {
     }
 
     private void checkIsOwner(Long memberId, Long scheduleId){
-        if(!scheduleQueryRepository.isScheduleOwner(memberId, scheduleId)){
+        if(!scheduleRepository.isScheduleOwner(memberId, scheduleId)){
             throw new ScheduleException(NO_SCHEDULE_OWNER);
         }
     }

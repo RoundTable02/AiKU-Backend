@@ -7,7 +7,7 @@ import common.domain.ExecStatus;
 import java.util.List;
 import java.util.Map;
 
-public interface BettingQueryRepositoryCustom {
+public interface BettingRepositoryCustom {
 
     List<Betting> findBettingsInSchedule(Long scheduleId, ExecStatus bettingStatus);
 

@@ -31,10 +31,10 @@ import static common.response.status.BaseErrorCode.*;
 @Service
 public class TeamService {
 
-    private final TeamQueryRepository teamQueryRepository;
-    private final ScheduleQueryRepository scheduleQueryRepository;
-    private final BettingQueryRepository bettingQueryRepository;
-    private final RacingQueryRepository racingQueryRepository;
+    private final TeamRepository teamRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final BettingRepository bettingRepository;
+    private final RacingRepository racingRepository;
     private final MemberRepository memberRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapperUtil objectMapperUtil;
@@ -44,7 +44,7 @@ public class TeamService {
         Member member = findMember(memberId);
 
         Team team = Team.create(member, teamDto.getGroupName());
-        teamQueryRepository.save(team);
+        teamRepository.save(team);
 
         return team.getId();
     }
@@ -67,7 +67,7 @@ public class TeamService {
         checkTeamMember(memberId, teamId, true);
         checkHasRunSchedule(memberId, teamId);
 
-        Long teamMemberCount = teamQueryRepository.countOfTeamMember(teamId);
+        Long teamMemberCount = teamRepository.countOfTeamMember(teamId);
         if (teamMemberCount <= 1){
             team.delete();
         }
@@ -84,13 +84,13 @@ public class TeamService {
         Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        List<TeamMemberResDto> teamMemberList = teamQueryRepository.getTeamMemberList(teamId);
+        List<TeamMemberResDto> teamMemberList = teamRepository.getTeamMemberList(teamId);
 
         return new TeamDetailResDto(teamId, team.getTeamName(), teamMemberList);
     }
 
     public DataResDto<List<TeamResDto>> getTeamList(Long memberId, int page) {
-        List<TeamResDto> data = teamQueryRepository.getTeamList(memberId, page);
+        List<TeamResDto> data = teamRepository.getTeamList(memberId, page);
 
         return new DataResDto<>(page, data);
     }
@@ -118,10 +118,10 @@ public class TeamService {
 
     @Transactional
     public void analyzeLateTimeResult(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         Team team = findTeamWithResult(schedule.getTeam().getId());
 
-        List<TeamMemberResult> lateTeamMemberRanking = teamQueryRepository.getTeamLateTimeResult(team.getId());
+        List<TeamMemberResult> lateTeamMemberRanking = teamRepository.getTeamLateTimeResult(team.getId());
 
         Map<Long, Integer> previousResultMembers = getPreviousLateTimeResultRank(team.getTeamResult());
         int rank = 1;
@@ -150,10 +150,10 @@ public class TeamService {
 
     @Transactional
     public void analyzeBettingResult(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         Team team = findTeamWithResult(schedule.getTeam().getId());
 
-        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingQueryRepository.findMemberTermBettingsInTeam(team.getId());
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingRepository.findMemberTermBettingsInTeam(team.getId());
 
         Map<Long, Integer> previousResult = getPreviousBettingResult(team.getTeamResult());
 
@@ -193,10 +193,10 @@ public class TeamService {
 
     @Transactional
     public void analyzeRacingResult(Long scheduleId) {
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         Team team = findTeamWithResult(schedule.getTeam().getId());
 
-        Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingQueryRepository.findMemberWithTermRacingsInTeam(team.getId());
+        Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingRepository.findMemberWithTermRacingsInTeam(team.getId());
 
         Map<Long, Integer> previousResult = getPreviousRacingResult(team.getTeamResult());
 
@@ -300,22 +300,22 @@ public class TeamService {
     }
 
     private Team findTeam(Long teamId){
-        return teamQueryRepository.findByIdAndStatus(teamId, ALIVE)
+        return teamRepository.findByIdAndStatus(teamId, ALIVE)
                 .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
     }
 
     private Team findTeamWithResult(Long teamId){
-        return teamQueryRepository.findTeamWithResult(teamId)
+        return teamRepository.findTeamWithResult(teamId)
                 .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
     }
 
     private TeamMember findTeamMember(Long memberId, Long teamId){
-        return teamQueryRepository.findTeamMember(teamId, memberId)
+        return teamRepository.findTeamMember(teamId, memberId)
                 .orElseThrow(() -> new TeamException(INTERNAL_SERVER_ERROR));
     }
 
     private void checkTeamMember(Long memberId, Long teamId, boolean isMember){
-        if(teamQueryRepository.existTeamMember(memberId, teamId) != isMember){
+        if(teamRepository.existTeamMember(memberId, teamId) != isMember){
             if(isMember){
                 throw new TeamException(NOT_IN_TEAM);
             }else {
@@ -325,7 +325,7 @@ public class TeamService {
     }
 
     private void checkHasRunSchedule(Long memberId, Long teamId) {
-        if(scheduleQueryRepository.existRunScheduleOfMemberInTeam(memberId, teamId)){
+        if(scheduleRepository.existRunScheduleOfMemberInTeam(memberId, teamId)){
             throw new TeamException(CAN_NOT_EXIT);
         }
     }

@@ -16,7 +16,7 @@ import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.title.QTitleMember.titleMember;
 
 @RequiredArgsConstructor
-public class TitleQueryRepositoryCustomImpl implements TitleQueryRepositoryCustom {
+public class TitleRepositoryCustomImpl implements TitleRepositoryCustom {
 
     private final JPAQueryFactory query;
 

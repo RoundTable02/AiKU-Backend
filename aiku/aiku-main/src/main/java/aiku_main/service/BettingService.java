@@ -7,9 +7,9 @@ import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
-import aiku_main.repository.BettingQueryRepository;
+import aiku_main.repository.BettingRepository;
 import aiku_main.repository.MemberRepository;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Betting;
@@ -42,8 +42,8 @@ import static common.response.status.BaseErrorCode.*;
 public class BettingService {
 
     private final MemberRepository memberRepository;
-    private final BettingQueryRepository bettingQueryRepository;
-    private final ScheduleQueryRepository scheduleQueryRepository;
+    private final BettingRepository bettingRepository;
+    private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ObjectMapper objectMapper;
 
@@ -59,7 +59,7 @@ public class BettingService {
         checkEnoughPoint(member, bettingDto.getPointAmount());
 
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
-        bettingQueryRepository.save(betting);
+        bettingRepository.save(betting);
 
         pointChangeEventPublisher.publish(
                 memberId,
@@ -93,7 +93,7 @@ public class BettingService {
 
     @Transactional
     public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
-        bettingQueryRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE)
+        bettingRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE)
                 .ifPresent((betting) -> {
                     betting.setStatus(DELETE);
 
@@ -109,11 +109,11 @@ public class BettingService {
 
     @Transactional
     public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
-        bettingQueryRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE)
+        bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE)
                 .ifPresent((betting) -> {
                     betting.setStatus(DELETE);
 
-                    Long memberIdOfBettor = scheduleQueryRepository.findMemberIdOfScheduleMember(betting.getBettor().getId()).orElseThrow();
+                    Long memberIdOfBettor = scheduleRepository.findMemberIdOfScheduleMember(betting.getBettor().getId()).orElseThrow();
                     pointChangeEventPublisher.publish(
                             memberIdOfBettor,
                             PLUS,
@@ -126,13 +126,13 @@ public class BettingService {
 
     @Transactional
     public void processBettingResult(Long scheduleId) {
-        List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(scheduleId, WAIT);
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
         if(bettings.isEmpty()){
             return;
         }
 
         Map<Long, ScheduleMember> scheduleMembers =
-                scheduleQueryRepository.findScheduleMembersWithMember(scheduleId).stream()
+                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
                 .collect(Collectors.toMap(
                         sm -> sm.getId(),
                         sm -> sm
@@ -207,13 +207,13 @@ public class BettingService {
 
     @Transactional
     public void analyzeScheduleBettingResult(Long scheduleId) {
-        List<Betting> bettings = bettingQueryRepository.findBettingsInSchedule(scheduleId, TERM);
+        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
         if(bettings.isEmpty()){
             return;
         }
 
         Map<Long, ScheduleMember> scheduleMembers =
-                scheduleQueryRepository.findScheduleMembersWithMember(scheduleId).stream()
+                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
                         .collect(Collectors.toMap(
                                 sm -> sm.getId(),
                                 sm -> sm
@@ -229,7 +229,7 @@ public class BettingService {
 
         ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
 
-        Schedule schedule = scheduleQueryRepository.findById(scheduleId).orElseThrow();
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         try {
             schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
@@ -242,28 +242,28 @@ public class BettingService {
     }
 
     private Betting findBettingById(Long bettingId){
-        return bettingQueryRepository.findByIdAndStatus(bettingId, ALIVE)
+        return bettingRepository.findByIdAndStatus(bettingId, ALIVE)
                 .orElseThrow(() -> new BettingException(NO_SUCH_BETTING));
     }
 
     private ScheduleMember findScheduleMember(Long memberId, Long scheduleId) {
-        return scheduleQueryRepository.findScheduleMember(memberId, scheduleId)
+        return scheduleRepository.findScheduleMember(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private Long findScheduleMemberId(Long memberId, Long scheduleId) {
-        return scheduleQueryRepository.findScheduleMemberId(memberId, scheduleId)
+        return scheduleRepository.findScheduleMemberId(memberId, scheduleId)
                 .orElseThrow(() -> new ScheduleException(NOT_IN_SCHEDULE));
     }
 
     private void checkScheduleWait(Long scheduleId) {
-        if(!scheduleQueryRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, ALIVE)){
+        if(!scheduleRepository.existsByIdAndScheduleStatusAndStatus(scheduleId, WAIT, ALIVE)){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }
 
     private void checkAlreadyHasBetting(Long scheduleMemberIdOfBettor, Long scheduleId) {
-        if(bettingQueryRepository.existBettorInSchedule(scheduleMemberIdOfBettor, scheduleId)){
+        if(bettingRepository.existBettorInSchedule(scheduleMemberIdOfBettor, scheduleId)){
             throw new BettingException(ALREADY_IN_BETTING);
         }
     }

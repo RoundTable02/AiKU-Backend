@@ -6,7 +6,7 @@ import common.domain.member.Member;
 import java.util.List;
 import java.util.Optional;
 
-public interface TitleQueryRepositoryCustom {
+public interface TitleRepositoryCustom {
 
     Optional<Long> findTitleMemberIdByMemberIdAndTitleId(Long memberId, Long titleId);
     TitleMemberResDto getTitleMemberResDtoByTitleId(Long titleId);

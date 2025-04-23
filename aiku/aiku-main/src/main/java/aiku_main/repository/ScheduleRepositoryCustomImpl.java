@@ -28,7 +28,7 @@ import static common.domain.schedule.QScheduleResult.scheduleResult;
 import static common.domain.team.QTeam.team;
 
 @RequiredArgsConstructor
-public class ScheduleQueryRepositoryCustomImpl implements ScheduleQueryRepositoryCustom {
+public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
     private final JPAQueryFactory query;
 

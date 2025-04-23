@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.team;
 
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.team.TeamAddDto;

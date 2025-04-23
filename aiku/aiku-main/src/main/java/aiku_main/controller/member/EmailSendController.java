@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.member;
 
 import aiku_main.dto.InquiryDto;
 import aiku_main.service.member.EmailService;

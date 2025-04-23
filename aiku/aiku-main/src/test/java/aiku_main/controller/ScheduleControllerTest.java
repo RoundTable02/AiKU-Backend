@@ -1,5 +1,6 @@
 package aiku_main.controller;
 
+import aiku_main.controller.schedule.ScheduleController;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.ScheduleAddDto;
 import aiku_main.dto.schedule.ScheduleUpdateDto;

@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.member;
 
 import aiku_main.dto.member.login.RefreshTokenDto;
 import aiku_main.dto.member.login.RefreshTokenResDto;

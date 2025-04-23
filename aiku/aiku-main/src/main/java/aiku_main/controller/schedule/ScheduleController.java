@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.schedule;
 
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;

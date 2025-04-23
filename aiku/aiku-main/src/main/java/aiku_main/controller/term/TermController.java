@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.term;
 
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.member.TermResDto;

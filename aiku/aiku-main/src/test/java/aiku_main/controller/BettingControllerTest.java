@@ -1,5 +1,6 @@
 package aiku_main.controller;
 
+import aiku_main.controller.betting.BettingController;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.service.betting.BettingService;
 import com.fasterxml.jackson.databind.ObjectMapper;

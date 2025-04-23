@@ -1,4 +1,4 @@
-package aiku_main.controller;
+package aiku_main.controller.betting;
 
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.service.betting.BettingService;

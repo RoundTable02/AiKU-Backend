@@ -14,15 +14,15 @@ import java.io.InputStream;
 @Getter
 @NoArgsConstructor
 @JsonNaming(SnakeCaseStrategy.class)
-public class KakaoKauthErrorResponse {
+public class OauthErrorResponse {
     private String error;
     private String errorCode;
     private String errorDescription;
 
-    public static KakaoKauthErrorResponse from(Response response) {
+    public static OauthErrorResponse from(Response response) {
         try (InputStream bodyIs = response.body().asInputStream()) {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(bodyIs, KakaoKauthErrorResponse.class);
+            return mapper.readValue(bodyIs, OauthErrorResponse.class);
         } catch (IOException e) {
             throw new InvalidIdTokenException();
         }

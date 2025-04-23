@@ -66,21 +66,21 @@ public class RacingServiceTest {
     @BeforeEach
     void setUp() {
         member1 = Member.builder()
-                .kakaoId(1L)
+                .oauthId(1L)
                 .nickname("member1")
                 .email("member1@sample.com")
                 .password("1")
                 .build();
 
         member2 = Member.builder()
-                .kakaoId(2L)
+                .oauthId(2L)
                 .nickname("member2")
                 .email("member2@sample.com")
                 .password("2")
                 .build();
 
         member3 = Member.builder()
-                .kakaoId(3L)
+                .oauthId(3L)
                 .nickname("member3")
                 .email("member3@sample.com")
                 .password("3")

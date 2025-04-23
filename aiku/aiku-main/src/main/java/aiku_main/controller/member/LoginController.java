@@ -17,9 +17,16 @@ public class LoginController {
 
     private final LoginService loginService;
 
-    @PostMapping("/sign-in")
-    public BaseResponse<SignInTokenResDto> signIn(@RequestBody @Valid SignInDto signInDto){
-        SignInTokenResDto signInTokenResDto = loginService.signIn(signInDto.getIdToken());
+    @PostMapping("/sign-in/kakao")
+    public BaseResponse<SignInTokenResDto> signInKakao(@RequestBody @Valid SignInDto signInDto){
+        SignInTokenResDto signInTokenResDto = loginService.signInKakao(signInDto.getIdToken());
+
+        return new BaseResponse<>(signInTokenResDto);
+    }
+
+    @PostMapping("/sign-in/apple")
+    public BaseResponse<SignInTokenResDto> signInApple(@RequestBody @Valid SignInDto signInDto){
+        SignInTokenResDto signInTokenResDto = loginService.signInApple(signInDto.getIdToken());
 
         return new BaseResponse<>(signInTokenResDto);
     }

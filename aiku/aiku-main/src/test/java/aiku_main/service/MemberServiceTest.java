@@ -45,7 +45,7 @@ class MemberServiceTest {
     @BeforeEach
     void init() {
         member = Member.builder()
-                .kakaoId(123L)
+                .oauthId(123L)
                 .nickname("nickname1")
                 .password("password1")
                 .email("asdasd@gmail.com")
@@ -58,7 +58,7 @@ class MemberServiceTest {
         em.persist(member);
 
         member2 = Member.builder()
-                .kakaoId(124L)
+                .oauthId(124L)
                 .nickname("nickname2")
                 .password("password2")
                 .email("asdasd2@gmail.com")

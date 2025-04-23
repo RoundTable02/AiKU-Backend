@@ -26,9 +26,9 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepository {
     );
 
     @Override
-    public Optional<Member> findMemberByKakaoId(Long kakaoId) {
-        String sql = "SELECT * FROM member WHERE kakao_id = ?";
-        return jdbcTemplate.query(sql, memberRowMapper, kakaoId)
+    public Optional<Member> findByMemberId(Long memberId) {
+        String sql = "SELECT * FROM member WHERE member_id = ?";
+        return jdbcTemplate.query(sql, memberRowMapper, memberId)
                 .stream()
                 .findFirst();
     }

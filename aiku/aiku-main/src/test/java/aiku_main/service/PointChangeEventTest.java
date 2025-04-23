@@ -41,7 +41,7 @@ public class PointChangeEventTest {
     @BeforeEach
     void init() {
         member = Member.builder()
-                .kakaoId(123L)
+                .oauthId(123L)
                 .nickname("nickname1")
                 .password("password1")
                 .email("asdasd@gmail.com")

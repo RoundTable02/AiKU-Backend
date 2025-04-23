@@ -14,7 +14,7 @@ public class MemberAdaptor extends User {
     private Member member;
 
     public MemberAdaptor(Member member, List<SimpleGrantedAuthority> authorities) {
-        super(String.valueOf(member.getKakaoId()), member.getPassword(), authorities);
+        super(String.valueOf(member.getOauthId()), member.getPassword(), authorities);
         this.member = member;
     }
 }

@@ -74,7 +74,7 @@ public class ScheduleScheduler {
         scheduleAutoCloseTasks.put(schedule.getId(), future);
     }
 
-    private void cancelAll(Long scheduleId){
+    public void cancelAll(Long scheduleId){
         ScheduledFuture future1 = scheduleOpenTasks.get(scheduleId);
         if (future1 != null) {
             future1.cancel(false);

@@ -39,7 +39,7 @@ class MemberFirebaseServiceTest {
     @BeforeEach
     void setUp() {
         member = Member.builder()
-                .kakaoId(123L)
+                .oauthId(123L)
                 .nickname("nickname1")
                 .password("password1")
                 .email("asdasd@gmail.com")

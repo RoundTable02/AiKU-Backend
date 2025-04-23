@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import static common.domain.ExecStatus.TERM;
 import static common.domain.Status.ALIVE;
+import static common.domain.betting.QBetting.betting;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.team.QTeam.team;

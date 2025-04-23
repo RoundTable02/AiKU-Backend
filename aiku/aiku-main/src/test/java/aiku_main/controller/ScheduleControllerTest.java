@@ -3,7 +3,7 @@ package aiku_main.controller;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.ScheduleAddDto;
 import aiku_main.dto.schedule.ScheduleUpdateDto;
-import aiku_main.service.ScheduleService;
+import aiku_main.service.schedule.ScheduleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;

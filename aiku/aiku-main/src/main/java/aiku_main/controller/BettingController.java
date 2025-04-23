@@ -1,7 +1,7 @@
 package aiku_main.controller;
 
 import aiku_main.dto.betting.BettingAddDto;
-import aiku_main.service.BettingService;
+import aiku_main.service.betting.BettingService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;

@@ -7,6 +7,7 @@ import aiku_main.dto.member.MemberResDto;
 import aiku_main.dto.member.TitleMemberResDto;
 import aiku_main.exception.TitleException;
 import aiku_main.repository.title.TitleRepository;
+import aiku_main.service.member.MemberService;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;

@@ -4,7 +4,7 @@ import aiku_main.dto.DataResDto;
 import aiku_main.dto.team.TeamAddDto;
 import aiku_main.dto.team.TeamDetailResDto;
 import aiku_main.dto.team.TeamResDto;
-import aiku_main.service.TeamService;
+import aiku_main.service.team.TeamService;
 import common.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

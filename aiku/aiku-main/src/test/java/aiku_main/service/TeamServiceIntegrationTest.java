@@ -5,6 +5,7 @@ import aiku_main.dto.team.TeamResDto;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.team.TeamRepository;
+import aiku_main.service.team.TeamService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;

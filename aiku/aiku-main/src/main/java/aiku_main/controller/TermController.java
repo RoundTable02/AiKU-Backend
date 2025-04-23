@@ -2,7 +2,7 @@ package aiku_main.controller;
 
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.member.TermResDto;
-import aiku_main.service.TermService;
+import aiku_main.service.term.TermService;
 import common.domain.TermTitle;
 import common.response.BaseResponse;
 import lombok.RequiredArgsConstructor;

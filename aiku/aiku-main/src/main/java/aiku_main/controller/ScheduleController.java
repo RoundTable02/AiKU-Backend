@@ -2,7 +2,7 @@ package aiku_main.controller;
 
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
-import aiku_main.service.ScheduleService;
+import aiku_main.service.schedule.ScheduleService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;

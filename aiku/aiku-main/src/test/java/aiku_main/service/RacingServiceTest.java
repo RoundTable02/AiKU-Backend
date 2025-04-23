@@ -4,6 +4,7 @@ import aiku_main.dto.racing.ScheduleRacing;
 import aiku_main.dto.racing.ScheduleRacingMember;
 import aiku_main.dto.racing.ScheduleRacingResult;
 import aiku_main.repository.racing.RacingRepository;
+import aiku_main.service.schedule.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Location;

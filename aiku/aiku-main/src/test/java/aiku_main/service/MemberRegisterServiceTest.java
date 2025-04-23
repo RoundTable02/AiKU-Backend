@@ -5,6 +5,7 @@ import aiku_main.dto.member.MemberRegisterDto;
 import aiku_main.dto.member.NicknameExistResDto;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
+import aiku_main.service.member.MemberRegisterService;
 import common.domain.Status;
 import common.domain.event.RecommendEvent;
 import common.domain.member.*;

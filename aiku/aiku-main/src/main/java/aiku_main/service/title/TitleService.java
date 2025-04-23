@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.title;
 
 import aiku_main.exception.TitleException;
 import aiku_main.kafka.KafkaProducerService;

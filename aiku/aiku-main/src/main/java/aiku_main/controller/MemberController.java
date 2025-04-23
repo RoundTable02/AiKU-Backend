@@ -2,7 +2,7 @@ package aiku_main.controller;
 
 import aiku_main.dto.*;
 import aiku_main.dto.member.*;
-import aiku_main.service.MemberService;
+import aiku_main.service.member.MemberService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;

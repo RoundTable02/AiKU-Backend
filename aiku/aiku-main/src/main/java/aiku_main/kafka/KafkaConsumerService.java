@@ -1,15 +1,11 @@
 package aiku_main.kafka;
 
 import aiku_main.application_event.event.PointChangeEvent;
-import aiku_main.application_event.event.PointChangeReason;
-import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
-import aiku_main.service.ScheduleService;
+import aiku_main.service.schedule.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.domain.value_reference.MemberValue;
-import common.kafka_message.PaymentPointChangedMessage;
 import common.kafka_message.ScheduleArrivalMessage;
 import common.kafka_message.ScheduleCloseMessage;
 import lombok.RequiredArgsConstructor;

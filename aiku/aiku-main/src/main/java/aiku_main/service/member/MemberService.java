@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.member;
 
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.dto.*;

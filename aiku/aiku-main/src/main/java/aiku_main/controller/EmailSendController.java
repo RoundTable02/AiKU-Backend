@@ -1,8 +1,7 @@
 package aiku_main.controller;
 
 import aiku_main.dto.InquiryDto;
-import aiku_main.service.EmailService;
-import common.domain.member.Member;
+import aiku_main.service.member.EmailService;
 import common.response.BaseResponse;
 import common.response.BaseResultDto;
 import jakarta.validation.Valid;

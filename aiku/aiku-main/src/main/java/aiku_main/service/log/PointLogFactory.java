@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.log;
 
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;

@@ -1,9 +1,10 @@
-package aiku_main.service;
+package aiku_main.service.member;
 
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.application_event.publisher.PointChangeFailEventPublisher;
 import aiku_main.exception.PointChangeFailException;
+import aiku_main.service.log.PointLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

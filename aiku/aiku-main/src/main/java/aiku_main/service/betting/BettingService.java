@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.betting;
 
 import aiku_main.dto.betting.ScheduleBetting;
 import aiku_main.dto.betting.ScheduleBettingMember;

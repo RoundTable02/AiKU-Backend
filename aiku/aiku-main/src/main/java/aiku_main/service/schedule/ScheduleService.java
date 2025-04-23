@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.schedule;
 
 import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.schedule.ScheduleArrivalResult;

@@ -4,7 +4,7 @@ import aiku_main.dto.member.login.RefreshTokenDto;
 import aiku_main.dto.member.login.RefreshTokenResDto;
 import aiku_main.dto.member.login.SignInDto;
 import aiku_main.dto.member.login.SignInTokenResDto;
-import aiku_main.service.LoginService;
+import aiku_main.service.member.LoginService;
 import common.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

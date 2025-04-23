@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.team;
 
 import aiku_main.dto.team.*;
 import aiku_main.application_event.publisher.TeamEventPublisher;

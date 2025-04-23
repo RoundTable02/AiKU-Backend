@@ -1,4 +1,4 @@
-package aiku_main.service;
+package aiku_main.service.term;
 
 import aiku_main.dto.member.TermResDto;
 import aiku_main.exception.TermException;

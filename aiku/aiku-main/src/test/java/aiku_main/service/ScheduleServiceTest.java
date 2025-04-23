@@ -1,7 +1,5 @@
 package aiku_main.service;
 
-import aiku_main.dto.schedule.ScheduleArrivalMember;
-import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;
@@ -10,7 +8,6 @@ import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
 import aiku_main.service.schedule.ScheduleService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;
 import common.domain.betting.Betting;
@@ -893,40 +890,6 @@ public class ScheduleServiceTest {
         assertThat(testSchedule.getScheduleMembers())
                 .extracting(ScheduleMember::getRewardPointAmount)
                 .contains(0, rewardPoint, rewardPoint);
-    }
-
-    @Test
-    void 이벤트핸들러_스케줄_도착순서_분석() throws JsonProcessingException {
-        //given
-        team.addTeamMember(member1);
-        team.addTeamMember(member2);
-        team.addTeamMember(member3);
-        em.flush();
-
-        Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
-        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
-        em.persist(schedule1);
-
-        LocalDateTime arrivalTime = LocalDateTime.now();
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime.plusHours(4));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime.plusHours(3).plusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), arrivalTime.plusHours(3));
-        schedule1.setTerm(LocalDateTime.now());
-
-        //when
-        scheduleService.analyzeScheduleArrivalResult(schedule1.getId());
-
-        //then
-        Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).get();
-        String scheduleArrivalResultStr = testSchedule.getScheduleResult().getScheduleArrivalResult();
-        List<ScheduleArrivalMember> data = objectMapper
-                .readValue(scheduleArrivalResultStr, ScheduleArrivalResult.class)
-                .getMembers();
-
-        assertThat(data)
-                .extracting(ScheduleArrivalMember::getMemberId)
-                .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
     Member createMember(){

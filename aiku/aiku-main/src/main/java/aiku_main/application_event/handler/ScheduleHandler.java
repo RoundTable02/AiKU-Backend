@@ -45,6 +45,6 @@ public class ScheduleHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeScheduleArrivalResult(ScheduleCloseEvent event) {
-        scheduleService.analyzeScheduleArrivalResult(event.getScheduleId());
+//        scheduleService.analyzeScheduleArrivalResult(event.getScheduleId());
     }
 }

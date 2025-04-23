@@ -1,7 +1,7 @@
 package aiku_main.repository.term;
 
-import common.domain.Term;
-import common.domain.TermTitle;
+import common.domain.term.Term;
+import common.domain.term.TermTitle;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

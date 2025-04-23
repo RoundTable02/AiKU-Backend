@@ -5,7 +5,7 @@ import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Betting;
+import common.domain.betting.Betting;
 import common.domain.ExecStatus;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static common.domain.ExecStatus.TERM;
-import static common.domain.QBetting.betting;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QScheduleMember.scheduleMember;

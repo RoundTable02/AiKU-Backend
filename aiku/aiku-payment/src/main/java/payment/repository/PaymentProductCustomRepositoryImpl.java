@@ -1,8 +1,7 @@
 package payment.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Payment;
-import common.domain.PaymentProduct;
+import common.domain.payment.Payment;
 import common.domain.QPayment;
 import lombok.RequiredArgsConstructor;
 

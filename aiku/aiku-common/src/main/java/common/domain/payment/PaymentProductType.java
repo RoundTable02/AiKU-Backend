@@ -1,4 +1,4 @@
-package common.domain;
+package common.domain.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

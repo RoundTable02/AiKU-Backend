@@ -8,7 +8,7 @@ import aiku_main.exception.TitleException;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.title.TitleRepository;
 import aiku_main.s3.S3ImageProvider;
-import common.domain.ServiceAgreement;
+import common.domain.member.ServiceAgreement;
 import common.domain.member.Member;
 import common.domain.member.MemberProfile;
 import common.domain.member.MemberProfileType;

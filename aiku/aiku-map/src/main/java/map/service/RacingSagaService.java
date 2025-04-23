@@ -1,14 +1,12 @@
 package map.service;
 
-import common.domain.Racing;
-import common.exception.JsonParseException;
+import common.domain.racing.Racing;
 import common.kafka_message.PointChangeReason;
 import common.kafka_message.PointChangedType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.exception.RacingException;
 import map.repository.RacingQueryRepository;
-import org.apache.kafka.common.KafkaException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

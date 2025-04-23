@@ -1,6 +1,6 @@
-package common.domain;
+package common.domain.payment;
 
-import common.domain.member.Member;
+import common.domain.BaseTime;
 import common.domain.value_reference.MemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Payment extends BaseTime{
+public class Payment extends BaseTime {
 
     @Column(name = "paymentId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

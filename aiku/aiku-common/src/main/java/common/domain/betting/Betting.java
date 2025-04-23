@@ -1,5 +1,8 @@
-package common.domain;
+package common.domain.betting;
 
+import common.domain.BaseTime;
+import common.domain.ExecStatus;
+import common.domain.Status;
 import common.domain.value_reference.ScheduleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -13,7 +16,7 @@ import static common.domain.Status.ALIVE;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Betting extends BaseTime{
+public class Betting extends BaseTime {
 
     @Column(name = "bettingId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

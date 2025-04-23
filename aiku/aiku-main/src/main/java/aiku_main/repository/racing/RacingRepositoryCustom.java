@@ -1,7 +1,7 @@
 package aiku_main.repository.racing;
 
 import aiku_main.repository.dto.TeamRacingResultMemberDto;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package common.domain;
+package common.domain.member;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;

@@ -4,7 +4,6 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
-import common.domain.Racing;
 import common.domain.member.QMember;
 import common.domain.schedule.QScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;

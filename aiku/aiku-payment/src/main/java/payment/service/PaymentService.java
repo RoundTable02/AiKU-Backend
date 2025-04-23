@@ -1,11 +1,10 @@
 package payment.service;
 
 import com.google.api.services.androidpublisher.model.ProductPurchase;
-import common.domain.Payment;
-import common.domain.PaymentProduct;
-import common.domain.PaymentProductType;
+import common.domain.payment.Payment;
+import common.domain.payment.PaymentProduct;
+import common.domain.payment.PaymentProductType;
 import common.domain.member.Member;
-import common.domain.value_reference.MemberValue;
 import common.kafka_message.*;
 import common.kafka_message.alarm.AlarmMessageType;
 import common.kafka_message.alarm.PaymentFailedMessage;

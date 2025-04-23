@@ -12,7 +12,7 @@ import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.domain.Betting;
+import common.domain.betting.Betting;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;

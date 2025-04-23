@@ -8,7 +8,7 @@ import aiku_main.service.schedule.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.Location;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
 import common.domain.member.MemberProfileCharacter;

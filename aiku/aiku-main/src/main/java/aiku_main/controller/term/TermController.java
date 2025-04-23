@@ -3,7 +3,7 @@ package aiku_main.controller.term;
 import aiku_main.dto.DataResDto;
 import aiku_main.dto.member.TermResDto;
 import aiku_main.service.term.TermService;
-import common.domain.TermTitle;
+import common.domain.term.TermTitle;
 import common.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -5,7 +5,7 @@ import aiku_main.repository.dto.TeamRacingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

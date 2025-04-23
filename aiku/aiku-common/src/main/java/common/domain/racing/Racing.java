@@ -1,5 +1,8 @@
-package common.domain;
+package common.domain.racing;
 
+import common.domain.BaseTime;
+import common.domain.ExecStatus;
+import common.domain.Status;
 import common.domain.value_reference.ScheduleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Racing extends BaseTime{
+public class Racing extends BaseTime {
 
     @Column(name = "racingId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

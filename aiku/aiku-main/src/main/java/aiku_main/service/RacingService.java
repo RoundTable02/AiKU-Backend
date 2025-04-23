@@ -8,7 +8,7 @@ import aiku_main.repository.racing.RacingRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import lombok.RequiredArgsConstructor;

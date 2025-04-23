@@ -1,4 +1,4 @@
-package common.domain;
+package common.domain.payment;
 
 public enum PaymentStatus {
     AWAIT, // 결제 요청 기본 상태

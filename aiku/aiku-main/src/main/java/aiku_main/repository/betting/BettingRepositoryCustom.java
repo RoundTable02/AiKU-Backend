@@ -1,7 +1,7 @@
 package aiku_main.repository.betting;
 
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
-import common.domain.Betting;
+import common.domain.betting.Betting;
 import common.domain.ExecStatus;
 
 import java.util.List;

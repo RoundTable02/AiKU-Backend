@@ -1,7 +1,7 @@
 package payment.repository;
 
-import common.domain.PaymentProduct;
-import common.domain.PaymentProductType;
+import common.domain.payment.PaymentProduct;
+import common.domain.payment.PaymentProductType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

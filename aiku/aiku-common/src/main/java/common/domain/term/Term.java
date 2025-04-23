@@ -1,15 +1,15 @@
-package common.domain;
+package common.domain.term;
 
+import common.domain.BaseTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Term extends BaseTime{
+public class Term extends BaseTime {
 
     @Column(name = "termId")
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

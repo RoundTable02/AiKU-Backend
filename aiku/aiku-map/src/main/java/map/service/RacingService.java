@@ -1,9 +1,8 @@
 package map.service;
 
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import common.domain.Status;
 import common.domain.schedule.Schedule;
-import common.exception.PaidMemberLimitException;
 import common.kafka_message.KafkaTopic;
 import common.kafka_message.PointChangeReason;
 import common.kafka_message.PointChangedMessage;

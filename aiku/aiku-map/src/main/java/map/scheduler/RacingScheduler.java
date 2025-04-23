@@ -1,7 +1,7 @@
 package map.scheduler;
 
 import common.domain.ExecStatus;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import lombok.RequiredArgsConstructor;
 import map.application_event.domain.RacingInfo;
 import map.application_event.publisher.RacingEventPublisher;

@@ -2,10 +2,11 @@ package aiku_main.service;
 
 import aiku_main.dto.member.TermResDto;
 import aiku_main.exception.TermException;
-import aiku_main.repository.TermRepository;
-import common.domain.AgreedType;
-import common.domain.Term;
-import common.domain.TermTitle;
+import aiku_main.repository.term.TermRepository;
+import aiku_main.service.term.TermService;
+import common.domain.term.AgreedType;
+import common.domain.term.Term;
+import common.domain.term.TermTitle;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

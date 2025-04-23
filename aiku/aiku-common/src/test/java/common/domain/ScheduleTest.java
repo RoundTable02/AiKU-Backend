@@ -30,7 +30,6 @@ class ScheduleTest {
         assertThat(scheduleMember.getSchedule()).isEqualTo(schedule);
         assertThat(scheduleMember.getMember()).isEqualTo(member);
         assertThat(scheduleMember.isOwner()).isEqualTo(true);
-        assertThat(scheduleMember.isPaid()).isEqualTo(false);
     }
 
     @Test
@@ -49,7 +48,6 @@ class ScheduleTest {
         assertThat(scheduleMember.getSchedule()).isEqualTo(schedule);
         assertThat(scheduleMember.getMember()).isEqualTo(member);
         assertThat(scheduleMember.isOwner()).isEqualTo(true);
-        assertThat(scheduleMember.isPaid()).isEqualTo(true);
         assertThat(scheduleMember.getPointAmount()).isEqualTo(100);
     }
 

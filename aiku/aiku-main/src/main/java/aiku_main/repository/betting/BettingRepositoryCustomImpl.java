@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.betting;
 
 import aiku_main.dto.MemberProfileResDto;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;

@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.racing;
 
 import common.domain.Racing;
 import org.springframework.data.jpa.repository.JpaRepository;

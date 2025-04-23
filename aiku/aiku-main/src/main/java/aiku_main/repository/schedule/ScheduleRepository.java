@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.schedule;
 
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;

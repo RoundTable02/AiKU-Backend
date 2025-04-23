@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.term;
 
 import common.domain.Term;
 import common.domain.TermTitle;

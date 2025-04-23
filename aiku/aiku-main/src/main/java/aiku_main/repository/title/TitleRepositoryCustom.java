@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.title;
 
 import aiku_main.dto.member.TitleMemberResDto;
 import common.domain.member.Member;

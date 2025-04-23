@@ -3,7 +3,7 @@ package aiku_main.service;
 import aiku_main.dto.InquiryDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.gmail.GmailAPIProvider;
-import aiku_main.repository.MemberRepository;
+import aiku_main.repository.member.MemberRepository;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

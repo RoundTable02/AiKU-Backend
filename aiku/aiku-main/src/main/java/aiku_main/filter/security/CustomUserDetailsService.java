@@ -1,6 +1,6 @@
 package aiku_main.filter.security;
 
-import aiku_main.repository.MemberRepository;
+import aiku_main.repository.member.MemberRepository;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

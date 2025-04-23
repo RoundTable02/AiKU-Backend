@@ -2,7 +2,7 @@ package aiku_main.service;
 
 import aiku_main.exception.TitleException;
 import aiku_main.kafka.KafkaProducerService;
-import aiku_main.repository.TitleRepository;
+import aiku_main.repository.title.TitleRepository;
 import common.domain.member.Member;
 import common.domain.title.Title;
 import common.domain.title.TitleCode;

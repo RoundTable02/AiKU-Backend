@@ -6,7 +6,7 @@ import aiku_main.exception.JwtAccessDeniedException;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
-import aiku_main.repository.MemberRepository;
+import aiku_main.repository.member.MemberRepository;
 import aiku_main.filter.security.JwtToken;
 import aiku_main.filter.security.JwtTokenProvider;
 import common.domain.member.Member;

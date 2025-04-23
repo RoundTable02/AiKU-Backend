@@ -1,7 +1,7 @@
 package aiku_main.scheduler;
 
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
-import aiku_main.repository.ScheduleRepository;
+import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;

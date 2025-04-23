@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.member;
 
 import common.domain.Status;
 import common.domain.member.Member;

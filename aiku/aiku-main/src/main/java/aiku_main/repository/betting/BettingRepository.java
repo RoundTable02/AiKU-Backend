@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.betting;
 
 import common.domain.Betting;
 import common.domain.Status;

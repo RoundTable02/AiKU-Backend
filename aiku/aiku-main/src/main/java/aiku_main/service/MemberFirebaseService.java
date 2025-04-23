@@ -2,7 +2,7 @@ package aiku_main.service;
 
 import aiku_main.dto.FirebaseTokenDto;
 import aiku_main.exception.*;
-import aiku_main.repository.MemberRepository;
+import aiku_main.repository.member.MemberRepository;
 import common.domain.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

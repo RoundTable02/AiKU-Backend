@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.dto.team.TeamMemberResult;

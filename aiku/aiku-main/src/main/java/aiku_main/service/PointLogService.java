@@ -2,7 +2,7 @@ package aiku_main.service;
 
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
-import aiku_main.repository.PointLogRepository;
+import aiku_main.repository.log.PointLogRepository;
 import common.domain.log.PointLog;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

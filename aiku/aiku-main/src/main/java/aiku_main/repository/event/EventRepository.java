@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.event;
 
 import common.domain.event.CommonEvent;
 import common.domain.event.RecommendEvent;

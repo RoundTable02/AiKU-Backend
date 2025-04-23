@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.title;
 
 import common.domain.title.Title;
 import common.domain.title.TitleCode;

@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.racing;
 
 import aiku_main.repository.dto.TeamRacingResultMemberDto;
 import common.domain.Racing;

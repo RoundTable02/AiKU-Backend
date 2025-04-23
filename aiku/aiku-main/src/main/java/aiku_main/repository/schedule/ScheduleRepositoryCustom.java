@@ -1,4 +1,4 @@
-package aiku_main.repository;
+package aiku_main.repository.schedule;
 
 import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.*;

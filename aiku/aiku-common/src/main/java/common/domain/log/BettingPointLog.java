@@ -1,6 +1,5 @@
 package common.domain.log;
 
-import common.domain.Betting;
 import common.domain.value_reference.BettingValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

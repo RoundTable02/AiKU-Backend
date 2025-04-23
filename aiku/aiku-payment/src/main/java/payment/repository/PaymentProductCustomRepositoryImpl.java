@@ -1,14 +1,14 @@
 package payment.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.Payment;
-import common.domain.PaymentProduct;
-import common.domain.QPayment;
+import common.domain.payment.Payment;
+import common.domain.payment.QPayment;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 
-import static common.domain.QPaymentProduct.paymentProduct;
+import static common.domain.payment.QPaymentProduct.paymentProduct;
+
 
 @RequiredArgsConstructor
 public class PaymentProductCustomRepositoryImpl implements PaymentProductCustomRepository {

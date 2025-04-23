@@ -1,7 +1,8 @@
 package aiku_main.controller;
 
+import aiku_main.controller.team.TeamController;
 import aiku_main.dto.team.TeamAddDto;
-import aiku_main.service.TeamService;
+import aiku_main.service.team.TeamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 package aiku_main.dto.member;
 
-import common.domain.AgreedType;
-import common.domain.Term;
-import common.domain.TermTitle;
+import common.domain.term.AgreedType;
+import common.domain.term.Term;
+import common.domain.term.TermTitle;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

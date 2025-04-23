@@ -1,8 +1,8 @@
 package aiku_payment.payment_test;
 
-import common.domain.Payment;
-import common.domain.PaymentProduct;
-import common.domain.PaymentProductType;
+import common.domain.payment.Payment;
+import common.domain.payment.PaymentProduct;
+import common.domain.payment.PaymentProductType;
 import common.domain.member.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;

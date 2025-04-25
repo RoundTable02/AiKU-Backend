@@ -3,7 +3,7 @@
   <img align='center' src='https://github.com/user-attachments/assets/d14b7984-07a7-47f5-9b0c-0453487fa9dd' width="700"/></img>
 </p>
 <p align="center">
-  기존 모놀리식 코드 : https://github.com/kyoona/AiKu_backend
+  기존 모놀리식 코드 : [https://github.com/kyoona/AiKu_backend](https://github.com/RoundTable02/AiKu_backend_old)
 </p>
 <p align="center">기간 | 2024.08.05 - 진행중</p>
 <p align="center">팀원 | 곽유나, 최원탁</p>

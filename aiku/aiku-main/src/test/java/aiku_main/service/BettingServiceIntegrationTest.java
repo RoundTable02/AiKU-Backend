@@ -1,7 +1,7 @@
 package aiku_main.service;
 
-import aiku_main.dto.betting.ScheduleBetting;
-import aiku_main.dto.betting.ScheduleBettingResult;
+import aiku_main.dto.schedule.result.betting.BettingResult;
+import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
@@ -368,12 +368,12 @@ class BettingServiceIntegrationTest {
         Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
         assertThat(findSchedule).isNotNull();
 
-        List<ScheduleBetting> bettingResults = objectMapper.readValue(findSchedule.getScheduleResult().getScheduleBettingResult(), ScheduleBettingResult.class).getData();
+        List<BettingResult> bettingResults = objectMapper.readValue(findSchedule.getScheduleResult().getScheduleBettingResult(), BettingResultDto.class).getData();
         assertThat(bettingResults)
-                .extracting((scheduleBetting) -> scheduleBetting.getBettor().getMemberId())
+                .extracting((bettingResult) -> bettingResult.getBettor().getMemberId())
                 .contains(member1.getId(), member2.getId(), member3.getId());
         assertThat(bettingResults)
-                .extracting(ScheduleBetting::getPointAmount)
+                .extracting(BettingResult::getPointAmount)
                 .contains(100, 200, 300);
     }
 }

@@ -1,12 +1,16 @@
 package aiku_main.repository.betting;
 
 import aiku_main.dto.MemberProfileResDto;
+import aiku_main.dto.schedule.result.betting.BettingResult;
+import aiku_main.dto.schedule.result.betting.ScheduleBettingMember;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.betting.Betting;
 import common.domain.ExecStatus;
+import common.domain.member.QMember;
+import common.domain.schedule.QScheduleMember;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -77,5 +81,52 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
                                 Collectors.toList()
                         )
                 ));
+    }
+
+    @Override
+    public List<BettingResult> getBettingResultsInSchedule(Long scheduleId) {
+        QScheduleMember betterScheMem = new QScheduleMember("betterScheMem");
+        QScheduleMember beteeScheMem = new QScheduleMember("beteeScheMem");
+        QMember bettorMem = new QMember("bettorMem");
+        QMember beteeMem = new QMember("beteeMem");
+
+        return query
+                .select(Projections.constructor(
+                        BettingResult.class,
+                        Projections.constructor(
+                                ScheduleBettingMember.class,
+                                bettorMem.id,
+                                bettorMem.nickname,
+                                Projections.constructor(
+                                        MemberProfileResDto.class,
+                                        bettorMem.profile.profileType,
+                                        bettorMem.profile.profileImg,
+                                        bettorMem.profile.profileCharacter,
+                                        bettorMem.profile.profileBackground)
+                        ),
+                        Projections.constructor(
+                                ScheduleBettingMember.class,
+                                beteeMem.id,
+                                beteeMem.nickname,
+                                Projections.constructor(
+                                        MemberProfileResDto.class,
+                                        beteeMem.profile.profileType,
+                                        beteeMem.profile.profileImg,
+                                        beteeMem.profile.profileCharacter,
+                                        beteeMem.profile.profileBackground)
+                        ),
+                        betting.pointAmount
+                ))
+                .from(betting)
+                .innerJoin(betterScheMem).on(betterScheMem.id.eq(betting.bettor.id))
+                .innerJoin(beteeScheMem).on(beteeScheMem.id.eq(betting.betee.id))
+                .innerJoin(bettorMem).on(bettorMem.id.eq(betterScheMem.member.id))
+                .innerJoin(beteeMem).on(beteeMem.id.eq(beteeScheMem.member.id))
+                .where(
+                        betterScheMem.schedule.id.eq(scheduleId),
+                        betting.bettingStatus.eq(TERM),
+                        betting.status.eq(ALIVE)
+                )
+                .fetch();
     }
 }

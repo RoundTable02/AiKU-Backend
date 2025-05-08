@@ -5,6 +5,7 @@ import aiku_main.dto.schedule.result.betting.BettingResult;
 import aiku_main.dto.schedule.result.betting.ScheduleBettingMember;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.betting.Betting;
@@ -36,9 +37,11 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
                 .select(betting.count())
                 .from(betting)
                 .join(scheduleMember).on(scheduleMember.id.eq(scheduleMemberIdOfBettor))
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         betting.bettor.id.eq(scheduleMemberIdOfBettor),
-                        betting.status.eq(ALIVE))
+                        betting.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return count != null && count > 0;
@@ -48,29 +51,38 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
     public List<Betting> findBettingsInSchedule(Long scheduleId, ExecStatus bettingStatus) {
         return query.selectFrom(betting)
                 .join(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
-                .where(scheduleMember.schedule.id.eq(scheduleId),
+                .where(
+                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE),
                         betting.bettingStatus.eq(bettingStatus),
-                        betting.status.eq(ALIVE))
+                        betting.status.eq(ALIVE)
+                )
                 .fetch();
     }
 
     @Override
     public Map<Long, List<TeamBettingResultMemberDto>> findMemberTermBettingsInTeam(Long teamId) {
         List<Tuple> bettings = query
-                .select(member.id, Projections.constructor(TeamBettingResultMemberDto.class,
-                        member.id, member.nickname,
-                        Projections.constructor(MemberProfileResDto.class,
-                                member.profile.profileType, member.profile.profileImg, member.profile.profileCharacter, member.profile.profileBackground),
-                        betting.isWinner, teamMember.status))
+                .select(member.id,
+                        Projections.constructor(
+                                TeamBettingResultMemberDto.class,
+                                member.id,
+                                member.nickname,
+                                constructMemberProfileResDto(member),
+                                betting.isWinner,
+                                teamMember.status
+                        )
+                )
                 .from(betting)
                 .innerJoin(scheduleMember).on(scheduleMember.id.eq(betting.bettor.id))
                 .innerJoin(teamMember).on(teamMember.member.id.eq(scheduleMember.member.id))
                 .innerJoin(member).on(member.id.eq(teamMember.member.id))
                 .innerJoin(team).on(team.id.eq(teamMember.team.id))
-                .where(team.id.eq(teamId),
+                .where(
+                        team.id.eq(teamId),
                         betting.status.eq(ALIVE),
-                        betting.bettingStatus.eq(TERM))
+                        betting.bettingStatus.eq(TERM)
+                )
                 .fetch();
 
         return bettings.stream()
@@ -93,28 +105,8 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
         return query
                 .select(Projections.constructor(
                         BettingResult.class,
-                        Projections.constructor(
-                                ScheduleBettingMember.class,
-                                bettorMem.id,
-                                bettorMem.nickname,
-                                Projections.constructor(
-                                        MemberProfileResDto.class,
-                                        bettorMem.profile.profileType,
-                                        bettorMem.profile.profileImg,
-                                        bettorMem.profile.profileCharacter,
-                                        bettorMem.profile.profileBackground)
-                        ),
-                        Projections.constructor(
-                                ScheduleBettingMember.class,
-                                beteeMem.id,
-                                beteeMem.nickname,
-                                Projections.constructor(
-                                        MemberProfileResDto.class,
-                                        beteeMem.profile.profileType,
-                                        beteeMem.profile.profileImg,
-                                        beteeMem.profile.profileCharacter,
-                                        beteeMem.profile.profileBackground)
-                        ),
+                        constructScheduleBettingMember(bettorMem),
+                        constructScheduleBettingMember(beteeMem),
                         betting.pointAmount
                 ))
                 .from(betting)
@@ -128,5 +120,23 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
                         betting.status.eq(ALIVE)
                 )
                 .fetch();
+    }
+
+    private ConstructorExpression<ScheduleBettingMember> constructScheduleBettingMember(QMember member){
+        return Projections.constructor(
+                ScheduleBettingMember.class,
+                member.id,
+                member.nickname,
+                constructMemberProfileResDto(member)
+        );
+    }
+
+    private ConstructorExpression<MemberProfileResDto> constructMemberProfileResDto(QMember member){
+        return Projections.constructor(
+                MemberProfileResDto.class,
+                member.profile.profileType,
+                member.profile.profileImg,
+                member.profile.profileCharacter,
+                member.profile.profileBackground);
     }
 }

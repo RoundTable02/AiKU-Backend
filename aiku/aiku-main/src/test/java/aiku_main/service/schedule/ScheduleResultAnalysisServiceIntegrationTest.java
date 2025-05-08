@@ -2,12 +2,16 @@ package aiku_main.service.schedule;
 
 import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.schedule.ScheduleArrivalResult;
+import aiku_main.dto.schedule.result.betting.BettingResult;
+import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.repository.schedule.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import common.domain.Location;
+import common.domain.betting.Betting;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
+import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
 import common.util.ObjectMapperUtil;
 import jakarta.persistence.EntityManager;
@@ -63,6 +67,10 @@ class ScheduleResultAnalysisServiceIntegrationTest {
         em.persist(member4);
 
         team = Team.create(teamOwner, "team");
+        team.addTeamMember(member1);
+        team.addTeamMember(member2);
+        team.addTeamMember(member3);
+        team.addTeamMember(member4);
         em.persist(team);
     }
 
@@ -80,14 +88,10 @@ class ScheduleResultAnalysisServiceIntegrationTest {
     @Test
     void 이벤트핸들러_스케줄_도착순서_분석() throws JsonProcessingException {
         //given
-        team.addTeamMember(member1);
-        team.addTeamMember(member2);
-        team.addTeamMember(member3);
-        em.flush();
-
         Schedule schedule1 = createSchedule(member1, team);
         schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
         schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
+
         em.persist(schedule1);
 
         LocalDateTime arrivalTime = LocalDateTime.now();
@@ -112,6 +116,61 @@ class ScheduleResultAnalysisServiceIntegrationTest {
                 .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
+    /**
+     * //given
+     * member1 -> member2
+     * member3 -> member4
+     * 베팅 2개 생성
+     *
+     * //then
+     * member1,3이 bettor
+     * member2,4가 betee인지 검증
+     */
+    @Test
+    void 베팅_결과_분석() {
+        //given
+        Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member3, false, 10);
+        schedule.addScheduleMember(member4, false, 10);
+
+        scheduleRepository.save(schedule);
+
+        Betting betting1 = createBetting(
+                schedule.getScheduleMembers().get(0).getId(),
+                schedule.getScheduleMembers().get(1).getId()
+        );
+        Betting betting2 = createBetting(
+                schedule.getScheduleMembers().get(2).getId(),
+                schedule.getScheduleMembers().get(3).getId()
+        );
+
+        betting1.setDraw();
+        betting2.setLose();
+
+        em.persist(betting1);
+        em.persist(betting2);
+
+        //when
+        scheduleResultAnalysisService.analyzeBettingResult(schedule.getId());
+
+        //then
+        String BettingResultStr = schedule.getScheduleResult().getScheduleBettingResult();
+        List<BettingResult> data = ObjectMapperUtil
+                .parseJson(BettingResultStr, BettingResultDto.class)
+                .getData();
+
+        assertThat(data).hasSize(2);
+
+        assertThat(data)
+                .extracting(result -> result.getBettor().getMemberId())
+                .contains(member1.getId(), member3.getId());
+
+        assertThat(data)
+                .extracting(result -> result.getBetee().getMemberId())
+                .contains(member2.getId(), member4.getId());
+    }
+
     Member createMember(){
         Member member = Member.builder()
                 .nickname(UUID.randomUUID().toString())
@@ -129,5 +188,13 @@ class ScheduleResultAnalysisServiceIntegrationTest {
                 LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()),
                 scheduleEnterPoint);
+    }
+
+    Betting createBetting(Long bettorScheMembId, Long betteScheMemId){
+        return Betting.create(
+                new ScheduleMemberValue(bettorScheMembId),
+                new ScheduleMemberValue(betteScheMemId),
+                100
+        );
     }
 }

@@ -1,7 +1,6 @@
 package aiku_main.application_event.handler;
 
 import aiku_main.application_event.event.ScheduleCloseEvent;
-import aiku_main.service.RacingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

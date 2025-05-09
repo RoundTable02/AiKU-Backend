@@ -47,4 +47,5 @@ public class ScheduleResultAnalysisService {
     private boolean noBettingInSchedule(List<BettingResult> bettingResults){
         return bettingResults.isEmpty();
     }
+    
 }

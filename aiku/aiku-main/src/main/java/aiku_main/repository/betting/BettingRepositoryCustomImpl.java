@@ -61,7 +61,7 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
     }
 
     @Override
-    public Map<Long, List<TeamBettingResultMemberDto>> findMemberTermBettingsInTeam(Long teamId) {
+    public Map<Long, List<TeamBettingResultMemberDto>> getMemberTermBettingsInTeam(Long teamId) {
         List<Tuple> bettings = query
                 .select(member.id,
                         Projections.constructor(

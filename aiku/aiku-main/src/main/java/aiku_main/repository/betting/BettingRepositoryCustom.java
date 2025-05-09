@@ -14,6 +14,6 @@ public interface BettingRepositoryCustom {
 
     boolean existBettorInSchedule(Long scheduleMemberIdOfBettor, Long scheduleId);
 
-    Map<Long, List<TeamBettingResultMemberDto>> findMemberTermBettingsInTeam(Long teamId);
+    Map<Long, List<TeamBettingResultMemberDto>> getMemberTermBettingsInTeam(Long teamId);
     List<BettingResult> getBettingResultsInSchedule(Long scheduleId);
 }

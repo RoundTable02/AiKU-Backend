@@ -1,8 +1,5 @@
 package aiku_main.service.betting;
 
-import aiku_main.dto.betting.ScheduleBetting;
-import aiku_main.dto.betting.ScheduleBettingMember;
-import aiku_main.dto.betting.ScheduleBettingResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
@@ -10,10 +7,8 @@ import aiku_main.exception.ScheduleException;
 import aiku_main.repository.betting.BettingRepository;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.betting.Betting;
-import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
@@ -29,7 +24,6 @@ import java.util.stream.Collectors;
 import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
-import static common.domain.ExecStatus.TERM;
 import static common.domain.ExecStatus.WAIT;
 import static common.domain.Status.ALIVE;
 import static common.domain.Status.DELETE;
@@ -202,38 +196,6 @@ public class BettingService {
 
     private int getBettingRewardPoint(int bettingPoint, int winnerPointAmount, int bettingPointAmount) {
         return (int) ((double) bettingPoint / winnerPointAmount * bettingPointAmount);
-    }
-
-    @Transactional
-    public void analyzeScheduleBettingResult(Long scheduleId) {
-        List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, TERM);
-        if(bettings.isEmpty()){
-            return;
-        }
-
-        Map<Long, ScheduleMember> scheduleMembers =
-                scheduleRepository.findScheduleMembersWithMember(scheduleId).stream()
-                        .collect(Collectors.toMap(
-                                sm -> sm.getId(),
-                                sm -> sm
-                        ));
-
-        List<ScheduleBetting> bettingDtoList = bettings.stream()
-                .map(betting -> {
-                    ScheduleBettingMember bettor = new ScheduleBettingMember(scheduleMembers.get(betting.getBettor().getId()).getMember());
-                    ScheduleBettingMember betee = new ScheduleBettingMember(scheduleMembers.get(betting.getBetee().getId()).getMember());
-
-                    return new ScheduleBetting(bettor, betee, betting.getPointAmount());
-                }).toList();
-
-        ScheduleBettingResult result = new ScheduleBettingResult(scheduleId, bettingDtoList);
-
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        try {
-            schedule.setScheduleBettingResult(objectMapper.writeValueAsString(result));
-        } catch (JsonProcessingException e) {
-            throw new BettingException(INTERNAL_SERVER_ERROR, "Can't Parse ScheduleBettingResult");
-        }
     }
 
     private Member findMember(Long memberId){

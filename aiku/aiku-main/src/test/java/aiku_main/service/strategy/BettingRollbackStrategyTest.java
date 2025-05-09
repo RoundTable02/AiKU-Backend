@@ -1,8 +1,8 @@
 package aiku_main.service.strategy;
 
-import aiku_main.repository.BettingQueryRepository;
-import common.domain.Betting;
+import aiku_main.repository.betting.BettingRepository;
 import common.domain.Status;
+import common.domain.betting.Betting;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ class BettingRollbackStrategyTest {
     @Autowired
     BettingRollbackStrategy bettingRollbackStrategy;
     @Autowired
-    BettingQueryRepository bettingRepository;
+    BettingRepository bettingRepository;
 
     @Test
     void execute() {

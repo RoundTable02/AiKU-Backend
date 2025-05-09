@@ -157,7 +157,7 @@ public class TeamService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
         Team team = findTeamWithResult(schedule.getTeam().getId());
 
-        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingRepository.findMemberTermBettingsInTeam(team.getId());
+        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingRepository.getMemberTermBettingsInTeam(team.getId());
 
         Map<Long, Integer> previousResult = getPreviousBettingResult(team.getTeamResult());
 

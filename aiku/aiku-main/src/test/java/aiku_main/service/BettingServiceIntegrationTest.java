@@ -1,7 +1,5 @@
 package aiku_main.service;
 
-import aiku_main.dto.betting.ScheduleBetting;
-import aiku_main.dto.betting.ScheduleBettingResult;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
@@ -9,7 +7,6 @@ import aiku_main.repository.betting.BettingRepository;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.service.betting.BettingService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;
 import common.domain.betting.Betting;
@@ -342,38 +339,5 @@ class BettingServiceIntegrationTest {
         assertThat(bettings)
                 .extracting(Betting::isWinner)
                 .containsExactly(true, false, true);
-    }
-
-    @Test
-    void 이벤트핸들러_베팅_결과_분석() throws JsonProcessingException {
-        //given
-        Long scheduleMemberId1 = scheduleRepository.findScheduleMemberId(member1.getId(), schedule1.getId()).orElseThrow();
-        Long scheduleMemberId2 = scheduleRepository.findScheduleMemberId(member2.getId(), schedule1.getId()).orElseThrow();
-        Long scheduleMemberId3 = scheduleRepository.findScheduleMemberId(member3.getId(), schedule1.getId()).orElseThrow();
-
-        Betting betting1 = Betting.create(new ScheduleMemberValue(scheduleMemberId1), new ScheduleMemberValue(scheduleMemberId3), 100);
-        Betting betting2 = Betting.create(new ScheduleMemberValue(scheduleMemberId2), new ScheduleMemberValue(scheduleMemberId3), 200);
-        Betting betting3 = Betting.create(new ScheduleMemberValue(scheduleMemberId3), new ScheduleMemberValue(scheduleMemberId1), 300);
-        betting1.setWin(1000);
-        betting2.setDraw();
-        betting3.setLose();
-        em.persist(betting1);
-        em.persist(betting2);
-        em.persist(betting3);
-
-        //when
-        bettingService.analyzeScheduleBettingResult(schedule1.getId());
-
-        //then
-        Schedule findSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
-        assertThat(findSchedule).isNotNull();
-
-        List<ScheduleBetting> bettingResults = objectMapper.readValue(findSchedule.getScheduleResult().getScheduleBettingResult(), ScheduleBettingResult.class).getData();
-        assertThat(bettingResults)
-                .extracting((scheduleBetting) -> scheduleBetting.getBettor().getMemberId())
-                .contains(member1.getId(), member2.getId(), member3.getId());
-        assertThat(bettingResults)
-                .extracting(ScheduleBetting::getPointAmount)
-                .contains(100, 200, 300);
     }
 }

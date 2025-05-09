@@ -1,4 +1,4 @@
-package aiku_main.dto.racing;
+package aiku_main.dto.schedule.result.racing;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScheduleRacingResult {
+public class RacingResultDto {
 
     private Long scheduleId;
-    private List<ScheduleRacing> data;
+    private List<RacingResult> data;
 }

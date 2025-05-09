@@ -1,7 +1,5 @@
 package aiku_main.service.schedule;
 
-import aiku_main.dto.schedule.ScheduleArrivalMember;
-import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -13,8 +11,6 @@ import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
@@ -22,7 +18,6 @@ import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleResult;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
-import common.exception.JsonParseException;
 import common.exception.NotEnoughPoint;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +51,6 @@ public class ScheduleService {
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
-    private final ObjectMapper objectMapper;
 
     @Value("${schedule.fee.participation}")
     private int scheduleEnterPoint;
@@ -340,19 +334,6 @@ public class ScheduleService {
                             schedule.getId()
                     );
                 });
-    }
-
-    @Transactional
-    public void analyzeScheduleArrivalResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findScheduleWithResult(scheduleId).orElseThrow();
-
-        List<ScheduleArrivalMember> arrivalMembers = scheduleRepository.getScheduleArrivalResults(scheduleId);
-        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
-        try {
-            schedule.setScheduleArrivalResult(objectMapper.writeValueAsString(arrivalResult));
-        } catch (JsonProcessingException e) {
-            throw new JsonParseException();
-        }
     }
 
     private Member findMember(Long memberId){

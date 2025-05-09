@@ -17,7 +17,7 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepository {
 
     private final RowMapper<Member> memberRowMapper = (rs, rowNum) -> new Member(
             rs.getLong("member_id"),
-            rs.getLong("kakao_id"),
+            rs.getLong("oauth_id"),
             rs.getString("refresh_token"),
             rs.getString("nickname"),
             rs.getString("email"),

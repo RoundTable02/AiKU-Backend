@@ -2,7 +2,7 @@ package aiku_main.service.strategy;
 
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
@@ -26,7 +26,7 @@ class ScheduleRollbackStrategyTest {
     @Autowired
     EntityManager em;
     @Autowired
-    ScheduleQueryRepository scheduleRepository;
+    ScheduleRepository scheduleRepository;
     @Autowired
     ScheduleRollbackStrategy scheduleRollbackStrategy;
 

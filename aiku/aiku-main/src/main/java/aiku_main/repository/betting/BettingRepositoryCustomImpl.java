@@ -2,7 +2,7 @@ package aiku_main.repository.betting;
 
 import aiku_main.dto.MemberProfileResDto;
 import aiku_main.dto.schedule.result.betting.BettingResult;
-import aiku_main.dto.schedule.result.betting.ScheduleBettingMember;
+import aiku_main.dto.schedule.result.betting.BettingResultMember;
 import aiku_main.repository.dto.TeamBettingResultMemberDto;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstructorExpression;
@@ -122,9 +122,9 @@ public class BettingRepositoryCustomImpl implements BettingRepositoryCustom {
                 .fetch();
     }
 
-    private ConstructorExpression<ScheduleBettingMember> constructScheduleBettingMember(QMember member){
+    private ConstructorExpression<BettingResultMember> constructScheduleBettingMember(QMember member){
         return Projections.constructor(
-                ScheduleBettingMember.class,
+                BettingResultMember.class,
                 member.id,
                 member.nickname,
                 constructMemberProfileResDto(member)

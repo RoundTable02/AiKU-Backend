@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ScheduleBettingMember {
+public class BettingResultMember {
 
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;
 
     @QueryProjection
-    public ScheduleBettingMember(Long memberId, String nickname, MemberProfileResDto memberProfile) {
+    public BettingResultMember(Long memberId, String nickname, MemberProfileResDto memberProfile) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;

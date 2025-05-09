@@ -31,7 +31,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
@@ -219,7 +218,7 @@ class ScheduleResultAnalysisServiceIntegrationTest {
         em.persist(racing3);
 
         //when
-        scheduleResultAnalysisService.analyzeScheduleRacingResult(schedule.getId());
+        scheduleResultAnalysisService.analyzeRacingResult(schedule.getId());
 
         String racingResultStr = schedule.getScheduleResult().getScheduleRacingResult();
         List<RacingResult> racingResults = ObjectMapperUtil

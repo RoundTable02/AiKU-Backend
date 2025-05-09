@@ -16,6 +16,6 @@ public class RacingHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeScheduleBettingResult(ScheduleCloseEvent event){
-        scheduleResultAnalysisService.analyzeScheduleRacingResult(event.getScheduleId());
+        scheduleResultAnalysisService.analyzeRacingResult(event.getScheduleId());
     }
 }

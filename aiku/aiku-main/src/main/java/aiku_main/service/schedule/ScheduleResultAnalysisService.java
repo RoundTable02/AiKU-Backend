@@ -53,7 +53,7 @@ public class ScheduleResultAnalysisService {
     }
 
     @Transactional
-    public void analyzeScheduleRacingResult(Long scheduleId) {
+    public void analyzeRacingResult(Long scheduleId) {
         List<RacingResult> racingResults = racingRepository.getRacingResultInSchedule(scheduleId);
 
         if (noRacingInSchedule(racingResults)) {

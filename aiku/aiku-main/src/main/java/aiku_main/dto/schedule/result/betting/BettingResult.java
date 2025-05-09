@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BettingResult {
 
-    private ScheduleBettingMember bettor;
-    private ScheduleBettingMember betee;
+    private BettingResultMember bettor;
+    private BettingResultMember betee;
     private int pointAmount;
 
     @QueryProjection
-    public BettingResult(ScheduleBettingMember bettor, ScheduleBettingMember betee, int pointAmount) {
+    public BettingResult(BettingResultMember bettor, BettingResultMember betee, int pointAmount) {
         this.bettor = bettor;
         this.betee = betee;
         this.pointAmount = pointAmount;

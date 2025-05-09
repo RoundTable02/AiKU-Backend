@@ -1,10 +1,13 @@
 package aiku_main.service.schedule;
 
+import aiku_main.dto.schedule.result.racing.RacingResult;
+import aiku_main.dto.schedule.result.racing.RacingResultDto;
 import aiku_main.dto.schedule.result.betting.BettingResult;
 import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.repository.betting.BettingRepository;
+import aiku_main.repository.racing.RacingRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.schedule.Schedule;
 import common.util.ObjectMapperUtil;
@@ -21,6 +24,7 @@ public class ScheduleResultAnalysisService {
 
     private final ScheduleRepository scheduleRepository;
     private final BettingRepository bettingRepository;
+    private final RacingRepository racingRepository;
 
     @Transactional
     public void analyzeScheduleArrivalResult(Long scheduleId) {
@@ -47,5 +51,25 @@ public class ScheduleResultAnalysisService {
     private boolean noBettingInSchedule(List<BettingResult> bettingResults){
         return bettingResults.isEmpty();
     }
-    
+
+    @Transactional
+    public void analyzeScheduleRacingResult(Long scheduleId) {
+        List<RacingResult> racingResults = racingRepository.getRacingResultInSchedule(scheduleId);
+
+        if (noRacingInSchedule(racingResults)) {
+            return;
+        };
+
+        RacingResultDto result = new RacingResultDto(scheduleId, racingResults);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
+        schedule.setScheduleRacingResult(ObjectMapperUtil.toJson(result));
+    }
+
+    private boolean noRacingInSchedule(List<RacingResult> racingResults) {
+        if (racingResults.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
 }

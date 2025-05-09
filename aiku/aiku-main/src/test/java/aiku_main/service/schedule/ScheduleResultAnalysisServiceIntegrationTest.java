@@ -4,11 +4,14 @@ import aiku_main.dto.schedule.ScheduleArrivalMember;
 import aiku_main.dto.schedule.ScheduleArrivalResult;
 import aiku_main.dto.schedule.result.betting.BettingResult;
 import aiku_main.dto.schedule.result.betting.BettingResultDto;
+import aiku_main.dto.schedule.result.racing.RacingResult;
+import aiku_main.dto.schedule.result.racing.RacingResultDto;
 import aiku_main.repository.schedule.ScheduleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import common.domain.Location;
 import common.domain.betting.Betting;
 import common.domain.member.Member;
+import common.domain.racing.Racing;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.value_reference.ScheduleMemberValue;
@@ -171,6 +174,78 @@ class ScheduleResultAnalysisServiceIntegrationTest {
                 .contains(member2.getId(), member4.getId());
     }
 
+    /**
+     * //given
+     * member1, member2 -> 1win
+     * member2, member4 -> 2win
+     * member3, member4 -> 4win
+     */
+    @Test
+    void 레이싱_결과_분석() {
+        //given
+        Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 10);
+        schedule.addScheduleMember(member3, false, 10);
+        schedule.addScheduleMember(member4, false, 10);
+
+        scheduleRepository.save(schedule);
+
+        int point1 = 100;
+        Racing racing1 = createRacing(
+                schedule.getScheduleMembers().get(0).getId(),
+                schedule.getScheduleMembers().get(1).getId(),
+                point1
+        );
+        racing1.termRacing(member1.getId());
+
+        int point2 = 50;
+        Racing racing2 = createRacing(
+                schedule.getScheduleMembers().get(1).getId(),
+                schedule.getScheduleMembers().get(3).getId(),
+                point2
+        );
+        racing2.termRacing(member2.getId());
+
+        int point3 = 10;
+        Racing racing3 = createRacing(
+                schedule.getScheduleMembers().get(2).getId(),
+                schedule.getScheduleMembers().get(3).getId(),
+                point3
+        );
+        racing3.termRacing(member4.getId());
+
+        em.persist(racing1);
+        em.persist(racing2);
+        em.persist(racing3);
+
+        //when
+        scheduleResultAnalysisService.analyzeScheduleRacingResult(schedule.getId());
+
+        String racingResultStr = schedule.getScheduleResult().getScheduleRacingResult();
+        List<RacingResult> racingResults = ObjectMapperUtil
+                .parseJson(racingResultStr, RacingResultDto.class)
+                .getData();
+
+        assertThat(racingResults).hasSize(3);
+
+        assertThat(racingResults)
+                .extracting(result -> result.getFirstRacer().getMemberId())
+                .containsExactlyInAnyOrder(member1.getId(), member2.getId(), member3.getId());
+
+        assertThat(racingResults)
+                .extracting(result -> result.getSecondRacer().getMemberId())
+                .containsExactlyInAnyOrder(member2.getId(), member4.getId(), member4.getId());
+
+        assertThat(racingResults)
+                .extracting(result -> result.getWinnerId())
+                .containsExactlyInAnyOrder(member1.getId(), member2.getId(), member4.getId());
+
+        assertThat(racingResults)
+                .extracting(result -> result.getPointAmount())
+                .containsExactlyInAnyOrder(point1, point2, point3);
+    }
+
+
     Member createMember(){
         Member member = Member.builder()
                 .nickname(UUID.randomUUID().toString())
@@ -195,6 +270,14 @@ class ScheduleResultAnalysisServiceIntegrationTest {
                 new ScheduleMemberValue(bettorScheMembId),
                 new ScheduleMemberValue(betteScheMemId),
                 100
+        );
+    }
+
+    Racing createRacing(Long firstScheMembId, Long secondScheMemId, int point){
+        return Racing.create(
+                firstScheMembId,
+                secondScheMemId,
+                point
         );
     }
 }

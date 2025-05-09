@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class ScheduleResultAnalysisService {
@@ -22,6 +22,7 @@ public class ScheduleResultAnalysisService {
     private final ScheduleRepository scheduleRepository;
     private final BettingRepository bettingRepository;
 
+    @Transactional
     public void analyzeScheduleArrivalResult(Long scheduleId) {
         Schedule schedule = scheduleRepository.findScheduleWithResult(scheduleId).orElseThrow();
 

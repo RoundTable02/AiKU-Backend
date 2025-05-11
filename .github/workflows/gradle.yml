@@ -101,7 +101,7 @@ jobs:
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-gateway:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-alarm:${{ github.sha }}
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
+        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/aiku-map:${{ github.sha }}
     
   deploy: 
     runs-on: ubuntu-latest

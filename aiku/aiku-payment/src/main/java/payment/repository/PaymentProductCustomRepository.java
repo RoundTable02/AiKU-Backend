@@ -1,6 +1,6 @@
 package payment.repository;
 
-import common.domain.Payment;
+import common.domain.payment.Payment;
 
 import java.util.Optional;
 

@@ -25,14 +25,4 @@ public class RacingEventPublisher {
         publisher.publishEvent(event);
     }
 
-    public void publishMemberArrivalEvent(Long memberId, Long scheduleId, String scheduleName){
-        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, scheduleName);
-        publisher.publishEvent(event);
-    }
-
-    public void publishScheduleCloseEvent(Long scheduleId){
-        ScheduleCloseEvent event = new ScheduleCloseEvent(scheduleId);
-        publisher.publishEvent(event);
-    }
-
 }

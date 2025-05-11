@@ -1,12 +1,10 @@
 package payment.service;
 
-import common.domain.PaymentProduct;
-import common.domain.member.Member;
+import common.domain.payment.PaymentProduct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import payment.exception.MemberNotFoundException;
 import payment.repository.MemberRepository;
 import payment.repository.PaymentProductRepository;
 

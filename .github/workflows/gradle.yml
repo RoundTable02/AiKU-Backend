@@ -174,7 +174,7 @@ jobs:
             -e AWS_ACCESS=${{ secrets.AWS_ACCESS }} \
             -e AWS_SECRET=${{ secrets.AWS_SECRET }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/aiku-main:${{ github.sha }}
-            
+
     # - name: excuting remote ssh commands to map
     #   uses: appleboy/ssh-action@v0.1.9
     #   with:

@@ -7,9 +7,7 @@ import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.EntityManager;
-import map.dto.MemberArrivalDto;
-import map.dto.ScheduleDetailResDto;
-import map.dto.ScheduleMemberResDto;
+import map.dto.*;
 import map.exception.ScheduleException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,6 +105,78 @@ public class MapServiceTest {
     }
 
     @Test
+    void 멤버_1명_위치_전달_저장_정상() {
+        RealTimeLocationDto member1Location = new RealTimeLocationDto(123.456, 123.456);
+        LocationsResponseDto locationsResponseDto = mapService.saveAndSendAllLocation(member1.getId(), schedule1.getId(), member1Location);
+
+        assertThat(locationsResponseDto.getCount()).isEqualTo(1);
+
+        RealTimeLocationResDto realTimeLocationResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member3.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocationResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
+        assertThat(realTimeLocationResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
+        assertThat(realTimeLocationResDto.getIsArrived()).isFalse();
+    }
+
+    @Test
+    void 멤버_2명_위치_전달_저장_정상() {
+        RealTimeLocationDto member1Location = new RealTimeLocationDto(123.456, 123.456);
+        RealTimeLocationDto member2Location = new RealTimeLocationDto(123.457, 123.457);
+        mapService.saveAndSendAllLocation(member1.getId(), schedule1.getId(), member1Location);
+        LocationsResponseDto locationsResponseDto = mapService.saveAndSendAllLocation(member2.getId(), schedule1.getId(), member2Location);
+
+        assertThat(locationsResponseDto.getCount()).isEqualTo(2);
+
+        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocation1ResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
+        assertThat(realTimeLocation1ResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
+        assertThat(realTimeLocation1ResDto.getIsArrived()).isFalse();
+
+        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member2.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocation2ResDto.getLatitude()).isEqualTo(member2Location.getLatitude());
+        assertThat(realTimeLocation2ResDto.getLongitude()).isEqualTo(member2Location.getLongitude());
+        assertThat(realTimeLocation2ResDto.getIsArrived()).isFalse();
+    }
+
+    @Test
+    void 멤버_3명_위치_전달_저장_정상() {
+        RealTimeLocationDto member1Location = new RealTimeLocationDto(123.456, 123.456);
+        RealTimeLocationDto member2Location = new RealTimeLocationDto(123.457, 123.457);
+        RealTimeLocationDto member3Location = new RealTimeLocationDto(123.458, 123.458);
+        mapService.saveAndSendAllLocation(member1.getId(), schedule1.getId(), member1Location);
+        mapService.saveAndSendAllLocation(member2.getId(), schedule1.getId(), member2Location);
+        LocationsResponseDto locationsResponseDto = mapService.saveAndSendAllLocation(member3.getId(), schedule1.getId(), member3Location);
+
+        assertThat(locationsResponseDto.getCount()).isEqualTo(3);
+
+        RealTimeLocationResDto realTimeLocation1ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocation1ResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
+        assertThat(realTimeLocation1ResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
+        assertThat(realTimeLocation1ResDto.getIsArrived()).isFalse();
+
+        RealTimeLocationResDto realTimeLocation2ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member2.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocation2ResDto.getLatitude()).isEqualTo(member2Location.getLatitude());
+        assertThat(realTimeLocation2ResDto.getLongitude()).isEqualTo(member2Location.getLongitude());
+        assertThat(realTimeLocation2ResDto.getIsArrived()).isFalse();
+
+        RealTimeLocationResDto realTimeLocation3ResDto = locationsResponseDto.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member3.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocation3ResDto.getLatitude()).isEqualTo(member3Location.getLatitude());
+        assertThat(realTimeLocation3ResDto.getLongitude()).isEqualTo(member3Location.getLongitude());
+        assertThat(realTimeLocation3ResDto.getIsArrived()).isFalse();
+    }
+
+    @Test
     void 멤버_도착_정상() {
         LocalDateTime arrivalTime = LocalDateTime.now();
         MemberArrivalDto memberArrivalDto = new MemberArrivalDto(arrivalTime);
@@ -114,8 +184,29 @@ public class MapServiceTest {
         mapService.makeMemberArrive(member1.getId(), schedule1.getId(), memberArrivalDto);
 
         ScheduleMember scheduleMember = em.find(ScheduleMember.class, scheduleMember1.getId());
-
         assertThat(scheduleMember.getArrivalTime()).isEqualTo(arrivalTime);
+
+        LocationsResponseDto locations = mapService.getAllLocation(member1.getId(), schedule1.getId());
+        RealTimeLocationResDto realTimeLocationResDto = locations.getLocations().stream()
+                .filter(r -> r.getMemberId().equals(member1.getId()))
+                .findAny().orElseThrow();
+        assertThat(realTimeLocationResDto.getIsArrived()).isTrue();
+    }
+
+    @Test
+    void 스케줄_종료_정상() {
+        RealTimeLocationDto member1Location = new RealTimeLocationDto(123.456, 123.456);
+        RealTimeLocationDto member2Location = new RealTimeLocationDto(123.457, 123.457);
+        RealTimeLocationDto member3Location = new RealTimeLocationDto(123.458, 123.458);
+        mapService.saveAndSendAllLocation(member1.getId(), schedule1.getId(), member1Location);
+        mapService.saveAndSendAllLocation(member2.getId(), schedule1.getId(), member2Location);
+        mapService.saveAndSendAllLocation(member3.getId(), schedule1.getId(), member3Location);
+
+        mapService.deleteAllLocationsInSchedule(schedule1.getId());
+
+        LocationsResponseDto allLocation = mapService.getAllLocation(member1.getId(), schedule1.getId());
+
+        assertThat(allLocation.getCount()).isEqualTo(0);
     }
 
     @Test

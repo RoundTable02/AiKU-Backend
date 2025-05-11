@@ -4,7 +4,8 @@ import aiku_main.application_event.event.ScheduleAutoCloseEvent;
 import aiku_main.application_event.event.ScheduleCloseEvent;
 import aiku_main.application_event.event.ScheduleOpenEvent;
 import aiku_main.application_event.event.TeamExitEvent;
-import aiku_main.service.ScheduleService;
+import aiku_main.service.schedule.ScheduleResultAnalysisService;
+import aiku_main.service.schedule.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -17,6 +18,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class ScheduleHandler {
 
     private final ScheduleService scheduleService;
+    private final ScheduleResultAnalysisService scheduleResultAnalysisService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -45,6 +47,6 @@ public class ScheduleHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeScheduleArrivalResult(ScheduleCloseEvent event) {
-        scheduleService.analyzeScheduleArrivalResult(event.getScheduleId());
+        scheduleResultAnalysisService.analyzeScheduleArrivalResult(event.getScheduleId());
     }
 }

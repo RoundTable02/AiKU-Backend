@@ -28,14 +28,4 @@ public class RacingHandler {
     public void handleRacingStatusNotChangedEvent(RacingStatusNotChangedEvent event){
         racingService.autoDeleteRacingById(event.getRacingInfo());
     }
-
-    @EventListener
-    public void handleMemberArrivalEvent(MemberArrivalEvent event){
-        racingService.makeMemberWinnerInRacing(event.getMemberId(), event.getScheduleId(), event.getScheduleName());
-    }
-
-    @EventListener
-    public void handleScheduleCloseEvent(ScheduleCloseEvent event){
-        racingService.terminateRunningRacing(event.getScheduleId());
-    }
 }

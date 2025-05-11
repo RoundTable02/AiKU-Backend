@@ -1,7 +1,7 @@
 package aiku_main.scheduler;
 
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 public class ScheduleScheduler {
 
     private final TaskScheduler scheduler;
-    private final ScheduleQueryRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
     private final ScheduleEventPublisher scheduleEventPublisher;
 
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();
@@ -74,7 +74,7 @@ public class ScheduleScheduler {
         scheduleAutoCloseTasks.put(schedule.getId(), future);
     }
 
-    private void cancelAll(Long scheduleId){
+    public void cancelAll(Long scheduleId){
         ScheduledFuture future1 = scheduleOpenTasks.get(scheduleId);
         if (future1 != null) {
             future1.cancel(false);

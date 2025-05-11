@@ -1,6 +1,6 @@
 package payment.controller.dto;
 
-import common.domain.PaymentProductType;
+import common.domain.payment.PaymentProductType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

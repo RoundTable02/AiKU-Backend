@@ -27,7 +27,7 @@ spring:
         - id: aiku-main
           uri: ${AIKU_MAIN_IP}
           predicates:
-            - Path=/login/sign-in/**,/login/refresh,/users/**,/term,/groups/**,/schedules/**,/member/schedules/**
+            - Path=/login/sign-in/**,/login/refresh,/users/**,/term/**,/groups/**,/schedules/**,/member/schedules/**
         - id: aiku-map
           uri: ${AIKU_MAP_IP}
           predicates:

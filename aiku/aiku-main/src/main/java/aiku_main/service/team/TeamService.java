@@ -3,18 +3,16 @@ package aiku_main.service.team;
 import aiku_main.dto.team.*;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.betting.BettingRepository;
-import aiku_main.repository.dto.TeamBettingResultMemberDto;
-import aiku_main.repository.dto.TeamRacingResultMemberDto;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.racing.RacingRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
 import common.util.ObjectMapperUtil;
 import common.domain.member.Member;
-import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import common.domain.team.TeamResult;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static common.domain.Status.ALIVE;
 import static common.response.status.BaseErrorCode.*;
@@ -119,39 +116,7 @@ public class TeamService {
 
         return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
     }
-
-    @Transactional
-    public void analyzeLateTimeResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        Team team = findTeamWithResult(schedule.getTeam().getId());
-
-        List<TeamMemberResult> lateTeamMemberRanking = teamRepository.getTeamLateTimeResult(team.getId());
-
-        Map<Long, Integer> previousResultMembers = getPreviousLateTimeResultRank(team.getTeamResult());
-        int rank = 1;
-        for (TeamMemberResult resultMember : lateTeamMemberRanking) {
-            resultMember.setRank(rank++);
-            resultMember.setPreviousRank(previousResultMembers.getOrDefault(resultMember.getMemberId(), -1));
-        }
-
-        TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(team.getId(), lateTeamMemberRanking);
-        team.setTeamLateResult(objectMapperUtil.toJson(teamLateTimeResult));
-    }
-
-    private Map<Long, Integer> getPreviousLateTimeResultRank(TeamResult teamResult) {
-        if (teamResult != null && teamResult.getLateTimeResult() != null) {
-            TeamLateTimeResult previousResult = objectMapperUtil.parseJson(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
-
-            return previousResult.getMembers().stream()
-                    .collect(Collectors.toMap(
-                            TeamMemberResult::getMemberId,
-                            teamMember -> teamMember.getRank())
-                    );
-        }
-
-        return new HashMap<>();
-    }
-
+/*
     @Transactional
     public void analyzeBettingResult(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
@@ -161,23 +126,23 @@ public class TeamService {
 
         Map<Long, Integer> previousResult = getPreviousBettingResult(team.getTeamResult());
 
-        List<TeamMemberResult> teamMemberResults = new ArrayList<>();
+        List<TeamLateTimeResult> teamLateTimeResultMembers = new ArrayList<>();
         memberBettingsMap.forEach((memberId, memberBettingList) -> {
             long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
             int analysis = (int) ((double)count/memberBettingList.size() * 100);
 
             TeamBettingResultMemberDto data = memberBettingList.get(0);
-            teamMemberResults.add(new TeamMemberResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
+            teamLateTimeResultMembers.add(new TeamLateTimeResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
-        teamMemberResults.sort(Comparator.comparingInt(TeamMemberResult::getAnalysis).reversed());
+        teamLateTimeResultMembers.sort(Comparator.comparingInt(TeamLateTimeResult::getLateTime).reversed());
 
         int rank = 1;
-        for (TeamMemberResult resultMember : teamMemberResults) {
+        for (TeamLateTimeResult resultMember : teamLateTimeResultMembers) {
             resultMember.setRank(rank++);
         }
 
-        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamMemberResults);
+        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamLateTimeResultMembers);
         team.setTeamBettingResult(objectMapperUtil.toJson(teamBettingResult));
     }
 
@@ -187,7 +152,7 @@ public class TeamService {
 
             return previousResult.getMembers().stream()
                     .collect(Collectors.toMap(
-                            TeamMemberResult::getMemberId,
+                            TeamLateTimeResult::getMemberId,
                             teamMember -> teamMember.getRank())
                     );
         }
@@ -204,23 +169,23 @@ public class TeamService {
 
         Map<Long, Integer> previousResult = getPreviousRacingResult(team.getTeamResult());
 
-        List<TeamMemberResult> teamMemberResults = new ArrayList<>();
+        List<TeamLateTimeResult> teamLateTimeResultMembers = new ArrayList<>();
         memberRacingsMap.forEach((memberId, memberRacingList) -> {
             long count = memberRacingList.stream().filter(TeamRacingResultMemberDto::isWinner).count();
             int analysis = (int) ((double) count / memberRacingList.size() * 100);
 
             TeamRacingResultMemberDto data = memberRacingList.get(0);
-            teamMemberResults.add(new TeamMemberResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
+            teamLateTimeResultMembers.add(new TeamLateTimeResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
         });
 
-        teamMemberResults.sort(Comparator.comparingInt(TeamMemberResult::getAnalysis).reversed());
+        teamLateTimeResultMembers.sort(Comparator.comparingInt(TeamLateTimeResult::getLateTime).reversed());
 
         int rank = 1;
-        for (TeamMemberResult resultMember : teamMemberResults) {
+        for (TeamLateTimeResult resultMember : teamLateTimeResultMembers) {
             resultMember.setRank(rank++);
         }
 
-        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamMemberResults);
+        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamLateTimeResultMembers);
         team.setTeamRacingResult(objectMapperUtil.toJson(teamRacingResult));
     }
 
@@ -230,13 +195,13 @@ public class TeamService {
 
             return previousResult.getMembers().stream()
                     .collect(Collectors.toMap(
-                            TeamMemberResult::getMemberId,
+                            TeamLateTimeResult::getMemberId,
                             teamMember -> teamMember.getRank())
                     );
         }
 
         return new HashMap<>();
-    }
+    }*/
 
     @Transactional
     public void updateTeamResultOfExitMember(Long memberId, Long teamId) {
@@ -256,7 +221,7 @@ public class TeamService {
             return;
         }
 
-        TeamLateTimeResult result = objectMapperUtil.parseJson(teamResult.getLateTimeResult(), TeamLateTimeResult.class);
+        TeamLateTimeResultDto result = objectMapperUtil.parseJson(teamResult.getLateTimeResult(), TeamLateTimeResultDto.class);
         result.getMembers().forEach(resultMember -> {
             if (resultMember.getMemberId().equals(memberId)) {
                 resultMember.setTeamMember(false);

@@ -1,4 +1,4 @@
-package aiku_main.dto.team;
+package aiku_main.dto.team.result.late_time;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamLateTimeResult {
+public class TeamLateTimeResultDto {
 
     private Long groupId;
-    private List<TeamMemberResult> members;
+    private List<TeamLateTimeResult> members;
 }

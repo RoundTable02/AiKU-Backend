@@ -1,12 +1,14 @@
 package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
-import aiku_main.dto.team.TeamMemberResult;
+import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.MemberProfileResDto;
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.member.QMember;
 import common.domain.schedule.QSchedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
@@ -37,6 +39,28 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                 .leftJoin(team.teamResult, teamResult).fetchJoin()
                 .where(team.id.eq(teamId),
                         team.status.eq(ALIVE))
+                .fetchOne();
+
+        return Optional.ofNullable(findTeam);
+    }
+
+    @Override
+    public Optional<Team> findTeamWithResultByScheduleId(Long scheduleId) {
+        Team findTeam = query
+                .selectFrom(team)
+                .leftJoin(team.teamResult, teamResult).fetchJoin()
+                .where(
+                        team.id.eq(
+                                JPAExpressions
+                                        .select(schedule.team.id)
+                                        .from(schedule)
+                                        .where(
+                                                schedule.id.eq(scheduleId),
+                                                schedule.status.eq(ALIVE)
+                                        )
+                        ),
+                        team.status.eq(ALIVE)
+                )
                 .fetchOne();
 
         return Optional.ofNullable(findTeam);
@@ -94,12 +118,8 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         TeamMemberResDto.class,
                         member.id,
                         member.nickname,
-                        Projections.constructor(
-                                MemberProfileResDto.class,
-                                member.profile.profileType,
-                                member.profile.profileImg,
-                                member.profile.profileCharacter,
-                                member.profile.profileBackground)))
+                        constructMemberProfileResDto(member))
+                )
                 .from(teamMember)
                 .innerJoin(teamMember.member, member)
                 .where(teamMember.team.id.eq(teamId),
@@ -151,7 +171,8 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         team.id,
                         team.teamName,
                         teamMember.count().intValue(),
-                        schedule.scheduleTime))
+                        schedule.scheduleTime)
+                )
                 .from(team)
                 .leftJoin(schedule).on(
                         schedule.team.id.eq(team.id),
@@ -177,35 +198,50 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
     }
 
     @Override
-    public List<TeamMemberResult> getTeamLateTimeResult(Long teamId) {
+    public List<TeamLateTimeResult> getTeamLateTimeResult(Long teamId) {
         return query
                 .select(Projections.constructor(
-                        TeamMemberResult.class,
+                        TeamLateTimeResult.class,
                         member.id,
                         member.nickname,
-                        Projections.constructor(
-                                MemberProfileResDto.class,
-                                member.profile.profileType,
-                                member.profile.profileImg,
-                                member.profile.profileCharacter,
-                                member.profile.profileBackground),
+                        constructMemberProfileResDto(member),
                         scheduleMember.arrivalTimeDiff.sum(),
-                        teamMember.status))
+                        teamMember.status)
+                )
                 .from(teamMember)
+                .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
                 .innerJoin(member).on(member.id.eq(teamMember.member.id))
-                .rightJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
-                .where(scheduleMember.arrivalTime.isNotNull(),
-                        scheduleMember.arrivalTimeDiff.lt(0),
-                        scheduleMember.status.eq(ALIVE))
-                .groupBy(member.id,
+                .where(
+                        schedule.status.eq(ALIVE),
+                        schedule.scheduleStatus.eq(TERM),
+                        scheduleMember.arrivalTime.isNotNull(),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .groupBy(
+                        member.id,
                         member.nickname,
                         member.profile.profileType,
                         member.profile.profileImg,
                         member.profile.profileCharacter,
                         member.profile.profileBackground,
-                        teamMember.status)
-                .orderBy(scheduleMember.arrivalTimeDiff.sum().asc())
+                        teamMember.status
+                )
+                .orderBy(
+                        scheduleMember.arrivalTimeDiff.sum().desc(),
+                        schedule.id.count().desc()
+                )
                 .fetch();
+    }
+
+    private ConstructorExpression<MemberProfileResDto> constructMemberProfileResDto(QMember member){
+        return Projections.constructor(
+                MemberProfileResDto.class,
+                member.profile.profileType,
+                member.profile.profileImg,
+                member.profile.profileCharacter,
+                member.profile.profileBackground
+        );
     }
 
     private int getOffset(int page){

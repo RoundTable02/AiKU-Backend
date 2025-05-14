@@ -2,7 +2,7 @@ package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.dto.team.TeamResDto;
-import aiku_main.dto.team.TeamMemberResult;
+import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 
@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface TeamRepositoryCustom {
 
     Optional<Team> findTeamWithResult(Long teamId);
+    Optional<Team> findTeamWithResultByScheduleId(Long scheduleId);
     List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId);
     Optional<TeamMember> findTeamMember(Long teamId, Long memberId);
     Optional<TeamMember> findDeletedTeamMember(Long teamId, Long memberId);
@@ -22,5 +23,5 @@ public interface TeamRepositoryCustom {
 
     List<TeamMemberResDto> getTeamMemberList(Long teamId);
     List<TeamResDto> getTeamList(Long memberId, int page);
-    List<TeamMemberResult> getTeamLateTimeResult(Long teamId);
+    List<TeamLateTimeResult> getTeamLateTimeResult(Long teamId);
 }

@@ -6,16 +6,12 @@ import aiku_main.exception.TeamException;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.team.TeamRepository;
 import aiku_main.service.team.TeamService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.*;
-import common.domain.betting.Betting;
 import common.domain.member.Member;
-import common.domain.racing.Racing;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
-import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -263,107 +259,7 @@ public class TeamServiceIntegrationTest {
                 .containsExactly(3, 1, 2);
     }
 
-    @Test
-    void 이벤트핸들러_그룹_지각_분석() throws JsonProcessingException {
-        //given
-        Team team = Team.create(member1, "team");
-        team.addTeamMember(member2);
-        team.addTeamMember(member3);
-        em.persist(team);
-
-        LocalDateTime scheduleTime = LocalDateTime.now().minusDays(1);
-
-        Schedule schedule1 = createSchedule(member1, team, scheduleTime);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 0);
-        em.persist(schedule1);
-
-        // member1: 10, member2: 0, member3: 15분 지각
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), scheduleTime.plusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), scheduleTime.minusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), scheduleTime.plusMinutes(15));
-        schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
-
-        Schedule schedule2 = createSchedule(member1, team, scheduleTime);
-        schedule2.addScheduleMember(member2, false, 0);
-        schedule2.addScheduleMember(member3, false, 0);
-        em.persist(schedule2);
-
-        // member1: 20, member2: 0, member3: 0분 지각
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), scheduleTime.plusMinutes(20));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), scheduleTime.minusMinutes(10));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), scheduleTime.minusMinutes(30));
-        schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
-
-        //when
-        teamService.analyzeLateTimeResult(schedule1.getId());
-
-        //then
-        Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
-        assertThat(resultTeam).isNotNull();
-
-        //누적 member1: 30, member2: 0, member3: 15분 지각
-        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
-        assertThat(lateMemberRanking)
-                .extracting(TeamMemberResult::getMemberId)
-                .containsExactly(member1.getId(), member3.getId());
-        assertThat(lateMemberRanking)
-                .extracting(TeamMemberResult::getAnalysis)
-                .containsExactly(-30, -15);
-    }
-
-    @Test
-    void 이벤트핸들러_그룹_지각_분석_이전결과존재() throws JsonProcessingException {
-        //given
-        Team team = Team.create(member1, "team");
-        team.addTeamMember(member2);
-        team.addTeamMember(member3);
-        em.persist(team);
-
-        LocalDateTime scheduleTime = LocalDateTime.now().minusDays(1);
-
-        Schedule schedule1 = createSchedule(member1, team, scheduleTime);
-        schedule1.addScheduleMember(member2, false, 0);
-        schedule1.addScheduleMember(member3, false, 0);
-        em.persist(schedule1);
-
-        //member1: 20, member2: 10, member3: 5분 지각
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), scheduleTime.plusMinutes(20));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), scheduleTime.plusMinutes(10));
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(2), scheduleTime.plusMinutes(5));
-        schedule1.setTerm(schedule1.getScheduleTime().plusMinutes(30));
-
-        teamService.analyzeLateTimeResult(schedule1.getId());
-
-        Schedule schedule2 = createSchedule(member1, team, LocalDateTime.now().minusDays(1));
-        schedule2.addScheduleMember(member2, false, 0);
-        schedule2.addScheduleMember(member3, false, 0);
-        em.persist(schedule2);
-
-        //member1: 10, member2: 50, member3: 100분 지각
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(0), scheduleTime.plusMinutes(10));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(1), scheduleTime.plusMinutes(50));
-        schedule2.arriveScheduleMember(schedule2.getScheduleMembers().get(2), scheduleTime.plusMinutes(100));
-        schedule2.setTerm(schedule2.getScheduleTime().plusMinutes(30));
-
-        //when
-        //member1: 30, member2: 60, member3: 105분 지각
-        teamService.analyzeLateTimeResult(schedule1.getId());
-
-        //then
-        Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
-        assertThat(resultTeam).isNotNull();
-
-        List<TeamMemberResult> lateMemberRanking = objectMapper.readValue(resultTeam.getTeamResult().getLateTimeResult(), TeamLateTimeResult.class).getMembers();
-        assertThat(lateMemberRanking)
-                .extracting(TeamMemberResult::getPreviousRank)
-                .containsExactly(3, 2, 1);
-        assertThat(lateMemberRanking)
-                .extracting(TeamMemberResult::getRank)
-                .containsExactly(1, 2, 3);
-    }
-
-    @Test
+/*    @Test
     void 이벤트핸들러_베팅_분석() throws JsonProcessingException {
         //given
         Team team = Team.create(member1, "team");
@@ -433,10 +329,10 @@ public class TeamServiceIntegrationTest {
         Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
-        assertThat(teamMemberResults).hasSize(3);
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getMemberId)
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        assertThat(teamLateTimeResultMembers).hasSize(3);
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getMemberId)
                 .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 
@@ -503,12 +399,12 @@ public class TeamServiceIntegrationTest {
         Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getRank)
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getRank)
                 .containsExactly(1, 2, 3);
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getPreviousRank)
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getPreviousRank)
                 .containsExactly(1, -1, 2);
     }
 
@@ -563,10 +459,10 @@ public class TeamServiceIntegrationTest {
         Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(resultTeam).isNotNull();
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
-        assertThat(teamMemberResults).hasSize(3);
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getMemberId)
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        assertThat(teamLateTimeResultMembers).hasSize(3);
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getMemberId)
                 .containsExactly(member1.getId(), member2.getId(), member3.getId());
     }
 
@@ -626,14 +522,14 @@ public class TeamServiceIntegrationTest {
         assertThat(resultTeam).isNotNull();
         System.out.println(resultTeam.getTeamResult().getTeamRacingResult());
 
-        List<TeamMemberResult> teamMemberResults = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getRank)
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamRacingResult(), TeamRacingResult.class).getMembers();
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getRank)
                 .containsExactly(1, 2, 3, 4);
-        assertThat(teamMemberResults)
-                .extracting(TeamMemberResult::getPreviousRank)
+        assertThat(teamLateTimeResultMembers)
+                .extracting(TeamLateTimeResult::getPreviousRank)
                 .containsExactly(1, 2, 3, -1);
-    }
+    }*/
 
     Schedule createSchedule(Member member, Team team, LocalDateTime startTime) {
         return Schedule.create(member, new TeamValue(team.getId()), "schedule", startTime,

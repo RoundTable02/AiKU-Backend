@@ -1,5 +1,6 @@
 package aiku_main.dto.team;
 
+import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +13,5 @@ import java.util.List;
 public class TeamRacingResult {
 
     private Long groupId;
-    private List<TeamMemberResult> members;
+    private List<TeamLateTimeResult> members;
 }

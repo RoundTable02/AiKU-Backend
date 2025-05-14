@@ -1,11 +1,11 @@
 package aiku_main.dto.team.result.racing_odds;
 
 import lombok.AllArgsConstructor;
-import lombok.Setter;
+import lombok.Getter;
 
 import java.util.List;
 
-@Setter
+@Getter
 @AllArgsConstructor
 public class TeamRacingResultDto {
 

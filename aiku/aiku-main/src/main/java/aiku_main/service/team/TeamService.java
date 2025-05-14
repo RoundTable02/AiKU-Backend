@@ -5,6 +5,8 @@ import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResult;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResultDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
 import aiku_main.repository.member.MemberRepository;
@@ -164,7 +166,7 @@ public class TeamService {
             return;
         }
 
-        TeamRacingResult result = objectMapperUtil.parseJson(teamResult.getTeamRacingResult(), TeamRacingResult.class);
+        TeamRacingResultDto result = objectMapperUtil.parseJson(teamResult.getTeamRacingResult(), TeamRacingResultDto.class);
         result.getMembers().forEach(resultMember -> {
             if (resultMember.getMemberId().equals(memberId)) {
                 resultMember.setTeamMember(false);

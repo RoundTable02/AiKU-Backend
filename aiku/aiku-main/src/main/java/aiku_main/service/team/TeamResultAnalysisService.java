@@ -27,27 +27,27 @@ public class TeamResultAnalysisService {
         Team team = teamRepository.findTeamWithResult(teamId).orElseThrow();
 
         List<TeamLateTimeResult> result = teamRepository.getTeamLateTimeResult(team.getId()); //1.지각 총 시간 내림차순, 2.스케줄 총 개수 내림차순
-        TeamLateTimeResultDto teamLateTimeResultDto = new TeamLateTimeResultDto(team.getId(), result);
+        TeamLateTimeResultDto resultDto = new TeamLateTimeResultDto(team.getId(), result);
 
-        team.setTeamLateResult(ObjectMapperUtil.toJson(teamLateTimeResultDto));
+        team.setTeamLateResult(ObjectMapperUtil.toJson(resultDto));
     }
 
     @Transactional
     public void analyzeBettingResult(Long teamId) {
         Team team = teamRepository.findTeamWithResult(teamId).orElseThrow();
 
-        List<TeamBettingResult> results = teamRepository.getBettingWinOddsResult(teamId); //1.확률 내림차순, 2.베팅 총 개수 내림차순
-        TeamBettingResultDto result = new TeamBettingResultDto(team.getId(), results);
+        List<TeamBettingResult> result = teamRepository.getBettingWinOddsResult(teamId); //1.확률 내림차순, 2.베팅 총 개수 내림차순
+        TeamBettingResultDto resultDto = new TeamBettingResultDto(team.getId(), result);
 
-        team.setTeamBettingResult(ObjectMapperUtil.toJson(result));
+        team.setTeamBettingResult(ObjectMapperUtil.toJson(resultDto));
     }
 
     @Transactional
     public void analyzeRacingResult(Long teamId){
         Team team = teamRepository.findTeamWithResult(teamId).orElseThrow();
 
-        List<TeamRacingResult> results = teamRepository.getRacingWinOddsResult(teamId);//1.확률 내림차순, 2.레이싱 총 개수 내림차순
-        TeamRacingResultDto resultDto = new TeamRacingResultDto(team.getId(), results);
+        List<TeamRacingResult> result = teamRepository.getRacingWinOddsResult(teamId);//1.확률 내림차순, 2.레이싱 총 개수 내림차순
+        TeamRacingResultDto resultDto = new TeamRacingResultDto(team.getId(), result);
 
         team.setTeamRacingResult(ObjectMapperUtil.toJson(resultDto));
     }

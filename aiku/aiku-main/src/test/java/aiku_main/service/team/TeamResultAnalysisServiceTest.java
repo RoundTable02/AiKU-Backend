@@ -1,12 +1,18 @@
 package aiku_main.service.team;
 
+import aiku_main.dto.schedule.result.betting.BettingResultDto;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
 import aiku_main.repository.team.TeamRepository;
 import common.domain.Location;
+import common.domain.betting.Betting;
 import common.domain.member.Member;
+import common.domain.racing.Racing;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
+import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
 import common.util.ObjectMapperUtil;
 import jakarta.persistence.EntityManager;
@@ -139,6 +145,85 @@ class TeamResultAnalysisServiceTest {
         assertThat(resultMembers)
                 .extracting(TeamLateTimeResult::getLateTime)
                 .containsExactly(60, 10, 0);
+    }
+
+    /**
+     * //given
+     * schedule1
+     * member1 승 -> member2 패
+     * member2 승 ->  member3 패
+     * member3 패 ->  member2 패
+     * schedule2
+     * member1 승 -> member2 패
+     * member2 패 -> member1 승
+     * => member1:2/2 member2:0/2 member3:0/1
+     */
+    @Test
+    void 팀_베팅_승률_분석() {
+        //given
+        Betting betting1 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                20
+        );
+        betting1.setWin(20);
+        em.persist(betting1);
+
+        Betting betting2 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
+                10
+        );
+        betting2.setWin(20);
+        em.persist(betting2);
+
+        Betting betting3 = Betting.create(
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(2).getId()),
+                new ScheduleMemberValue(schedule1.getScheduleMembers().get(1).getId()),
+                20
+        );
+        betting3.setLose();
+        em.persist(betting3);
+
+        Betting betting4 = Betting.create(
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                10
+        );
+        betting4.setWin(20);
+        em.persist(betting4);
+
+        Betting betting5 = Betting.create(
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(1).getId()),
+                new ScheduleMemberValue(schedule2.getScheduleMembers().get(0).getId()),
+                10
+        );
+        betting5.setLose();
+        em.persist(betting5);
+
+        schedule1.setTerm(LocalDateTime.now());
+        schedule2.setTerm(LocalDateTime.now());
+
+        em.flush();
+
+        //when
+        teamResultAnalysisService.analyzeBettingResult(team.getId());
+
+        //then
+        String result = teamRepository.findById(team.getId()).get()
+                .getTeamResult()
+                .getTeamBettingResult();
+
+        List<TeamBettingResult> resultMembers = ObjectMapperUtil.parseJson(result, TeamBettingResultDto.class)
+                .getMembers();
+
+        assertThat(resultMembers)
+                .extracting(TeamBettingResult::getMemberId)
+                .containsExactly(member1.getId(), member2.getId(), member3.getId());
+
+        assertThat(resultMembers)
+                .extracting(TeamBettingResult::getOdds)
+                .containsExactly(1L, 0L, 0L);
     }
 
     Member createMember(){

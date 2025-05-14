@@ -17,7 +17,7 @@ public class TeamBettingResult {
     private Long memberId;
     private String nickname;
     private MemberProfileResDto memberProfile;
-    private int lateTime;
+    private long odds;
     private boolean isTeamMember;
 
     @QueryProjection
@@ -25,13 +25,13 @@ public class TeamBettingResult {
             Long memberId,
             String nickname,
             MemberProfileResDto memberProfile,
-            int lateTime,
+            long odds,
             Status isTeamMember
     ) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;
-        this.lateTime = lateTime;
+        this.odds = odds;
         this.isTeamMember = isTeamMember == ALIVE
                 ? true
                 : false;

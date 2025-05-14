@@ -1,6 +1,5 @@
 package aiku_main.dto.team.result.betting_odds;
 
-import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

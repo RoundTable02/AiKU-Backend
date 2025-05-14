@@ -226,13 +226,14 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         member.id,
                         member.nickname,
                         constructMemberProfileResDto(member),
-                        getIfWinner(betting).count().divide(betting.count()),
+                        getIfWinner(betting).divide(betting.count()),
                         teamMember.status
                 ))
                 .from(teamMember)
                 .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
                 .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
                 .innerJoin(betting).on(betting.bettor.id.eq(scheduleMember.id))
+                .innerJoin(member).on(member.id.eq(teamMember.member.id))
                 .where(
                         betting.status.eq(ALIVE),
                         betting.bettingStatus.eq(TERM),
@@ -248,7 +249,7 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         teamMember.status
                 )
                 .orderBy(
-                        getIfWinner(betting).count().divide(betting.count()).desc(),
+                        getIfWinner(betting).divide(betting.count()).desc(),
                         betting.count().desc()
                 )
                 .fetch();

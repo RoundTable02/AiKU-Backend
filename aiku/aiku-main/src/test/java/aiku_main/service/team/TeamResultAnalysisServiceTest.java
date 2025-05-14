@@ -6,12 +6,10 @@ import aiku_main.repository.team.TeamRepository;
 import common.domain.Location;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
-import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import common.util.ObjectMapperUtil;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
@@ -93,7 +90,7 @@ class TeamResultAnalysisServiceTest {
      * => member1:1시간 지각 member2: 0분 지각 member3:10분 지각
      */
     @Test
-    void analyzeLateTimeResult() {
+    void 팀_지각_순위_분석() {
         //given
         schedule1.arriveScheduleMember(
                 schedule1.getScheduleMembers().get(0),

@@ -1,5 +1,6 @@
 package aiku_main.service.team;
 
+import aiku_main.dto.MemberProfileResDto;
 import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
@@ -9,11 +10,14 @@ import aiku_main.dto.team.result.racing_odds.TeamRacingResult;
 import aiku_main.dto.team.result.racing_odds.TeamRacingResultDto;
 import aiku_main.repository.team.TeamRepository;
 import common.domain.Location;
+import common.domain.Status;
 import common.domain.betting.Betting;
 import common.domain.member.Member;
+import common.domain.member.MemberProfileType;
 import common.domain.racing.Racing;
 import common.domain.schedule.Schedule;
 import common.domain.team.Team;
+import common.domain.team.TeamResult;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.domain.value_reference.TeamValue;
 import common.util.ObjectMapperUtil;
@@ -307,10 +311,70 @@ class TeamResultAnalysisServiceTest {
                 .containsExactly(1L, 0L, 0L);
     }
 
+    @Test
+    void 팀_탈퇴시_분석_결과_업데이트() {
+        //given
+        TeamLateTimeResult teamLateTimeResult = new TeamLateTimeResult(
+                member2.getId(),
+                member2.getNickname(),
+                new MemberProfileResDto(member2.getProfile()),
+                0,
+                Status.ALIVE
+        );
+        TeamLateTimeResultDto teamLateTimeResultDto = new TeamLateTimeResultDto(team.getId(), List.of(teamLateTimeResult));
+        team.setTeamLateResult(ObjectMapperUtil.toJson(teamLateTimeResultDto));
+
+        TeamBettingResult teamBettingResult = new TeamBettingResult(
+                member2.getId(),
+                member2.getNickname(),
+                new MemberProfileResDto(member2.getProfile()),
+                0,
+                Status.ALIVE
+        );
+        TeamBettingResultDto teamBettingResultDto = new TeamBettingResultDto(team.getId(), List.of(teamBettingResult));
+        team.setTeamBettingResult(ObjectMapperUtil.toJson(teamBettingResultDto));
+
+        TeamRacingResult teamRacingResult = new TeamRacingResult(
+                member2.getId(),
+                member2.getNickname(),
+                new MemberProfileResDto(member2.getProfile()),
+                0,
+                Status.ALIVE
+        );
+        TeamRacingResultDto teamRacingResultDto = new TeamRacingResultDto(team.getId(), List.of(teamRacingResult));
+        team.setTeamRacingResult(ObjectMapperUtil.toJson(teamRacingResultDto));
+
+        em.flush();
+
+        //when
+        teamResultAnalysisService.updateTeamResultOfExitMember(member2.getId(), team.getId());
+
+        //then
+        TeamResult result = teamRepository.findById(team.getId()).get()
+                .getTeamResult();
+
+        TeamLateTimeResult teamLateTimeResultMem = ObjectMapperUtil.parseJson(result.getLateTimeResult(), TeamLateTimeResultDto.class)
+                .getMembers()
+                .get(0);
+        assertThat(teamLateTimeResultMem.isTeamMember()).isFalse();
+
+        TeamBettingResult teamBettingResultMem = ObjectMapperUtil.parseJson(result.getTeamBettingResult(), TeamBettingResultDto.class)
+                .getMembers()
+                .get(0);
+        assertThat(teamBettingResultMem.isTeamMember()).isFalse();
+
+        TeamRacingResult teamRacingResultMem = ObjectMapperUtil.parseJson(result.getTeamRacingResult(), TeamRacingResultDto.class)
+                .getMembers()
+                .get(0);
+        assertThat(teamRacingResultMem.isTeamMember()).isFalse();
+
+    }
+
     Member createMember(){
         Member member = Member.builder()
                 .nickname(UUID.randomUUID().toString())
                 .build();
+        member.updateProfile(MemberProfileType.CHAR, null, null, null);
         member.updatePointAmount(100);
 
         return member;

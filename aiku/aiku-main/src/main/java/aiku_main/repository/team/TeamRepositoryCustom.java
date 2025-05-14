@@ -2,6 +2,7 @@ package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
 import aiku_main.dto.team.TeamResDto;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
@@ -23,4 +24,5 @@ public interface TeamRepositoryCustom {
     List<TeamMemberResDto> getTeamMemberList(Long teamId);
     List<TeamResDto> getTeamList(Long memberId, int page);
     List<TeamLateTimeResult> getTeamLateTimeResult(Long teamId);
+    List<TeamBettingResult> getBettingWinOddsResult(Long teamId);
 }

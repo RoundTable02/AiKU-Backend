@@ -1,6 +1,7 @@
 package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.MemberProfileResDto;
@@ -10,6 +11,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.betting.QBetting;
 import common.domain.member.QMember;
 import common.domain.schedule.QSchedule;
 import common.domain.schedule.QScheduleMember;
@@ -23,6 +25,7 @@ import java.util.Optional;
 import static common.domain.ExecStatus.TERM;
 import static common.domain.Status.ALIVE;
 import static common.domain.Status.DELETE;
+import static common.domain.betting.QBetting.betting;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
@@ -215,11 +218,55 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<TeamBettingResult> getBettingWinOddsResult(Long teamId) {
+        return query
+                .select(Projections.constructor(
+                        TeamBettingResult.class,
+                        member.id,
+                        member.nickname,
+                        constructMemberProfileResDto(member),
+                        getIfWinner(betting).count().divide(betting.count()),
+                        teamMember.status
+                ))
+                .from(teamMember)
+                .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
+                .innerJoin(betting).on(betting.bettor.id.eq(scheduleMember.id))
+                .where(
+                        betting.status.eq(ALIVE),
+                        betting.bettingStatus.eq(TERM),
+                        schedule.scheduleStatus.eq(TERM)
+                )
+                .groupBy(
+                        member.id,
+                        member.nickname,
+                        member.profile.profileType,
+                        member.profile.profileImg,
+                        member.profile.profileCharacter,
+                        member.profile.profileBackground,
+                        teamMember.status
+                )
+                .orderBy(
+                        getIfWinner(betting).count().divide(betting.count()).desc(),
+                        betting.count().desc()
+                )
+                .fetch();
+    }
+
     private NumberExpression<Integer> getLateTimeIfMinus(QScheduleMember scheduleMember){
         return new CaseBuilder()
                 .when(scheduleMember.arrivalTimeDiff.loe(0))
                 .then(scheduleMember.arrivalTimeDiff)
                 .otherwise(0);
+    }
+
+    private NumberExpression<Long> getIfWinner(QBetting betting){
+        return new CaseBuilder()
+                .when(betting.isWinner.isTrue())
+                .then(1L)
+                .otherwise(0L)
+                .sum();
     }
 
     private ConstructorExpression<MemberProfileResDto> constructMemberProfileResDto(QMember member){

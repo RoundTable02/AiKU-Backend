@@ -3,6 +3,7 @@ package aiku_main.service.team;
 import aiku_main.dto.team.*;
 import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
@@ -117,38 +118,9 @@ public class TeamService {
         return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
     }
 /*
-    @Transactional
-    public void analyzeBettingResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        Team team = findTeamWithResult(schedule.getTeam().getId());
-
-        Map<Long, List<TeamBettingResultMemberDto>> memberBettingsMap = bettingRepository.getMemberTermBettingsInTeam(team.getId());
-
-        Map<Long, Integer> previousResult = getPreviousBettingResult(team.getTeamResult());
-
-        List<TeamLateTimeResult> teamLateTimeResultMembers = new ArrayList<>();
-        memberBettingsMap.forEach((memberId, memberBettingList) -> {
-            long count = memberBettingList.stream().filter(TeamBettingResultMemberDto::isWinner).count();
-            int analysis = (int) ((double)count/memberBettingList.size() * 100);
-
-            TeamBettingResultMemberDto data = memberBettingList.get(0);
-            teamLateTimeResultMembers.add(new TeamLateTimeResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
-        });
-
-        teamLateTimeResultMembers.sort(Comparator.comparingInt(TeamLateTimeResult::getLateTime).reversed());
-
-        int rank = 1;
-        for (TeamLateTimeResult resultMember : teamLateTimeResultMembers) {
-            resultMember.setRank(rank++);
-        }
-
-        TeamBettingResult teamBettingResult = new TeamBettingResult(team.getId(), teamLateTimeResultMembers);
-        team.setTeamBettingResult(objectMapperUtil.toJson(teamBettingResult));
-    }
-
     private Map<Long, Integer> getPreviousBettingResult(TeamResult teamResult) {
         if(teamResult != null && teamResult.getTeamBettingResult() != null){
-            TeamBettingResult previousResult = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResult.class);
+            TeamBettingResultDto previousResult = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResultDto.class);
 
             return previousResult.getMembers().stream()
                     .collect(Collectors.toMap(
@@ -237,7 +209,7 @@ public class TeamService {
             return;
         }
 
-        TeamBettingResult result = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResult.class);
+        TeamBettingResultDto result = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResultDto.class);
         result.getMembers().forEach(resultMember -> {
             if (resultMember.getMemberId().equals(memberId)) {
                 resultMember.setTeamMember(false);

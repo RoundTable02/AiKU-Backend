@@ -329,7 +329,7 @@ public class TeamServiceIntegrationTest {
         Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(resultTeam).isNotNull();
 
-        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResultDto.class).getMembers();
         assertThat(teamLateTimeResultMembers).hasSize(3);
         assertThat(teamLateTimeResultMembers)
                 .extracting(TeamLateTimeResult::getMemberId)
@@ -399,7 +399,7 @@ public class TeamServiceIntegrationTest {
         Team resultTeam = teamRepository.findById(team.getId()).orElse(null);
         assertThat(resultTeam).isNotNull();
 
-        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResult.class).getMembers();
+        List<TeamLateTimeResult> teamLateTimeResultMembers = objectMapper.readValue(resultTeam.getTeamResult().getTeamBettingResult(), TeamBettingResultDto.class).getMembers();
         assertThat(teamLateTimeResultMembers)
                 .extracting(TeamLateTimeResult::getRank)
                 .containsExactly(1, 2, 3);

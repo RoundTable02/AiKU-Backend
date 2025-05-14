@@ -1,4 +1,4 @@
-package aiku_main.dto.team;
+package aiku_main.dto.team.result.betting_odds;
 
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamBettingResult {
+public class TeamBettingResultDto {
 
     private Long groupId;
-    private List<TeamLateTimeResult> members;
+    private List<TeamBettingResult> members;
 }

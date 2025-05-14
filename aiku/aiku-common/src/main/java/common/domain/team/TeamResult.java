@@ -47,4 +47,16 @@ public class TeamResult extends BaseTime {
     protected void setTeamRacingResult(String teamRacingResult) {
         this.teamRacingResult = teamRacingResult;
     }
+
+    public boolean hasNoLateTimeResult(){
+        return lateTimeResult == null;
+    }
+
+    public boolean hasNoTeamBettingResult(){
+        return teamBettingResult == null;
+    }
+
+    public boolean hasNoTeamRacingResult(){
+        return teamRacingResult == null;
+    }
 }

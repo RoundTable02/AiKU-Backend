@@ -123,7 +123,7 @@ class TeamResultAnalysisServiceTest {
         em.flush();
 
         //when
-        teamResultAnalysisService.analyzeLateTimeResult(schedule1.getId());
+        teamResultAnalysisService.analyzeLateTimeResult(team.getId());
 
         //then
         String result = teamRepository.findById(team.getId()).get()

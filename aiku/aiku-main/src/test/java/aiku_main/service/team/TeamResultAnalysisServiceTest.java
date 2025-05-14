@@ -1,7 +1,6 @@
 package aiku_main.service.team;
 
 import aiku_main.dto.MemberProfileResDto;
-import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;

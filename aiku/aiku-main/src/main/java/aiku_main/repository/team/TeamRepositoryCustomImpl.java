@@ -6,10 +6,13 @@ import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.MemberProfileResDto;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.member.QMember;
 import common.domain.schedule.QSchedule;
+import common.domain.schedule.QScheduleMember;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import lombok.RequiredArgsConstructor;
@@ -39,28 +42,6 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                 .leftJoin(team.teamResult, teamResult).fetchJoin()
                 .where(team.id.eq(teamId),
                         team.status.eq(ALIVE))
-                .fetchOne();
-
-        return Optional.ofNullable(findTeam);
-    }
-
-    @Override
-    public Optional<Team> findTeamWithResultByScheduleId(Long scheduleId) {
-        Team findTeam = query
-                .selectFrom(team)
-                .leftJoin(team.teamResult, teamResult).fetchJoin()
-                .where(
-                        team.id.eq(
-                                JPAExpressions
-                                        .select(schedule.team.id)
-                                        .from(schedule)
-                                        .where(
-                                                schedule.id.eq(scheduleId),
-                                                schedule.status.eq(ALIVE)
-                                        )
-                        ),
-                        team.status.eq(ALIVE)
-                )
                 .fetchOne();
 
         return Optional.ofNullable(findTeam);
@@ -205,7 +186,7 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         member.id,
                         member.nickname,
                         constructMemberProfileResDto(member),
-                        scheduleMember.arrivalTimeDiff.sum(),
+                        getLateTimeIfMinus(scheduleMember).sum().abs(),
                         teamMember.status)
                 )
                 .from(teamMember)
@@ -228,10 +209,17 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         teamMember.status
                 )
                 .orderBy(
-                        scheduleMember.arrivalTimeDiff.sum().desc(),
+                        getLateTimeIfMinus(scheduleMember).sum().abs().desc(),
                         schedule.id.count().desc()
                 )
                 .fetch();
+    }
+
+    private NumberExpression<Integer> getLateTimeIfMinus(QScheduleMember scheduleMember){
+        return new CaseBuilder()
+                .when(scheduleMember.arrivalTimeDiff.loe(0))
+                .then(scheduleMember.arrivalTimeDiff)
+                .otherwise(0);
     }
 
     private ConstructorExpression<MemberProfileResDto> constructMemberProfileResDto(QMember member){

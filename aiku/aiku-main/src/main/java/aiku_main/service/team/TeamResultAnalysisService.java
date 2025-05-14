@@ -29,8 +29,8 @@ public class TeamResultAnalysisService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public void analyzeLateTimeResult(Long scheduleId) {
-        Team team = teamRepository.findTeamWithResultByScheduleId(scheduleId).orElseThrow();
+    public void analyzeLateTimeResult(Long teamId) {
+        Team team = teamRepository.findTeamWithResult(teamId).orElseThrow();
 
         List<TeamLateTimeResult> teamMembers = teamRepository.getTeamLateTimeResult(team.getId()); //1.지각 총 시간 내림차순, 2.스케줄 총 개수 내림차순
         TeamLateTimeResultDto teamLateTimeResultDto = new TeamLateTimeResultDto(team.getId(), teamMembers);

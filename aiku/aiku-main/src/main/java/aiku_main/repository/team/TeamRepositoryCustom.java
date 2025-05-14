@@ -12,7 +12,6 @@ import java.util.Optional;
 public interface TeamRepositoryCustom {
 
     Optional<Team> findTeamWithResult(Long teamId);
-    Optional<Team> findTeamWithResultByScheduleId(Long scheduleId);
     List<TeamMember> findTeamMembersWithMemberInTeam(Long teamId);
     Optional<TeamMember> findTeamMember(Long teamId, Long memberId);
     Optional<TeamMember> findDeletedTeamMember(Long teamId, Long memberId);

@@ -20,7 +20,7 @@ public class TeamHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeLateTimeResult(ScheduleCloseEvent event){
-        teamResultAnalysisService.analyzeLateTimeResult(event.getScheduleId());
+//        teamResultAnalysisService.analyzeLateTimeResult(event.getScheduleId()); //TODO 파라미터 teamId로 변경
     }
 
     @Async

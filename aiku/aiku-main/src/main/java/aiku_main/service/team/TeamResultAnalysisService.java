@@ -4,23 +4,16 @@ import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
-import aiku_main.exception.TeamException;
-import aiku_main.repository.schedule.ScheduleRepository;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResult;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResultDto;
 import aiku_main.repository.team.TeamRepository;
-import common.domain.schedule.Schedule;
 import common.domain.team.Team;
-import common.domain.team.TeamResult;
 import common.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static common.response.status.BaseErrorCode.NO_SUCH_TEAM;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -47,5 +40,15 @@ public class TeamResultAnalysisService {
         TeamBettingResultDto result = new TeamBettingResultDto(team.getId(), results);
 
         team.setTeamBettingResult(ObjectMapperUtil.toJson(result));
+    }
+
+    @Transactional
+    public void analyzeRacingResult(Long teamId){
+        Team team = teamRepository.findTeamWithResult(teamId).orElseThrow();
+
+        List<TeamRacingResult> results = teamRepository.getRacingWinOddsResult(teamId);//1.확률 내림차순, 2.레이싱 총 개수 내림차순
+        TeamRacingResultDto resultDto = new TeamRacingResultDto(team.getId(), results);
+
+        team.setTeamRacingResult(ObjectMapperUtil.toJson(resultDto));
     }
 }

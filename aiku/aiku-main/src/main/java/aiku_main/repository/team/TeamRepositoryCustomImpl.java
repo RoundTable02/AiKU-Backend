@@ -305,7 +305,6 @@ TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         member.profile.profileImg,
                         member.profile.profileCharacter,
                         member.profile.profileBackground,
-                        scheduleMember.id,
                         teamMember.status
                 )
                 .orderBy(

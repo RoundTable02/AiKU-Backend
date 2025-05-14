@@ -5,6 +5,8 @@ import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
 import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResult;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResultDto;
 import aiku_main.repository.team.TeamRepository;
 import common.domain.Location;
 import common.domain.betting.Betting;
@@ -223,6 +225,85 @@ class TeamResultAnalysisServiceTest {
 
         assertThat(resultMembers)
                 .extracting(TeamBettingResult::getOdds)
+                .containsExactly(1L, 0L, 0L);
+    }
+
+    /**
+     * //given
+     * schedule1
+     * member1 승 -> member2 패
+     * member2 승 ->  member3 패
+     * member3 패 ->  member2 패
+     * schedule2
+     * member1 승 -> member2 패
+     * member2 패 -> member1 승
+     * => member1:2/2 member2:0/2 member3:0/1
+     */
+    @Test
+    void 팀_레이싱_승률_분석() {
+        //given
+        Racing racing1 = Racing.create(
+                schedule1.getScheduleMembers().get(0).getId(),
+                schedule1.getScheduleMembers().get(1).getId(),
+                20
+        );
+        racing1.termRacing(schedule1.getScheduleMembers().get(0).getId());
+        em.persist(racing1);
+
+        Racing racing2 = Racing.create(
+                schedule1.getScheduleMembers().get(1).getId(),
+                schedule1.getScheduleMembers().get(2).getId(),
+                10
+        );
+        racing2.termRacing(schedule1.getScheduleMembers().get(1).getId());
+        em.persist(racing2);
+
+        Racing racing3 = Racing.create(
+                schedule1.getScheduleMembers().get(2).getId(),
+                schedule1.getScheduleMembers().get(1).getId(),
+                20
+        );
+        racing3.termRacing(schedule1.getScheduleMembers().get(1).getId());
+        em.persist(racing3);
+
+        Racing racing4 = Racing.create(
+                schedule2.getScheduleMembers().get(0).getId(),
+                schedule2.getScheduleMembers().get(1).getId(),
+                10
+        );
+        racing4.termRacing(schedule2.getScheduleMembers().get(0).getId());
+        em.persist(racing4);
+
+        Racing racing5 = Racing.create(
+                schedule2.getScheduleMembers().get(1).getId(),
+                schedule2.getScheduleMembers().get(0).getId(),
+                10
+        );
+        racing5.termRacing(schedule2.getScheduleMembers().get(0).getId());
+        em.persist(racing5);
+
+        schedule1.setTerm(LocalDateTime.now());
+        schedule2.setTerm(LocalDateTime.now());
+
+        em.flush();
+
+        //when
+        teamResultAnalysisService.analyzeRacingResult(team.getId());
+
+        //then
+        String result = teamRepository.findById(team.getId()).get()
+                .getTeamResult()
+                .getTeamRacingResult();
+
+        List<TeamRacingResult> resultMembers = ObjectMapperUtil.parseJson(result, TeamRacingResultDto.class)
+                .getMembers();
+
+        assertThat(resultMembers)
+                .extracting(TeamRacingResult::getMemberId)
+                .containsExactly(member1.getId(), member2.getId(), member3.getId());
+
+        assertThat(resultMembers)
+                .extracting(TeamRacingResult::getOdds)
                 .containsExactly(1L, 0L, 0L);
     }
 

@@ -7,9 +7,7 @@ import aiku_main.dto.team.result.betting_odds.TeamBettingResultDto;
 import aiku_main.dto.team.result.late_time.TeamLateTimeResultDto;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
-import aiku_main.repository.betting.BettingRepository;
 import aiku_main.repository.member.MemberRepository;
-import aiku_main.repository.racing.RacingRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
 import common.util.ObjectMapperUtil;
@@ -35,8 +33,6 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final ScheduleRepository scheduleRepository;
-    private final BettingRepository bettingRepository;
-    private final RacingRepository racingRepository;
     private final MemberRepository memberRepository;
     private final TeamEventPublisher teamEventPublisher;
     private final ObjectMapperUtil objectMapperUtil;
@@ -117,63 +113,6 @@ public class TeamService {
 
         return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
     }
-/*
-    private Map<Long, Integer> getPreviousBettingResult(TeamResult teamResult) {
-        if(teamResult != null && teamResult.getTeamBettingResult() != null){
-            TeamBettingResultDto previousResult = objectMapperUtil.parseJson(teamResult.getTeamBettingResult(), TeamBettingResultDto.class);
-
-            return previousResult.getMembers().stream()
-                    .collect(Collectors.toMap(
-                            TeamLateTimeResult::getMemberId,
-                            teamMember -> teamMember.getRank())
-                    );
-        }
-
-        return new HashMap<>();
-    }
-
-    @Transactional
-    public void analyzeRacingResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
-        Team team = findTeamWithResult(schedule.getTeam().getId());
-
-        Map<Long, List<TeamRacingResultMemberDto>> memberRacingsMap = racingRepository.findMemberWithTermRacingsInTeam(team.getId());
-
-        Map<Long, Integer> previousResult = getPreviousRacingResult(team.getTeamResult());
-
-        List<TeamLateTimeResult> teamLateTimeResultMembers = new ArrayList<>();
-        memberRacingsMap.forEach((memberId, memberRacingList) -> {
-            long count = memberRacingList.stream().filter(TeamRacingResultMemberDto::isWinner).count();
-            int analysis = (int) ((double) count / memberRacingList.size() * 100);
-
-            TeamRacingResultMemberDto data = memberRacingList.get(0);
-            teamLateTimeResultMembers.add(new TeamLateTimeResult(memberId, data.getNickName(), data.getMemberProfile(), analysis, previousResult.getOrDefault(memberId, -1), data.getIsTeamMember()));
-        });
-
-        teamLateTimeResultMembers.sort(Comparator.comparingInt(TeamLateTimeResult::getLateTime).reversed());
-
-        int rank = 1;
-        for (TeamLateTimeResult resultMember : teamLateTimeResultMembers) {
-            resultMember.setRank(rank++);
-        }
-
-        TeamRacingResult teamRacingResult = new TeamRacingResult(team.getId(), teamLateTimeResultMembers);
-        team.setTeamRacingResult(objectMapperUtil.toJson(teamRacingResult));
-    }
-
-    private Map<Long, Integer> getPreviousRacingResult(TeamResult teamResult) {
-        if(teamResult != null && teamResult.getTeamRacingResult() != null){
-            TeamRacingResult previousResult = objectMapperUtil.parseJson(teamResult.getTeamRacingResult(), TeamRacingResult.class);
-
-            return previousResult.getMembers().stream()
-                    .collect(Collectors.toMap(
-                            TeamLateTimeResult::getMemberId,
-                            teamMember -> teamMember.getRank())
-                    );
-        }
-
-        return new HashMap<>();
-    }*/
 
     @Transactional
     public void updateTeamResultOfExitMember(Long memberId, Long teamId) {

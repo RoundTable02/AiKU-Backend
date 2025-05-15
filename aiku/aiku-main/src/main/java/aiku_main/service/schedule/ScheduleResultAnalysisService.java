@@ -67,9 +67,6 @@ public class ScheduleResultAnalysisService {
     }
 
     private boolean noRacingInSchedule(List<RacingResult> racingResults) {
-        if (racingResults.isEmpty()) {
-            return true;
-        }
-        return false;
+        return racingResults.isEmpty();
     }
 }

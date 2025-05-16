@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.slf4j.MDC;
 
+import java.util.UUID;
+
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class BaseErrorResponse {
@@ -13,7 +15,10 @@ public class BaseErrorResponse {
     private String requestId;
 
     public BaseErrorResponse(int code, String message) {
-        this.requestId = MDC.get("request_id");
+        String requestId = UUID.randomUUID().toString();
+        MDC.put("request_id", requestId);
+
+        this.requestId = requestId;
         this.code = code;
         this.message = message;
     }

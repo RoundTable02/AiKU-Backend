@@ -2,6 +2,8 @@ package gateway.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,9 @@ import org.springframework.web.server.WebExceptionHandler;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 @Order(-2)
@@ -34,6 +38,9 @@ public class GlobalWebExceptionHandler implements WebExceptionHandler {
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         BaseErrorResponse errorResponse = new BaseErrorResponse(40300, ex.getMessage());
+
+        log.error("GlobalWebExceptionHandler.handle_JwtAccessDeniedException <{}>", ex.getMessage(), ex);
+
         return getErrorMessage(exchange, errorResponse);
     }
 
@@ -42,6 +49,9 @@ public class GlobalWebExceptionHandler implements WebExceptionHandler {
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         BaseErrorResponse errorResponse = new BaseErrorResponse(50000, ex.getMessage());
+
+        log.error("GlobalWebExceptionHandler.handle_DefaultException <{}>", ex.getMessage(), ex);
+
         return getErrorMessage(exchange, errorResponse);
     }
 

@@ -56,15 +56,11 @@ public class TeamService {
 
     @Transactional
     public Long exitTeam(Long memberId, Long teamId) {
-        Member member = findMember(memberId);
         Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId, true);
         checkHasRunSchedule(memberId, teamId);
 
-        Long teamMemberCount = teamRepository.countOfTeamMember(teamId);
-        if (teamMemberCount <= 1){
-            team.delete();
-        }
+        deleteTeamIfLastMember(team);
 
         TeamMember teamMember = findTeamMember(memberId, teamId);
         team.removeTeamMember(teamMember);
@@ -72,6 +68,17 @@ public class TeamService {
         publishTeamExitEvent(memberId, teamId);
 
         return team.getId();
+    }
+
+    public void deleteTeamIfLastMember(Team team){
+        Long teamMemberCount = teamRepository.countOfTeamMember(team.getId());
+        if (isLastMember(teamMemberCount)){
+            team.delete();
+        }
+    }
+
+    public boolean isLastMember(long teamMemberCount){
+        return teamMemberCount <= 1;
     }
 
     public void publishTeamExitEvent(Long memberId, Long teamId){
@@ -98,21 +105,27 @@ public class TeamService {
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getLateTimeResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getLateTimeResult();
     }
 
     public String getTeamBettingResult(Long memberId, Long teamId){
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getTeamBettingResult();
     }
 
     public String getTeamRacingResult(Long memberId, Long teamId) {
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getTeamRacingResult();
     }
 
     private Member findMember(Long memberId){

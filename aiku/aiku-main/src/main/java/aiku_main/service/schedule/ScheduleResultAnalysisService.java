@@ -1,11 +1,11 @@
 package aiku_main.service.schedule;
 
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResult;
 import aiku_main.dto.schedule.result.racing.RacingResult;
 import aiku_main.dto.schedule.result.racing.RacingResultDto;
 import aiku_main.dto.schedule.result.betting.BettingResult;
 import aiku_main.dto.schedule.result.betting.BettingResultDto;
-import aiku_main.dto.schedule.ScheduleArrivalMember;
-import aiku_main.dto.schedule.ScheduleArrivalResult;
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResultDto;
 import aiku_main.repository.betting.BettingRepository;
 import aiku_main.repository.racing.RacingRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
@@ -28,11 +28,11 @@ public class ScheduleResultAnalysisService {
 
     @Transactional
     public void analyzeScheduleArrivalResult(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findScheduleWithResult(scheduleId).orElseThrow();
+        List<ScheduleArrivalResult> arrivalResults = scheduleRepository.getScheduleArrivalResults(scheduleId);
+        ScheduleArrivalResultDto result = new ScheduleArrivalResultDto(scheduleId, arrivalResults);
 
-        List<ScheduleArrivalMember> arrivalMembers = scheduleRepository.getScheduleArrivalResults(scheduleId);
-        ScheduleArrivalResult arrivalResult = new ScheduleArrivalResult(scheduleId, arrivalMembers);
-        schedule.setScheduleArrivalResult(ObjectMapperUtil.toJson(arrivalResult));
+        Schedule schedule = scheduleRepository.findScheduleWithResult(scheduleId).orElseThrow();
+        schedule.setScheduleArrivalResult(ObjectMapperUtil.toJson(result));
     }
 
     @Transactional

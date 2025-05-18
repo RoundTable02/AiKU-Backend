@@ -1,7 +1,7 @@
 package aiku_main.service.schedule;
 
-import aiku_main.dto.schedule.ScheduleArrivalMember;
-import aiku_main.dto.schedule.ScheduleArrivalResult;
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResult;
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResultDto;
 import aiku_main.dto.schedule.result.betting.BettingResult;
 import aiku_main.dto.schedule.result.betting.BettingResultDto;
 import aiku_main.dto.schedule.result.racing.RacingResult;
@@ -108,13 +108,13 @@ class ScheduleResultAnalysisServiceIntegrationTest {
         //then
         Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).get();
         String scheduleArrivalResultStr = testSchedule.getScheduleResult().getScheduleArrivalResult();
-        List<ScheduleArrivalMember> data = ObjectMapperUtil
-                .parseJson(scheduleArrivalResultStr, ScheduleArrivalResult.class)
+        List<ScheduleArrivalResult> data = ObjectMapperUtil
+                .parseJson(scheduleArrivalResultStr, ScheduleArrivalResultDto.class)
                 .getMembers();
 
         //지각 많이한 순
         assertThat(data)
-                .extracting(ScheduleArrivalMember::getMemberId)
+                .extracting(ScheduleArrivalResult::getMemberId)
                 .containsExactly(member3.getId(), member2.getId(), member1.getId());
     }
 

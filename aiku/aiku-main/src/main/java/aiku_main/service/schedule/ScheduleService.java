@@ -1,5 +1,6 @@
 package aiku_main.service.schedule;
 
+import aiku_main.application_event.event.ScheduleExitEvent;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
@@ -23,6 +24,7 @@ import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,7 @@ public class ScheduleService {
     private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${schedule.fee.participation}")
     private int scheduleEnterPoint;
@@ -138,9 +141,15 @@ public class ScheduleService {
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_EXIT);
         pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
-        scheduleEventPublisher.publishScheduleExitEvent(memberId, scheduleMember.getId(), scheduleId);
+
+        publishScheduleExitEvent(memberId, scheduleMember.getId(), scheduleId);
 
         return schedule.getId();
+    }
+
+    public void publishScheduleExitEvent(Long memberId, Long scheduleMemberId, Long scheduleId){
+        ScheduleExitEvent event = new ScheduleExitEvent(memberId, scheduleMemberId, scheduleId);
+        eventPublisher.publishEvent(event);
     }
 
     private ScheduleMember findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleId){
@@ -266,7 +275,7 @@ public class ScheduleService {
             schedule.removeScheduleMember(scheduleMember);
 
             pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
-            scheduleEventPublisher.publishScheduleExitEvent(memberId, scheduleMember.getId(), schedule.getId());
+            publishScheduleExitEvent(memberId, scheduleMember.getId(), schedule.getId());
             sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
     }

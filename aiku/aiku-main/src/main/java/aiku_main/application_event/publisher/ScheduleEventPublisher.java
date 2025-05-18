@@ -14,11 +14,6 @@ public class ScheduleEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    public void publishScheduleExitEvent(Long memberId, Long scheduleMemberId, Long scheduleId){
-        ScheduleExitEvent event = new ScheduleExitEvent(memberId, scheduleMemberId, scheduleId);
-        publisher.publishEvent(event);
-    }
-
     public void publishScheduleOpenEvent(Long scheduleId){
         ScheduleOpenEvent event = new ScheduleOpenEvent(scheduleId);
         publisher.publishEvent(event);

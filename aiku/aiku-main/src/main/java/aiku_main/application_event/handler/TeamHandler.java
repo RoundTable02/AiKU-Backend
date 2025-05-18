@@ -2,6 +2,7 @@ package aiku_main.application_event.handler;
 
 import aiku_main.application_event.event.ScheduleCloseEvent;
 import aiku_main.application_event.event.TeamExitEvent;
+import aiku_main.service.team.TeamResultAnalysisService;
 import aiku_main.service.team.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -14,28 +15,29 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class TeamHandler {
 
     private final TeamService teamService;
+    private final TeamResultAnalysisService teamResultAnalysisService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeLateTimeResult(ScheduleCloseEvent event){
-        teamService.analyzeLateTimeResult(event.getScheduleId());
+//        teamResultAnalysisService.analyzeLateTimeResult(event.getScheduleId()); //TODO 파라미터 teamId로 변경
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeBettingResult(ScheduleCloseEvent event){
-        teamService.analyzeBettingResult(event.getScheduleId());
+//        teamService.analyzeBettingResult(event.getScheduleId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeRacingResult(ScheduleCloseEvent event){
-        teamService.analyzeRacingResult(event.getScheduleId());
+//        teamService.analyzeRacingResult(event.getScheduleId());
     }
 
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void updateLateTimeResultOfExitMember(TeamExitEvent event) {
-        teamService.updateTeamResultOfExitMember(event.getMemberId(), event.getTeamId());
+        teamResultAnalysisService.updateTeamResultOfExitMember(event.getMemberId(), event.getTeamId());
     }
 }

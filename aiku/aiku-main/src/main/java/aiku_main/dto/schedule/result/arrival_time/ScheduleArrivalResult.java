@@ -1,4 +1,4 @@
-package aiku_main.dto.schedule;
+package aiku_main.dto.schedule.result.arrival_time;
 
 import aiku_main.dto.MemberProfileResDto;
 import com.querydsl.core.annotations.QueryProjection;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ScheduleArrivalMember{
+public class ScheduleArrivalResult {
 
     private Long memberId;
     private String nickname;
@@ -15,7 +15,7 @@ public class ScheduleArrivalMember{
     private int arrivalTimeDiff;
 
     @QueryProjection
-    public ScheduleArrivalMember(Long memberId, String nickname, MemberProfileResDto memberProfile, int arrivalTimeDiff) {
+    public ScheduleArrivalResult(Long memberId, String nickname, MemberProfileResDto memberProfile, int arrivalTimeDiff) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.memberProfile = memberProfile;

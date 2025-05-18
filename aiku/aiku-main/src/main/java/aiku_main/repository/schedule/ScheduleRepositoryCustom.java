@@ -1,6 +1,6 @@
 package aiku_main.repository.schedule;
 
-import aiku_main.dto.schedule.ScheduleArrivalMember;
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResult;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.MemberScheduleListEachResDto;
 import aiku_main.dto.schedule.ScheduleMemberResDto;
@@ -46,5 +46,5 @@ public interface ScheduleRepositoryCustom {
     List<ScheduleMemberResDto> getScheduleMembersWithBettingInfo(Long memberId, Long scheduleId);
     List<TeamScheduleListEachResDto> getTeamSchedules(Long teamId, Long memberId, SearchDateCond dateCond, int page);
     List<MemberScheduleListEachResDto> getMemberSchedules(Long memberId, SearchDateCond dateCond, int page);
-    List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId);
+    List<ScheduleArrivalResult> getScheduleArrivalResults(Long scheduleId);
 }

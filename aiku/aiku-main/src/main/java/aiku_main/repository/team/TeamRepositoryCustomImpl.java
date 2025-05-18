@@ -1,13 +1,22 @@
 package aiku_main.repository.team;
 
 import aiku_main.dto.team.TeamMemberResDto;
-import aiku_main.dto.team.TeamMemberResult;
+import aiku_main.dto.team.result.betting_odds.TeamBettingResult;
+import aiku_main.dto.team.result.late_time.TeamLateTimeResult;
 import aiku_main.dto.team.TeamResDto;
 import aiku_main.dto.MemberProfileResDto;
+import aiku_main.dto.team.result.racing_odds.TeamRacingResult;
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import common.domain.betting.QBetting;
+import common.domain.member.QMember;
+import common.domain.racing.QRacing;
 import common.domain.schedule.QSchedule;
+import common.domain.schedule.QScheduleMember;
 import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +27,9 @@ import java.util.Optional;
 import static common.domain.ExecStatus.TERM;
 import static common.domain.Status.ALIVE;
 import static common.domain.Status.DELETE;
+import static common.domain.betting.QBetting.betting;
 import static common.domain.member.QMember.member;
+import static common.domain.racing.QRacing.racing;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 import static common.domain.team.QTeam.team;
@@ -26,7 +37,8 @@ import static common.domain.team.QTeamMember.teamMember;
 import static common.domain.team.QTeamResult.teamResult;
 
 @RequiredArgsConstructor
-public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
+public class
+TeamRepositoryCustomImpl implements TeamRepositoryCustom {
 
     private final JPAQueryFactory query;
 
@@ -94,12 +106,8 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         TeamMemberResDto.class,
                         member.id,
                         member.nickname,
-                        Projections.constructor(
-                                MemberProfileResDto.class,
-                                member.profile.profileType,
-                                member.profile.profileImg,
-                                member.profile.profileCharacter,
-                                member.profile.profileBackground)))
+                        constructMemberProfileResDto(member))
+                )
                 .from(teamMember)
                 .innerJoin(teamMember.member, member)
                 .where(teamMember.team.id.eq(teamId),
@@ -151,7 +159,8 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
                         team.id,
                         team.teamName,
                         teamMember.count().intValue(),
-                        schedule.scheduleTime))
+                        schedule.scheduleTime)
+                )
                 .from(team)
                 .leftJoin(schedule).on(
                         schedule.team.id.eq(team.id),
@@ -177,35 +186,150 @@ public class TeamRepositoryCustomImpl implements TeamRepositoryCustom {
     }
 
     @Override
-    public List<TeamMemberResult> getTeamLateTimeResult(Long teamId) {
+    public List<TeamLateTimeResult> getTeamLateTimeResult(Long teamId) {
         return query
                 .select(Projections.constructor(
-                        TeamMemberResult.class,
+                        TeamLateTimeResult.class,
                         member.id,
                         member.nickname,
-                        Projections.constructor(
-                                MemberProfileResDto.class,
-                                member.profile.profileType,
-                                member.profile.profileImg,
-                                member.profile.profileCharacter,
-                                member.profile.profileBackground),
-                        scheduleMember.arrivalTimeDiff.sum(),
-                        teamMember.status))
+                        constructMemberProfileResDto(member),
+                        getLateTimeIfMinus(scheduleMember).sum().abs(),
+                        teamMember.status)
+                )
                 .from(teamMember)
+                .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
                 .innerJoin(member).on(member.id.eq(teamMember.member.id))
-                .rightJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
-                .where(scheduleMember.arrivalTime.isNotNull(),
-                        scheduleMember.arrivalTimeDiff.lt(0),
-                        scheduleMember.status.eq(ALIVE))
-                .groupBy(member.id,
+                .where(
+                        schedule.status.eq(ALIVE),
+                        schedule.scheduleStatus.eq(TERM),
+                        scheduleMember.arrivalTime.isNotNull(),
+                        scheduleMember.status.eq(ALIVE)
+                )
+                .groupBy(
+                        member.id,
                         member.nickname,
                         member.profile.profileType,
                         member.profile.profileImg,
                         member.profile.profileCharacter,
                         member.profile.profileBackground,
-                        teamMember.status)
-                .orderBy(scheduleMember.arrivalTimeDiff.sum().asc())
+                        teamMember.status
+                )
+                .orderBy(
+                        getLateTimeIfMinus(scheduleMember).sum().abs().desc(),
+                        schedule.id.count().desc()
+                )
                 .fetch();
+    }
+
+    @Override
+    public List<TeamBettingResult> getBettingWinOddsResult(Long teamId) {
+        return query
+                .select(Projections.constructor(
+                        TeamBettingResult.class,
+                        member.id,
+                        member.nickname,
+                        constructMemberProfileResDto(member),
+                        getIfWinner(betting).divide(betting.count()),
+                        teamMember.status
+                ))
+                .from(teamMember)
+                .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
+                .innerJoin(betting).on(betting.bettor.id.eq(scheduleMember.id))
+                .innerJoin(member).on(member.id.eq(teamMember.member.id))
+                .where(
+                        betting.status.eq(ALIVE),
+                        betting.bettingStatus.eq(TERM),
+                        schedule.scheduleStatus.eq(TERM)
+                )
+                .groupBy(
+                        member.id,
+                        member.nickname,
+                        member.profile.profileType,
+                        member.profile.profileImg,
+                        member.profile.profileCharacter,
+                        member.profile.profileBackground,
+                        teamMember.status
+                )
+                .orderBy(
+                        getIfWinner(betting).divide(betting.count()).desc(),
+                        betting.count().desc()
+                )
+                .fetch();
+    }
+
+    private NumberExpression<Integer> getLateTimeIfMinus(QScheduleMember scheduleMember){
+        return new CaseBuilder()
+                .when(scheduleMember.arrivalTimeDiff.loe(0))
+                .then(scheduleMember.arrivalTimeDiff)
+                .otherwise(0);
+    }
+
+    private NumberExpression<Long> getIfWinner(QBetting betting){
+        return new CaseBuilder()
+                .when(betting.isWinner.isTrue())
+                .then(1L)
+                .otherwise(0L)
+                .sum();
+    }
+
+    @Override
+    public List<TeamRacingResult> getRacingWinOddsResult(Long teamId) {
+        return query
+                .select(Projections.constructor(
+                        TeamRacingResult.class,
+                        member.id,
+                        member.nickname,
+                        constructMemberProfileResDto(member),
+                        getIfWinner(scheduleMember, racing).divide(racing.count()),
+                        teamMember.status
+                ))
+                .from(teamMember)
+                .innerJoin(scheduleMember).on(scheduleMember.member.id.eq(teamMember.member.id))
+                .innerJoin(schedule).on(schedule.id.eq(scheduleMember.schedule.id))
+                .innerJoin(racing).on(
+                        racing.firstRacer.id.eq(scheduleMember.id)
+                                .or(racing.secondRacer.id.eq(scheduleMember.id))
+                )
+                .innerJoin(member).on(member.id.eq(teamMember.member.id))
+                .where(
+                        racing.status.eq(ALIVE),
+                        racing.raceStatus.eq(TERM),
+                        schedule.scheduleStatus.eq(TERM)
+                )
+                .groupBy(
+                        member.id,
+                        member.nickname,
+                        member.profile.profileType,
+                        member.profile.profileImg,
+                        member.profile.profileCharacter,
+                        member.profile.profileBackground,
+                        teamMember.status
+                )
+                .orderBy(
+                        getIfWinner(scheduleMember, racing).divide(racing.count()).desc(),
+                        racing.count().desc()
+                )
+                .fetch();
+    }
+
+    private NumberExpression<Long> getIfWinner(QScheduleMember scheduleMember, QRacing racing){
+        return new CaseBuilder()
+                .when(racing.winner.id.eq(scheduleMember.id))
+                .then(1L)
+                .otherwise(0L)
+                .sum();
+    }
+
+    private ConstructorExpression<MemberProfileResDto> constructMemberProfileResDto(QMember member){
+        return Projections.constructor(
+                MemberProfileResDto.class,
+                member.profile.profileType,
+                member.profile.profileImg,
+                member.profile.profileCharacter,
+                member.profile.profileBackground
+        );
     }
 
     private int getOffset(int page){

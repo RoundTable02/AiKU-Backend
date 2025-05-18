@@ -35,7 +35,7 @@ public class ScheduleMember extends BaseTime {
     private int rewardPointAmount;
 
     private LocalDateTime arrivalTime;
-    private int arrivalTimeDiff;
+    private int arrivalTimeDiff; //-:지각 +:일찍도착
 
     @Enumerated(value = EnumType.STRING)
     private Status status = ALIVE;

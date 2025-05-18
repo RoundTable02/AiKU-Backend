@@ -1,6 +1,6 @@
 package aiku_main.repository.schedule;
 
-import aiku_main.dto.schedule.ScheduleArrivalMember;
+import aiku_main.dto.schedule.result.arrival_time.ScheduleArrivalResult;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import com.querydsl.core.types.Projections;
@@ -539,10 +539,10 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public List<ScheduleArrivalMember> getScheduleArrivalResults(Long scheduleId) {
+    public List<ScheduleArrivalResult> getScheduleArrivalResults(Long scheduleId) {
         return query
                 .select(Projections.constructor(
-                        ScheduleArrivalMember.class,
+                        ScheduleArrivalResult.class,
                         member.id,
                         member.nickname,
                         Projections.constructor(

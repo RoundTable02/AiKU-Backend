@@ -1,8 +1,6 @@
 package aiku_main.service.schedule;
 
-import aiku_main.application_event.event.ScheduleCloseEvent;
-import aiku_main.application_event.event.ScheduleExitEvent;
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
+import aiku_main.application_event.event.*;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;
@@ -12,7 +10,6 @@ import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
 import aiku_main.scheduler.ScheduleScheduler;
-import common.domain.ExecStatus;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
@@ -50,7 +47,6 @@ public class ScheduleService {
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final TeamRepository teamRepository;
-    private final PointChangeEventPublisher pointChangeEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
     private final ApplicationEventPublisher eventPublisher;
@@ -75,10 +71,27 @@ public class ScheduleService {
         scheduleRepository.save(schedule);
 
         scheduleScheduler.reserveSchedule(schedule);
-        pointChangeEventPublisher.publish(memberId, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, schedule.getId());
+        publishPointChangeEvent(
+                memberId,
+                MINUS,
+                scheduleEnterPoint,
+                SCHEDULE_ENTER,
+                schedule.getId()
+        );
         sendMessageToTeamMembers(teamId, schedule, member.getId(), AlarmMessageType.SCHEDULE_ADD);
 
         return schedule.getId();
+    }
+
+    private void publishPointChangeEvent(Long memberId, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
+        PointChangeEvent event = new PointChangeEvent(
+                memberId,
+                changeType,
+                pointAmount,
+                reason,
+                reasonId
+        );
+        eventPublisher.publishEvent(event);
     }
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
@@ -115,7 +128,13 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, scheduleEnterPoint);
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_ENTER);
-        pointChangeEventPublisher.publish(memberId, MINUS, scheduleEnterPoint, SCHEDULE_ENTER, scheduleId);
+        publishPointChangeEvent(
+                memberId,
+                MINUS,
+                scheduleEnterPoint,
+                SCHEDULE_ENTER,
+                scheduleId
+        );
 
         return schedule.getId();
     }
@@ -138,7 +157,13 @@ public class ScheduleService {
         schedule.removeScheduleMember(scheduleMember);
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_EXIT);
-        pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
+        publishPointChangeEvent(
+                memberId,
+                PLUS,
+                scheduleEnterPoint,
+                SCHEDULE_EXIT,
+                schedule.getId()
+        );
 
         publishScheduleExitEvent(memberId, scheduleMember.getId(), scheduleId);
 
@@ -287,7 +312,13 @@ public class ScheduleService {
             Schedule schedule = scheduleMember.getSchedule();
             schedule.removeScheduleMember(scheduleMember);
 
-            pointChangeEventPublisher.publish(memberId, PLUS, scheduleEnterPoint, SCHEDULE_EXIT, schedule.getId());
+            publishPointChangeEvent(
+                    memberId,
+                    PLUS,
+                    scheduleEnterPoint,
+                    SCHEDULE_EXIT,
+                    schedule.getId()
+            );
             publishScheduleExitEvent(memberId, scheduleMember.getId(), schedule.getId());
             sendMessageToScheduleMembers(schedule, member.getId(), member, AlarmMessageType.SCHEDULE_EXIT);
         });
@@ -334,7 +365,7 @@ public class ScheduleService {
 
         earlyMembers.forEach((earlyScheduleMember) -> {
             schedule.rewardMember(earlyScheduleMember, rewardPointAmount);
-            pointChangeEventPublisher.publish(
+            publishPointChangeEvent(
                     earlyScheduleMember.getMember().getId(),
                     PLUS,
                     rewardPointAmount,
@@ -348,7 +379,7 @@ public class ScheduleService {
         scheduleRepository.findScheduleMemberListWithMember(schedule.getId())
                 .forEach((scheduleMember) -> {
                     schedule.rewardMember(scheduleMember, scheduleEnterPoint);
-                    pointChangeEventPublisher.publish(
+                    publishPointChangeEvent(
                             scheduleMember.getMember().getId(),
                             PLUS,
                             scheduleEnterPoint,

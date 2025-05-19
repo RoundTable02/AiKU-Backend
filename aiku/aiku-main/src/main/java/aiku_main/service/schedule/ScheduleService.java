@@ -144,18 +144,18 @@ public class ScheduleService {
         return schedule.getId();
     }
 
-    public boolean isLastMemberOfSchedule(long scheduleMemberCount){
+    private boolean isLastMemberOfSchedule(long scheduleMemberCount){
         return scheduleMemberCount <= 1;
     }
 
-    public ScheduleMember changeScheduleOwner(Schedule schedule, Long curOwnerScheduleMemberId){
+    private ScheduleMember changeScheduleOwner(Schedule schedule, Long curOwnerScheduleMemberId){
         ScheduleMember nextOwner = findNextScheduleOwnerWithMember(schedule.getId(), curOwnerScheduleMemberId);
         schedule.changeScheduleOwner(nextOwner);
 
         return nextOwner;
     }
 
-    public void publishScheduleExitEvent(Long memberId, Long scheduleMemberId, Long scheduleId){
+    private void publishScheduleExitEvent(Long memberId, Long scheduleMemberId, Long scheduleId){
         ScheduleExitEvent event = new ScheduleExitEvent(memberId, scheduleMemberId, scheduleId);
         eventPublisher.publishEvent(event);
     }

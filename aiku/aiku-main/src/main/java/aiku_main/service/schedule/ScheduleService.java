@@ -17,7 +17,6 @@ import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleResult;
-import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
 import common.exception.NotEnoughPoint;
 import common.kafka_message.alarm.*;
@@ -128,13 +127,11 @@ public class ScheduleService {
         checkIsWait(schedule);
 
         Long scheduleMemberCount = scheduleRepository.countOfScheduleMembers(scheduleId);
-        if(scheduleMemberCount <= 1){
+        if(isLastMemberOfSchedule(scheduleMemberCount)){
             schedule.delete();
         }else if(scheduleMember.isOwner()){
-            ScheduleMember nextScheduleOwner = findNextScheduleOwnerWithMember(scheduleId, scheduleMember.getId());
-            schedule.changeScheduleOwner(nextScheduleOwner);
-
-            sendMessageToScheduleMember(schedule, nextScheduleOwner.getMember().getFirebaseToken(), AlarmMessageType.SCHEDULE_OWNER);
+            ScheduleMember nextOwner = changeScheduleOwner(schedule, scheduleMember.getId());
+            sendMessageToScheduleMember(schedule, nextOwner.getMember().getFirebaseToken(), AlarmMessageType.SCHEDULE_OWNER);
         }
 
         schedule.removeScheduleMember(scheduleMember);
@@ -145,6 +142,17 @@ public class ScheduleService {
         publishScheduleExitEvent(memberId, scheduleMember.getId(), scheduleId);
 
         return schedule.getId();
+    }
+
+    public boolean isLastMemberOfSchedule(long scheduleMemberCount){
+        return scheduleMemberCount <= 1;
+    }
+
+    public ScheduleMember changeScheduleOwner(Schedule schedule, Long curOwnerScheduleMemberId){
+        ScheduleMember nextOwner = findNextScheduleOwnerWithMember(schedule.getId(), curOwnerScheduleMemberId);
+        schedule.changeScheduleOwner(nextOwner);
+
+        return nextOwner;
     }
 
     public void publishScheduleExitEvent(Long memberId, Long scheduleMemberId, Long scheduleId){
@@ -214,7 +222,6 @@ public class ScheduleService {
     }
 
     public TeamScheduleListResDto getTeamScheduleList(Long memberId, Long teamId, SearchDateCond dateCond, int page) {
-        Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId);
 
         List<TeamScheduleListEachResDto> scheduleList = scheduleRepository.getTeamSchedules(teamId, memberId, dateCond, page);
@@ -347,11 +354,6 @@ public class ScheduleService {
 
     private Member findMember(Long memberId){
         return memberRepository.findById(memberId).orElseThrow();
-    }
-
-    private Team findTeam(Long teamId){
-        return teamRepository.findByIdAndStatus(teamId, ALIVE)
-                .orElseThrow(() -> new TeamException(NO_SUCH_TEAM));
     }
 
     private Schedule findSchedule(Long scheduleId){

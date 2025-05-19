@@ -1,8 +1,8 @@
 package aiku_main.service.schedule;
 
+import aiku_main.application_event.event.ScheduleCloseEvent;
 import aiku_main.application_event.event.ScheduleExitEvent;
 import aiku_main.application_event.publisher.PointChangeEventPublisher;
-import aiku_main.application_event.publisher.ScheduleEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;
@@ -49,7 +49,6 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final TeamRepository teamRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
-    private final ScheduleEventPublisher scheduleEventPublisher;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
     private final ApplicationEventPublisher eventPublisher;
@@ -201,7 +200,12 @@ public class ScheduleService {
         Schedule schedule = findSchedule(scheduleId);
         schedule.close(scheduleCloseTime);
 
-        scheduleEventPublisher.publishScheduleCloseEvent(scheduleId);
+        publishScheduleCloseEvent(scheduleId);
+    }
+
+    private void publishScheduleCloseEvent(Long scheduleId){
+        ScheduleCloseEvent event = new ScheduleCloseEvent(scheduleId);
+        eventPublisher.publishEvent(event);
     }
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long teamId, Long scheduleId) {
@@ -308,7 +312,7 @@ public class ScheduleService {
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-        scheduleEventPublisher.publishScheduleCloseEvent(scheduleId);
+        publishScheduleCloseEvent(scheduleId);
     }
 
     @Transactional

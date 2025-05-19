@@ -23,9 +23,4 @@ public class ScheduleEventPublisher {
         ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(scheduleId);
         publisher.publishEvent(event);
     }
-
-    public void publishScheduleCloseEvent(Long scheduleId){
-        ScheduleCloseEvent event = new ScheduleCloseEvent(scheduleId);
-        publisher.publishEvent(event);
-    }
 }

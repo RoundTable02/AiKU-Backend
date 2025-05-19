@@ -128,6 +128,7 @@ public class ScheduleService {
         schedule.addScheduleMember(member, false, scheduleEnterPoint);
 
         sendMessageToScheduleMembers(schedule, memberId, member, AlarmMessageType.SCHEDULE_ENTER);
+
         publishPointChangeEvent(
                 memberId,
                 MINUS,
@@ -302,7 +303,6 @@ public class ScheduleService {
         return new SimpleResDto<>(scheduleTimeList);
     }
 
-    //== 이벤트 핸들러 ==
     @Transactional
     public void exitAllScheduleInTeam(Long memberId, Long teamId) {
         Member member = memberRepository.findById(memberId).orElseThrow();

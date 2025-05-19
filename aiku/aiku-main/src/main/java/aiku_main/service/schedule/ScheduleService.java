@@ -35,6 +35,8 @@ import java.util.List;
 import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
 import static aiku_main.application_event.event.PointChangeType.PLUS;
+import static common.domain.ExecStatus.RUN;
+import static common.domain.ExecStatus.WAIT;
 import static common.domain.Status.ALIVE;
 import static common.kafka_message.KafkaTopic.alarm;
 import static common.response.status.BaseErrorCode.*;
@@ -230,16 +232,16 @@ public class ScheduleService {
 
         List<TeamScheduleListEachResDto> scheduleList = scheduleRepository.getTeamSchedules(teamId, memberId, dateCond, page);
         scheduleList.forEach((schedule) -> schedule.setAccept(memberId));
-        int runSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.RUN, dateCond);
-        int waitSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, ExecStatus.WAIT, dateCond);
+        int runSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, RUN, dateCond);
+        int waitSchedule = scheduleRepository.countTeamScheduleByScheduleStatus(teamId, WAIT, dateCond);
 
         return new TeamScheduleListResDto(page, teamId, runSchedule, waitSchedule, scheduleList);
     }
 
     public MemberScheduleListResDto getMemberScheduleList(Long memberId, SearchDateCond dateCond, int page) {
         List<MemberScheduleListEachResDto> scheduleList = scheduleRepository.getMemberSchedules(memberId, dateCond, page);
-        int runSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.RUN, dateCond);
-        int waitSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, ExecStatus.WAIT, dateCond);
+        int runSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, RUN, dateCond);
+        int waitSchedule = scheduleRepository.countMemberScheduleByScheduleStatus(memberId, WAIT, dateCond);
 
         return new MemberScheduleListResDto(page, runSchedule, waitSchedule, scheduleList);
     }
@@ -302,7 +304,7 @@ public class ScheduleService {
     @Transactional
     public void closeScheduleAuto(Long scheduleId) {
         Schedule schedule = findSchedule(scheduleId);
-        if (schedule.getScheduleStatus() == ExecStatus.TERM){
+        if (schedule.isTerm()){
             return;
         }
 
@@ -376,7 +378,7 @@ public class ScheduleService {
     }
 
     private void checkIsWait(Schedule schedule){
-        if(schedule.getScheduleStatus() != ExecStatus.WAIT){
+        if(schedule.isWait()){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }

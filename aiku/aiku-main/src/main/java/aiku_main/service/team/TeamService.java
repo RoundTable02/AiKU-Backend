@@ -77,11 +77,11 @@ public class TeamService {
         }
     }
 
-    public boolean isLastMember(long teamMemberCount){
+    private boolean isLastMember(long teamMemberCount){
         return teamMemberCount <= 1;
     }
 
-    public void publishTeamExitEvent(Long memberId, Long teamId){
+    private void publishTeamExitEvent(Long memberId, Long teamId){
         TeamExitEvent event = new TeamExitEvent(memberId, teamId);
         eventPublisher.publishEvent(event);
     }

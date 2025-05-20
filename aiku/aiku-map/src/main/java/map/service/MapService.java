@@ -38,7 +38,6 @@ public class MapService {
     private final ScheduleLocationRepository scheduleLocationRepository;
 
     private final ApplicationEventPublisher publisher;
-//    private final ScheduleEventPublisher scheduleEventPublisher;
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long scheduleId) {
         Schedule schedule = findSchedule(scheduleId);

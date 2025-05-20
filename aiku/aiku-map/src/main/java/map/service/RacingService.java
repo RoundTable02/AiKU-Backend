@@ -37,7 +37,6 @@ public class RacingService {
 
     private final KafkaProducerService kafkaService;
     private final ApplicationEventPublisher publisher;
-//    private final RacingEventPublisher racingEventPublisher;
     private final RacingQueryRepository racingQueryRepository;
     private final RacingCommandRepository racingCommandRepository;
     private final ScheduleRepository scheduleRepository;

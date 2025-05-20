@@ -13,7 +13,7 @@ public class ScheduleOpenEventHandler {
     private ScheduleService scheduleService;
 
     @EventListener
-    public void handleScheduleOpenEvent(ScheduleOpenEvent event){
+    public void openSchedule(ScheduleOpenEvent event){
         scheduleService.openSchedule(event.getScheduleId());
     }
 }

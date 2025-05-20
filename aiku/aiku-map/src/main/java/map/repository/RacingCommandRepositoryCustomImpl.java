@@ -7,7 +7,7 @@ import common.domain.Status;
 import common.domain.value_reference.ScheduleMemberValue;
 import lombok.RequiredArgsConstructor;
 
-import static common.domain.QRacing.racing;
+import static common.domain.racing.QRacing.racing;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor

@@ -173,4 +173,12 @@ public class Schedule extends BaseTime {
     public List<ScheduleMember> getScheduleMembers() {
         return List.copyOf(scheduleMembers);
     }
+
+    public boolean isTerm() {
+        return this.getScheduleStatus() == TERM;
+    }
+
+    public boolean isWait() {
+        return this.getScheduleStatus() == WAIT;
+    }
 }

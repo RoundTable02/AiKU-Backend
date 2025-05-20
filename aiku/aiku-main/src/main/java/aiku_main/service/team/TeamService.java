@@ -1,7 +1,7 @@
 package aiku_main.service.team;
 
+import aiku_main.application_event.event.TeamExitEvent;
 import aiku_main.dto.team.*;
-import aiku_main.application_event.publisher.TeamEventPublisher;
 import aiku_main.dto.*;
 import aiku_main.exception.MemberNotFoundException;
 import aiku_main.exception.TeamException;
@@ -13,6 +13,7 @@ import common.domain.team.Team;
 import common.domain.team.TeamMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
-    private final TeamEventPublisher teamEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long addTeam(Long memberId, TeamAddDto teamDto){
@@ -55,22 +56,34 @@ public class TeamService {
 
     @Transactional
     public Long exitTeam(Long memberId, Long teamId) {
-        Member member = findMember(memberId);
         Team team = findTeam(teamId);
         checkTeamMember(memberId, teamId, true);
         checkHasRunSchedule(memberId, teamId);
 
-        Long teamMemberCount = teamRepository.countOfTeamMember(teamId);
-        if (teamMemberCount <= 1){
-            team.delete();
-        }
+        deleteTeamIfLastMember(team);
 
         TeamMember teamMember = findTeamMember(memberId, teamId);
         team.removeTeamMember(teamMember);
 
-        teamEventPublisher.publishTeamExitEvent(memberId, teamId);
+        publishTeamExitEvent(memberId, teamId);
 
         return team.getId();
+    }
+
+    public void deleteTeamIfLastMember(Team team){
+        Long teamMemberCount = teamRepository.countOfTeamMember(team.getId());
+        if (isLastMember(teamMemberCount)){
+            team.delete();
+        }
+    }
+
+    private boolean isLastMember(long teamMemberCount){
+        return teamMemberCount <= 1;
+    }
+
+    private void publishTeamExitEvent(Long memberId, Long teamId){
+        TeamExitEvent event = new TeamExitEvent(memberId, teamId);
+        eventPublisher.publishEvent(event);
     }
 
     public TeamDetailResDto getTeamDetail(Long memberId, Long teamId) {
@@ -92,21 +105,27 @@ public class TeamService {
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getLateTimeResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getLateTimeResult();
     }
 
     public String getTeamBettingResult(Long memberId, Long teamId){
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getTeamBettingResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getTeamBettingResult();
     }
 
     public String getTeamRacingResult(Long memberId, Long teamId) {
         Team team = findTeamWithResult(teamId);
         checkTeamMember(memberId, teamId, true);
 
-        return team.getTeamResult() == null? null : team.getTeamResult().getTeamRacingResult();
+        return team.getTeamResult() == null
+                ? null
+                : team.getTeamResult().getTeamRacingResult();
     }
 
     private Member findMember(Long memberId){

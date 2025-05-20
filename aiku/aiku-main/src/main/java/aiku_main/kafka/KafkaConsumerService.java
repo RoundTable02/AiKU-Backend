@@ -1,7 +1,8 @@
 package aiku_main.kafka;
 
 import aiku_main.application_event.event.PointChangeEvent;
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
+import aiku_main.application_event.event.PointChangeReason;
+import aiku_main.application_event.event.PointChangeType;
 import aiku_main.service.schedule.ScheduleService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -11,6 +12,7 @@ import common.kafka_message.ScheduleCloseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,9 @@ public class KafkaConsumerService {
 
     private final ScheduleService scheduleService;
     private final ObjectMapper objectMapper;
-
-    private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @KafkaListener(topics = {"test"}, groupId = "test", concurrency = "1")
-
     public void consumeTest(ConsumerRecord<String, String> data, Acknowledgment ack) {
         log.info("KafkaConsumerService Test : value = {}", data.value());
         ack.acknowledge();
@@ -62,7 +62,7 @@ public class KafkaConsumerService {
     public void consumePointChangeEvent(ConsumerRecord<String, String> data, Acknowledgment ack) {
         try {
             PointChangeEvent message = objectMapper.readValue(data.value(), PointChangeEvent.class);
-            pointChangeEventPublisher.consumerPublish(message.getMemberId(),
+            publishPointChangeEvent(message.getMemberId(),
                     message.getSign(),
                     message.getPointAmount(),
                     message.getReason(),
@@ -75,5 +75,16 @@ public class KafkaConsumerService {
         }
 
         ack.acknowledge();
+    }
+
+    private void publishPointChangeEvent(Long memberId, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
+        PointChangeEvent event = new PointChangeEvent(
+                memberId,
+                changeType,
+                pointAmount,
+                reason,
+                reasonId
+        );
+        eventPublisher.publishEvent(event);
     }
 }

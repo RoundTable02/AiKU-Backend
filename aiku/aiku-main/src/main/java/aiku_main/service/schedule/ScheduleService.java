@@ -341,11 +341,15 @@ public class ScheduleService {
 
         List<ScheduleMember> notArriveScheduleMembers = scheduleRepository.findNotArriveScheduleMember(scheduleId);
 
-        LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
+        LocalDateTime autoCloseTime = getScheduleAutoCloseTime(schedule.getScheduleTime());
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
         publishScheduleCloseEvent(scheduleId);
+    }
+
+    private LocalDateTime getScheduleAutoCloseTime(LocalDateTime scheduleTime) {
+        return scheduleTime.plusMinutes(30);
     }
 
     @Transactional

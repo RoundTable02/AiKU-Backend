@@ -26,12 +26,6 @@ public class ScheduleHandler {
     }
 
     @Async
-    @EventListener
-    public void closeScheduleAuto(ScheduleAutoCloseEvent event){
-        scheduleService.closeScheduleAuto(event.getScheduleId());
-    }
-
-    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void processSchedulePoint(ScheduleCloseEvent event){
         scheduleService.processScheduleResultPoint(event.getScheduleId());

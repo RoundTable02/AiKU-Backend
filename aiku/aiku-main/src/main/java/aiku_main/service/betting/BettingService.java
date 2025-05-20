@@ -7,7 +7,6 @@ import aiku_main.exception.ScheduleException;
 import aiku_main.repository.betting.BettingRepository;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import common.domain.betting.Betting;
 import common.domain.schedule.ScheduleMember;
 import common.domain.member.Member;
@@ -38,7 +37,6 @@ public class BettingService {
     private final BettingRepository bettingRepository;
     private final ScheduleRepository scheduleRepository;
     private final PointChangeEventPublisher pointChangeEventPublisher;
-    private final ObjectMapper objectMapper;
 
     @Transactional
     public Long addBetting(Long memberId, Long scheduleId, BettingAddDto bettingDto){

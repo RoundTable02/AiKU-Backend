@@ -4,11 +4,9 @@ import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.service.schedule.ScheduleService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import common.kafka_message.ScheduleArrivalMessage;
 import common.kafka_message.ScheduleCloseMessage;
+import common.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 public class KafkaConsumerService {
 
     private final ScheduleService scheduleService;
-    private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     @KafkaListener(topics = {"test"}, groupId = "test", concurrency = "1")
@@ -34,45 +31,29 @@ public class KafkaConsumerService {
 
     @KafkaListener(topics = {"schedule-close"}, groupId = "aiku-main", concurrency = "1")
     public void consumeScheduleClose(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            ScheduleCloseMessage message = objectMapper.readValue(data.value(), ScheduleCloseMessage.class);
-            scheduleService.closeSchedule(message.getScheduleId(), message.getScheduleCloseTime());
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
+        ScheduleCloseMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleCloseMessage.class);
+        scheduleService.closeSchedule(message.getScheduleId(), message.getScheduleCloseTime());
 
         ack.acknowledge();
     }
 
     @KafkaListener(topics = {"schedule-arrival"}, groupId = "aiku-main", concurrency = "1")
     public void consumeScheduleArrival(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            ScheduleArrivalMessage message = objectMapper.readValue(data.value(), ScheduleArrivalMessage.class);
-            scheduleService.arriveSchedule(message.getScheduleId(), message.getMemberId(), message.getArrivalTime());
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeScheduleArrival에서 ScheduleArrivalMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeScheduleArrival에서 ScheduleArrivalMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
+        ScheduleArrivalMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleArrivalMessage.class);
+        scheduleService.arriveSchedule(message.getScheduleId(), message.getMemberId(), message.getArrivalTime());
+
+        ack.acknowledge();
     }
 
     @KafkaListener(topics = {"point-change"}, groupId = "aiku-main", concurrency = "1")
     public void consumePointChangeEvent(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            PointChangeEvent message = objectMapper.readValue(data.value(), PointChangeEvent.class);
-            publishPointChangeEvent(message.getMemberId(),
-                    message.getSign(),
-                    message.getPointAmount(),
-                    message.getReason(),
-                    message.getReasonId()
-            );
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
+        PointChangeEvent message = ObjectMapperUtil.parseJson(data.value(), PointChangeEvent.class);
+        publishPointChangeEvent(message.getMemberId(),
+                message.getSign(),
+                message.getPointAmount(),
+                message.getReason(),
+                message.getReasonId()
+        );
 
         ack.acknowledge();
     }

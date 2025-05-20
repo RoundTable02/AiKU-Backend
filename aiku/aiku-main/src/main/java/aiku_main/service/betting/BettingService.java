@@ -1,6 +1,8 @@
 package aiku_main.service.betting;
 
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
+import aiku_main.application_event.event.PointChangeEvent;
+import aiku_main.application_event.event.PointChangeReason;
+import aiku_main.application_event.event.PointChangeType;
 import aiku_main.dto.betting.BettingAddDto;
 import aiku_main.exception.BettingException;
 import aiku_main.exception.ScheduleException;
@@ -13,6 +15,7 @@ import common.domain.member.Member;
 import common.domain.value_reference.ScheduleMemberValue;
 import common.exception.NotEnoughPoint;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +39,7 @@ public class BettingService {
     private final MemberRepository memberRepository;
     private final BettingRepository bettingRepository;
     private final ScheduleRepository scheduleRepository;
-    private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long addBetting(Long memberId, Long scheduleId, BettingAddDto bettingDto){
@@ -52,7 +55,7 @@ public class BettingService {
         Betting betting = Betting.create(bettor, bettee, bettingDto.getPointAmount());
         bettingRepository.save(betting);
 
-        pointChangeEventPublisher.publish(
+        publishPointChangeEvent(
                 memberId,
                 MINUS,
                 bettingDto.getPointAmount(),
@@ -71,7 +74,7 @@ public class BettingService {
 
         betting.setStatus(DELETE);
 
-        pointChangeEventPublisher.publish(
+        publishPointChangeEvent(
                 memberId,
                 PLUS,
                 betting.getPointAmount(),
@@ -88,7 +91,7 @@ public class BettingService {
                 .ifPresent((betting) -> {
                     betting.setStatus(DELETE);
 
-                    pointChangeEventPublisher.publish(
+                    publishPointChangeEvent(
                             memberId,
                             PLUS,
                             betting.getPointAmount(),
@@ -105,7 +108,7 @@ public class BettingService {
                     betting.setStatus(DELETE);
 
                     Long memberIdOfBettor = scheduleRepository.findMemberIdOfScheduleMember(betting.getBettor().getId()).orElseThrow();
-                    pointChangeEventPublisher.publish(
+                    publishPointChangeEvent(
                             memberIdOfBettor,
                             PLUS,
                             betting.getPointAmount(),
@@ -135,7 +138,7 @@ public class BettingService {
         if(winBettingCount == 0) {
             for (Betting betting : bettings) {
                 betting.setDraw();
-                pointChangeEventPublisher.publish(
+                publishPointChangeEvent(
                         scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
                         PLUS,
                         betting.getPointAmount(),
@@ -153,7 +156,7 @@ public class BettingService {
             if(scheduleMembers.get(betting.getBetee().getId()).getArrivalTime().equals(latestTime)){
                 int rewardPoint = getBettingRewardPoint(betting.getPointAmount(), winnerPointAmount, bettingPointAmount);
                 betting.setWin(rewardPoint);
-                pointChangeEventPublisher.publish(
+                publishPointChangeEvent(
                         scheduleMembers.get(betting.getBettor().getId()).getMember().getId(),
                         PLUS,
                         rewardPoint,
@@ -194,6 +197,17 @@ public class BettingService {
 
     private int getBettingRewardPoint(int bettingPoint, int winnerPointAmount, int bettingPointAmount) {
         return (int) ((double) bettingPoint / winnerPointAmount * bettingPointAmount);
+    }
+
+    private void publishPointChangeEvent(Long memberId, PointChangeType changeType, int pointAmount, PointChangeReason reason, Long reasonId){
+        PointChangeEvent event = new PointChangeEvent(
+                memberId,
+                changeType,
+                pointAmount,
+                reason,
+                reasonId
+        );
+        eventPublisher.publishEvent(event);
     }
 
     private Member findMember(Long memberId){

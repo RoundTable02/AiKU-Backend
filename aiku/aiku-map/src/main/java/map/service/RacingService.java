@@ -60,6 +60,7 @@ public class RacingService {
 
         //  대기 중 레이싱 DB 저장
         Racing racing = createRacing(memberId, scheduleId, racingAddDto);
+        racingCommandRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
         Schedule schedule = sendAskRacingAlarmToTargetMember(memberId, scheduleId, racingAddDto, racing);
@@ -283,7 +284,6 @@ public class RacingService {
         Long secondScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(racingAddDto.getTargetMemberId(), scheduleId);
 
         Racing racing = Racing.create(firstScheduleMemberId, secondScheduleMemberId, racingAddDto.getPoint());
-        racingCommandRepository.save(racing);
         return racing;
     }
 

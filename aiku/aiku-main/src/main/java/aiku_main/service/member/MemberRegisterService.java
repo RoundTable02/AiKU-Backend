@@ -1,8 +1,8 @@
 package aiku_main.service.member;
 
+import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
-import aiku_main.application_event.publisher.PointChangeEventPublisher;
 import aiku_main.dto.member.MemberProfileDto;
 import aiku_main.dto.member.MemberRegisterDto;
 import aiku_main.dto.member.NicknameExistResDto;
@@ -16,6 +16,7 @@ import common.domain.member.Member;
 import common.domain.member.MemberProfileType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,8 @@ public class MemberRegisterService {
     private final S3ImageProvider imageProvider;
 
     private final EventRepository eventRepository;
-    private final PointChangeEventPublisher pointChangeEventPublisher;
+//    private final PointChangeEventPublisher pointChangeEventPublisher;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional
     public Long register(MemberRegisterDto memberRegisterDto) {
@@ -80,8 +82,21 @@ public class MemberRegisterService {
 
         eventRepository.save(recommendEvent);
 
-        pointChangeEventPublisher.publish(member.getId(), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
-        pointChangeEventPublisher.publish(recommender.getId(), PointChangeType.PLUS, 10, PointChangeReason.EVENT, recommendEvent.getId());
+        PointChangeEvent memberPointChangeEvent = new PointChangeEvent(member.getId(),
+                PointChangeType.PLUS,
+                10,
+                PointChangeReason.EVENT,
+                recommendEvent.getId()
+        );
+        publisher.publishEvent(memberPointChangeEvent);
+
+        PointChangeEvent recommenderPointChangeEvent = new PointChangeEvent(recommender.getId(),
+                PointChangeType.PLUS,
+                10,
+                PointChangeReason.EVENT,
+                recommendEvent.getId()
+        );
+        publisher.publishEvent(recommenderPointChangeEvent);
     }
 
 

@@ -4,9 +4,10 @@ import common.domain.ExecStatus;
 import common.domain.racing.Racing;
 import lombok.RequiredArgsConstructor;
 import map.application_event.domain.RacingInfo;
-import map.application_event.publisher.RacingEventPublisher;
+import map.application_event.event.RacingStatusNotChangedEvent;
 import map.exception.RacingException;
 import map.repository.RacingQueryRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ import static common.response.status.BaseErrorCode.NO_SUCH_RACING;
 public class RacingScheduler {
 
     private final TaskScheduler taskScheduler;
-    private final RacingEventPublisher racingEventPublisher;
+    private final ApplicationEventPublisher publisher;
     private final RacingQueryRepository racingRepository;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> racingTaskMap = new ConcurrentHashMap<>();
@@ -45,7 +46,8 @@ public class RacingScheduler {
                 .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
 
         if (racing.getRaceStatus().equals(ExecStatus.WAIT)) {
-            racingEventPublisher.publishRacingStatusNotChangedEvent(racingInfo);
+            RacingStatusNotChangedEvent event = new RacingStatusNotChangedEvent(racingInfo);
+            publisher.publishEvent(event);
         }
     }
 }

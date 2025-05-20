@@ -11,7 +11,7 @@ import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.application_event.domain.RacingInfo;
-import map.application_event.publisher.RacingEventPublisher;
+import map.application_event.event.AskRacingEvent;
 import map.dto.*;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
@@ -19,6 +19,7 @@ import map.repository.MemberRepository;
 import map.repository.RacingCommandRepository;
 import map.repository.RacingQueryRepository;
 import map.repository.ScheduleRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +36,8 @@ import static common.response.status.BaseErrorCode.*;
 public class RacingService {
 
     private final KafkaProducerService kafkaService;
-    private final RacingEventPublisher racingEventPublisher;
+    private final ApplicationEventPublisher publisher;
+//    private final RacingEventPublisher racingEventPublisher;
     private final RacingQueryRepository racingQueryRepository;
     private final RacingCommandRepository racingCommandRepository;
     private final ScheduleRepository scheduleRepository;
@@ -86,15 +88,15 @@ public class RacingService {
         );
 
         //  30초 후 레이싱 상태 확인, 대기 중이면 삭제하고 두 사용자에게 알림 발송하는 로직 실행
-        racingEventPublisher.publishAskRacingEvent(
-                new RacingInfo(scheduleId,
-                        schedule.getScheduleName(),
-                        racing.getId(),
-                        memberId,
-                        racingAddDto.getTargetMemberId(),
-                        racingAddDto.getPoint()
-                )
+        RacingInfo racingInfo = new RacingInfo(scheduleId,
+                schedule.getScheduleName(),
+                racing.getId(),
+                memberId,
+                racingAddDto.getTargetMemberId(),
+                racingAddDto.getPoint()
         );
+        AskRacingEvent event = new AskRacingEvent(racingInfo);
+        publisher.publishEvent(event);
 
         return racing.getId();
     }

@@ -8,8 +8,7 @@ import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import map.application_event.publisher.RacingEventPublisher;
-import map.application_event.publisher.ScheduleEventPublisher;
+import map.application_event.event.MemberArrivalEvent;
 import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
@@ -17,11 +16,11 @@ import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
 import map.repository.ScheduleLocationRepository;
 import map.repository.ScheduleRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 import static common.domain.ExecStatus.RUN;
 import static common.response.status.BaseErrorCode.NOT_IN_SCHEDULE;
@@ -38,7 +37,8 @@ public class MapService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleLocationRepository scheduleLocationRepository;
 
-    private final ScheduleEventPublisher scheduleEventPublisher;
+    private final ApplicationEventPublisher publisher;
+//    private final ScheduleEventPublisher scheduleEventPublisher;
 
     public ScheduleDetailResDto getScheduleDetail(Long memberId, Long scheduleId) {
         Schedule schedule = findSchedule(scheduleId);
@@ -95,24 +95,27 @@ public class MapService {
         List<String> fcmTokens = findAllFcmTokensInSchedule(scheduleId);
         AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
 
+        String scheduleName = schedule.getScheduleName();
+
         kafkaService.sendMessage(KafkaTopic.alarm,
                 new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
                         memberId,
                         scheduleId,
-                        schedule.getScheduleName(),
+                        scheduleName,
                         arrivalDto.getArrivalTime(),
                         arriveMemberInfo
                 )
         );
 
-        scheduleEventPublisher.publishMemberArrivalEvent(memberId, scheduleId, schedule.getScheduleName());
+        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, scheduleName);
+        publisher.publishEvent(event);
 
         //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
         if(schedule.checkAllMembersArrive()) {
             kafkaService.sendMessage(KafkaTopic.alarm,
                     new ScheduleClosedMessage(fcmTokens, AlarmMessageType.SCHEDULE_MAP_CLOSE,
                             scheduleId,
-                            schedule.getScheduleName(),
+                            scheduleName,
                             schedule.getLocation().getLocationName(),
                             schedule.getScheduleTime()
                     )

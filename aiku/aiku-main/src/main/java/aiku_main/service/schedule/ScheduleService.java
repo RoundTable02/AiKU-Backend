@@ -413,7 +413,7 @@ public class ScheduleService {
     }
 
     private void checkIsWait(Schedule schedule){
-        if(schedule.isWait()){
+        if(!schedule.isWait()){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }

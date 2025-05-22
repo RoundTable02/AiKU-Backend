@@ -220,7 +220,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member1.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
+        bettingService.deleteBettingForBettor(member1.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
 
         //then
         Betting findBetting = bettingRepository.findById(betting.getId()).orElse(null);
@@ -238,7 +238,7 @@ class BettingServiceIntegrationTest {
         em.persist(betting);
 
         //when
-        bettingService.exitSchedule_deleteBettingForBettor(member2.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
+        bettingService.deleteBettingForBettor(member2.getId(), ScheduleMemberIdOfBettor, schedule1.getId());
 
         //then
         Betting findBetting = bettingRepository.findById(betting.getId()).orElse(null);

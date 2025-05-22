@@ -16,10 +16,4 @@ public class BettingHandler {
     private final BettingService bettingService;
     private final ScheduleResultAnalysisService scheduleResultAnalysisService;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleScheduleExitEvent(ScheduleExitEvent event){
-        bettingService.exitSchedule_deleteBettingForBettor(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
-        bettingService.exitSchedule_deleteBettingForBetee(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
-    }
 }

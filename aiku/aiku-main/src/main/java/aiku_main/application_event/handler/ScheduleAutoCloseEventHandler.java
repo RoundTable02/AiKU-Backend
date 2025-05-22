@@ -14,6 +14,6 @@ public class ScheduleAutoCloseEventHandler {
 
     @EventListener
     public void closeScheduleAuto(ScheduleAutoCloseEvent event){
-        scheduleService.closeScheduleAuto(event.getScheduleId());
+        scheduleService.closeScheduleByAutoAndArriveLateMembers(event.getScheduleId());
     }
 }

@@ -1,6 +1,5 @@
 package aiku_main.application_event.handler;
 
-import aiku_main.application_event.event.ScheduleCloseEvent;
 import aiku_main.application_event.event.ScheduleExitEvent;
 import aiku_main.service.betting.BettingService;
 import aiku_main.service.schedule.ScheduleResultAnalysisService;
@@ -22,17 +21,5 @@ public class BettingHandler {
     public void handleScheduleExitEvent(ScheduleExitEvent event){
         bettingService.exitSchedule_deleteBettingForBettor(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
         bettingService.exitSchedule_deleteBettingForBetee(event.getMemberId(), event.getScheduleMemberId(), event.getScheduleId());
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void processBettingResult(ScheduleCloseEvent event){
-        bettingService.processBettingResult(event.getScheduleId());
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void analyzeScheduleBettingResult(ScheduleCloseEvent event){
-        scheduleResultAnalysisService.analyzeBettingResult(event.getScheduleId());
     }
 }

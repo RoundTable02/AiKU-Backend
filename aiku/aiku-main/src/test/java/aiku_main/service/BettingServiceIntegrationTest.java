@@ -264,7 +264,7 @@ class BettingServiceIntegrationTest {
         schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now());
 
         //when
-        bettingService.processBettingResult(schedule1.getId());
+        bettingService.termBettingAndProcessResultPoint(schedule1.getId());
 
         //then
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);
@@ -296,7 +296,7 @@ class BettingServiceIntegrationTest {
         schedule1.arriveScheduleMember(scheduleMembers.get(2), LocalDateTime.now().plusMinutes(30));
 
         //when
-        bettingService.processBettingResult(schedule1.getId());
+        bettingService.termBettingAndProcessResultPoint(schedule1.getId());
 
         //then
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);
@@ -329,7 +329,7 @@ class BettingServiceIntegrationTest {
         schedule1.arriveScheduleMember(scheduleMembers.get(2), schedule1.getScheduleTime().plusMinutes(30));
 
         //when
-        bettingService.processBettingResult(schedule1.getId());
+        bettingService.termBettingAndProcessResultPoint(schedule1.getId());
 
         //then
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(schedule1.getId(), TERM);

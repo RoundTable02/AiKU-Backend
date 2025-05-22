@@ -13,9 +13,4 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class RacingHandler {
 
     private ScheduleResultAnalysisService scheduleResultAnalysisService;
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void analyzeScheduleBettingResult(ScheduleCloseEvent event){
-        scheduleResultAnalysisService.analyzeRacingResult(event.getScheduleId());
-    }
 }

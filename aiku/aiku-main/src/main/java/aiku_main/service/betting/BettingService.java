@@ -119,7 +119,7 @@ public class BettingService {
     }
 
     @Transactional
-    public void processBettingResult(Long scheduleId) {
+    public void termBettingAndProcessResultPoint(Long scheduleId) {
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
         if(bettings.isEmpty()){
             return;

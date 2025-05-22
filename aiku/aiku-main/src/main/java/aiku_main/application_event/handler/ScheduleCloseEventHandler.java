@@ -5,11 +5,14 @@ import aiku_main.service.betting.BettingService;
 import aiku_main.service.schedule.ScheduleResultAnalysisService;
 import aiku_main.service.schedule.ScheduleService;
 import aiku_main.service.team.TeamResultAnalysisService;
+import aiku_main.service.title.TitleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import java.util.List;
 
 /**
  * 1. schedule-close 토픽 consume
@@ -24,6 +27,7 @@ public class ScheduleCloseEventHandler {
     private final ScheduleResultAnalysisService scheduleResultAnalysisService;
     private final BettingService bettingService;
     private final TeamResultAnalysisService teamResultAnalysisService;
+    private final TitleService titleService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -61,5 +65,29 @@ public class ScheduleCloseEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void analyzeTeamRacingResult(ScheduleCloseEvent event){
         teamResultAnalysisService.analyzeRacingResult(event.getTeamId());
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void checkAllAvailableMemberTitleInSchedule(ScheduleCloseEvent event) {
+        List<Long> memberIds = titleService.getMemberIdsInSchedule(event.getScheduleId());
+
+        // ** 1만 포인트 달성 칭호 **
+        titleService.checkAndGivePointsMoreThan10kTitle(memberIds);
+
+        // ** 누적 지각 도착 5회 이상 칭호 **
+        titleService.checkAndGiveEarlyArrival10TimesTitle(memberIds);
+
+        // ** 누적 지각 도착 5회 이상 칭호 **
+        titleService.checkAndGiveLateArrival5TimesTitle(memberIds);
+
+        // ** 누적 지각 도착 10회 이상 칭호 **
+        titleService.checkAndGiveLateArrival10TimesTitle(memberIds);
+
+        // ** 누적 베팅 승리 5회 이상 칭호 **[
+        titleService.checkAndGiveBettingWinning5TimesTitle(memberIds);
+
+        // ** 누적 베팅 승리 10회 이상 칭호 **
+        titleService.checkAndGiveBettingLosing10TimesTitle(memberIds);
     }
 }

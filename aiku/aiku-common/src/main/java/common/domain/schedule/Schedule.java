@@ -175,10 +175,10 @@ public class Schedule extends BaseTime {
     }
 
     public boolean isTerm() {
-        return this.getScheduleStatus() == TERM;
+        return scheduleStatus == TERM;
     }
 
     public boolean isWait() {
-        return this.getScheduleStatus() == WAIT;
+        return scheduleStatus == WAIT;
     }
 }

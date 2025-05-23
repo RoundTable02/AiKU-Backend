@@ -228,11 +228,11 @@ public class ScheduleService {
         Schedule schedule = findSchedule(scheduleId);
         schedule.close(scheduleCloseTime);
 
-        publishScheduleCloseEvent(scheduleId);
+        publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
     }
 
-    private void publishScheduleCloseEvent(Long scheduleId){
-        ScheduleCloseEvent event = new ScheduleCloseEvent(scheduleId);
+    private void publishScheduleCloseEvent(Long teamId, Long scheduleId){
+        ScheduleCloseEvent event = new ScheduleCloseEvent(teamId, scheduleId);
         eventPublisher.publishEvent(event);
     }
 
@@ -333,7 +333,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void closeScheduleAuto(Long scheduleId) {
+    public void closeScheduleByAutoAndArriveLateMembers(Long scheduleId) {
         Schedule schedule = findSchedule(scheduleId);
         if (schedule.isTerm()){
             return;
@@ -341,11 +341,15 @@ public class ScheduleService {
 
         List<ScheduleMember> notArriveScheduleMembers = scheduleRepository.findNotArriveScheduleMember(scheduleId);
 
-        LocalDateTime autoCloseTime = schedule.getScheduleTime().plusMinutes(30);
+        LocalDateTime autoCloseTime = getScheduleAutoCloseTime(schedule.getScheduleTime());
         schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-        publishScheduleCloseEvent(scheduleId);
+        publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
+    }
+
+    private LocalDateTime getScheduleAutoCloseTime(LocalDateTime scheduleTime) {
+        return scheduleTime.plusMinutes(30);
     }
 
     @Transactional
@@ -409,7 +413,7 @@ public class ScheduleService {
     }
 
     private void checkIsWait(Schedule schedule){
-        if(schedule.isWait()){
+        if(!schedule.isWait()){
             throw new ScheduleException(NO_WAIT_SCHEDULE);
         }
     }

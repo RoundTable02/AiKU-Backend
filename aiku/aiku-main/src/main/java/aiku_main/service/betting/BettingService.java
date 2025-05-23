@@ -86,7 +86,7 @@ public class BettingService {
     }
 
     @Transactional
-    public void exitSchedule_deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
+    public void deleteBettingForBettor(Long memberId, Long scheduleMemberId, Long scheduleId){
         bettingRepository.findByBettorIdAndStatus(scheduleMemberId, ALIVE)
                 .ifPresent((betting) -> {
                     betting.setStatus(DELETE);
@@ -102,7 +102,7 @@ public class BettingService {
     }
 
     @Transactional
-    public void exitSchedule_deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
+    public void deleteBettingForBetee(Long memberId, Long scheduleMemberId, Long scheduleId){
         bettingRepository.findByBeteeIdAndStatus(scheduleMemberId, ALIVE)
                 .ifPresent((betting) -> {
                     betting.setStatus(DELETE);
@@ -119,7 +119,7 @@ public class BettingService {
     }
 
     @Transactional
-    public void processBettingResult(Long scheduleId) {
+    public void termBettingAndProcessResultPoint(Long scheduleId) {
         List<Betting> bettings = bettingRepository.findBettingsInSchedule(scheduleId, WAIT);
         if(bettings.isEmpty()){
             return;

@@ -762,7 +762,7 @@ public class ScheduleServiceTest {
         em.flush();
 
         //when
-        scheduleService.closeScheduleAuto(schedule1.getId());
+        scheduleService.closeScheduleByAutoAndArriveLateMembers(schedule1.getId());
 
         //then
         Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).get();
@@ -789,7 +789,7 @@ public class ScheduleServiceTest {
         schedule1.setTerm(LocalDateTime.now());
 
         //when
-        scheduleService.closeScheduleAuto(schedule1.getId());
+        scheduleService.closeScheduleByAutoAndArriveLateMembers(schedule1.getId());
 
         //then
         Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);

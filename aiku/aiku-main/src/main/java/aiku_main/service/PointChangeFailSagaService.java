@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static common.kafka_message.KafkaTopic.ALARM;
+
 @RequiredArgsConstructor
 @Service
 public class PointChangeFailSagaService {
@@ -30,7 +32,7 @@ public class PointChangeFailSagaService {
         String firebaseToken = memberRepository.findFirebaseTokenByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException());
 
-        kafkaProducerService.sendMessage(KafkaTopic.alarm,
+        kafkaProducerService.sendMessage(ALARM,
                 new PointErrorMessage(List.of(firebaseToken), AlarmMessageType.POINT_ERROR)
         );
     }

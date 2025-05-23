@@ -1,11 +1,13 @@
 package aiku_main.scheduler;
 
-import aiku_main.application_event.publisher.ScheduleEventPublisher;
+import aiku_main.application_event.event.ScheduleAutoCloseEvent;
+import aiku_main.application_event.event.ScheduleOpenEvent;
 import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,7 @@ public class ScheduleScheduler {
 
     private final TaskScheduler scheduler;
     private final ScheduleRepository scheduleRepository;
-    private final ScheduleEventPublisher scheduleEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAutoCloseTasks = new ConcurrentHashMap<>();
@@ -58,9 +60,10 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(schedule.getScheduleTime()).minus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()-> {
-            scheduleEventPublisher.publishScheduleOpenEvent(schedule.getId());
-            }, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
+                ()-> publishScheduleOpenEvent(schedule.getId()),
+                delayTime
+        );
         scheduleOpenTasks.put(schedule.getId(), future);
     }
 
@@ -68,9 +71,10 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(schedule.getScheduleTime()).plus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{
-            scheduleEventPublisher.publishScheduleAutoCloseEvent(schedule.getId());
-        }, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
+                ()-> publishScheduleAutoCloseEvent(schedule.getId()),
+                delayTime
+        );
         scheduleAutoCloseTasks.put(schedule.getId(), future);
     }
 
@@ -101,5 +105,15 @@ public class ScheduleScheduler {
     private boolean isValidDuration(Duration duration){
         if(duration.toMinutes() < 0) return false;
         else return true;
+    }
+
+    private void publishScheduleOpenEvent(Long scheduleId){
+        ScheduleOpenEvent event = new ScheduleOpenEvent(scheduleId);
+        eventPublisher.publishEvent(event);
+    }
+
+    private void publishScheduleAutoCloseEvent(Long scheduleId){
+        ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(scheduleId);
+        eventPublisher.publishEvent(event);
     }
 }

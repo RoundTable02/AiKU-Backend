@@ -14,8 +14,7 @@ public class PointChangeEventHandler {
 
     private final MemberPointChangeFacade pointChangeFacade;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void pointChangeEvent(PointChangeEvent event) {
         pointChangeFacade.makePointChange(event.getMemberId(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
     }

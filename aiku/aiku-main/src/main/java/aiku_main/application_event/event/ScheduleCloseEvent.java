@@ -7,5 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ScheduleCloseEvent {
 
+    private Long teamId;
     private Long scheduleId;
 }

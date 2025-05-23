@@ -11,7 +11,7 @@ import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.application_event.domain.RacingInfo;
-import map.application_event.publisher.RacingEventPublisher;
+import map.application_event.event.AskRacingEvent;
 import map.dto.*;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
@@ -19,6 +19,7 @@ import map.repository.MemberRepository;
 import map.repository.RacingCommandRepository;
 import map.repository.RacingQueryRepository;
 import map.repository.ScheduleRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +36,7 @@ import static common.response.status.BaseErrorCode.*;
 public class RacingService {
 
     private final KafkaProducerService kafkaService;
-    private final RacingEventPublisher racingEventPublisher;
+    private final ApplicationEventPublisher publisher;
     private final RacingQueryRepository racingQueryRepository;
     private final RacingCommandRepository racingCommandRepository;
     private final ScheduleRepository scheduleRepository;
@@ -55,46 +56,17 @@ public class RacingService {
     @Transactional
     public Long makeRacing(Long memberId, Long scheduleId, RacingAddDto racingAddDto) {
         // 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증
-        Long firstScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
-        Long secondScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(racingAddDto.getTargetMemberId(), scheduleId);
-        checkScheduleInRun(scheduleId);
-
-        //  이미 중복된 레이싱이 존재하는지 검증,
-        checkDuplicateRacing(scheduleId, memberId, racingAddDto.getTargetMemberId());
-
-        //  두 유저 모두 충분한 포인트를 가졌는지 확인
-        checkEnoughRacingPoint(memberId, racingAddDto.getPoint());
-        checkEnoughRacingPoint(racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
+        validateCreateRacing(memberId, scheduleId, racingAddDto);
 
         //  대기 중 레이싱 DB 저장
-        Racing racing = Racing.create(firstScheduleMemberId, secondScheduleMemberId, racingAddDto.getPoint());
+        Racing racing = createRacing(memberId, scheduleId, racingAddDto);
         racingCommandRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
-        AlarmMemberInfo firstRacerInfo = getMemberInfo(memberId);
-        String fcmToken = findFcmTokenByMemberId(racingAddDto.getTargetMemberId());
-        Schedule schedule = findSchedule(scheduleId);
-
-        kafkaService.sendMessage(KafkaTopic.alarm,
-                new AskRacingMessage(List.of(fcmToken), AlarmMessageType.ASK_RACING,
-                        scheduleId,
-                        schedule.getScheduleName(),
-                        racing.getId(),
-                        racingAddDto.getPoint(),
-                        firstRacerInfo
-                )
-        );
+        Schedule schedule = sendAskRacingAlarmToTargetMember(memberId, scheduleId, racingAddDto, racing);
 
         //  30초 후 레이싱 상태 확인, 대기 중이면 삭제하고 두 사용자에게 알림 발송하는 로직 실행
-        racingEventPublisher.publishAskRacingEvent(
-                new RacingInfo(scheduleId,
-                        schedule.getScheduleName(),
-                        racing.getId(),
-                        memberId,
-                        racingAddDto.getTargetMemberId(),
-                        racingAddDto.getPoint()
-                )
-        );
+        publishRacingCreatedEvent(memberId, scheduleId, racingAddDto, schedule, racing);
 
         return racing.getId();
     }
@@ -276,6 +248,55 @@ public class RacingService {
                             r.getRacingId())
             );
         });
+    }
+
+    private void publishRacingCreatedEvent(Long memberId, Long scheduleId, RacingAddDto racingAddDto, Schedule schedule, Racing racing) {
+        RacingInfo racingInfo = new RacingInfo(scheduleId,
+                schedule.getScheduleName(),
+                racing.getId(),
+                memberId,
+                racingAddDto.getTargetMemberId(),
+                racingAddDto.getPoint()
+        );
+        AskRacingEvent event = new AskRacingEvent(racingInfo);
+        publisher.publishEvent(event);
+    }
+
+    private Schedule sendAskRacingAlarmToTargetMember(Long memberId, Long scheduleId, RacingAddDto racingAddDto, Racing racing) {
+        AlarmMemberInfo firstRacerInfo = getMemberInfo(memberId);
+        String fcmToken = findFcmTokenByMemberId(racingAddDto.getTargetMemberId());
+        Schedule schedule = findSchedule(scheduleId);
+
+        kafkaService.sendMessage(KafkaTopic.alarm,
+                new AskRacingMessage(List.of(fcmToken), AlarmMessageType.ASK_RACING,
+                        scheduleId,
+                        schedule.getScheduleName(),
+                        racing.getId(),
+                        racingAddDto.getPoint(),
+                        firstRacerInfo
+                )
+        );
+        return schedule;
+    }
+
+    private Racing createRacing(Long memberId, Long scheduleId, RacingAddDto racingAddDto) {
+        Long firstScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
+        Long secondScheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(racingAddDto.getTargetMemberId(), scheduleId);
+
+        Racing racing = Racing.create(firstScheduleMemberId, secondScheduleMemberId, racingAddDto.getPoint());
+        return racing;
+    }
+
+    private void validateCreateRacing(Long memberId, Long scheduleId, RacingAddDto racingAddDto) {
+        // 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증
+        checkScheduleInRun(scheduleId);
+
+        //  이미 중복된 레이싱이 존재하는지 검증,
+        checkDuplicateRacing(scheduleId, memberId, racingAddDto.getTargetMemberId());
+
+        //  두 유저 모두 충분한 포인트를 가졌는지 확인
+        checkEnoughRacingPoint(memberId, racingAddDto.getPoint());
+        checkEnoughRacingPoint(racingAddDto.getTargetMemberId(), racingAddDto.getPoint());
     }
 
     private Schedule findSchedule(Long scheduleId) {

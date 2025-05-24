@@ -6,10 +6,12 @@ import common.domain.Status;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.KafkaTopic;
+import common.kafka_message.ScheduleCloseMessage;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.application_event.event.MemberArrivalEvent;
+import map.application_event.event.ScheduleCloseEvent;
 import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
@@ -22,6 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static common.domain.ExecStatus.RUN;
@@ -99,41 +102,38 @@ public class MapService {
         scheduleLocationRepository.saveLocation(scheduleId, memberId, location.getLatitude(), location.getLongitude());
         scheduleLocationRepository.updateArrivalStatus(scheduleId, memberId, true);
 
-        //  해당 약속의 멤버들에게 멤버 도착 카프카로 전달
+        // 멤버 도착 이벤트 발행
+        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, schedule.getScheduleName(), arrivalDto.getArrivalTime());
+        publisher.publishEvent(event);
+
+        // 모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
+        if(arrivalRepository.isAllMembersInScheduleArrived(scheduleId)) {
+            publisher.publishEvent(new ScheduleCloseEvent(scheduleId, arrivalDto.getArrivalTime()));
+        }
+
+        return scheduleId;
+    }
+
+    public void sendKafkaAlarmIfMemberArrived(Long memberId, Long scheduleId, String scheduleName, LocalDateTime arrivalTime) {
         List<String> fcmTokens = findAllFcmTokensInSchedule(scheduleId);
         AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
 
-        String scheduleName = schedule.getScheduleName();
-
-        // 멤버 도착 이벤트 발행
-        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, scheduleName);
-        publisher.publishEvent(event);
-
-        // TODO : 멤버 도착은 따로 이벤트 처리
+        // 멤버 도착 알람 전달
         kafkaService.sendMessage(KafkaTopic.ALARM,
                 new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
                         memberId,
                         scheduleId,
                         scheduleName,
-                        arrivalDto.getArrivalTime(),
+                        arrivalTime,
                         arriveMemberInfo
                 )
         );
+    }
 
-        // TODO : 이벤트 기반 처리로 옮길 예정
-        //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
-        if(arrivalRepository.isAllMembersInScheduleArrived(scheduleId)) {
-            kafkaService.sendMessage(KafkaTopic.ALARM,
-                    new ScheduleClosedMessage(fcmTokens, AlarmMessageType.SCHEDULE_MAP_CLOSE,
-                            scheduleId,
-                            scheduleName,
-                            schedule.getLocation().getLocationName(),
-                            schedule.getScheduleTime()
-                    )
-            );
-        }
-
-        return scheduleId;
+    public void sendKafkaEventIfScheduleClosed(Long scheduleId, LocalDateTime closeTime) {
+        kafkaService.sendMessage(KafkaTopic.SCHEDULE_CLOSE,
+                new ScheduleCloseMessage(scheduleId, closeTime)
+        );
     }
 
     public Long sendEmoji(Long memberId, Long scheduleId, EmojiDto emojiDto) {

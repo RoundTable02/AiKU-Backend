@@ -6,6 +6,7 @@ import aiku_main.repository.title.TitleRepository;
 import common.domain.member.Member;
 import common.domain.title.Title;
 import common.domain.title.TitleCode;
+import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.AlarmMessageType;
 import common.kafka_message.alarm.TitleGrantedMessage;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static common.domain.title.TitleCode.*;
-import static common.kafka_message.KafkaTopic.alarm;
+import static common.kafka_message.KafkaTopic.ALARM;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -129,7 +130,7 @@ public class TitleService {
     }
 
     private void sendMessage(Member member, Title title) {
-        kafkaProducerService.sendMessage(alarm, new TitleGrantedMessage(
+        kafkaProducerService.sendMessage(ALARM, new TitleGrantedMessage(
                 List.of(member.getFirebaseToken()), AlarmMessageType.TITLE_GRANTED,
                 title.getId(), title.getTitleName(), title.getTitleDescription(), title.getTitleCode()));
     }

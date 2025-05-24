@@ -16,6 +16,7 @@ import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleResult;
 import common.domain.value_reference.TeamValue;
 import common.exception.NotEnoughPoint;
+import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
 import static common.domain.Status.ALIVE;
-import static common.kafka_message.KafkaTopic.alarm;
+import static common.kafka_message.KafkaTopic.ALARM;
 import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
@@ -96,7 +97,7 @@ public class ScheduleService {
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
         List<String> alarmTokens = teamRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
+        kafkaProducerService.sendMessage(ALARM, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
     }
 
     @Transactional
@@ -197,12 +198,12 @@ public class ScheduleService {
 
         if(sourceMember == null) {
             kafkaProducerService.sendMessage(
-                    alarm,
+                    ALARM,
                     new ScheduleAlarmMessage(alarmTokens, messageType, schedule)
             );
         } else {
             kafkaProducerService.sendMessage(
-                    alarm,
+                    ALARM,
                     new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember), schedule)
             );
         }
@@ -210,7 +211,7 @@ public class ScheduleService {
 
     private void sendMessageToScheduleMember(Schedule schedule, String alarmToken, AlarmMessageType messageType){
         kafkaProducerService.sendMessage(
-                alarm,
+                ALARM,
                 new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule)
         );
     }

@@ -18,7 +18,7 @@ public class KafkaProducerService {
     public void sendMessage(KafkaTopic topic, Object message){
         try {
             String messageStr = objectMapper.writeValueAsString(message);
-            kafkaTemplate.send(topic.name(), messageStr);
+            kafkaTemplate.send(topic.getName(), messageStr);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }

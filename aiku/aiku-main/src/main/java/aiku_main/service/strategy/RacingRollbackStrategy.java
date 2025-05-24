@@ -10,6 +10,8 @@ import common.kafka_message.RacingPointChangedFailedMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static common.kafka_message.KafkaTopic.ALARM;
+
 @RequiredArgsConstructor
 @PointChangeReasonMapping({PointChangeReason.RACING, PointChangeReason.RACING_REWARD, PointChangeReason.RACING_CANCEL})
 @Component
@@ -19,7 +21,7 @@ public class RacingRollbackStrategy implements RollbackStrategy {
 
     @Override
     public void execute(Long memberId, PointChangeType pointChangeType, int pointAmount, PointChangeReason pointChangeReason, Long reasonId) {
-        kafkaProducerService.sendMessage(KafkaTopic.alarm,
+        kafkaProducerService.sendMessage(ALARM,
                 new RacingPointChangedFailedMessage(
                         memberId,
                         PointChangedType.valueOf(pointChangeType.name()),

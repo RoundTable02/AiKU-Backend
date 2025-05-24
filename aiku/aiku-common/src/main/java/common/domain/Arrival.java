@@ -3,6 +3,7 @@ package common.domain;
 import common.domain.value_reference.ScheduleMemberValue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,4 +24,9 @@ public class Arrival extends BaseTime {
 
     private LocalDateTime arrivalTime;
 
+    @Builder
+    public Arrival(Long scheduleMemberId, LocalDateTime arrivalTime) {
+        this.scheduleMember = new ScheduleMemberValue(scheduleMemberId);
+        this.arrivalTime = arrivalTime;
+    }
 }

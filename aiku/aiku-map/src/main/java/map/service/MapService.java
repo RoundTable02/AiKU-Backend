@@ -1,5 +1,6 @@
 package map.service;
 
+import common.domain.Arrival;
 import common.domain.Location;
 import common.domain.Status;
 import common.domain.schedule.Schedule;
@@ -13,6 +14,7 @@ import map.dto.*;
 import map.exception.MemberNotFoundException;
 import map.exception.ScheduleException;
 import map.kafka.KafkaProducerService;
+import map.repository.ArrivalRepository;
 import map.repository.MemberRepository;
 import map.repository.ScheduleLocationRepository;
 import map.repository.ScheduleRepository;
@@ -36,6 +38,7 @@ public class MapService {
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleLocationRepository scheduleLocationRepository;
+    private final ArrivalRepository arrivalRepository;
 
     private final ApplicationEventPublisher publisher;
 
@@ -80,10 +83,16 @@ public class MapService {
         checkMemberInSchedule(memberId, scheduleId);
         checkScheduleInRun(scheduleId);
 
-        //  ScheduleMember에 해당 멤버 도착 저장
-        ScheduleMember scheduleMember = findScheduleMember(memberId, scheduleId);
+        //  Arrival에 해당 멤버 도착 저장
         Schedule schedule = findSchedule(scheduleId);
-        schedule.arriveScheduleMember(scheduleMember, arrivalDto.getArrivalTime());
+        ScheduleMember scheduleMember = findScheduleMember(memberId, scheduleId);
+
+        arrivalRepository.save(
+                Arrival.builder()
+                        .scheduleMemberId(scheduleMember.getId())
+                        .arrivalTime(arrivalDto.getArrivalTime())
+                        .build()
+        );
 
         // 도착하면? TTL 삭제 후 도착 상태로 저장
         Location location = schedule.getLocation();
@@ -96,7 +105,12 @@ public class MapService {
 
         String scheduleName = schedule.getScheduleName();
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        // 멤버 도착 이벤트 발행
+        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, scheduleName);
+        publisher.publishEvent(event);
+
+        // TODO : 멤버 도착은 따로 이벤트 처리
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
                         memberId,
                         scheduleId,
@@ -106,12 +120,10 @@ public class MapService {
                 )
         );
 
-        MemberArrivalEvent event = new MemberArrivalEvent(memberId, scheduleId, scheduleName);
-        publisher.publishEvent(event);
-
+        // TODO : 이벤트 기반 처리로 옮길 예정
         //  모든 멤버 도착 확인, 카프카로 스케줄 종료 전달
-        if(schedule.checkAllMembersArrive()) {
-            kafkaService.sendMessage(KafkaTopic.alarm,
+        if(arrivalRepository.isAllMembersInScheduleArrived(scheduleId)) {
+            kafkaService.sendMessage(KafkaTopic.ALARM,
                     new ScheduleClosedMessage(fcmTokens, AlarmMessageType.SCHEDULE_MAP_CLOSE,
                             scheduleId,
                             scheduleName,
@@ -137,7 +149,7 @@ public class MapService {
 
         Schedule schedule = findSchedule(scheduleId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new EmojiMessage(List.of(receiverFcmToken), AlarmMessageType.EMOJI,
                         scheduleId,
                         schedule.getScheduleName(),

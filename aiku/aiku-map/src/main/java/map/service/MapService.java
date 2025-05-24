@@ -114,28 +114,6 @@ public class MapService {
         return scheduleId;
     }
 
-    public void sendKafkaAlarmIfMemberArrived(Long memberId, Long scheduleId, String scheduleName, LocalDateTime arrivalTime) {
-        List<String> fcmTokens = findAllFcmTokensInSchedule(scheduleId);
-        AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
-
-        // 멤버 도착 알람 전달
-        kafkaService.sendMessage(KafkaTopic.ALARM,
-                new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
-                        memberId,
-                        scheduleId,
-                        scheduleName,
-                        arrivalTime,
-                        arriveMemberInfo
-                )
-        );
-    }
-
-    public void sendKafkaEventIfScheduleClosed(Long scheduleId, LocalDateTime closeTime) {
-        kafkaService.sendMessage(KafkaTopic.SCHEDULE_CLOSE,
-                new ScheduleCloseMessage(scheduleId, closeTime)
-        );
-    }
-
     public Long sendEmoji(Long memberId, Long scheduleId, EmojiDto emojiDto) {
         // 해당 멤버 스케줄에 존재 / 스케줄이 진행 중인지 검증,
         checkMemberInSchedule(memberId, scheduleId);
@@ -166,6 +144,46 @@ public class MapService {
     @Transactional
     public void deleteAllLocationsInSchedule(Long scheduleId) {
         scheduleLocationRepository.deleteScheduleLocations(scheduleId);
+    }
+
+    @Transactional
+    public void makeNotArrivedMemberArrive(Long scheduleId, LocalDateTime closeTime) {
+        // Arrival에 저장되지 않은 ScheduleMember 조회
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersNotInArrivalByScheduleId(scheduleId);
+
+        // Arrival에 ScheduleMember 저장
+        List<Arrival> arrivals = scheduleMembers.stream()
+                .map(sm ->
+                        Arrival.builder()
+                                .scheduleMemberId(sm.getId())
+                                .arrivalTime(closeTime)
+                                .build()
+                )
+                .toList();
+
+        arrivalRepository.saveAll(arrivals);
+    }
+
+    public void sendKafkaAlarmIfMemberArrived(Long memberId, Long scheduleId, String scheduleName, LocalDateTime arrivalTime) {
+        List<String> fcmTokens = findAllFcmTokensInSchedule(scheduleId);
+        AlarmMemberInfo arriveMemberInfo = getMemberInfo(memberId);
+
+        // 멤버 도착 알람 전달
+        kafkaService.sendMessage(KafkaTopic.ALARM,
+                new ArrivalAlarmMessage(fcmTokens, AlarmMessageType.MEMBER_ARRIVAL,
+                        memberId,
+                        scheduleId,
+                        scheduleName,
+                        arrivalTime,
+                        arriveMemberInfo
+                )
+        );
+    }
+
+    public void sendKafkaEventIfScheduleClosed(Long scheduleId, LocalDateTime closeTime) {
+        kafkaService.sendMessage(KafkaTopic.SCHEDULE_CLOSE,
+                new ScheduleCloseMessage(scheduleId, closeTime)
+        );
     }
 
     private Schedule findSchedule(Long scheduleId) {

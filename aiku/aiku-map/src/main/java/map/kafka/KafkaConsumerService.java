@@ -7,6 +7,7 @@ import common.kafka_message.RacingPointChangedFailedMessage;
 import common.kafka_message.ScheduleCloseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import map.application_event.event.ScheduleAutoCloseEvent;
 import map.application_event.event.ScheduleCloseEvent;
 import map.service.RacingSagaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -38,11 +39,11 @@ public class KafkaConsumerService {
         ack.acknowledge();
     }
 
-    @KafkaListener(topics = {"schedule-close"}, groupId = "aiku-main", concurrency = "1")
+    @KafkaListener(topics = {"schedule-auto-close"}, groupId = "aiku-main", concurrency = "1")
     public void consumeScheduleClose(ConsumerRecord<String, String> data, Acknowledgment ack) {
         try {
             ScheduleCloseMessage message = objectMapper.readValue(data.value(), ScheduleCloseMessage.class);
-            ScheduleCloseEvent event = new ScheduleCloseEvent(message.getScheduleId());
+            ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(message.getScheduleId(), message.getScheduleCloseTime());
             publisher.publishEvent(event);
         } catch (JsonMappingException e) {
             log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);

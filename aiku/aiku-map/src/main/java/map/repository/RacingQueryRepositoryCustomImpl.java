@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static common.domain.QRacing.racing;
 import static common.domain.member.QMember.member;
+import static common.domain.racing.QRacing.racing;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor

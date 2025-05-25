@@ -8,6 +8,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
@@ -17,7 +19,7 @@ public class ScheduleCloseEventHandler {
     private final MapService mapService;
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void terminateRunningRacing(ScheduleCloseEvent event){
         // 레이싱 종료
         racingService.terminateRunningRacing(event.getScheduleId());
@@ -26,7 +28,7 @@ public class ScheduleCloseEventHandler {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void deleteAllLocationsInSchedule(ScheduleCloseEvent event){
         mapService.deleteAllLocationsInSchedule(event.getScheduleId());
     }

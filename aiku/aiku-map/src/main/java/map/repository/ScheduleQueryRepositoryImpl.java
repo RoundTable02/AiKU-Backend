@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static common.domain.QArrival.arrival;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
@@ -99,6 +100,17 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
                 .leftJoin(schedule.scheduleMembers, scheduleMember)
                 .leftJoin(scheduleMember.member, member)
                 .where(schedule.id.eq(scheduleId))
+                .fetch();
+    }
+
+    @Override
+    public List<ScheduleMember> findScheduleMembersNotInArrivalByScheduleId(Long scheduleId) {
+        return query.select(scheduleMember)
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .leftJoin(arrival).on(scheduleMember.id.eq(arrival.scheduleMember.id))
+                .where(schedule.id.eq(scheduleId),
+                        arrival.isNull())
                 .fetch();
     }
 

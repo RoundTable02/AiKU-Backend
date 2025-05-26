@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
-public class ScheduleCloseEvent {
+public class ScheduleAutoCloseEvent {
 
     private Long scheduleId;
     private LocalDateTime closeTime;

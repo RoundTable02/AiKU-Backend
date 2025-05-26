@@ -20,4 +20,6 @@ public interface ScheduleQueryRepository {
     List<ScheduleMemberResDto> getScheduleMembersInfo(Long scheduleId);
 
     List<String> findAllFcmTokensInSchedule(Long scheduleId);
+
+    List<ScheduleMember> findScheduleMembersNotInArrivalByScheduleId(Long scheduleId);
 }

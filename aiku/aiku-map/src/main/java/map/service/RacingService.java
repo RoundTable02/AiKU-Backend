@@ -78,7 +78,7 @@ public class RacingService {
         String firstRacerFcmToken = findFcmTokenByMemberId(racingInfo.getFirstRacerId());
         String secondRacerFcmToken = findFcmTokenByMemberId(racingInfo.getSecondRacerId());
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingAutoDeletedMessage(List.of(firstRacerFcmToken, secondRacerFcmToken),
                         AlarmMessageType.RACING_AUTO_DELETED,
                         racingInfo.getScheduleId(),
@@ -107,7 +107,7 @@ public class RacingService {
 
         Schedule schedule = findSchedule(scheduleId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingStartMessage(racersTokens,
                         AlarmMessageType.RACING_START,
                         scheduleId,
@@ -121,7 +121,7 @@ public class RacingService {
 
         // 두 대상자에게 포인트 차감 전달
         racingMemberInfos.forEach(r ->
-                kafkaService.sendMessage(KafkaTopic.alarm,
+                kafkaService.sendMessage(KafkaTopic.ALARM,
                         new PointChangedMessage(
                                 r.getMemberId(),
                                 PointChangedType.MINUS,
@@ -148,7 +148,7 @@ public class RacingService {
         List<String> racersTokens = findRacersFcmTokensInRacing(racingId);
         AlarmMemberInfo memberInfo = getMemberInfo(memberId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingDeniedMessage(racersTokens,
                         AlarmMessageType.RACING_DENIED,
                         scheduleId,
@@ -192,7 +192,7 @@ public class RacingService {
         AlarmMemberInfo loserInfo = getMemberInfoByScheduleMemberId(loserScheduleMemberId);
 
         // 승리자 아쿠 추가 (레이싱 성사 때 차감된 금액 + 상금)
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new PointChangedMessage(
                         winnerInfo.getMemberId(),
                         PointChangedType.PLUS,
@@ -205,7 +205,7 @@ public class RacingService {
         List<String> racersTokens = findRacersFcmTokensInRacing(racingId);
 
         // 레이싱 종료 알림
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingTermMessage(racersTokens,
                         AlarmMessageType.RACING_TERM,
                         scheduleId,
@@ -229,7 +229,7 @@ public class RacingService {
             AlarmMemberInfo firstInfo = getMemberInfoByScheduleMemberId(r.getFirstScheduleMemberId());
             AlarmMemberInfo secondInfo = getMemberInfoByScheduleMemberId(r.getSecondScheduleMemberId());
 
-            kafkaService.sendMessage(KafkaTopic.alarm,
+            kafkaService.sendMessage(KafkaTopic.ALARM,
                     new PointChangedMessage(
                             firstInfo.getMemberId(),
                             PointChangedType.PLUS,
@@ -239,7 +239,7 @@ public class RacingService {
                     )
             );
 
-            kafkaService.sendMessage(KafkaTopic.alarm,
+            kafkaService.sendMessage(KafkaTopic.ALARM,
                     new PointChangedMessage(
                             secondInfo.getMemberId(),
                             PointChangedType.PLUS,
@@ -267,7 +267,7 @@ public class RacingService {
         String fcmToken = findFcmTokenByMemberId(racingAddDto.getTargetMemberId());
         Schedule schedule = findSchedule(scheduleId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new AskRacingMessage(List.of(fcmToken), AlarmMessageType.ASK_RACING,
                         scheduleId,
                         schedule.getScheduleName(),

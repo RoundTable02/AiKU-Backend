@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.kafka_message.RacingPointChangedFailedMessage;
 import common.kafka_message.ScheduleCloseMessage;
+import common.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import map.application_event.event.ScheduleAutoCloseEvent;
 import map.application_event.event.ScheduleCloseEvent;
 import map.service.RacingSagaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,35 +22,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaConsumerService {
 
-    private final ObjectMapper objectMapper;
     private final RacingSagaService racingSagaService;
     private final ApplicationEventPublisher publisher;
 
     @KafkaListener(topics = {"racing-point-failed"}, groupId = "aiku-main", concurrency = "1")
     public void consumeRacingPointChangedFailedMessage(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            RacingPointChangedFailedMessage message = objectMapper.readValue(data.value(), RacingPointChangedFailedMessage.class);
-            racingSagaService.rollbackRacing(message.getMemberId(), message.getPointChangedType(), message.getPointAmount(), message.getReason(), message.getReasonId());
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeRacingPointChangedFailedMessage에서 RacingPointChangedFailedMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeRacingPointChangedFailedMessage에서 RacingPointChangedFailedMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
+        RacingPointChangedFailedMessage message = ObjectMapperUtil.parseJson(data.value(), RacingPointChangedFailedMessage.class);
+        racingSagaService.rollbackRacing(message.getMemberId(), message.getPointChangedType(), message.getPointAmount(), message.getReason(), message.getReasonId());
 
         ack.acknowledge();
     }
 
-    @KafkaListener(topics = {"schedule-close"}, groupId = "aiku-main", concurrency = "1")
+    @KafkaListener(topics = {"schedule-auto-close"}, groupId = "aiku-main", concurrency = "1")
     public void consumeScheduleClose(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        try {
-            ScheduleCloseMessage message = objectMapper.readValue(data.value(), ScheduleCloseMessage.class);
-            ScheduleCloseEvent event = new ScheduleCloseEvent(message.getScheduleId());
-            publisher.publishEvent(event);
-        } catch (JsonMappingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        } catch (JsonProcessingException e) {
-            log.error("KafkaConsumerService.consumeScheduleClose에서 ScheduleCloseMessage파싱 오류가 발생하였습니다. message = {}", data.value(), e);
-        }
+        ScheduleCloseMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleCloseMessage.class);
+        ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(message.getScheduleId(), message.getScheduleCloseTime());
+        publisher.publishEvent(event);
 
         ack.acknowledge();
     }

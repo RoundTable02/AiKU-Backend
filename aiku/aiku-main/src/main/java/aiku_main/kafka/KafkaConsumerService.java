@@ -4,7 +4,6 @@ import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.service.schedule.ScheduleService;
-import common.kafka_message.ScheduleArrivalMessage;
 import common.kafka_message.ScheduleCloseMessage;
 import common.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;

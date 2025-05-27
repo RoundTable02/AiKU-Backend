@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -351,41 +350,6 @@ public class ScheduleServiceTest {
         //when
         assertThatThrownBy(() -> scheduleService.exitSchedule(member2.getId(), team.getId(), schedule.getId()))
                 .isInstanceOf(ScheduleException.class);
-    }
-
-    @Test
-    void 스케줄_종료(){
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
-        Schedule schedule = createSchedule(member1, team);
-        em.persist(schedule);
-
-        //when
-        schedule.close(LocalDateTime.now());
-
-        //then
-        Schedule testSchedule = scheduleRepository.findById(schedule.getId()).get();
-        assertThat(testSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
-    }
-
-    @Test
-    void 스케줄_도착() {
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
-        Schedule schedule = createSchedule(member1, team);
-        em.persist(schedule);
-
-        //when
-        LocalDateTime arrivalTime = LocalDateTime.now();
-        scheduleService.arriveSchedule(schedule.getId(), member1.getId(), arrivalTime);
-
-        //then
-        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(member1.getId(), schedule.getId()).get();
-        assertThat(scheduleMember.getArrivalTimeDiff()).isEqualTo(Duration.between(arrivalTime, schedule.getScheduleTime()).toMinutes());
     }
 
     @Test
@@ -745,62 +709,6 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void 이벤트핸들러_스케줄_자동종료() {
-        //given
-        team.addTeamMember(member1);
-        team.addTeamMember(member2);
-        team.addTeamMember(member3);
-        em.flush();
-
-        Schedule schedule1 = createSchedule(member1,  team);
-        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
-        schedule1.addScheduleMember(member3, false, scheduleEnterPoint);
-        em.persist(schedule1);
-
-        LocalDateTime arrivalTime = LocalDateTime.now();
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
-        em.flush();
-
-        //when
-        scheduleService.closeScheduleByAutoAndArriveLateMembers(schedule1.getId());
-
-        //then
-        Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).get();
-        assertThat(testSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
-        assertThat(testSchedule.getScheduleMembers())
-                .extracting(ScheduleMember::getArrivalTimeDiff)
-                .contains(-30, -30, (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes());
-    }
-
-    @Test
-    void 이벤트핸들러_스케줄_자동종료_이미종료된스케줄() {
-        //given
-        team.addTeamMember(member1);
-        team.addTeamMember(member2);
-        em.flush();
-
-        Schedule schedule1 = createSchedule(member1, team);
-        schedule1.addScheduleMember(member2, false, scheduleEnterPoint);
-        em.persist(schedule1);
-
-        LocalDateTime arrivalTime = LocalDateTime.now();
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(0), arrivalTime);
-        schedule1.arriveScheduleMember(schedule1.getScheduleMembers().get(1), arrivalTime);
-        schedule1.setTerm(LocalDateTime.now());
-
-        //when
-        scheduleService.closeScheduleByAutoAndArriveLateMembers(schedule1.getId());
-
-        //then
-        Schedule testSchedule = scheduleRepository.findById(schedule1.getId()).orElse(null);
-
-        int timeDiff = (int) Duration.between(arrivalTime, schedule1.getScheduleTime()).toMinutes();
-        assertThat(testSchedule.getScheduleMembers())
-                .extracting(ScheduleMember::getArrivalTimeDiff)
-                .contains(timeDiff, timeDiff);
-    }
-
-    @Test
     void 이벤트핸들러_스케줄_결과_정산_지각자x(){
         //given
         team.addTeamMember(member1);
@@ -892,6 +800,28 @@ public class ScheduleServiceTest {
                 .contains(0, rewardPoint, rewardPoint);
     }
 
+    @Test
+    void 스케줄_종료() {
+        //given
+        Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 0);
+        scheduleRepository.save(schedule);
+
+        Arrival arrival1 = createArrival(schedule.getScheduleMembers().get(0).getId(), schedule.getScheduleTime().minusMinutes(10));
+        Arrival arrival2 = createArrival(schedule.getScheduleMembers().get(1).getId(), schedule.getScheduleTime().plusMinutes(20));
+        em.persist(arrival1);
+        em.persist(arrival2);
+
+        //when
+        scheduleService.closeSchedule(schedule.getId(), schedule.getScheduleTime().plusMinutes(30));
+
+        //then
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMember::getArrivalTimeDiff)
+                .containsExactlyInAnyOrder(10, -20);
+    }
+
     Member createMember(){
         Member member = Member.builder()
                 .nickname(UUID.randomUUID().toString())
@@ -909,5 +839,12 @@ public class ScheduleServiceTest {
                 LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()),
                 scheduleEnterPoint);
+    }
+
+    Arrival createArrival(Long scheduleMemberId, LocalDateTime arrivalTime){
+        return Arrival.builder()
+                .scheduleMemberId(scheduleMemberId)
+                .arrivalTime(arrivalTime)
+                .build();
     }
 }

@@ -20,12 +20,9 @@ public interface ScheduleRepositoryCustom {
     Optional<Schedule> findScheduleWithResult(Long scheduleId);
     Optional<ScheduleMember> findScheduleMember(Long memberId, Long scheduleId);
     Optional<ScheduleMember> findScheduleMemberWithSchedule(Long memberId, Long scheduleId);
-    Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId);
     Optional<ScheduleMember> findNextScheduleOwnerWithMember(Long scheduleId, Long prevOwnerScheduleMemberId);
     Optional<ScheduleResult> findScheduleResult(Long scheduleId);
-    List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId);
     List<ScheduleMember> findEarlyScheduleMemberWithMember(Long scheduleId);
-    List<ScheduleMember> findScheduleMemberListWithMember(Long scheduleId);
     List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId);
     List<ScheduleMember> findScheduleMembersWithMember(Long scheduleId);
 
@@ -33,7 +30,6 @@ public interface ScheduleRepositoryCustom {
     Optional<Long> findMemberIdOfScheduleMember(Long scheduleMemberId);
     boolean isScheduleOwner(Long memberId, Long scheduleId);
     boolean existScheduleMember(Long memberId, Long scheduleId);
-    boolean existPaidScheduleMember(Long memberId, Long scheduleId);
     boolean existRunScheduleOfMemberInTeam(Long memberId, Long teamId);
     Long countOfScheduleMembers(Long scheduleId);
     int findLateScheduleMemberCount(Long scheduleId);

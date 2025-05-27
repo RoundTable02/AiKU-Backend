@@ -4,7 +4,6 @@ import aiku_main.application_event.event.PointChangeEvent;
 import aiku_main.application_event.event.PointChangeReason;
 import aiku_main.application_event.event.PointChangeType;
 import aiku_main.service.schedule.ScheduleService;
-import common.kafka_message.ScheduleArrivalMessage;
 import common.kafka_message.ScheduleCloseMessage;
 import common.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +32,6 @@ public class KafkaConsumerService {
     public void consumeScheduleClose(ConsumerRecord<String, String> data, Acknowledgment ack) {
         ScheduleCloseMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleCloseMessage.class);
         scheduleService.closeSchedule(message.getScheduleId(), message.getScheduleCloseTime());
-
-        ack.acknowledge();
-    }
-
-    @KafkaListener(topics = {"schedule-arrival"}, groupId = "aiku-main", concurrency = "1")
-    public void consumeScheduleArrival(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        ScheduleArrivalMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleArrivalMessage.class);
-        scheduleService.arriveSchedule(message.getScheduleId(), message.getMemberId(), message.getArrivalTime());
 
         ack.acknowledge();
     }

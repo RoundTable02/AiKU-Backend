@@ -33,18 +33,6 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     private final JPAQueryFactory query;
 
     @Override
-    public List<ScheduleMember> findNotArriveScheduleMember(Long scheduleId) {
-        return query
-                .selectFrom(scheduleMember)
-                .where(
-                        scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.arrivalTime.isNull(),
-                        scheduleMember.status.eq(ALIVE)
-                )
-                .fetch();
-    }
-
-    @Override
     public boolean isScheduleOwner(Long memberId, Long scheduleId) {
         Long count = query
                 .select(scheduleMember.count())
@@ -68,22 +56,6 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
                 .where(
                         scheduleMember.member.id.eq(memberId),
                         scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE)
-                )
-                .fetchOne();
-
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existPaidScheduleMember(Long memberId, Long scheduleId) {
-        Long count = query
-                .select(scheduleMember.count())
-                .from(scheduleMember)
-                .where(
-                        scheduleMember.member.id.eq(memberId),
-                        scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.pointAmount.isNotNull(),
                         scheduleMember.status.eq(ALIVE)
                 )
                 .fetchOne();
@@ -163,17 +135,6 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public Optional<ScheduleMember> findScheduleMemberWithMemberById(Long scheduleMemberId) {
-        ScheduleMember findScheduleMember = query
-                .selectFrom(scheduleMember)
-                .innerJoin(scheduleMember.member, member).fetchJoin()
-                .where(scheduleMember.id.eq(scheduleMemberId))
-                .fetchOne();
-
-        return Optional.ofNullable(findScheduleMember);
-    }
-
-    @Override
     public int findLateScheduleMemberCount(Long scheduleId) {
         Long count = query
                 .select(scheduleMember.count())
@@ -196,18 +157,6 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
                 .where(
                         scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.arrivalTimeDiff.goe(0),
-                        scheduleMember.status.eq(ALIVE)
-                )
-                .fetch();
-    }
-
-    @Override
-    public List<ScheduleMember> findScheduleMemberListWithMember(Long scheduleId) {
-        return query
-                .selectFrom(scheduleMember)
-                .innerJoin(scheduleMember.member, member)
-                .where(
-                        scheduleMember.schedule.id.eq(scheduleId),
                         scheduleMember.status.eq(ALIVE)
                 )
                 .fetch();

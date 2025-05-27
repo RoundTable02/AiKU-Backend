@@ -37,14 +37,6 @@ public class KafkaConsumerService {
         ack.acknowledge();
     }
 
-    @KafkaListener(topics = {"schedule-arrival"}, groupId = "aiku-main", concurrency = "1")
-    public void consumeScheduleArrival(ConsumerRecord<String, String> data, Acknowledgment ack) {
-        ScheduleArrivalMessage message = ObjectMapperUtil.parseJson(data.value(), ScheduleArrivalMessage.class);
-        scheduleService.arriveSchedule(message.getScheduleId(), message.getMemberId(), message.getArrivalTime());
-
-        ack.acknowledge();
-    }
-
     @KafkaListener(topics = {"point-change"}, groupId = "aiku-main", concurrency = "1")
     public void consumePointChangeEvent(ConsumerRecord<String, String> data, Acknowledgment ack) {
         PointChangeEvent message = ObjectMapperUtil.parseJson(data.value(), PointChangeEvent.class);

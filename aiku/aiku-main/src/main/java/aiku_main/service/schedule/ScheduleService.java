@@ -16,7 +16,6 @@ import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleResult;
 import common.domain.value_reference.TeamValue;
 import common.exception.NotEnoughPoint;
-import common.kafka_message.KafkaTopic;
 import common.kafka_message.alarm.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -214,14 +213,6 @@ public class ScheduleService {
                 ALARM,
                 new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule)
         );
-    }
-
-    @Transactional
-    public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
-        Schedule schedule = findSchedule(scheduleId);
-        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
-
-        schedule.arriveScheduleMember(scheduleMember, arrivalTime);
     }
 
     @Transactional

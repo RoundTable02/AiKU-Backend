@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import map.application_event.domain.RacingInfo;
 import map.application_event.event.RacingStatusNotChangedEvent;
 import map.exception.RacingException;
-import map.repository.RacingQueryRepository;
+import map.repository.RacingRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class RacingScheduler {
 
     private final TaskScheduler taskScheduler;
     private final ApplicationEventPublisher publisher;
-    private final RacingQueryRepository racingRepository;
+    private final RacingRepository racingRepository;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> racingTaskMap = new ConcurrentHashMap<>();
 

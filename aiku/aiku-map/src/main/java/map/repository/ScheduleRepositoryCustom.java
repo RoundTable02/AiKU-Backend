@@ -7,7 +7,7 @@ import map.dto.ScheduleMemberResDto;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScheduleQueryRepository {
+public interface ScheduleRepositoryCustom {
 
     List<AlarmMemberInfo> findScheduleMemberInfosByScheduleId(Long scheduleId);
 

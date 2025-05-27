@@ -2,10 +2,13 @@ package map.repository;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import common.domain.ExecStatus;
+import common.domain.Status;
 import common.domain.member.QMember;
 import common.domain.schedule.QScheduleMember;
+import common.domain.value_reference.ScheduleMemberValue;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
 import map.dto.*;
@@ -19,9 +22,45 @@ import static common.domain.racing.QRacing.racing;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class RacingQueryRepositoryCustomImpl implements RacingQueryRepositoryCustom {
+public class RacingRepositoryCustomImpl implements RacingRepositoryCustom {
 
     private final JPAQueryFactory query;
+
+    @Override
+    public void setWinnerAndTermRacingByScheduleMemberId(Long scheduleMemberId) {
+        query.update(racing)
+                .set(racing.raceStatus, ExecStatus.TERM)
+                .set(racing.winner, new ScheduleMemberValue(scheduleMemberId))
+                .where(racing.raceStatus.eq(ExecStatus.RUN),
+                        racing.firstRacer.id.eq(scheduleMemberId)
+                                .or(racing.secondRacer.id.eq(scheduleMemberId))
+                )
+                .execute();
+    }
+
+    @Override
+    public void terminateRunningRacing(Long scheduleId) {
+        query.update(racing)
+                .set(racing.raceStatus, ExecStatus.TERM)
+                .where(racing.firstRacer.id.in(
+                        JPAExpressions.select(scheduleMember.id)
+                                .from(scheduleMember)
+                                .where(scheduleMember.schedule.id.eq(scheduleId))
+                ).or(racing.secondRacer.id.in(
+                        JPAExpressions.select(scheduleMember.id)
+                                .from(scheduleMember)
+                                .where(scheduleMember.schedule.id.eq(scheduleId))
+                )))
+                .execute();
+    }
+
+    @Override
+    public void cancelRacing(Long racingId) {
+        query.update(racing)
+                .set(racing.status, Status.DELETE)
+                .where(racing.id.eq(racingId))
+                .execute();
+    }
 
     @Override
     public List<RacingResDto> getAllRunningRacingsInSchedule(Long scheduleId) {

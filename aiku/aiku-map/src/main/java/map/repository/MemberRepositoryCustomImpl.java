@@ -11,7 +11,7 @@ import static common.domain.member.QMember.member;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class MemberQueryRepositoryImpl implements MemberQueryRepository {
+public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
     private final JPAQueryFactory query;
 

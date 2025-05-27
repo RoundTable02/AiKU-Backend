@@ -16,8 +16,7 @@ import map.dto.*;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
 import map.repository.MemberRepository;
-import map.repository.RacingCommandRepository;
-import map.repository.RacingQueryRepository;
+import map.repository.RacingRepository;
 import map.repository.ScheduleRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,7 @@ public class RacingService {
 
     private final KafkaProducerService kafkaService;
     private final ApplicationEventPublisher publisher;
-    private final RacingQueryRepository racingQueryRepository;
-    private final RacingCommandRepository racingCommandRepository;
+    private final RacingRepository racingRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
 
@@ -48,7 +46,7 @@ public class RacingService {
         checkScheduleInRun(scheduleId);
 
         //  해당 스케줄에 속해 있으며 현재 진행 중인 레이싱 종합하여 전달
-        List<RacingResDto> racings = racingQueryRepository.getAllRunningRacingsInSchedule(scheduleId);
+        List<RacingResDto> racings = racingRepository.getAllRunningRacingsInSchedule(scheduleId);
 
         return new DataResDto<>(1, racings);
     }
@@ -60,7 +58,7 @@ public class RacingService {
 
         //  대기 중 레이싱 DB 저장
         Racing racing = createRacing(memberId, scheduleId, racingAddDto);
-        racingCommandRepository.save(racing);
+        racingRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
         Schedule schedule = sendAskRacingAlarmToTargetMember(memberId, scheduleId, racingAddDto, racing);
@@ -73,7 +71,7 @@ public class RacingService {
 
     @Transactional
     public void autoDeleteRacingById(RacingInfo racingInfo) {
-        racingCommandRepository.deleteById(racingInfo.getRacingId());
+        racingRepository.deleteById(racingInfo.getRacingId());
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingInfo.getSecondRacerId());
         String firstRacerFcmToken = findFcmTokenByMemberId(racingInfo.getFirstRacerId());
         String secondRacerFcmToken = findFcmTokenByMemberId(racingInfo.getSecondRacerId());
@@ -159,7 +157,7 @@ public class RacingService {
         );
 
         //  대기 중 레이싱 싱테 DELETE로 변경
-        racingCommandRepository.cancelRacing(racingId);
+        racingRepository.cancelRacing(racingId);
 
         return racingId;
     }
@@ -171,10 +169,10 @@ public class RacingService {
         Long scheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
 
         // 회원이 소속된 진행 중인 레이싱 정보 조회
-        List<RunningRacingDto> runningRacingDtos = racingQueryRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
+        List<RunningRacingDto> runningRacingDtos = racingRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
 
         // 레이싱 종료 처리를 위한 update 벌크 쿼리
-        racingCommandRepository.setWinnerAndTermRacingByScheduleMemberId(scheduleMemberId);
+        racingRepository.setWinnerAndTermRacingByScheduleMemberId(scheduleMemberId);
 
         runningRacingDtos.forEach(r -> {
             Long loserId = r.getFirstScheduleMemberId();
@@ -221,9 +219,9 @@ public class RacingService {
     @Transactional
     public void terminateRunningRacing(Long scheduleId) {
         // 스케줄 종료 이후 진행 중인 레이싱 모두 무승부 처리
-        racingCommandRepository.terminateRunningRacing(scheduleId);
+        racingRepository.terminateRunningRacing(scheduleId);
 
-        List<TermRacingDto> racingDtos = racingQueryRepository.findTermRacingIdsWithNoWinnerInSchedule(scheduleId);
+        List<TermRacingDto> racingDtos = racingRepository.findTermRacingIdsWithNoWinnerInSchedule(scheduleId);
 
         racingDtos.forEach(r -> {
             AlarmMemberInfo firstInfo = getMemberInfoByScheduleMemberId(r.getFirstScheduleMemberId());
@@ -325,16 +323,16 @@ public class RacingService {
     }
 
     private Racing findRacing(Long racingId) {
-        return racingQueryRepository.findById(racingId)
+        return racingRepository.findById(racingId)
                 .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
     }
 
     private List<AlarmMemberInfo> getMemberInfosInRacing(Long racingId) {
-        return racingQueryRepository.findMemberInfoByScheduleMemberId(racingId);
+        return racingRepository.findMemberInfoByScheduleMemberId(racingId);
     }
 
     private List<String> findRacersFcmTokensInRacing(Long racingId) {
-        return racingQueryRepository.findRacersFcmTokensInRacing(racingId);
+        return racingRepository.findRacersFcmTokensInRacing(racingId);
     }
 
     private void checkMemberInSchedule(Long memberId, Long scheduleId) {
@@ -350,13 +348,13 @@ public class RacingService {
     }
 
     private void checkDuplicateRacing(Long scheduleId, Long firstMemberId, Long secondMemberId) {
-        if (racingQueryRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
+        if (racingRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
             throw new RacingException(DUPLICATE_RACING);
         }
     }
 
     private void checkRacingInWait(Long racingId) {
-        if (!racingQueryRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
+        if (!racingRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }
@@ -368,13 +366,13 @@ public class RacingService {
     }
 
     private void checkBothMemberHaveEnoughRacingPoint(Long racingId){
-        if(!racingQueryRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
+        if(!racingRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
             throw new NotEnoughPointException();
         }
     }
 
     private void checkMemberIsSecondRacerInRacing(Long memberId, Long racingId) {
-        if (!racingQueryRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
+        if (!racingRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
             throw new RacingException(NOT_IN_RACING);
         }
     }

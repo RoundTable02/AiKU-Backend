@@ -1,12 +1,10 @@
 package aiku_main.scheduler;
 
-import aiku_main.application_event.event.ScheduleAutoCloseEvent;
 import aiku_main.application_event.event.ScheduleOpenEvent;
 import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
-import common.kafka_message.KafkaTopic;
 import common.kafka_message.ScheduleCloseMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

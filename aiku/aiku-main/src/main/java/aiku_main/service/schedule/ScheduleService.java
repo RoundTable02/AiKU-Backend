@@ -324,7 +324,7 @@ public class ScheduleService {
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_OPEN);
     }
 
-    @Transactional
+/*    @Transactional
     public void closeScheduleByAutoAndArriveLateMembers(Long scheduleId) {
         Schedule schedule = findSchedule(scheduleId);
         if (schedule.isTerm()){
@@ -338,7 +338,7 @@ public class ScheduleService {
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
         publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
-    }
+    }*/
 
     private LocalDateTime getScheduleAutoCloseTime(LocalDateTime scheduleTime) {
         return scheduleTime.plusMinutes(30);

@@ -16,7 +16,7 @@ import map.dto.RacingResDto;
 import map.exception.NotEnoughPointException;
 import map.exception.RacingException;
 import map.exception.ScheduleException;
-import map.repository.RacingQueryRepository;
+import map.repository.racing.RacingRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class RacingServiceTest {
     Racing racing2;
 
     @Autowired
-    private RacingQueryRepository racingRepository;
+    private RacingRepository racingRepository;
 
     @BeforeEach
     void setUp() {

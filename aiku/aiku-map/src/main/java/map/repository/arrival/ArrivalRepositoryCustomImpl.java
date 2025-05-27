@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.arrival;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class ArrivalQueryRepositoryImpl implements ArrivalQueryRepository {
+public class ArrivalRepositoryCustomImpl implements ArrivalRepositoryCustom {
 
     private final JPAQueryFactory query;
 

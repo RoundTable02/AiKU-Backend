@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.racing;
 
 import common.kafka_message.alarm.AlarmMemberInfo;
 import map.dto.RacingResDto;
@@ -7,7 +7,13 @@ import map.dto.TermRacingDto;
 
 import java.util.List;
 
-public interface RacingQueryRepositoryCustom {
+public interface RacingRepositoryCustom {
+
+    void setWinnerAndTermRacingByScheduleMemberId(Long scheduleMemberId);
+
+    void terminateRunningRacing(Long scheduleId);
+
+    void cancelRacing(Long racingId);
 
     List<RacingResDto> getAllRunningRacingsInSchedule(Long scheduleId);
 

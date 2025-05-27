@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.schedule_location;
 
 import lombok.RequiredArgsConstructor;
 import map.dto.RealTimeLocationResDto;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Repository
 @RequiredArgsConstructor
-public class ScheduleLocationRepository {
+public class ScheduleLocationRepositoryImpl implements ScheduleLocationRepository {
 
     private final RedisTemplate<String, String> redisTemplate;
     private static final int TTL_SECONDS = 60 * 5; // 5분

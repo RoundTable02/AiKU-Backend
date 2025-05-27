@@ -1,10 +1,10 @@
-package map.repository;
+package map.repository.member;
 
 import common.kafka_message.alarm.AlarmMemberInfo;
 
 import java.util.Optional;
 
-public interface MemberQueryRepository {
+public interface MemberRepositoryCustom {
 
     Optional<AlarmMemberInfo> findMemberInfo(Long memberId);
 

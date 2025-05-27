@@ -1,14 +1,12 @@
-package map.repository;
+package map.repository.schedule;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
 import map.dto.MemberProfileDto;
 import map.dto.ScheduleMemberResDto;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +18,7 @@ import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
+public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
     private final JPAQueryFactory query;
 

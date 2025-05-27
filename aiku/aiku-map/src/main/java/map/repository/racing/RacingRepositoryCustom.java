@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.racing;
 
 import common.kafka_message.alarm.AlarmMemberInfo;
 import map.dto.RacingResDto;

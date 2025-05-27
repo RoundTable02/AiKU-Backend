@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.schedule_location;
 
 import lombok.RequiredArgsConstructor;
 import map.dto.RealTimeLocationResDto;

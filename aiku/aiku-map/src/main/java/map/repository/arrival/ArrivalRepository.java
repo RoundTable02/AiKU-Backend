@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.arrival;
 
 import common.domain.Arrival;
 import org.springframework.data.jpa.repository.JpaRepository;

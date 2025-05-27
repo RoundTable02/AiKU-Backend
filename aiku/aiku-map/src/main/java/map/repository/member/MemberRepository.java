@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.member;
 
 import common.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;

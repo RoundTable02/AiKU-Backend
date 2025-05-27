@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.racing;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;

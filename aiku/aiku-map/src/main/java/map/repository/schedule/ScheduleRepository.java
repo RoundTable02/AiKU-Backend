@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.schedule;
 
 import common.domain.ExecStatus;
 import common.domain.Status;

@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.member;
 
 import common.kafka_message.alarm.AlarmMemberInfo;
 

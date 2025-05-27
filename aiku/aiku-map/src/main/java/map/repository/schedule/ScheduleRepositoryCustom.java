@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.schedule;
 
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;

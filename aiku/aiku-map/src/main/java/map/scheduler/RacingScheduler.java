@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import map.application_event.domain.RacingInfo;
 import map.application_event.event.RacingStatusNotChangedEvent;
 import map.exception.RacingException;
-import map.repository.RacingRepository;
+import map.repository.racing.RacingRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;

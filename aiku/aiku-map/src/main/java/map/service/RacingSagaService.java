@@ -6,7 +6,7 @@ import common.kafka_message.PointChangedType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.exception.RacingException;
-import map.repository.RacingRepository;
+import map.repository.racing.RacingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

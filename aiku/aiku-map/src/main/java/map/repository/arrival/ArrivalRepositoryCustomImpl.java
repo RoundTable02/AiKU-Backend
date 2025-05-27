@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.arrival;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

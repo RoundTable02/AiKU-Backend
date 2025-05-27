@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.racing;
 
 import common.domain.ExecStatus;
 import common.domain.Status;

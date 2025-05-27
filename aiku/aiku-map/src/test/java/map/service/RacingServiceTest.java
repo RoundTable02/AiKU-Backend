@@ -16,7 +16,7 @@ import map.dto.RacingResDto;
 import map.exception.NotEnoughPointException;
 import map.exception.RacingException;
 import map.exception.ScheduleException;
-import map.repository.RacingRepository;
+import map.repository.racing.RacingRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -163,18 +163,6 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
     }
 
     @Override
-    public List<ScheduleMember> findScheduleMemberListWithMember(Long scheduleId) {
-        return query
-                .selectFrom(scheduleMember)
-                .innerJoin(scheduleMember.member, member)
-                .where(
-                        scheduleMember.schedule.id.eq(scheduleId),
-                        scheduleMember.status.eq(ALIVE)
-                )
-                .fetch();
-    }
-
-    @Override
     public List<ScheduleMember> findWaitScheduleMemberWithScheduleInTeam(Long memberId, Long teamId) {
         return query.selectFrom(scheduleMember)
                 .innerJoin(scheduleMember.schedule, schedule).fetchJoin()

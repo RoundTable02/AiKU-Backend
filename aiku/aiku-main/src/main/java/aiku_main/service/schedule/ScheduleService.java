@@ -364,7 +364,7 @@ public class ScheduleService {
     }
 
     private void refundScheduleEnterPointToMembers(Schedule schedule){
-        scheduleRepository.findScheduleMemberListWithMember(schedule.getId())
+        scheduleRepository.findScheduleMembersWithMember(schedule.getId())
                 .forEach((scheduleMember) -> {
                     schedule.rewardMember(scheduleMember, scheduleEnterPoint);
                     publishPointChangeEvent(

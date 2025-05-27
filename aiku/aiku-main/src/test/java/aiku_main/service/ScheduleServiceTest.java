@@ -353,23 +353,6 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void 스케줄_종료(){
-        //given
-        Team team = Team.create(member1, "team1");
-        em.persist(team);
-
-        Schedule schedule = createSchedule(member1, team);
-        em.persist(schedule);
-
-        //when
-        schedule.setTerm(LocalDateTime.now());
-
-        //then
-        Schedule testSchedule = scheduleRepository.findById(schedule.getId()).get();
-        assertThat(testSchedule.getScheduleStatus()).isEqualTo(ExecStatus.TERM);
-    }
-
-    @Test
     void 스케줄_상세_조회() {
         //given
         team.addTeamMember(member1);
@@ -817,6 +800,28 @@ public class ScheduleServiceTest {
                 .contains(0, rewardPoint, rewardPoint);
     }
 
+    @Test
+    void 스케줄_종료() {
+        //given
+        Schedule schedule = createSchedule(member1, team);
+        schedule.addScheduleMember(member2, false, 0);
+        scheduleRepository.save(schedule);
+
+        Arrival arrival1 = createArrival(schedule.getScheduleMembers().get(0).getId(), schedule.getScheduleTime().minusMinutes(10));
+        Arrival arrival2 = createArrival(schedule.getScheduleMembers().get(1).getId(), schedule.getScheduleTime().plusMinutes(20));
+        em.persist(arrival1);
+        em.persist(arrival2);
+
+        //when
+        scheduleService.closeSchedule(schedule.getId(), schedule.getScheduleTime().plusMinutes(30));
+
+        //then
+        List<ScheduleMember> scheduleMembers = scheduleRepository.findScheduleMembersWithMember(schedule.getId());
+        assertThat(scheduleMembers)
+                .extracting(ScheduleMember::getArrivalTimeDiff)
+                .containsExactlyInAnyOrder(10, -20);
+    }
+
     Member createMember(){
         Member member = Member.builder()
                 .nickname(UUID.randomUUID().toString())
@@ -834,5 +839,12 @@ public class ScheduleServiceTest {
                 LocalDateTime.now().plusHours(3),
                 new Location(UUID.randomUUID().toString(), random.nextDouble(), random.nextDouble()),
                 scheduleEnterPoint);
+    }
+
+    Arrival createArrival(Long scheduleMemberId, LocalDateTime arrivalTime){
+        return Arrival.builder()
+                .scheduleMemberId(scheduleMemberId)
+                .arrivalTime(arrivalTime)
+                .build();
     }
 }

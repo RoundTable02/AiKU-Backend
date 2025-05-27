@@ -6,6 +6,7 @@ import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
 import aiku_main.kafka.KafkaProducerService;
+import aiku_main.repository.arrival.ArrivalRepository;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
@@ -28,6 +29,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
@@ -46,6 +49,7 @@ public class ScheduleService {
 
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ArrivalRepository arrivalRepository;
     private final TeamRepository teamRepository;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
@@ -216,9 +220,17 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
+    public void closeSchedule(Long scheduleId, LocalDateTime closeTime){
         Schedule schedule = findSchedule(scheduleId);
-        schedule.close(scheduleCloseTime);
+
+        Map<Long, LocalDateTime> scheMemArrivalTime = arrivalRepository.findArrivalsOfSchedule(scheduleId)
+                .stream()
+                .collect(Collectors.toMap(
+                        (arrival) -> arrival.getScheduleMember().getId(),
+                        (arrival) -> arrival.getArrivalTime()
+                ));
+
+        schedule.close(closeTime, scheMemArrivalTime);
 
         publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
     }
@@ -322,26 +334,6 @@ public class ScheduleService {
         schedule.setRun();
 
         sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_OPEN);
-    }
-
-/*    @Transactional
-    public void closeScheduleByAutoAndArriveLateMembers(Long scheduleId) {
-        Schedule schedule = findSchedule(scheduleId);
-        if (schedule.isTerm()){
-            return;
-        }
-
-        List<ScheduleMember> notArriveScheduleMembers = scheduleRepository.findNotArriveScheduleMember(scheduleId);
-
-        LocalDateTime autoCloseTime = getScheduleAutoCloseTime(schedule.getScheduleTime());
-        schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
-
-        sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-        publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
-    }*/
-
-    private LocalDateTime getScheduleAutoCloseTime(LocalDateTime scheduleTime) {
-        return scheduleTime.plusMinutes(30);
     }
 
     @Transactional

@@ -362,7 +362,7 @@ public class ScheduleServiceTest {
         em.persist(schedule);
 
         //when
-        schedule.close(LocalDateTime.now());
+        schedule.setTerm(LocalDateTime.now());
 
         //then
         Schedule testSchedule = scheduleRepository.findById(schedule.getId()).get();

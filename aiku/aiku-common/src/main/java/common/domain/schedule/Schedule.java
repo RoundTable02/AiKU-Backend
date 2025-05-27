@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import static common.domain.ExecStatus.*;
 import static common.domain.Status.*;
@@ -115,17 +115,20 @@ public class Schedule extends BaseTime {
         }
     }
 
-    public void close(LocalDateTime scheduleCloseTime){
+    public void close(LocalDateTime scheduleCloseTime, Map<Long, LocalDateTime> scheMemArrivalTime){
+        scheduleMembers.forEach(scheduleMember -> {
+            LocalDateTime arrivalTime = scheMemArrivalTime.get(scheduleMember.getId());
+            scheduleMember.arrive(
+                    arrivalTime,
+                    getArrivalTimeDiff(arrivalTime)
+            );
+        });
+
         setTerm(scheduleCloseTime);
     }
 
-    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
-        notArriveScheduleMembers.forEach(scheduleMember -> {
-            if(isScheduleMember(scheduleMember)){
-                scheduleMember.arrive(closeTime, -30);
-            }
-        });
-        setTerm(closeTime);
+    private int getArrivalTimeDiff(LocalDateTime arrivalTime){
+        return (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes();
     }
 
     public void setTerm(LocalDateTime scheduleTermTime){
@@ -150,14 +153,6 @@ public class Schedule extends BaseTime {
     public void setScheduleRacingResult(String scheduleRacingResult) {
         checkScheduleResultExist();
         scheduleResult.setScheduleRacingResult(scheduleRacingResult);
-    }
-
-    public boolean checkAllMembersArrive() {
-        long count = scheduleMembers.stream()
-                .filter(s -> Objects.isNull(s.getArrivalTime()))
-                .count();
-
-        return count == 0;
     }
 
     private void checkScheduleResultExist(){

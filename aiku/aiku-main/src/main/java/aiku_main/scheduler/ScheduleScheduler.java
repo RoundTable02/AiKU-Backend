@@ -1,10 +1,11 @@
 package aiku_main.scheduler;
 
-import aiku_main.application_event.event.ScheduleAutoCloseEvent;
 import aiku_main.application_event.event.ScheduleOpenEvent;
+import aiku_main.kafka.KafkaProducerService;
 import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
+import common.kafka_message.ScheduleCloseMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import static common.kafka_message.KafkaTopic.SCHEDULE_AUTO_CLOSE;
+
 
 @RequiredArgsConstructor
 @Component
@@ -25,6 +28,7 @@ public class ScheduleScheduler {
     private final TaskScheduler scheduler;
     private final ScheduleRepository scheduleRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducerService kafkaProducerService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAutoCloseTasks = new ConcurrentHashMap<>();
@@ -72,7 +76,7 @@ public class ScheduleScheduler {
         if(!isValidDuration(delayTime)) return;
 
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
-                ()-> publishScheduleAutoCloseEvent(schedule.getId()),
+                ()-> publishScheduleAutoClose(schedule.getId(), schedule.getScheduleTime()),
                 delayTime
         );
         scheduleAutoCloseTasks.put(schedule.getId(), future);
@@ -112,8 +116,10 @@ public class ScheduleScheduler {
         eventPublisher.publishEvent(event);
     }
 
-    private void publishScheduleAutoCloseEvent(Long scheduleId){
-        ScheduleAutoCloseEvent event = new ScheduleAutoCloseEvent(scheduleId);
-        eventPublisher.publishEvent(event);
+    private void publishScheduleAutoClose(Long scheduleId, LocalDateTime scheduleTime){
+        kafkaProducerService.sendMessage(
+                SCHEDULE_AUTO_CLOSE,
+                new ScheduleCloseMessage(scheduleId, scheduleTime.plusMinutes(30))
+        );
     }
 }

@@ -6,6 +6,7 @@ import aiku_main.dto.schedule.*;
 import aiku_main.exception.ScheduleException;
 import aiku_main.exception.TeamException;
 import aiku_main.kafka.KafkaProducerService;
+import aiku_main.repository.arrival.ArrivalRepository;
 import aiku_main.repository.member.MemberRepository;
 import aiku_main.repository.schedule.ScheduleRepository;
 import aiku_main.repository.team.TeamRepository;
@@ -28,6 +29,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static aiku_main.application_event.event.PointChangeReason.*;
 import static aiku_main.application_event.event.PointChangeType.MINUS;
@@ -35,7 +38,7 @@ import static aiku_main.application_event.event.PointChangeType.PLUS;
 import static common.domain.ExecStatus.RUN;
 import static common.domain.ExecStatus.WAIT;
 import static common.domain.Status.ALIVE;
-import static common.kafka_message.KafkaTopic.alarm;
+import static common.kafka_message.KafkaTopic.ALARM;
 import static common.response.status.BaseErrorCode.*;
 
 @Slf4j
@@ -46,6 +49,7 @@ public class ScheduleService {
 
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
+    private final ArrivalRepository arrivalRepository;
     private final TeamRepository teamRepository;
     private final ScheduleScheduler scheduleScheduler;
     private final KafkaProducerService kafkaProducerService;
@@ -96,7 +100,7 @@ public class ScheduleService {
 
     private void sendMessageToTeamMembers(Long teamId, Schedule schedule, Long excludeMemberId, AlarmMessageType messageType){
         List<String> alarmTokens = teamRepository.findAlarmTokenListOfTeamMembers(teamId, excludeMemberId);
-        kafkaProducerService.sendMessage(alarm, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
+        kafkaProducerService.sendMessage(ALARM, new ScheduleAlarmMessage(alarmTokens, messageType, schedule));
     }
 
     @Transactional
@@ -197,12 +201,12 @@ public class ScheduleService {
 
         if(sourceMember == null) {
             kafkaProducerService.sendMessage(
-                    alarm,
+                    ALARM,
                     new ScheduleAlarmMessage(alarmTokens, messageType, schedule)
             );
         } else {
             kafkaProducerService.sendMessage(
-                    alarm,
+                    ALARM,
                     new ScheduleMemberAlarmMessage(alarmTokens, messageType, new AlarmMemberInfo(sourceMember), schedule)
             );
         }
@@ -210,23 +214,23 @@ public class ScheduleService {
 
     private void sendMessageToScheduleMember(Schedule schedule, String alarmToken, AlarmMessageType messageType){
         kafkaProducerService.sendMessage(
-                alarm,
+                ALARM,
                 new ScheduleAlarmMessage(List.of(alarmToken), messageType, schedule)
         );
     }
 
     @Transactional
-    public void arriveSchedule(Long scheduleId, Long memberId, LocalDateTime arrivalTime){
+    public void closeSchedule(Long scheduleId, LocalDateTime closeTime){
         Schedule schedule = findSchedule(scheduleId);
-        ScheduleMember scheduleMember = scheduleRepository.findScheduleMember(memberId, scheduleId).orElseThrow();
 
-        schedule.arriveScheduleMember(scheduleMember, arrivalTime);
-    }
+        Map<Long, LocalDateTime> scheMemArrivalTime = arrivalRepository.findArrivalsOfSchedule(scheduleId)
+                .stream()
+                .collect(Collectors.toMap(
+                        (arrival) -> arrival.getScheduleMember().getId(),
+                        (arrival) -> arrival.getArrivalTime()
+                ));
 
-    @Transactional
-    public void closeSchedule(Long scheduleId, LocalDateTime scheduleCloseTime){
-        Schedule schedule = findSchedule(scheduleId);
-        schedule.close(scheduleCloseTime);
+        schedule.close(closeTime, scheMemArrivalTime);
 
         publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
     }
@@ -333,26 +337,6 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void closeScheduleByAutoAndArriveLateMembers(Long scheduleId) {
-        Schedule schedule = findSchedule(scheduleId);
-        if (schedule.isTerm()){
-            return;
-        }
-
-        List<ScheduleMember> notArriveScheduleMembers = scheduleRepository.findNotArriveScheduleMember(scheduleId);
-
-        LocalDateTime autoCloseTime = getScheduleAutoCloseTime(schedule.getScheduleTime());
-        schedule.autoClose(notArriveScheduleMembers, autoCloseTime);
-
-        sendMessageToScheduleMembers(schedule, null, null, AlarmMessageType.SCHEDULE_AUTO_CLOSE);
-        publishScheduleCloseEvent(schedule.getTeam().getId(), scheduleId);
-    }
-
-    private LocalDateTime getScheduleAutoCloseTime(LocalDateTime scheduleTime) {
-        return scheduleTime.plusMinutes(30);
-    }
-
-    @Transactional
     public void processScheduleResultPoint(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow();
 
@@ -380,7 +364,7 @@ public class ScheduleService {
     }
 
     private void refundScheduleEnterPointToMembers(Schedule schedule){
-        scheduleRepository.findScheduleMemberListWithMember(schedule.getId())
+        scheduleRepository.findScheduleMembersWithMember(schedule.getId())
                 .forEach((scheduleMember) -> {
                     schedule.rewardMember(scheduleMember, scheduleEnterPoint);
                     publishPointChangeEvent(

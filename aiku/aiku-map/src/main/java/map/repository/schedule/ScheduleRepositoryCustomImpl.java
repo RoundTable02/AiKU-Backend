@@ -1,25 +1,24 @@
-package map.repository;
+package map.repository.schedule;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
 import lombok.RequiredArgsConstructor;
 import map.dto.MemberProfileDto;
 import map.dto.ScheduleMemberResDto;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+import static common.domain.QArrival.arrival;
 import static common.domain.Status.ALIVE;
 import static common.domain.member.QMember.member;
 import static common.domain.schedule.QSchedule.schedule;
 import static common.domain.schedule.QScheduleMember.scheduleMember;
 
 @RequiredArgsConstructor
-public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
+public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
     private final JPAQueryFactory query;
 
@@ -99,6 +98,17 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
                 .leftJoin(schedule.scheduleMembers, scheduleMember)
                 .leftJoin(scheduleMember.member, member)
                 .where(schedule.id.eq(scheduleId))
+                .fetch();
+    }
+
+    @Override
+    public List<ScheduleMember> findScheduleMembersNotInArrivalByScheduleId(Long scheduleId) {
+        return query.select(scheduleMember)
+                .from(schedule)
+                .leftJoin(schedule.scheduleMembers, scheduleMember)
+                .leftJoin(arrival).on(scheduleMember.id.eq(arrival.scheduleMember.id))
+                .where(schedule.id.eq(scheduleId),
+                        arrival.isNull())
                 .fetch();
     }
 

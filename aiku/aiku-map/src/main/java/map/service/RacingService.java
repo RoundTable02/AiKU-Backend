@@ -15,10 +15,9 @@ import map.application_event.event.AskRacingEvent;
 import map.dto.*;
 import map.exception.*;
 import map.kafka.KafkaProducerService;
-import map.repository.MemberRepository;
-import map.repository.RacingCommandRepository;
-import map.repository.RacingQueryRepository;
-import map.repository.ScheduleRepository;
+import map.repository.member.MemberRepository;
+import map.repository.racing.RacingRepository;
+import map.repository.schedule.ScheduleRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +36,7 @@ public class RacingService {
 
     private final KafkaProducerService kafkaService;
     private final ApplicationEventPublisher publisher;
-    private final RacingQueryRepository racingQueryRepository;
-    private final RacingCommandRepository racingCommandRepository;
+    private final RacingRepository racingRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
 
@@ -48,7 +46,7 @@ public class RacingService {
         checkScheduleInRun(scheduleId);
 
         //  해당 스케줄에 속해 있으며 현재 진행 중인 레이싱 종합하여 전달
-        List<RacingResDto> racings = racingQueryRepository.getAllRunningRacingsInSchedule(scheduleId);
+        List<RacingResDto> racings = racingRepository.getAllRunningRacingsInSchedule(scheduleId);
 
         return new DataResDto<>(1, racings);
     }
@@ -60,7 +58,7 @@ public class RacingService {
 
         //  대기 중 레이싱 DB 저장
         Racing racing = createRacing(memberId, scheduleId, racingAddDto);
-        racingCommandRepository.save(racing);
+        racingRepository.save(racing);
 
         //  카프카로 레이싱 신청 대상자에게 알림 전달
         Schedule schedule = sendAskRacingAlarmToTargetMember(memberId, scheduleId, racingAddDto, racing);
@@ -73,12 +71,12 @@ public class RacingService {
 
     @Transactional
     public void autoDeleteRacingById(RacingInfo racingInfo) {
-        racingCommandRepository.deleteById(racingInfo.getRacingId());
+        racingRepository.deleteById(racingInfo.getRacingId());
         AlarmMemberInfo secondRacerInfo = getMemberInfo(racingInfo.getSecondRacerId());
         String firstRacerFcmToken = findFcmTokenByMemberId(racingInfo.getFirstRacerId());
         String secondRacerFcmToken = findFcmTokenByMemberId(racingInfo.getSecondRacerId());
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingAutoDeletedMessage(List.of(firstRacerFcmToken, secondRacerFcmToken),
                         AlarmMessageType.RACING_AUTO_DELETED,
                         racingInfo.getScheduleId(),
@@ -107,7 +105,7 @@ public class RacingService {
 
         Schedule schedule = findSchedule(scheduleId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingStartMessage(racersTokens,
                         AlarmMessageType.RACING_START,
                         scheduleId,
@@ -121,7 +119,7 @@ public class RacingService {
 
         // 두 대상자에게 포인트 차감 전달
         racingMemberInfos.forEach(r ->
-                kafkaService.sendMessage(KafkaTopic.alarm,
+                kafkaService.sendMessage(KafkaTopic.ALARM,
                         new PointChangedMessage(
                                 r.getMemberId(),
                                 PointChangedType.MINUS,
@@ -148,7 +146,7 @@ public class RacingService {
         List<String> racersTokens = findRacersFcmTokensInRacing(racingId);
         AlarmMemberInfo memberInfo = getMemberInfo(memberId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingDeniedMessage(racersTokens,
                         AlarmMessageType.RACING_DENIED,
                         scheduleId,
@@ -159,7 +157,7 @@ public class RacingService {
         );
 
         //  대기 중 레이싱 싱테 DELETE로 변경
-        racingCommandRepository.cancelRacing(racingId);
+        racingRepository.cancelRacing(racingId);
 
         return racingId;
     }
@@ -171,10 +169,10 @@ public class RacingService {
         Long scheduleMemberId = getScheduleMemberIdByMemberAndScheduleId(memberId, scheduleId);
 
         // 회원이 소속된 진행 중인 레이싱 정보 조회
-        List<RunningRacingDto> runningRacingDtos = racingQueryRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
+        List<RunningRacingDto> runningRacingDtos = racingRepository.findRunningRacingsByScheduleMemberId(scheduleMemberId);
 
         // 레이싱 종료 처리를 위한 update 벌크 쿼리
-        racingCommandRepository.setWinnerAndTermRacingByScheduleMemberId(scheduleMemberId);
+        racingRepository.setWinnerAndTermRacingByScheduleMemberId(scheduleMemberId);
 
         runningRacingDtos.forEach(r -> {
             Long loserId = r.getFirstScheduleMemberId();
@@ -192,7 +190,7 @@ public class RacingService {
         AlarmMemberInfo loserInfo = getMemberInfoByScheduleMemberId(loserScheduleMemberId);
 
         // 승리자 아쿠 추가 (레이싱 성사 때 차감된 금액 + 상금)
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new PointChangedMessage(
                         winnerInfo.getMemberId(),
                         PointChangedType.PLUS,
@@ -205,7 +203,7 @@ public class RacingService {
         List<String> racersTokens = findRacersFcmTokensInRacing(racingId);
 
         // 레이싱 종료 알림
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new RacingTermMessage(racersTokens,
                         AlarmMessageType.RACING_TERM,
                         scheduleId,
@@ -221,15 +219,15 @@ public class RacingService {
     @Transactional
     public void terminateRunningRacing(Long scheduleId) {
         // 스케줄 종료 이후 진행 중인 레이싱 모두 무승부 처리
-        racingCommandRepository.terminateRunningRacing(scheduleId);
+        racingRepository.terminateRunningRacing(scheduleId);
 
-        List<TermRacingDto> racingDtos = racingQueryRepository.findTermRacingIdsWithNoWinnerInSchedule(scheduleId);
+        List<TermRacingDto> racingDtos = racingRepository.findTermRacingIdsWithNoWinnerInSchedule(scheduleId);
 
         racingDtos.forEach(r -> {
             AlarmMemberInfo firstInfo = getMemberInfoByScheduleMemberId(r.getFirstScheduleMemberId());
             AlarmMemberInfo secondInfo = getMemberInfoByScheduleMemberId(r.getSecondScheduleMemberId());
 
-            kafkaService.sendMessage(KafkaTopic.alarm,
+            kafkaService.sendMessage(KafkaTopic.ALARM,
                     new PointChangedMessage(
                             firstInfo.getMemberId(),
                             PointChangedType.PLUS,
@@ -239,7 +237,7 @@ public class RacingService {
                     )
             );
 
-            kafkaService.sendMessage(KafkaTopic.alarm,
+            kafkaService.sendMessage(KafkaTopic.ALARM,
                     new PointChangedMessage(
                             secondInfo.getMemberId(),
                             PointChangedType.PLUS,
@@ -267,7 +265,7 @@ public class RacingService {
         String fcmToken = findFcmTokenByMemberId(racingAddDto.getTargetMemberId());
         Schedule schedule = findSchedule(scheduleId);
 
-        kafkaService.sendMessage(KafkaTopic.alarm,
+        kafkaService.sendMessage(KafkaTopic.ALARM,
                 new AskRacingMessage(List.of(fcmToken), AlarmMessageType.ASK_RACING,
                         scheduleId,
                         schedule.getScheduleName(),
@@ -325,16 +323,16 @@ public class RacingService {
     }
 
     private Racing findRacing(Long racingId) {
-        return racingQueryRepository.findById(racingId)
+        return racingRepository.findById(racingId)
                 .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
     }
 
     private List<AlarmMemberInfo> getMemberInfosInRacing(Long racingId) {
-        return racingQueryRepository.findMemberInfoByScheduleMemberId(racingId);
+        return racingRepository.findMemberInfoByScheduleMemberId(racingId);
     }
 
     private List<String> findRacersFcmTokensInRacing(Long racingId) {
-        return racingQueryRepository.findRacersFcmTokensInRacing(racingId);
+        return racingRepository.findRacersFcmTokensInRacing(racingId);
     }
 
     private void checkMemberInSchedule(Long memberId, Long scheduleId) {
@@ -350,13 +348,13 @@ public class RacingService {
     }
 
     private void checkDuplicateRacing(Long scheduleId, Long firstMemberId, Long secondMemberId) {
-        if (racingQueryRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
+        if (racingRepository.existsByFirstMemberIdAndSecondMemberId(scheduleId, firstMemberId, secondMemberId)) {
             throw new RacingException(DUPLICATE_RACING);
         }
     }
 
     private void checkRacingInWait(Long racingId) {
-        if (!racingQueryRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
+        if (!racingRepository.existsByIdAndRaceStatusAndStatus(racingId, WAIT, Status.ALIVE)) {
             throw new ScheduleException(NO_SUCH_SCHEDULE);
         }
     }
@@ -368,13 +366,13 @@ public class RacingService {
     }
 
     private void checkBothMemberHaveEnoughRacingPoint(Long racingId){
-        if(!racingQueryRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
+        if(!racingRepository.checkBothMemberHaveEnoughRacingPoint(racingId)){
             throw new NotEnoughPointException();
         }
     }
 
     private void checkMemberIsSecondRacerInRacing(Long memberId, Long racingId) {
-        if (!racingQueryRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
+        if (!racingRepository.checkMemberIsSecondRacerInRacing(memberId, racingId)) {
             throw new RacingException(NOT_IN_RACING);
         }
     }

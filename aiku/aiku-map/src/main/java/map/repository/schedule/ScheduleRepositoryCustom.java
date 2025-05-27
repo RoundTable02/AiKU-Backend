@@ -1,4 +1,4 @@
-package map.repository;
+package map.repository.schedule;
 
 import common.domain.schedule.ScheduleMember;
 import common.kafka_message.alarm.AlarmMemberInfo;
@@ -7,7 +7,7 @@ import map.dto.ScheduleMemberResDto;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScheduleQueryRepository {
+public interface ScheduleRepositoryCustom {
 
     List<AlarmMemberInfo> findScheduleMemberInfosByScheduleId(Long scheduleId);
 
@@ -20,4 +20,6 @@ public interface ScheduleQueryRepository {
     List<ScheduleMemberResDto> getScheduleMembersInfo(Long scheduleId);
 
     List<String> findAllFcmTokensInSchedule(Long scheduleId);
+
+    List<ScheduleMember> findScheduleMembersNotInArrivalByScheduleId(Long scheduleId);
 }

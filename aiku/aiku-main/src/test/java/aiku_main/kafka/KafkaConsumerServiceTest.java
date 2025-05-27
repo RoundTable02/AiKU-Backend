@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static common.kafka_message.KafkaTopic.TEST;
+
 @SpringBootTest
 class KafkaConsumerServiceTest {
 
@@ -15,7 +17,7 @@ class KafkaConsumerServiceTest {
     void consumeTest() throws InterruptedException {
         //given
         String message = "testMessage";
-        kafkaProducerService.sendMessage(KafkaTopic.test, message);
+        kafkaProducerService.sendMessage(TEST, message);
 
         //given
         Thread.sleep(5000);

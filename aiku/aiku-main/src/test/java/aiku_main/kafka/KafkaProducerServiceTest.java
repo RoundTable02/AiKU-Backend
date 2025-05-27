@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static common.kafka_message.KafkaTopic.alarm;
+import static common.kafka_message.KafkaTopic.TEST;
 
 @Transactional
 @SpringBootTest
@@ -34,6 +34,6 @@ class KafkaProducerServiceTest {
         };
 
         //when
-        kafkaProducerService.sendMessage(alarm, message);
+        kafkaProducerService.sendMessage(TEST, message);
     }
 }

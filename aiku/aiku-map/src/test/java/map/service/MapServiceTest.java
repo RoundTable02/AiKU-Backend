@@ -1,5 +1,6 @@
 package map.service;
 
+import common.domain.Arrival;
 import common.domain.Location;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
@@ -112,7 +113,7 @@ public class MapServiceTest {
         assertThat(locationsResponseDto.getCount()).isEqualTo(1);
 
         RealTimeLocationResDto realTimeLocationResDto = locationsResponseDto.getLocations().stream()
-                .filter(r -> r.getMemberId().equals(member3.getId()))
+                .filter(r -> r.getMemberId().equals(member1.getId()))
                 .findAny().orElseThrow();
         assertThat(realTimeLocationResDto.getLatitude()).isEqualTo(member1Location.getLatitude());
         assertThat(realTimeLocationResDto.getLongitude()).isEqualTo(member1Location.getLongitude());
@@ -183,8 +184,10 @@ public class MapServiceTest {
 
         mapService.makeMemberArrive(member1.getId(), schedule1.getId(), memberArrivalDto);
 
-        ScheduleMember scheduleMember = em.find(ScheduleMember.class, scheduleMember1.getId());
-        assertThat(scheduleMember.getArrivalTime()).isEqualTo(arrivalTime);
+        Arrival arrival = em.createQuery("SELECT a FROM Arrival a WHERE a.scheduleMember.id = :scheduleMemberId", Arrival.class)
+                .setParameter("scheduleMemberId", scheduleMember1.getId())
+                .getSingleResult();
+        assertThat(arrival.getArrivalTime()).isEqualTo(arrivalTime);
 
         LocationsResponseDto locations = mapService.getAllLocation(member1.getId(), schedule1.getId());
         RealTimeLocationResDto realTimeLocationResDto = locations.getLocations().stream()

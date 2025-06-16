@@ -125,6 +125,11 @@ jobs:
           
           docker run -d \
             --name aiku-gateway \
+            --log-driver=awslogs \
+            --log-opt awslogs-region=ap-northeast-2 \
+            --log-opt awslogs-group=aiku-gateway \
+            --log-opt awslogs-stream=${{ secrets.EC2_AIKU_GATEWAY_ID }} \
+            --log-opt awslogs-multiline-pattern="^\[[a-f0-9-]{36}\]" \
             --network="my_network" \
             -e MYSQL_URL=${{ secrets.MYSQL_URL }} \
             -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \

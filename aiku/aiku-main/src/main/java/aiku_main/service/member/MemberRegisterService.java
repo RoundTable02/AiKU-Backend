@@ -55,6 +55,7 @@ public class MemberRegisterService {
         Member member = Member.builder()
                 .email(memberRegisterDto.getEmail())
                 .nickname(memberRegisterDto.getNickname())
+                .provider(memberRegisterDto.getProvider())
                 .oauthId(Long.valueOf(oauthId))
                 .password(password)
                 .build();

@@ -40,6 +40,9 @@ spring:
     client-secret: ${GOOGLE_CLIENT_SECRET}
     refresh-token: ${GOOGLE_REFRESH_TOKEN}
     to-email: ${GMAIL_ACCOUNT}
+  servlet:
+    multipart:
+      max-file-size: 5MB
 
 mail:
   mime:

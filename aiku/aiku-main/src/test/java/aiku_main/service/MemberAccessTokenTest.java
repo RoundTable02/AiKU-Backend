@@ -72,7 +72,7 @@ public class MemberAccessTokenTest {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
         // JWT Token 발급
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.APPLE);
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         member.reissueRefreshToken(jwtToken.getRefreshToken());
 

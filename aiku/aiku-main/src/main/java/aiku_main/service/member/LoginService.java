@@ -68,7 +68,7 @@ public class LoginService {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
         // JWT Token 발급
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.KAKAO);
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         member.reissueRefreshToken(jwtToken.getRefreshToken());
 
@@ -80,7 +80,7 @@ public class LoginService {
         OauthInfo info = appleOauthHelper.getOauthInfoByIdToken(idToken);
         String appleId = info.getOid();
         Member member = memberRepository.findByProviderAndOauthId(OauthProvider.APPLE, Long.valueOf(appleId))
-                .orElseThrow(() -> new MemberNotFoundException());
+                .orElseThrow(MemberNotFoundException::new);
 
         UsernamePasswordAuthenticationToken authenticationFilter
                 = new UsernamePasswordAuthenticationToken(member.getId(), appleId);
@@ -88,7 +88,7 @@ public class LoginService {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
         // JWT Token 발급
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.APPLE);
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         member.reissueRefreshToken(jwtToken.getRefreshToken());
 
@@ -104,17 +104,17 @@ public class LoginService {
     @Transactional
     public RefreshTokenResDto refreshToken(Long accessMemberId, String refreshToken) {
         Member member = memberRepository.findById(accessMemberId)
-                .orElseThrow(() -> new MemberNotFoundException());
+                .orElseThrow(MemberNotFoundException::new);
 
         if (member.getRefreshToken().equals(refreshToken)) {
-            Long oid = member.getOauthId();
+            Long memberId = member.getId();
             UsernamePasswordAuthenticationToken authenticationFilter
-                    = new UsernamePasswordAuthenticationToken(oid, oid);
+                    = new UsernamePasswordAuthenticationToken(memberId, member.getOauthId());
 
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
             // 토큰 생성
-            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, member.getProvider());
+            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
             // 바뀐 Refresh Token 저장 (RTR)
             member.reissueRefreshToken(jwtToken.getRefreshToken());

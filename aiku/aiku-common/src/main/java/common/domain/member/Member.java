@@ -102,6 +102,10 @@ public class Member extends BaseTime {
         this.mainTitle = new TitleMemberValue(titleMemberId);
     }
 
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
     public void updateFirebaseToken(String firebaseToken) {
         this.firebaseToken = firebaseToken;
     }

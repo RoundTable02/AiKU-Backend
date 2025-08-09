@@ -12,11 +12,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import static common.domain.ExecStatus.*;
-import static common.domain.Status.ALIVE;
-import static common.domain.Status.DELETE;
+import static common.domain.Status.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -75,9 +74,19 @@ public class Schedule extends BaseTime {
         this.status = DELETE;
     }
 
+    public void error(){
+        this.status = ERROR;
+    }
+
     public void addScheduleMember(Member member, boolean isOwner, int pointAmount) {
         ScheduleMember scheduleMember = new ScheduleMember(member, this, isOwner, pointAmount);
         this.scheduleMembers.add(scheduleMember);
+    }
+
+    public void errorScheduleMember(ScheduleMember scheduleMember) {
+        if(isScheduleMember(scheduleMember)){
+            scheduleMember.setStatus(ERROR);
+        }
     }
 
     public void removeScheduleMember(ScheduleMember scheduleMember) {
@@ -106,17 +115,20 @@ public class Schedule extends BaseTime {
         }
     }
 
-    public void close(LocalDateTime scheduleCloseTime){
+    public void close(LocalDateTime scheduleCloseTime, Map<Long, LocalDateTime> scheMemArrivalTime){
+        scheduleMembers.forEach(scheduleMember -> {
+            LocalDateTime arrivalTime = scheMemArrivalTime.get(scheduleMember.getId());
+            scheduleMember.arrive(
+                    arrivalTime,
+                    getArrivalTimeDiff(arrivalTime)
+            );
+        });
+
         setTerm(scheduleCloseTime);
     }
 
-    public void autoClose(List<ScheduleMember> notArriveScheduleMembers, LocalDateTime closeTime){
-        notArriveScheduleMembers.forEach(scheduleMember -> {
-            if(isScheduleMember(scheduleMember)){
-                scheduleMember.arrive(closeTime, -30);
-            }
-        });
-        setTerm(closeTime);
+    private int getArrivalTimeDiff(LocalDateTime arrivalTime){
+        return (int) Duration.between(arrivalTime, this.scheduleTime).toMinutes();
     }
 
     public void setTerm(LocalDateTime scheduleTermTime){
@@ -143,14 +155,6 @@ public class Schedule extends BaseTime {
         scheduleResult.setScheduleRacingResult(scheduleRacingResult);
     }
 
-    public boolean checkAllMembersArrive() {
-        long count = scheduleMembers.stream()
-                .filter(s -> Objects.isNull(s.getArrivalTime()))
-                .count();
-
-        return count == 0;
-    }
-
     private void checkScheduleResultExist(){
         if(scheduleResult == null){
             scheduleResult = new ScheduleResult(this);
@@ -163,5 +167,13 @@ public class Schedule extends BaseTime {
 
     public List<ScheduleMember> getScheduleMembers() {
         return List.copyOf(scheduleMembers);
+    }
+
+    public boolean isTerm() {
+        return scheduleStatus == TERM;
+    }
+
+    public boolean isWait() {
+        return scheduleStatus == WAIT;
     }
 }

@@ -12,7 +12,7 @@ spring:
       port: 6379
   jpa:
     hibernate:
-      ddl-auto: none #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
+      ddl-auto: create #주의 사용에 따라 create, update 사용 후 none으로 변경해주세요
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -40,6 +40,9 @@ spring:
     client-secret: ${GOOGLE_CLIENT_SECRET}
     refresh-token: ${GOOGLE_REFRESH_TOKEN}
     to-email: ${GMAIL_ACCOUNT}
+  servlet:
+    multipart:
+      max-file-size: 5MB
 
 mail:
   mime:

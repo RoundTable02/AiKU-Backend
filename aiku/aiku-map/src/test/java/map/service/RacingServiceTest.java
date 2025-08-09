@@ -2,14 +2,13 @@ package map.service;
 
 import common.domain.ExecStatus;
 import common.domain.Location;
-import common.domain.Racing;
+import common.domain.racing.Racing;
 import common.domain.Status;
 import common.domain.member.Member;
 import common.domain.schedule.Schedule;
 import common.domain.schedule.ScheduleMember;
 import common.domain.team.Team;
 import common.domain.value_reference.TeamValue;
-import common.exception.PaidMemberLimitException;
 import jakarta.persistence.EntityManager;
 import map.dto.DataResDto;
 import map.dto.RacingAddDto;
@@ -17,7 +16,7 @@ import map.dto.RacingResDto;
 import map.exception.NotEnoughPointException;
 import map.exception.RacingException;
 import map.exception.ScheduleException;
-import map.repository.RacingQueryRepository;
+import map.repository.racing.RacingRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +55,7 @@ class RacingServiceTest {
     Racing racing2;
 
     @Autowired
-    private RacingQueryRepository racingRepository;
+    private RacingRepository racingRepository;
 
     @BeforeEach
     void setUp() {

@@ -7,6 +7,7 @@ import aiku_main.filter.security.JwtToken;
 import aiku_main.filter.security.JwtTokenProvider;
 import aiku_main.oauth.KakaoOauthHelper;
 import aiku_main.oauth.OauthInfo;
+import aiku_main.service.member.MemberRegisterService;
 import common.domain.member.*;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,7 @@ public class MemberAccessTokenTest {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationFilter);
 
         // JWT Token 발급
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication, OauthProvider.APPLE);
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         member.reissueRefreshToken(jwtToken.getRefreshToken());
 

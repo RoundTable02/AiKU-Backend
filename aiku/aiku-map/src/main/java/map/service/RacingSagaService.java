@@ -1,14 +1,12 @@
 package map.service;
 
-import common.domain.Racing;
-import common.exception.JsonParseException;
+import common.domain.racing.Racing;
 import common.kafka_message.PointChangeReason;
 import common.kafka_message.PointChangedType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import map.exception.RacingException;
-import map.repository.RacingQueryRepository;
-import org.apache.kafka.common.KafkaException;
+import map.repository.racing.RacingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +18,7 @@ import static common.response.status.BaseErrorCode.NO_SUCH_RACING;
 @Service
 public class RacingSagaService {
 
-    private final RacingQueryRepository racingQueryRepository;
+    private final RacingRepository racingRepository;
 
     /*
     무승부, 승자, 성사
@@ -31,7 +29,7 @@ public class RacingSagaService {
      */
     @Transactional
     public void rollbackRacing(Long memberId, PointChangedType pointChangedType, Integer pointAmount, PointChangeReason reason, Long racingId){
-        Racing racing = racingQueryRepository.findById(racingId)
+        Racing racing = racingRepository.findById(racingId)
                 .orElseThrow(() -> new RacingException(NO_SUCH_RACING));
         racing.specifyError();
     }

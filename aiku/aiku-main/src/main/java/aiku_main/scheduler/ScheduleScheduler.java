@@ -1,11 +1,14 @@
 package aiku_main.scheduler;
 
-import aiku_main.application_event.publisher.ScheduleEventPublisher;
-import aiku_main.repository.ScheduleQueryRepository;
+import aiku_main.application_event.event.ScheduleOpenEvent;
+import aiku_main.kafka.KafkaProducerService;
+import aiku_main.repository.schedule.ScheduleRepository;
 import common.domain.ExecStatus;
 import common.domain.schedule.Schedule;
+import common.kafka_message.ScheduleCloseMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +18,17 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import static common.kafka_message.KafkaTopic.SCHEDULE_AUTO_CLOSE;
+
 
 @RequiredArgsConstructor
 @Component
 public class ScheduleScheduler {
 
     private final TaskScheduler scheduler;
-    private final ScheduleQueryRepository scheduleRepository;
-    private final ScheduleEventPublisher scheduleEventPublisher;
+    private final ScheduleRepository scheduleRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducerService kafkaProducerService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleOpenTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, ScheduledFuture> scheduleAutoCloseTasks = new ConcurrentHashMap<>();
@@ -58,9 +64,10 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(schedule.getScheduleTime()).minus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()-> {
-            scheduleEventPublisher.publishScheduleOpenEvent(schedule.getId());
-            }, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
+                ()-> publishScheduleOpenEvent(schedule.getId()),
+                delayTime
+        );
         scheduleOpenTasks.put(schedule.getId(), future);
     }
 
@@ -68,13 +75,14 @@ public class ScheduleScheduler {
         Duration delayTime = getDuration(schedule.getScheduleTime()).plus(Duration.ofMinutes(30));
         if(!isValidDuration(delayTime)) return;
 
-        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(()->{
-            scheduleEventPublisher.publishScheduleAutoCloseEvent(schedule.getId());
-        }, delayTime);
+        ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
+                ()-> publishScheduleAutoClose(schedule.getId(), schedule.getScheduleTime()),
+                delayTime
+        );
         scheduleAutoCloseTasks.put(schedule.getId(), future);
     }
 
-    private void cancelAll(Long scheduleId){
+    public void cancelAll(Long scheduleId){
         ScheduledFuture future1 = scheduleOpenTasks.get(scheduleId);
         if (future1 != null) {
             future1.cancel(false);
@@ -101,5 +109,17 @@ public class ScheduleScheduler {
     private boolean isValidDuration(Duration duration){
         if(duration.toMinutes() < 0) return false;
         else return true;
+    }
+
+    private void publishScheduleOpenEvent(Long scheduleId){
+        ScheduleOpenEvent event = new ScheduleOpenEvent(scheduleId);
+        eventPublisher.publishEvent(event);
+    }
+
+    private void publishScheduleAutoClose(Long scheduleId, LocalDateTime scheduleTime){
+        kafkaProducerService.sendMessage(
+                SCHEDULE_AUTO_CLOSE,
+                new ScheduleCloseMessage(scheduleId, scheduleTime.plusMinutes(30))
+        );
     }
 }

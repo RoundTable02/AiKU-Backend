@@ -27,7 +27,7 @@ spring:
         - id: aiku-main
           uri: ${AIKU_MAIN_IP}
           predicates:
-            - Path=/login/sign-in/**,/login/refresh,/users/**,/term,/groups/**,/schedules/**,/member/schedules/**
+            - Path=/login/sign-in/**,/login/refresh,/users/**,/term/**,/groups/**,/schedules/**,/member/schedules/**
         - id: aiku-map
           uri: ${AIKU_MAP_IP}
           predicates:
@@ -40,6 +40,8 @@ custom:
   password: ${CUSTOM_PASSWORD}
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ, Asia/Seoul} [%X{request_id}] %-5level [%thread] %logger{36} - %msg%n"
   level:
     root: INFO
   file:

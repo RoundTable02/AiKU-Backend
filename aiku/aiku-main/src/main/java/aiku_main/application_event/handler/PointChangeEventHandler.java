@@ -1,11 +1,7 @@
 package aiku_main.application_event.handler;
 
 import aiku_main.application_event.event.PointChangeEvent;
-import aiku_main.service.MemberPointChangeFacade;
-import aiku_main.service.MemberService;
-import aiku_main.service.PointLogFactory;
-import aiku_main.service.PointLogService;
-import common.domain.log.PointLog;
+import aiku_main.service.member.MemberPointChangeFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -18,8 +14,7 @@ public class PointChangeEventHandler {
 
     private final MemberPointChangeFacade pointChangeFacade;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void pointChangeEvent(PointChangeEvent event) {
         pointChangeFacade.makePointChange(event.getMemberId(), event.getSign(), event.getPointAmount(), event.getReason(), event.getReasonId());
     }

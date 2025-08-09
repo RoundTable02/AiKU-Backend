@@ -1,7 +1,9 @@
 package aiku_main.service;
 
+import aiku_main.service.schedule.ScheduleService;
+import aiku_main.service.title.TitleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.domain.Betting;
+import common.domain.betting.Betting;
 import common.domain.Location;
 import common.domain.member.Member;
 import common.domain.member.MemberProfileBackground;
@@ -247,16 +249,16 @@ public class TitleServiceTest {
         schedule9.arriveScheduleMember(schedule9.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 20, 00));
         schedule10.arriveScheduleMember(schedule10.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 20, 00));
 
-        schedule1.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule2.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule3.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule4.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule5.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule6.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule7.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule8.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule9.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
-        schedule10.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule1.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule2.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule3.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule4.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule5.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule6.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule7.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule8.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule9.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
+        schedule10.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 30, 00));
 
         Title earlyArrival10TimesTitle = Title.create("기다림의 미학", "일찍 도착 10회 달성", "img2", TitleCode.EARLY_ARRIVAL_10_TIMES);
         em.persist(earlyArrival10TimesTitle);
@@ -279,11 +281,11 @@ public class TitleServiceTest {
         schedule4.arriveScheduleMember(schedule4.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
         schedule5.arriveScheduleMember(schedule5.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
 
-        schedule1.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule2.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule3.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule4.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule5.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule1.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule2.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule3.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule4.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule5.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
 
         Title lateArrival5TimesTitle = Title.create("지각 뉴비", "지각 도착 5회 달성", "img3", TitleCode.LATE_ARRIVAL_5_TIMES);
         em.persist(lateArrival5TimesTitle);
@@ -311,16 +313,16 @@ public class TitleServiceTest {
         schedule9.arriveScheduleMember(schedule9.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
         schedule10.arriveScheduleMember(schedule10.getScheduleMembers().get(0), LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
 
-        schedule1.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule2.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule3.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule4.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule5.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule6.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule7.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule8.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule9.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
-        schedule10.close(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule1.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule2.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule3.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule4.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule5.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule6.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule7.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule8.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule9.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
+        schedule10.setTerm(LocalDateTime.of(2100, Month.JANUARY, 11, 13, 50, 00));
 
         Title lateArrival10TimesTitle = Title.create("지각 전문가", "지각 도착 10회 달성", "img4", TitleCode.LATE_ARRIVAL_10_TIMES);
         em.persist(lateArrival10TimesTitle);

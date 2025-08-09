@@ -1,7 +1,6 @@
 package common.domain.member;
 
 import common.domain.BaseTime;
-import common.domain.ServiceAgreement;
 import common.domain.Status;
 import common.domain.value_reference.TitleMemberValue;
 import jakarta.persistence.*;
@@ -101,6 +100,10 @@ public class Member extends BaseTime {
 
     public void updateMainTitle(Long titleMemberId) {
         this.mainTitle = new TitleMemberValue(titleMemberId);
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
     public void updateFirebaseToken(String firebaseToken) {

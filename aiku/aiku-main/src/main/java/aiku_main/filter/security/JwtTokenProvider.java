@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     }
 
     // 유저 정보 -> Token 생성
-    public JwtToken generateToken(Authentication authentication, OauthProvider provider) {
+    public JwtToken generateToken(Authentication authentication) {
         if (authentication == null)
             throw new JwtAccessDeniedException("자격 증명에 실패하였습니다.");
 
@@ -35,7 +35,7 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        String accessToken = generateAccessToken(authentication, authorities, provider);
+        String accessToken = generateAccessToken(authentication, authorities);
         String refreshToken = generateRefreshToken();
 
         return JwtToken.builder()
@@ -45,7 +45,7 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public String generateAccessToken(Authentication authentication, String authorities, OauthProvider provider) {
+    public String generateAccessToken(Authentication authentication, String authorities) {
         Calendar accessTokenCal = Calendar.getInstance();
         accessTokenCal.setTime(new Date());
 //        accessTokenCal.add(Calendar.DATE, 1);

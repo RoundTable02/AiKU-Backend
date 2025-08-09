@@ -1,6 +1,7 @@
 package gateway.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gateway.exception.BaseErrorResponse;
 import gateway.exception.JwtAccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -25,21 +26,22 @@ public class JwtAccessDeniedHandler implements ServerAccessDeniedHandler {
         return sendErrorResponse(exchange);
     }
 
-    /**
-     * jwt 예외처리 응답
-     */
+    // 인가 실패 시 처리
     private Mono<Void> sendErrorResponse(ServerWebExchange exchange) {
         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        String errorResponse = "";
+        BaseErrorResponse errorResponse = new BaseErrorResponse(50000, "권힌이 없습니다.");
+
+        String responseBody;
+
         try {
-            errorResponse = objectMapper.writeValueAsString(new JwtAccessDeniedException());
+            responseBody = objectMapper.writeValueAsString(errorResponse);
         } catch (Exception e) {
-            errorResponse = "{\"error\": \"Access Denied\"}";
+            responseBody = "{\"code\": 500, \"message\": \"internal server error\", \"requestId\": null}";
         }
 
-        byte[] bytes = errorResponse.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
         return exchange.getResponse().writeWith(Mono.just(buffer));
     }
